@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/baking-bad/noble-indexer/cmd/common"
 	"github.com/baking-bad/noble-indexer/pkg/indexer"
 	"github.com/dipdup-net/indexer-sdk/pkg/modules/stopper"
 	"github.com/rs/zerolog/log"
@@ -18,15 +19,16 @@ var rootCmd = &cobra.Command{
 }
 
 func main() {
-	cfg, err := initConfig()
+	cfg, err := common.InitConfig(rootCmd)
 	if err != nil {
 		return
 	}
 
-	if err = initLogger(cfg.LogLevel); err != nil {
+	if err = common.InitLogger(cfg.LogLevel); err != nil {
 		return
 	}
-	if err = initProflier(cfg.Profiler); err != nil {
+	prscp, err := common.InitProfiler(cfg.Profiler, "indexer")
+	if err != nil {
 		return
 	}
 

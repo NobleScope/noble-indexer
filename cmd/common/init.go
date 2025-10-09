@@ -1,4 +1,4 @@
-package main
+package common
 
 import (
 	"os"
@@ -10,6 +10,7 @@ import (
 	"github.com/grafana/pyroscope-go"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/cobra"
 )
 
 func init() {
@@ -19,7 +20,7 @@ func init() {
 	})
 }
 
-func initConfig() (*config.Config, error) {
+func InitConfig(rootCmd *cobra.Command) (*config.Config, error) {
 	configPath := rootCmd.PersistentFlags().StringP("config", "c", "dipdup.yml", "path to YAML config file")
 	if err := rootCmd.Execute(); err != nil {
 		log.Panic().Err(err).Msg("command line execute")
@@ -44,7 +45,7 @@ func initConfig() (*config.Config, error) {
 	return &cfg, nil
 }
 
-func initLogger(level string) error {
+func InitLogger(level string) error {
 	logLevel, err := zerolog.ParseLevel(level)
 	if err != nil {
 		log.Panic().Err(err).Msg("parsing log level")
@@ -67,9 +68,6 @@ func initLogger(level string) error {
 	return nil
 }
 
-var prscp *pyroscope.Profiler
-
-func initProflier(cfg *profiler.Config) (err error) {
-	prscp, err = profiler.New(cfg, "indexer")
-	return
+func InitProfiler(cfg *profiler.Config, serviceName string) (*pyroscope.Profiler, error) {
+	return profiler.New(cfg, serviceName)
 }

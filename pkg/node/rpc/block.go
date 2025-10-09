@@ -108,6 +108,9 @@ func (api *API) BlockBulk(ctx context.Context, levels ...pkgTypes.Level) ([]pkgT
 	}
 
 	err = json.NewDecoder(resp.Raw().Body).Decode(&responses)
+	if err != nil {
+		return []pkgTypes.BlockData{}, err
+	}
 
 	var blockData = make([]pkgTypes.BlockData, len(levels))
 	for i := range responses {

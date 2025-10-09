@@ -9,6 +9,7 @@ type Config struct {
 	config.Config `yaml:",inline"`
 	LogLevel      string           `validate:"omitempty,oneof=debug trace info warn error fatal panic" yaml:"log_level"`
 	Indexer       Indexer          `yaml:"indexer"`
+	API           API              `yaml:"api"`
 	Profiler      *profiler.Config `validate:"omitempty"                                               yaml:"profiler"`
 }
 
@@ -18,6 +19,12 @@ type Indexer struct {
 	BlockPeriod     int64  `validate:"omitempty"       yaml:"block_period"`
 	ScriptsDir      string `validate:"omitempty,dir"   yaml:"scripts_dir"`
 	RequestBulkSize int    `validate:"omitempty,min=1" yaml:"request_bulk_size"`
+}
+
+type API struct {
+	Bind           string `validate:"required" yaml:"bind"`
+	RateLimit      int    `validate:"min=0"    yaml:"rate_limit"`
+	RequestTimeout int    `validate:"min=1"    yaml:"request_timeout"`
 }
 
 // Substitute -

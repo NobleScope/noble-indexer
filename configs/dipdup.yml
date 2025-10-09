@@ -34,6 +34,11 @@ datasources:
         header: apikey
         key: ${NOBLE_API_KEY}
 
+api:
+  bind: ${API_HOST:-0.0.0.0}:${API_PORT:-9876}
+  rate_limit: ${API_RATE_LIMIT:-0}
+  request_timeout: ${API_REQUEST_TIMEOUT:-30}
+
 profiler:
   server: ${PROFILER_SERVER}
   project: noble

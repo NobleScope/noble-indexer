@@ -8,7 +8,7 @@ import (
 
 func (p *Module) parse(b types.BlockData) error {
 	start := time.Now()
-	height, err := b.Block.Number.Uint64()
+	height, err := b.Number.Uint64()
 	if err != nil {
 		return err
 	}

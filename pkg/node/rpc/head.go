@@ -43,13 +43,17 @@ func (api *API) Head(ctx context.Context) (pkgTypes.Level, error) {
 
 	results := types.Response[pkgTypes.Hex]{}
 	err = json.NewDecoder(resp.Raw().Body).Decode(&results)
+	if err != nil {
+		return 0, errors.Wrapf(err, "decoding response body")
+	}
 
 	val, err := results.Result.Uint64()
 	if err != nil {
+		api.log.Err(err).Msg("converting level")
 		panic(err)
 	}
 
-	api.log.Debug().Uint64("head", val)
+	api.log.Debug().Uint64("head", val).Send()
 
 	return pkgTypes.Level(val), err
 }
