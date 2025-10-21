@@ -1,0 +1,116 @@
+package postgres
+
+import (
+	"context"
+
+	models "github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/dipdup-net/indexer-sdk/pkg/storage"
+	"github.com/uptrace/bun"
+)
+
+type Transaction struct {
+	storage.Transaction
+}
+
+func BeginTransaction(ctx context.Context, tx storage.Transactable) (models.Transaction, error) {
+	t, err := tx.BeginTransaction(ctx)
+	return Transaction{t}, err
+}
+
+func (tx Transaction) SaveTransactions(ctx context.Context, txs ...*models.Tx) error {
+	switch len(txs) {
+	case 0:
+		return nil
+	case 1:
+		return tx.Add(ctx, txs[0])
+	default:
+		arr := make([]any, len(txs))
+		for i := range txs {
+			arr[i] = txs[i]
+		}
+		return tx.BulkSave(ctx, arr)
+	}
+}
+func (tx Transaction) SaveLogs(ctx context.Context, logs ...models.Log) error {
+	switch len(logs) {
+	case 0:
+		return nil
+	case 1:
+		return tx.Add(ctx, &logs[0])
+	default:
+		arr := make([]any, len(logs))
+		for i := range logs {
+			arr[i] = &logs[i]
+		}
+		return tx.BulkSave(ctx, arr)
+	}
+}
+
+type addedAddress struct {
+	bun.BaseModel `bun:"address"`
+	*models.Address
+
+	Xmax uint64 `bun:"xmax"`
+}
+
+func (tx Transaction) SaveAddresses(ctx context.Context, addresses ...*models.Address) (int64, error) {
+	if len(addresses) == 0 {
+		return 0, nil
+	}
+
+	addr := make([]addedAddress, len(addresses))
+	for i := range addresses {
+		addr[i].Address = addresses[i]
+	}
+
+	_, err := tx.Tx().NewInsert().Model(&addr).
+		Column("address", "height", "last_height", "is_contract").
+		On("CONFLICT ON CONSTRAINT address_idx DO UPDATE").
+		Set("last_height = EXCLUDED.last_height").
+		Returning("xmax, id").
+		Exec(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	var count int64
+	for i := range addr {
+		if addr[i].Xmax == 0 {
+			count++
+		}
+	}
+
+	return count, err
+}
+
+func (tx Transaction) SaveContracts(ctx context.Context, contracts ...*models.Contract) error {
+	if len(contracts) == 0 {
+		return nil
+	}
+
+	_, err := tx.Tx().NewInsert().Model(&contracts).
+		On("CONFLICT ON CONSTRAINT contract_idx DO NOTHING").
+		Exec(ctx)
+
+	return err
+}
+
+func (tx Transaction) SaveTraces(ctx context.Context, traces ...*models.Trace) error {
+	switch len(traces) {
+	case 0:
+		return nil
+	case 1:
+		return tx.Add(ctx, traces[0])
+	default:
+		arr := make([]any, len(traces))
+		for i := range traces {
+			arr[i] = traces[i]
+		}
+		return tx.BulkSave(ctx, arr)
+	}
+}
+
+func (tx Transaction) State(ctx context.Context, name string) (state models.State, err error) {
+	err = tx.Tx().NewSelect().Model(&state).Where("name = ?", name).Scan(ctx)
+	return
+}

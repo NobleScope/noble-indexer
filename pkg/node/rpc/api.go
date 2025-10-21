@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/dipdup-net/go-lib/config"
+	jsoniter "github.com/json-iterator/go"
 	fastshot "github.com/opus-domini/fast-shot"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -13,6 +14,8 @@ import (
 const (
 	userAgent = "Noble Indexer"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type API struct {
 	client    fastshot.ClientHttpMethods

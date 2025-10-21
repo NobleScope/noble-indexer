@@ -2,7 +2,7 @@ package rpc
 
 import (
 	"context"
-	"encoding/json"
+	"github.com/opus-domini/fast-shot/constant/header"
 	"net/url"
 
 	"github.com/baking-bad/noble-indexer/pkg/node/types"
@@ -29,10 +29,14 @@ func (api *API) Head(ctx context.Context) (pkgTypes.Level, error) {
 	}
 
 	resp, err := api.client.POST(u.Path).
-		Context().Set(requestCtx).
-		Header().Add("User-Agent", userAgent).
-		Body().AsJSON(&request).
-		Send()
+		Context().
+		Set(requestCtx).
+		Header().
+		AddAll(map[header.Type]string{
+			header.ContentType: "application/json",
+			header.UserAgent:   userAgent}).
+		Body().AsJSON(&request).Send()
+
 	if err != nil {
 		return 0, err
 	}

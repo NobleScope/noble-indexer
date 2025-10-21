@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
 	"github.com/baking-bad/noble-indexer/pkg/node"
 	"github.com/baking-bad/noble-indexer/pkg/types"
@@ -22,7 +23,7 @@ type Module struct {
 	ws               *websocket.Conn
 	level            types.Level
 	blocks           chan types.BlockData
-	hash             string
+	hash             []byte
 	mx               *sync.RWMutex
 	cfg              config.Indexer
 	cancelReadBlocks context.CancelFunc
@@ -31,14 +32,21 @@ type Module struct {
 
 var _ modules.Module = (*Module)(nil)
 
-func NewModule(cfg config.Indexer, api node.Api, ws *websocket.Conn) Module {
+func NewModule(cfg config.Indexer, api node.Api, ws *websocket.Conn, state *storage.State) Module {
 	level := types.Level(cfg.StartLevel)
+	var lastHash []byte
+	if state != nil {
+		level = state.LastHeight
+		lastHash = state.LastHash
+	}
+
 	receiver := Module{
 		BaseModule: modules.New("receiver"),
 		api:        api,
 		cfg:        cfg,
 		ws:         ws,
 		level:      level,
+		hash:       lastHash,
 		blocks:     make(chan types.BlockData, 128),
 		mx:         new(sync.RWMutex),
 	}
@@ -58,14 +66,14 @@ func (r *Module) Start(ctx context.Context) {
 	r.G.GoCtx(ctx, r.sync)
 }
 
-func (r *Module) Level() (types.Level, string) {
+func (r *Module) Level() (types.Level, []byte) {
 	r.mx.RLock()
 	defer r.mx.RUnlock()
 
 	return r.level, r.hash
 }
 
-func (r *Module) setLevel(level types.Level, hash string) {
+func (r *Module) setLevel(level types.Level, hash []byte) {
 	r.mx.Lock()
 	defer r.mx.Unlock()
 

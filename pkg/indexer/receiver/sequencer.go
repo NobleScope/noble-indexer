@@ -31,7 +31,7 @@ func (r *Module) sequencer(ctx context.Context) {
 			b, ok := orderedBlocks[currentBlock]
 			for ok {
 				r.MustOutput(BlocksOutput).Push(b)
-				r.setLevel(types.Level(currentBlock), b.Hash.String())
+				r.setLevel(types.Level(currentBlock), b.Hash)
 				r.Log.Debug().
 					Uint64("height", currentBlock).
 					Msg("put in order block")

@@ -1,0 +1,36 @@
+package storage
+
+import (
+	"context"
+
+	"github.com/baking-bad/noble-indexer/internal/storage"
+)
+
+func saveTransactions(
+	ctx context.Context,
+	tx storage.Transaction,
+	txs []*storage.Tx,
+	addresses map[string]uint64,
+) error {
+	if len(txs) == 0 {
+		return nil
+	}
+
+	for _, t := range txs {
+		t.FromAddressId = addresses[t.FromAddress.Address]
+
+		if t.ToAddress != nil {
+			id := addresses[t.ToAddress.Address]
+			t.ToAddressId = &id
+		}
+
+		if t.Contract != nil {
+			id := addresses[t.Contract.Address]
+			t.ContractId = &id
+		}
+	}
+
+	err := tx.SaveTransactions(ctx, txs...)
+
+	return err
+}

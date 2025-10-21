@@ -2,17 +2,18 @@ package rpc
 
 import (
 	"context"
-	"encoding/json"
 	"net/url"
 
 	"github.com/baking-bad/noble-indexer/pkg/node/types"
 	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/opus-domini/fast-shot/constant/header"
 	"github.com/pkg/errors"
 )
 
 const (
 	pathBlock    = "eth_getBlockByNumber"
 	pathReceipts = "eth_getBlockReceipts"
+	pathTraces   = "trace_block"
 )
 
 func (api *API) Block(ctx context.Context, level pkgTypes.Level) (pkgTypes.Block, error) {
@@ -68,15 +69,16 @@ func (api *API) BlockBulk(ctx context.Context, levels ...pkgTypes.Level) ([]pkgT
 	requestCtx, cancel := context.WithTimeout(ctx, api.timeout)
 	defer cancel()
 
-	responses := make([]any, len(levels)*2)
-	requests := make([]types.Request, len(levels)*2)
+	responses := make([]any, len(levels)*3)
+	requests := make([]types.Request, len(levels)*3)
 
 	for i := range levels {
-		responses[i*2] = &types.Response[pkgTypes.Block]{}
-		responses[i*2+1] = &types.Response[[]pkgTypes.Receipt]{}
+		responses[i*3] = &types.Response[pkgTypes.Block]{}
+		responses[i*3+1] = &types.Response[[]pkgTypes.Receipt]{}
+		responses[i*3+2] = &types.Response[[]pkgTypes.Trace]{}
 
 		hexLevel := levels[i].Hex()
-		requests[i*2] = types.Request{
+		requests[i*3] = types.Request{
 			Method:  pathBlock,
 			JsonRpc: "2.0",
 			Id:      1,
@@ -85,8 +87,17 @@ func (api *API) BlockBulk(ctx context.Context, levels ...pkgTypes.Level) ([]pkgT
 				true,
 			},
 		}
-		requests[i*2+1] = types.Request{
+		requests[i*3+1] = types.Request{
 			Method:  pathReceipts,
+			JsonRpc: "2.0",
+			Id:      1,
+			Params: []any{
+				hexLevel,
+			},
+		}
+
+		requests[i*3+2] = types.Request{
+			Method:  pathTraces,
 			JsonRpc: "2.0",
 			Id:      1,
 			Params: []any{
@@ -96,10 +107,14 @@ func (api *API) BlockBulk(ctx context.Context, levels ...pkgTypes.Level) ([]pkgT
 	}
 
 	resp, err := api.client.POST(u.Path).
-		Context().Set(requestCtx).
-		Header().Add("User-Agent", userAgent).
-		Body().AsJSON(&requests).
-		Send()
+		Context().
+		Set(requestCtx).
+		Header().
+		AddAll(map[header.Type]string{
+			header.ContentType: "application/json",
+			header.UserAgent:   userAgent}).
+		Body().AsJSON(&requests).Send()
+
 	if err != nil {
 		return []pkgTypes.BlockData{}, err
 	}
@@ -119,12 +134,17 @@ func (api *API) BlockBulk(ctx context.Context, levels ...pkgTypes.Level) ([]pkgT
 			if typ.Error != nil {
 				return nil, errors.Wrapf(types.ErrRequest, "request error: %s", typ.Error.Error())
 			}
-			blockData[i/2].Block = typ.Result
+			blockData[i/3].Block = typ.Result
 		case *types.Response[[]pkgTypes.Receipt]:
 			if typ.Error != nil {
 				return nil, errors.Wrapf(types.ErrRequest, "request error: %s", typ.Error.Error())
 			}
-			blockData[i/2].Receipts = typ.Result
+			blockData[i/3].Receipts = typ.Result
+		case *types.Response[[]pkgTypes.Trace]:
+			if typ.Error != nil {
+				return nil, errors.Wrapf(types.ErrRequest, "request error: %s", typ.Error.Error())
+			}
+			blockData[i/3].Traces = typ.Result
 		}
 	}
 

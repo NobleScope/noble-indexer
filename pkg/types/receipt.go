@@ -27,5 +27,5 @@ type Log struct {
 	TransactionIndex Hex   `json:"transactionIndex"`
 	BlockHash        Hex   `json:"blockHash"`
 	LogIndex         Hex   `json:"logIndex"`
-	Removed          Hex   `json:"removed"`
+	Removed          bool  `json:"removed"`
 }

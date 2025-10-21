@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"database/sql/driver"
 	"encoding/hex"
-	"github.com/pkg/errors"
 	"strconv"
+	"time"
+
+	"github.com/pkg/errors"
+	"github.com/shopspring/decimal"
 )
 
 type Hex []byte
@@ -105,14 +108,63 @@ func (h Hex) String() string {
 	return "0x" + hexStr
 }
 
+func (h Hex) Int64() (int64, error) {
+	if len(h) == 0 {
+		return 0, nil
+	}
+
+	hexStr := hex.EncodeToString(h)
+	if hexStr == "" {
+		return 0, nil
+	}
+
+	value, err := strconv.ParseInt(hexStr, 16, 64)
+	if err != nil {
+		return 0, errors.Wrap(err, "failed to parse hex to int64")
+	}
+
+	return value, nil
+}
+
 func (h Hex) Uint64() (uint64, error) {
 	if len(h) == 0 {
 		return 0, nil
 	}
+
 	hexStr := hex.EncodeToString(h)
+	if hexStr == "" {
+		return 0, nil
+	}
+
 	val, err := strconv.ParseUint(hexStr, 16, 64)
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to parse hex to uint64")
 	}
 	return val, nil
+}
+
+func (h Hex) Time() (time.Time, error) {
+	if len(h) == 0 {
+		return time.Time{}, nil
+	}
+
+	hexStr := hex.EncodeToString(h)
+	if hexStr == "" {
+		return time.Time{}, nil
+	}
+
+	seconds, err := strconv.ParseUint(hexStr, 16, 64)
+	if err != nil {
+		return time.Time{}, errors.Wrap(err, "failed to parse hex timestamp")
+	}
+
+	return time.Unix(int64(seconds), 0).UTC(), nil
+}
+
+func (h Hex) Decimal() (decimal.Decimal, error) {
+	val, err := h.Int64()
+	if err != nil {
+		return decimal.Zero, errors.Wrap(err, "failed to convert hex to decimal")
+	}
+	return decimal.NewFromInt(val), nil
 }
