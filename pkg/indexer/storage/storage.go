@@ -117,7 +117,6 @@ func (module *Module) saveBlock(ctx context.Context, dCtx *decodeContext.Context
 func (module *Module) processBlockInTransaction(ctx context.Context, tx storage.Transaction, dCtx *decodeContext.Context) (storage.State, error) {
 	block := dCtx.Block
 	state, err := module.pg.State.ByName(ctx, module.indexerName)
-	// temporarily. todo: genesis
 	if err != nil {
 		if module.pg.State.IsNoRows(err) {
 			if err = tx.Add(ctx, &storage.State{
@@ -135,7 +134,13 @@ func (module *Module) processBlockInTransaction(ctx context.Context, tx storage.
 		}
 	}
 
+	// todo: handle genesis block
+
 	if err := tx.Add(ctx, block); err != nil {
+		return state, err
+	}
+
+	if err := tx.Add(ctx, block.Stats); err != nil {
 		return state, err
 	}
 

@@ -2,11 +2,13 @@ package storage
 
 import (
 	"context"
+
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 )
 
 var Models = []any{
 	&Block{},
+	&BlockStats{},
 	&Tx{},
 	&Log{},
 	&Address{},

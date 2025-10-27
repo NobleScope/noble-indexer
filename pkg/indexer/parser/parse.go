@@ -66,6 +66,11 @@ func (p *Module) parse(b types.BlockData) error {
 		TransactionsRootHash: b.TransactionsRoot,
 		Txs:                  make([]*storage.Tx, len(b.Transactions)),
 		Traces:               make([]*storage.Trace, len(b.Traces)),
+		Stats: &storage.BlockStats{
+			Height:  types.Level(height),
+			Time:    blockTime,
+			TxCount: int64(len(b.Transactions)),
+		},
 	}
 
 	for i, tx := range b.Transactions {

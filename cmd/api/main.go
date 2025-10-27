@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
+	"github.com/baking-bad/noble-indexer/cmd/api/handler"
 	"github.com/baking-bad/noble-indexer/cmd/common"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
 	"github.com/labstack/echo/v4"
@@ -41,10 +42,55 @@ func run(cfg *config.Config) error {
 	defer notifyCancel()
 
 	e := echo.New()
+	e.Validator = handler.NewApiValidator()
 	e.HideBanner = true
-	e.Use(zerologMiddleware())
+	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+		LogURI:       true,
+		LogStatus:    true,
+		LogLatency:   true,
+		LogMethod:    true,
+		LogUserAgent: true,
+		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+			switch {
+			case v.Status == http.StatusOK || v.Status == http.StatusNoContent:
+				log.Info().
+					Str("uri", v.URI).
+					Int("status", v.Status).
+					Dur("latency", v.Latency).
+					Str("method", v.Method).
+					Str("user_agent", v.UserAgent).
+					Str("ip", c.RealIP()).
+					Msg("request")
+			case v.Status >= 500:
+				log.Error().
+					Str("uri", v.URI).
+					Int("status", v.Status).
+					Dur("latency", v.Latency).
+					Str("method", v.Method).
+					Str("user_agent", v.UserAgent).
+					Str("ip", c.RealIP()).
+					Msg("request")
+			default:
+				log.Warn().
+					Str("uri", v.URI).
+					Int("status", v.Status).
+					Dur("latency", v.Latency).
+					Str("method", v.Method).
+					Str("user_agent", v.UserAgent).
+					Str("ip", c.RealIP()).
+					Msg("request")
+			}
+			return nil
+		},
+	}))
+	e.Use(middleware.BodyLimit("9M"))
 	e.Use(middleware.Recover())
+	e.Use(middleware.Secure())
 	e.Use(middleware.CORS())
+	e.Pre(middleware.RemoveTrailingSlash())
+
+	db := initDatabase(cfg.Database, cfg.Indexer.ScriptsDir)
+	initHandlers(ctx, e, *cfg, db)
 
 	go func() {
 		log.Info().Str("bind", cfg.API.Bind).Msg("Starting API server")
@@ -63,29 +109,4 @@ func run(cfg *config.Config) error {
 
 	log.Info().Msg("stopped")
 	return nil
-}
-
-func zerologMiddleware() echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			start := time.Now()
-			req := c.Request()
-			res := c.Response()
-
-			err := next(c)
-			if err != nil {
-				c.Error(err)
-			}
-
-			log.Info().
-				Str("method", req.Method).
-				Str("uri", req.RequestURI).
-				Int("status", res.Status).
-				Dur("latency", time.Since(start)).
-				Str("remote_ip", c.RealIP()).
-				Msg("request")
-
-			return err
-		}
-	}
 }

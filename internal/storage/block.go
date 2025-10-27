@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"time"
 
 	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
@@ -12,6 +13,9 @@ import (
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
 type IBlock interface {
 	storage.Table[*Block]
+
+	ByHeight(ctx context.Context, height pkgTypes.Level, withStats bool) (Block, error)
+	ListWithStats(ctx context.Context, limit, offset uint64, order storage.SortOrder) ([]*Block, error)
 }
 
 // Block -
@@ -40,8 +44,9 @@ type Block struct {
 	TotalDifficultyHash  pkgTypes.Hex `bun:"total_difficulty_hash"  comment:"Total difficulty hash"`
 	TransactionsRootHash pkgTypes.Hex `bun:"transactions_root_hash" comment:"Hash of transactions root"`
 
-	Txs    []*Tx    `bun:"rel:has-many" json:"-"`
-	Traces []*Trace `bun:"rel:has-many" json:"-"`
+	Txs    []*Tx       `bun:"rel:has-many"                   json:"-"`
+	Traces []*Trace    `bun:"rel:has-many"                   json:"-"`
+	Stats  *BlockStats `bun:"rel:has-one,join:height=height"`
 }
 
 // TableName -

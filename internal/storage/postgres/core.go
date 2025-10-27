@@ -19,12 +19,13 @@ type Storage struct {
 	cfg        config.Database
 	scriptsDir string
 
-	Blocks    models.IBlock
-	Tx        models.ITx
-	Logs      models.ILog
-	Addresses models.IAddress
-	Contracts models.IContract
-	State     models.IState
+	Blocks     models.IBlock
+	BlockStats models.IBlockStats
+	Tx         models.ITx
+	Logs       models.ILog
+	Addresses  models.IAddress
+	Contracts  models.IContract
+	State      models.IState
 }
 
 // Create -
@@ -41,6 +42,7 @@ func Create(ctx context.Context, cfg config.Database, scriptsDir string) (Storag
 		scriptsDir: scriptsDir,
 		Storage:    strg,
 		Blocks:     NewBlock(strg.Connection()),
+		BlockStats: NewBlockStats(strg.Connection()),
 		Logs:       NewLog(strg.Connection()),
 		Tx:         NewTx(strg.Connection()),
 		Addresses:  NewAddress(strg.Connection()),
@@ -94,6 +96,7 @@ func createHypertables(ctx context.Context, conn *database.Bun) error {
 	return conn.DB().RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
 		for _, model := range []storage.Model{
 			&models.Block{},
+			&models.BlockStats{},
 			&models.Tx{},
 			&models.Log{},
 		} {
