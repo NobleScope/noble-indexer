@@ -83,6 +83,20 @@ func (tx Transaction) SaveAddresses(ctx context.Context, addresses ...*models.Ad
 	return count, err
 }
 
+func (tx Transaction) SaveBalances(ctx context.Context, balances ...*models.Balance) error {
+	if len(balances) == 0 {
+		return nil
+	}
+
+	_, err := tx.Tx().NewInsert().Model(&balances).
+		Column("id", "currency", "value").
+		On("CONFLICT (id, currency) DO UPDATE").
+		Set("value = EXCLUDED.value + balance.value").
+		Exec(ctx)
+
+	return err
+}
+
 func (tx Transaction) SaveContracts(ctx context.Context, contracts ...*models.Contract) error {
 	if len(contracts) == 0 {
 		return nil

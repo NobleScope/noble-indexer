@@ -6,6 +6,7 @@ import (
 	"github.com/baking-bad/noble-indexer/internal/storage/types"
 	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage"
+	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
 )
 
@@ -27,18 +28,20 @@ type Trace struct {
 	To   *uint64 `bun:"to_address_id"   comment:"To address identity"`
 
 	// init
-	GasLimit       uint64          `bun:"gas_limit"       comment:"Gas limit"`
-	Value          *uint64         `bun:"value"           comment:"Value in Wei"`
-	Input          []byte          `bun:"input"           comment:"Input data"`
-	Type           types.TraceType `bun:"type"            comment:"Trace type"`
-	InitHash       *pkgTypes.Hex   `bun:"init_hash"       comment:"Code of the contract being created"`
-	CreationMethod *string         `bun:"creation_method" comment:"Creation method"`
+	GasLimit       decimal.Decimal  `bun:"gas_limit,type:numeric" comment:"Gas limit"`
+	Amount         *decimal.Decimal `bun:"amount,type:numeric"    comment:"Value in Wei"`
+	Input          []byte           `bun:"input"                  comment:"Input data"`
+	TxPosition     uint64           `bun:"tx_position"            comment:"Transaction position"`
+	TraceAddress   []uint64         `bun:"trace_address"          comment:"Trace position in the call tree"`
+	Type           types.TraceType  `bun:"type"                   comment:"Trace type"`
+	InitHash       *pkgTypes.Hex    `bun:"init_hash"              comment:"Code of the contract being created"`
+	CreationMethod *string          `bun:"creation_method"        comment:"Creation method"`
 
 	// result
-	GasUsed    uint64        `bun:"gas_used"    comment:"Gas used"`
-	Output     []byte        `bun:"output"      comment:"Output data"`
-	ContractId *uint64       `bun:"contract_id" comment:"Address identity of the new contract"`
-	Code       *pkgTypes.Hex `bun:"code"        comment:"New contract code"`
+	GasUsed    decimal.Decimal `bun:"gas_used,type:numeric" comment:"Gas used"`
+	Output     []byte          `bun:"output"                comment:"Output data"`
+	ContractId *uint64         `bun:"contract_id"           comment:"Address identity of the new contract"`
+	Code       *pkgTypes.Hex   `bun:"code"                  comment:"New contract code"`
 
 	Subtraces uint64 `bun:"subtraces" comment:"Amount of subtraces"`
 

@@ -5,6 +5,7 @@ type Block struct {
 	ExtraData        Hex   `json:"extraData"`
 	GasLimit         Hex   `json:"gasLimit"`
 	GasUsed          Hex   `json:"gasUsed"`
+	BaseFeePerGas    Hex   `json:"baseFeePerGas"`
 	Hash             Hex   `json:"hash"`
 	LogsBloom        Hex   `json:"logsBloom"`
 	Miner            Hex   `json:"miner"`

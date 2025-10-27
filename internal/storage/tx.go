@@ -23,24 +23,24 @@ type Tx struct {
 	Height pkgTypes.Level `bun:",notnull"                    comment:"The number (height) of this block"`
 	Time   time.Time      `bun:"time,pk,notnull"             comment:"The time of block"`
 
-	Gas      int64        `bun:"gas"           comment:"Gas"`
-	GasPrice int64        `bun:"gas_price"     comment:"Gas price"`
-	Hash     pkgTypes.Hex `bun:"hash"          comment:"Transaction hash"`
-	Nonce    int64        `bun:"nonce"         comment:"Nonce"`
-	Index    int64        `bun:"index"         comment:"Transaction index in the block"`
-	Value    int64        `bun:"value"         comment:"Value in Wei"`
-	Type     types.TxType `bun:",type:tx_type" comment:"Transaction type"`
-	Input    []byte       `bun:"input"         comment:"Transaction input"`
+	Gas      decimal.Decimal `bun:"gas,type:numeric"       comment:"Gas"`
+	GasPrice decimal.Decimal `bun:"gas_price,type:numeric" comment:"Gas price"`
+	Hash     pkgTypes.Hex    `bun:"hash"                   comment:"Transaction hash"`
+	Nonce    int64           `bun:"nonce"                  comment:"Nonce"`
+	Index    int64           `bun:"index"                  comment:"Transaction index in the block"`
+	Amount   decimal.Decimal `bun:"amount,type:numeric"    comment:"Value in Wei"`
+	Type     types.TxType    `bun:",type:tx_type"          comment:"Transaction type"`
+	Input    []byte          `bun:"input"                  comment:"Transaction input"`
 
-	ContractId        *uint64         `bun:"contract_id"           comment:"Contract address id"`
-	CumulativeGasUsed int64           `bun:"cumulative_gas_used"   comment:"Cumulative gas used"`
-	EffectiveGasPrice int64           `bun:"effective_gas_price"   comment:"Effective gas price"`
-	FromAddressId     uint64          `bun:"from_address_id"       comment:"From address id"`
-	ToAddressId       *uint64         `bun:"to_address_id"         comment:"To address id"`
-	Fee               decimal.Decimal `bun:"fee"                   comment:"Fee in Wei"`
-	GasUsed           int64           `bun:"gas_used"              comment:"Gas used"`
-	Status            types.TxStatus  `bun:"status,type:tx_status" comment:"Transaction status"`
-	LogsBloom         []byte          `bun:"logs_bloom"            comment:"Logs bloom"`
+	ContractId        *uint64         `bun:"contract_id"                      comment:"Contract address id"`
+	CumulativeGasUsed decimal.Decimal `bun:"cumulative_gas_used,type:numeric" comment:"Cumulative gas used"`
+	EffectiveGasPrice decimal.Decimal `bun:"effective_gas_price,type:numeric" comment:"Effective gas price"`
+	FromAddressId     uint64          `bun:"from_address_id"                  comment:"From address id"`
+	ToAddressId       *uint64         `bun:"to_address_id"                    comment:"To address id"`
+	Fee               decimal.Decimal `bun:"fee,type:numeric"                 comment:"Fee in Wei"`
+	GasUsed           decimal.Decimal `bun:"gas_used,type:numeric"            comment:"Gas used"`
+	Status            types.TxStatus  `bun:"status,type:tx_status"            comment:"Transaction status"`
+	LogsBloom         []byte          `bun:"logs_bloom"                       comment:"Logs bloom"`
 
 	Contract    *Contract `bun:"-"`
 	FromAddress Address   `bun:"-"`

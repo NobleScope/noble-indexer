@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"database/sql/driver"
 	"encoding/hex"
+	"math/big"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -162,9 +164,40 @@ func (h Hex) Time() (time.Time, error) {
 }
 
 func (h Hex) Decimal() (decimal.Decimal, error) {
-	val, err := h.Int64()
-	if err != nil {
-		return decimal.Zero, errors.Wrap(err, "failed to convert hex to decimal")
+	if len(h) == 0 {
+		return decimal.Zero, nil
 	}
-	return decimal.NewFromInt(val), nil
+
+	hexStr := hex.EncodeToString(h)
+	if hexStr == "" {
+		return decimal.Zero, nil
+	}
+
+	val := new(big.Int)
+	_, ok := val.SetString(hexStr, 16)
+	if !ok {
+		return decimal.Zero, errors.New("failed to parse hex to big.Int")
+	}
+
+	return decimal.NewFromBigInt(val, 0), nil
+}
+
+func (h Hex) BigInt() (*big.Int, error) {
+	if len(h) == 0 {
+		return big.NewInt(0), nil
+	}
+
+	hexStr := hex.EncodeToString(h)
+	hexStr = strings.TrimPrefix(strings.ToLower(hexStr), "0x")
+	if hexStr == "" {
+		return big.NewInt(0), nil
+	}
+
+	val := new(big.Int)
+	_, ok := val.SetString(hexStr, 16)
+	if !ok {
+		return nil, errors.Errorf("failed to parse hex to big.Int: %s", hexStr)
+	}
+
+	return val, nil
 }

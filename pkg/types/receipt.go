@@ -8,7 +8,7 @@ type Receipt struct {
 	EffectiveGasPrice Hex   `json:"effectiveGasPrice"`
 	From              Hex   `json:"from"`
 	GasUsed           Hex   `json:"gasUsed"`
-	L1Fee             Hex   `json:"l1Fee"`
+	L1Fee             *Hex  `json:"l1Fee"`
 	Logs              []Log `json:"logs"`
 	LogsBloom         Hex   `json:"logsBloom"`
 	Status            Hex   `json:"status"`

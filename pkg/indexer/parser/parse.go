@@ -26,16 +26,20 @@ func (p *Module) parse(b types.BlockData) error {
 		Int64("ms", time.Since(start).Milliseconds()).
 		Msg("block parsed")
 
-	blockData := b.Block
-	blockTime, err := blockData.Timestamp.Time()
+	block := b.Block
+	blockTime, err := block.Timestamp.Time()
 	if err != nil {
 		return err
 	}
-	gasLimit, err := blockData.GasLimit.Uint64()
+	gasLimit, err := block.GasLimit.Decimal()
 	if err != nil {
 		return err
 	}
-	gasUsed, err := blockData.GasUsed.Uint64()
+	gasUsed, err := block.GasUsed.Decimal()
+	if err != nil {
+		return err
+	}
+	feePerGas, err := block.BaseFeePerGas.Uint64()
 	if err != nil {
 		return err
 	}
@@ -45,6 +49,7 @@ func (p *Module) parse(b types.BlockData) error {
 		Height:               types.Level(height),
 		GasLimit:             gasLimit,
 		GasUsed:              gasUsed,
+		BaseFeePerGas:        feePerGas,
 		DifficultyHash:       b.Difficulty,
 		ExtraDataHash:        b.ExtraData,
 		Hash:                 b.Hash,
@@ -64,11 +69,11 @@ func (p *Module) parse(b types.BlockData) error {
 	}
 
 	for i, tx := range b.Transactions {
-		gas, err := tx.Gas.Int64()
+		gas, err := tx.Gas.Decimal()
 		if err != nil {
 			return err
 		}
-		gasPrice, err := tx.GasPrice.Int64()
+		gasPrice, err := tx.GasPrice.Decimal()
 		if err != nil {
 			return err
 		}
@@ -77,10 +82,6 @@ func (p *Module) parse(b types.BlockData) error {
 			return err
 		}
 		index, err := tx.TransactionIndex.Int64()
-		if err != nil {
-			return err
-		}
-		value, err := tx.Value.Int64()
 		if err != nil {
 			return err
 		}
@@ -95,22 +96,25 @@ func (p *Module) parse(b types.BlockData) error {
 			txType = storageType.TxTypeUnknown
 		}
 
-		cumulativeGasUsed, err := b.Receipts[i].CumulativeGasUsed.Int64()
+		cumulativeGasUsed, err := b.Receipts[i].CumulativeGasUsed.Decimal()
 		if err != nil {
 			return err
 		}
-		effectiveGasPrice, err := b.Receipts[i].EffectiveGasPrice.Int64()
+		effectiveGasPrice, err := b.Receipts[i].EffectiveGasPrice.Decimal()
 		if err != nil {
 			return err
 		}
-		fee, err := b.Receipts[i].L1Fee.Decimal()
+		txGasUsed, err := b.Receipts[i].GasUsed.Decimal()
 		if err != nil {
 			return err
 		}
-		txGasUsed, err := b.Receipts[i].GasUsed.Int64()
+		amount, err := tx.Value.Decimal()
 		if err != nil {
 			return err
 		}
+
+		fee := cumulativeGasUsed.Mul(effectiveGasPrice)
+
 		var status storageType.TxStatus
 		switch b.Receipts[i].Status.String() {
 		case "0x01":
@@ -129,7 +133,7 @@ func (p *Module) parse(b types.BlockData) error {
 			Hash:     tx.Hash,
 			Nonce:    nonce,
 			Index:    index,
-			Value:    value,
+			Amount:   amount,
 			Type:     txType,
 			Input:    tx.Input,
 
@@ -204,17 +208,17 @@ func (p *Module) parse(b types.BlockData) error {
 	}
 
 	for i, trace := range b.Traces {
-		gasLimit, err = trace.Action.Gas.Uint64()
+		gl, err := trace.Action.Gas.Decimal()
 		if err != nil {
 			return err
 		}
 
-		gasUsed, err = trace.Result.GasUsed.Uint64()
+		gu, err := trace.Result.GasUsed.Decimal()
 		if err != nil {
 			return err
 		}
 
-		value, err := trace.Action.Value.Uint64()
+		value, err := trace.Action.Value.Decimal()
 		if err != nil {
 			return err
 		}
@@ -237,13 +241,15 @@ func (p *Module) parse(b types.BlockData) error {
 				Hash: trace.TxHash,
 			},
 
-			GasLimit:       gasLimit,
-			Value:          &value,
+			TraceAddress:   trace.TraceAddress,
+			TxPosition:     trace.TxPosition,
+			GasLimit:       gl,
+			Amount:         &value,
 			Type:           typ,
 			InitHash:       trace.Action.Init,
 			CreationMethod: trace.Action.CreationMethod,
 
-			GasUsed: gasUsed,
+			GasUsed: gu,
 			Code:    trace.Result.Code,
 
 			Subtraces: trace.Subtraces,
@@ -277,6 +283,11 @@ func (p *Module) parse(b types.BlockData) error {
 
 		decodeCtx.Block.Traces[i] = newTrace
 		decodeCtx.AddTrace(newTrace)
+	}
+
+	err = p.parseTxs(decodeCtx)
+	if err != nil {
+		return err
 	}
 
 	output := p.MustOutput(OutputName)

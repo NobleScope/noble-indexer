@@ -397,6 +397,49 @@ func (c *MockTransactionSaveAddressesCall) DoAndReturn(f func(context.Context, .
 	return c
 }
 
+// SaveBalances mocks base method.
+func (m *MockTransaction) SaveBalances(ctx context.Context, balances ...*storage.Balance) error {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx}
+	for _, a := range balances {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SaveBalances", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveBalances indicates an expected call of SaveBalances.
+func (mr *MockTransactionMockRecorder) SaveBalances(ctx any, balances ...any) *MockTransactionSaveBalancesCall {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx}, balances...)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveBalances", reflect.TypeOf((*MockTransaction)(nil).SaveBalances), varargs...)
+	return &MockTransactionSaveBalancesCall{Call: call}
+}
+
+// MockTransactionSaveBalancesCall wrap *gomock.Call
+type MockTransactionSaveBalancesCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionSaveBalancesCall) Return(arg0 error) *MockTransactionSaveBalancesCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionSaveBalancesCall) Do(f func(context.Context, ...*storage.Balance) error) *MockTransactionSaveBalancesCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionSaveBalancesCall) DoAndReturn(f func(context.Context, ...*storage.Balance) error) *MockTransactionSaveBalancesCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // SaveContracts mocks base method.
 func (m *MockTransaction) SaveContracts(ctx context.Context, addresses ...*storage.Contract) error {
 	m.ctrl.T.Helper()

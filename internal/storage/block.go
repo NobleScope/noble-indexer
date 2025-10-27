@@ -5,6 +5,7 @@ import (
 
 	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage"
+	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
 )
 
@@ -17,11 +18,12 @@ type IBlock interface {
 type Block struct {
 	bun.BaseModel `bun:"block" comment:"Table with blocks."`
 
-	Id       uint64         `bun:",pk,notnull,autoincrement" comment:"Unique internal identity"`
-	Height   pkgTypes.Level `bun:"height"                    comment:"The number (height) of this block"`
-	Time     time.Time      `bun:"time,pk,notnull"           comment:"The time of block"`
-	GasLimit uint64         `bun:"gas_limit"                 comment:"Gas limit"`
-	GasUsed  uint64         `bun:"gas_used"                  comment:"Gas used"`
+	Id            uint64          `bun:",pk,notnull,autoincrement"     comment:"Unique internal identity"`
+	Height        pkgTypes.Level  `bun:"height"                        comment:"The number (height) of this block"`
+	Time          time.Time       `bun:"time,pk,notnull"               comment:"The time of block"`
+	GasLimit      decimal.Decimal `bun:"gas_limit,type:numeric"        comment:"Gas limit"`
+	GasUsed       decimal.Decimal `bun:"gas_used,type:numeric"         comment:"Gas used"`
+	BaseFeePerGas uint64          `bun:"base_fee_per_gas,type:numeric" comment:"Fee per gas"`
 
 	DifficultyHash       pkgTypes.Hex `bun:"difficulty_hash"        comment:"Difficulty hash"`
 	ExtraDataHash        pkgTypes.Hex `bun:"extra_data_hash"        comment:"Extra data hash"`
