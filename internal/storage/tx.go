@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"time"
 
 	"github.com/baking-bad/noble-indexer/internal/storage/types"
@@ -13,6 +14,8 @@ import (
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
 type ITx interface {
 	storage.Table[*Tx]
+
+	ByHeight(ctx context.Context, height pkgTypes.Level, limit, offset int, order storage.SortOrder) (txs []*Tx, err error)
 }
 
 // Tx -
@@ -42,9 +45,9 @@ type Tx struct {
 	Status            types.TxStatus  `bun:"status,type:tx_status"            comment:"Transaction status"`
 	LogsBloom         []byte          `bun:"logs_bloom"                       comment:"Logs bloom"`
 
-	Contract    *Contract `bun:"-"`
-	FromAddress Address   `bun:"-"`
-	ToAddress   *Address  `bun:"-"`
+	Contract    *Contract `bun:"rel:belongs-to,join:contract_id=id"`
+	FromAddress Address   `bun:"rel:belongs-to,join:from_address_id=id"`
+	ToAddress   *Address  `bun:"rel:belongs-to,join:to_address_id=id"`
 	Logs        []Log     `bun:"rel:has-many"`
 }
 

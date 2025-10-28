@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	_ "github.com/baking-bad/noble-indexer/cmd/api/docs"
 	"github.com/baking-bad/noble-indexer/cmd/api/handler"
 	"github.com/baking-bad/noble-indexer/cmd/common"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
@@ -15,6 +16,23 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
+
+//	@title			Noble Indexer API
+//	@version		1.0
+//	@description	API for Noble blockchain indexer
+//	@termsOfService	https://bakingbad.dev/terms
+
+//	@contact.name	API Support
+//	@contact.url	https://github.com/baking-bad/noble-indexer
+//	@contact.email	hello@bakingbad.dev
+
+//	@license.name	MIT
+//	@license.url	https://github.com/baking-bad/noble-indexer/blob/master/LICENSE
+
+//	@host		localhost:9876
+//	@BasePath	/v1
+
+//	@schemes	http https
 
 var rootCmd = &cobra.Command{
 	Use:   "api",

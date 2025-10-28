@@ -1,0 +1,565 @@
+{
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "API for Noble blockchain indexer",
+        "title": "Noble Indexer API",
+        "termsOfService": "https://bakingbad.dev/terms",
+        "contact": {
+            "name": "API Support",
+            "url": "https://github.com/baking-bad/noble-indexer",
+            "email": "hello@bakingbad.dev"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://github.com/baking-bad/noble-indexer/blob/master/LICENSE"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:9876",
+    "basePath": "/v1",
+    "paths": {
+        "/block": {
+            "get": {
+                "description": "List blocks info",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "block"
+                ],
+                "summary": "List blocks info",
+                "operationId": "list-block",
+                "parameters": [
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Count of requested blocks",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "description": "Sort order",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Need join stats for block",
+                        "name": "stats",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/responses.Block"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/block/count": {
+            "get": {
+                "description": "Get count of blocks in network",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "block"
+                ],
+                "summary": "Get count of blocks in network",
+                "operationId": "get-blocks-count",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/block/{height}": {
+            "get": {
+                "description": "Get block info",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "block"
+                ],
+                "summary": "Get block info",
+                "operationId": "get-block",
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Block height",
+                        "name": "height",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Need include stats for block",
+                        "name": "stats",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/responses.Block"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/block/{height}/stats": {
+            "get": {
+                "description": "Get block stats by height",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "block"
+                ],
+                "summary": "Get block stats by height",
+                "operationId": "get-block-stats",
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Block height",
+                        "name": "height",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/responses.BlockStats"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/block/{height}/transactions": {
+            "get": {
+                "description": "List block transactions",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "block"
+                ],
+                "summary": "List block transactions",
+                "operationId": "list-block-transactions",
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Block height",
+                        "name": "height",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Count of requested transactions",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "description": "Sort order",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/responses.Transaction"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/head": {
+            "get": {
+                "description": "Get current indexer head",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "general"
+                ],
+                "summary": "Get current indexer head",
+                "operationId": "head",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/responses.State"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "handler.Error": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "responses.Block": {
+            "type": "object",
+            "properties": {
+                "difficulty": {
+                    "type": "string",
+                    "example": "0x0"
+                },
+                "extra_data": {
+                    "type": "string",
+                    "example": "0x726574682f76312e372e302f6c696e7578"
+                },
+                "gas_limit": {
+                    "type": "integer",
+                    "example": 1000000
+                },
+                "gas_used": {
+                    "type": "integer",
+                    "example": 500000
+                },
+                "hash": {
+                    "type": "string",
+                    "example": "0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d"
+                },
+                "height": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "logs_bloom": {
+                    "type": "string",
+                    "example": "0x0000000000000000000020000000000"
+                },
+                "miner": {
+                    "type": "string",
+                    "example": "0x0000000000000000000000000000000000000000"
+                },
+                "mix_hash": {
+                    "type": "string",
+                    "example": "0x000000000000000000000000000000000000000000000000000000000033a87e"
+                },
+                "nonce": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "parent_hash": {
+                    "type": "string",
+                    "example": "0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d"
+                },
+                "receipts_root": {
+                    "type": "string",
+                    "example": "0x24e9aae3033f9ff809675831eca331b701440009592a40a6d788756f3be983a2"
+                },
+                "sha3_uncles_hash": {
+                    "type": "string",
+                    "example": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347"
+                },
+                "size": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "state_root": {
+                    "type": "string",
+                    "example": "0x9b6e76e8263c5060b61e396c65baf15dd187386d5607250be0dcc5308f0b49ef"
+                },
+                "stats": {
+                    "$ref": "#/definitions/responses.BlockStats"
+                },
+                "time": {
+                    "type": "string",
+                    "example": "2023-07-04T03:10:57+00:00"
+                },
+                "total_difficulty_hash": {
+                    "type": "string",
+                    "example": "0x0"
+                },
+                "transactions_root_hash": {
+                    "type": "string",
+                    "example": "0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d"
+                }
+            }
+        },
+        "responses.BlockStats": {
+            "type": "object",
+            "properties": {
+                "block_time": {
+                    "type": "integer",
+                    "example": 1000
+                },
+                "height": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "time": {
+                    "type": "string",
+                    "example": "2023-07-04T03:10:57+00:00"
+                },
+                "tx_count": {
+                    "type": "integer",
+                    "example": 12
+                }
+            }
+        },
+        "responses.State": {
+            "type": "object",
+            "properties": {
+                "hash": {
+                    "type": "string",
+                    "format": "string",
+                    "example": "0x85480d3bbf5d757b63375ab9da566e7c330e2b6b9abe965fc7f41542d3edaeaa"
+                },
+                "id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "example": 321
+                },
+                "last_height": {
+                    "type": "integer",
+                    "format": "int64",
+                    "example": 100
+                },
+                "last_time": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2023-07-04T03:10:57+00:00"
+                },
+                "name": {
+                    "type": "string",
+                    "format": "string",
+                    "example": "indexer"
+                },
+                "total_accounts": {
+                    "type": "integer",
+                    "format": "int64",
+                    "example": 43
+                },
+                "total_tx": {
+                    "type": "integer",
+                    "format": "int64",
+                    "example": 23456
+                }
+            }
+        },
+        "responses.Transaction": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer",
+                    "example": 1000000000000000000
+                },
+                "contract": {
+                    "type": "string",
+                    "example": "0x0000000000000000000000000000000000000002"
+                },
+                "cumulative_gas_used": {
+                    "type": "integer",
+                    "example": 21000
+                },
+                "effective_gas_price": {
+                    "type": "integer",
+                    "example": 1000000
+                },
+                "fee": {
+                    "type": "string",
+                    "example": "21000000000"
+                },
+                "from_address": {
+                    "type": "string",
+                    "example": "0x0000000000000000000000000000000000000000"
+                },
+                "gas": {
+                    "type": "integer",
+                    "example": 21000
+                },
+                "gas_price": {
+                    "type": "integer",
+                    "example": 1000000
+                },
+                "gas_used": {
+                    "type": "integer",
+                    "example": 21000
+                },
+                "hash": {
+                    "type": "string",
+                    "example": "0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d"
+                },
+                "height": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "index": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "input": {
+                    "type": "string",
+                    "example": "0x"
+                },
+                "logs_bloom": {
+                    "type": "string",
+                    "example": "0x00000000000000000000000000000000000000000000"
+                },
+                "nonce": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "TxStatusSuccess",
+                        "TxStatusRevert"
+                    ],
+                    "example": "TxStatusSuccess"
+                },
+                "time": {
+                    "type": "string",
+                    "example": "2023-07-04T03:10:57+00:00"
+                },
+                "to_address": {
+                    "type": "string",
+                    "example": "0x0000000000000000000000000000000000000001"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "TxTypeUnknown",
+                        "TxTypeLegacy",
+                        "TxTypeDynamicFee"
+                    ],
+                    "example": "TxTypeDynamicFee"
+                }
+            }
+        }
+    }
+}

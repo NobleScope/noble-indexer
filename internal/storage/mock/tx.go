@@ -14,6 +14,7 @@ import (
 	reflect "reflect"
 
 	storage "github.com/baking-bad/noble-indexer/internal/storage"
+	types "github.com/baking-bad/noble-indexer/pkg/types"
 	storage0 "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -40,6 +41,45 @@ func NewMockITx(ctrl *gomock.Controller) *MockITx {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockITx) EXPECT() *MockITxMockRecorder {
 	return m.recorder
+}
+
+// ByHeight mocks base method.
+func (m *MockITx) ByHeight(ctx context.Context, height types.Level, limit, offset int, order storage0.SortOrder) ([]*storage.Tx, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ByHeight", ctx, height, limit, offset, order)
+	ret0, _ := ret[0].([]*storage.Tx)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ByHeight indicates an expected call of ByHeight.
+func (mr *MockITxMockRecorder) ByHeight(ctx, height, limit, offset, order any) *MockITxByHeightCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ByHeight", reflect.TypeOf((*MockITx)(nil).ByHeight), ctx, height, limit, offset, order)
+	return &MockITxByHeightCall{Call: call}
+}
+
+// MockITxByHeightCall wrap *gomock.Call
+type MockITxByHeightCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockITxByHeightCall) Return(txs []*storage.Tx, err error) *MockITxByHeightCall {
+	c.Call = c.Call.Return(txs, err)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockITxByHeightCall) Do(f func(context.Context, types.Level, int, int, storage0.SortOrder) ([]*storage.Tx, error)) *MockITxByHeightCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockITxByHeightCall) DoAndReturn(f func(context.Context, types.Level, int, int, storage0.SortOrder) ([]*storage.Tx, error)) *MockITxByHeightCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
 }
 
 // CursorList mocks base method.

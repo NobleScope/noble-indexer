@@ -12,6 +12,7 @@ import (
 type BlockHandler struct {
 	block       storage.IBlock
 	blockStats  storage.IBlockStats
+	txs         storage.ITx
 	state       storage.IState
 	indexerName string
 }
@@ -19,12 +20,14 @@ type BlockHandler struct {
 func NewBlockHandler(
 	block storage.IBlock,
 	blockStats storage.IBlockStats,
+	txs storage.ITx,
 	state storage.IState,
 	indexerName string,
 ) *BlockHandler {
 	return &BlockHandler{
 		block:       block,
 		blockStats:  blockStats,
+		txs:         txs,
 		state:       state,
 		indexerName: indexerName,
 	}
@@ -43,7 +46,7 @@ type getBlockByHeightRequest struct {
 //	@ID				get-block
 //	@Param			height	path	integer	true	"Block height"	minimum(1)
 //	@Param			stats	query	boolean	false	"Need include stats for block"
-//	@Produce		JSON
+//	@Produce		json
 //	@Success		200	{object}	responses.Block
 //	@Success		204
 //	@Failure		400	{object}	Error
@@ -89,7 +92,7 @@ func (p *blockListRequest) SetDefault() {
 //	@Param			offset	query	integer	false	"Offset"						minimum(1)
 //	@Param			sort	query	string	false	"Sort order"					Enums(asc, desc)
 //	@Param			stats	query	boolean	false	"Need join stats for block"
-//	@Produce		JSON
+//	@Produce		json
 //	@Success		200	{array}		responses.Block
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
@@ -126,7 +129,7 @@ func (handler *BlockHandler) List(c echo.Context) error {
 //	@Description	Get count of blocks in network
 //	@Tags			block
 //	@ID				get-blocks-count
-//	@Produce		JSON
+//	@Produce		json
 //	@Success		200	{integer}	uint64
 //	@Failure		500	{object}	Error
 //	@Router			/block/count [get]
@@ -145,7 +148,7 @@ func (handler *BlockHandler) Count(c echo.Context) error {
 //	@Tags			block
 //	@ID				get-block-stats
 //	@Param			height	path	integer	true	"Block height"	minimum(1)
-//	@Produce		JSON
+//	@Produce		json
 //	@Success		200	{object}	responses.BlockStats
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
@@ -161,4 +164,57 @@ func (handler *BlockHandler) GetStats(c echo.Context) error {
 		return handleError(c, err, handler.block)
 	}
 	return c.JSON(http.StatusOK, responses.NewBlockStats(stats))
+}
+
+type transactionsListRequest struct {
+	Height types.Level `param:"height" validate:"min=1"`
+	Limit  int         `query:"limit"  validate:"omitempty,min=1,max=100"`
+	Offset int         `query:"offset" validate:"omitempty,min=0"`
+	Sort   string      `query:"sort"   validate:"omitempty,oneof=asc desc"`
+}
+
+func (p *transactionsListRequest) SetDefault() {
+	if p.Limit == 0 {
+		p.Limit = 10
+	}
+	if p.Sort == "" {
+		p.Sort = asc
+	}
+}
+
+// TransactionsList godoc
+//
+//	@Summary		List block transactions
+//	@Description	List block transactions
+//	@Tags			block
+//	@ID				list-block-transactions
+//	@Param			height	path	integer	true	"Block height"	minimum(1)
+//	@Param			limit	query	integer	false	"Count of requested transactions" 	minimum(1)	maximum(100)
+//	@Param			offset	query	integer	false	"Offset"							minimum(1)
+//	@Param			sort	query	string	false	"Sort order"						Enums(asc, desc)
+//	@Produce		json
+//	@Success		200	{array}		responses.Transaction
+//	@Failure		400	{object}	Error
+//	@Failure		500	{object}	Error
+//	@Router			/block/{height}/transactions [get]
+func (handler *BlockHandler) TransactionsList(c echo.Context) error {
+	req, err := bindAndValidate[transactionsListRequest](c)
+	if err != nil {
+		return badRequestError(c, err)
+	}
+	req.SetDefault()
+
+	var txs []*storage.Tx
+	txs, err = handler.txs.ByHeight(c.Request().Context(), req.Height, req.Limit, req.Offset, pgSort(req.Sort))
+
+	if err != nil {
+		return handleError(c, err, handler.block)
+	}
+
+	response := make([]responses.Transaction, len(txs))
+	for i := range txs {
+		response[i] = responses.NewTransaction(*txs[i])
+	}
+
+	return returnArray(c, response)
 }

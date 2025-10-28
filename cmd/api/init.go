@@ -10,6 +10,7 @@ import (
 	golibCfg "github.com/dipdup-net/go-lib/config"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 func initDatabase(cfg golibCfg.Database, viewsDir string) postgres.Storage {
@@ -23,12 +24,14 @@ func initDatabase(cfg golibCfg.Database, viewsDir string) postgres.Storage {
 }
 
 func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postgres.Storage) {
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
+
 	v1 := e.Group("v1")
 
 	stateHandlers := handler.NewStateHandler(db.State, cfg.Indexer.Name)
 	v1.GET("/head", stateHandlers.Head)
 
-	blockHandlers := handler.NewBlockHandler(db.Blocks, db.BlockStats, db.State, cfg.Indexer.Name)
+	blockHandlers := handler.NewBlockHandler(db.Blocks, db.BlockStats, db.Tx, db.State, cfg.Indexer.Name)
 	blockGroup := v1.Group("/block")
 	{
 		blockGroup.GET("", blockHandlers.List)
@@ -37,6 +40,7 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 		{
 			heightGroup.GET("", blockHandlers.Get)
 			heightGroup.GET("/stats", blockHandlers.GetStats)
+			heightGroup.GET("/transactions", blockHandlers.TransactionsList)
 		}
 	}
 

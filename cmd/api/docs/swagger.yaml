@@ -1,0 +1,399 @@
+basePath: /v1
+definitions:
+  handler.Error:
+    properties:
+      message:
+        type: string
+    type: object
+  responses.Block:
+    properties:
+      difficulty:
+        example: "0x0"
+        type: string
+      extra_data:
+        example: 0x726574682f76312e372e302f6c696e7578
+        type: string
+      gas_limit:
+        example: 1000000
+        type: integer
+      gas_used:
+        example: 500000
+        type: integer
+      hash:
+        example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d
+        type: string
+      height:
+        example: 100
+        type: integer
+      logs_bloom:
+        example: "0x0000000000000000000020000000000"
+        type: string
+      miner:
+        example: "0x0000000000000000000000000000000000000000"
+        type: string
+      mix_hash:
+        example: "0x000000000000000000000000000000000000000000000000000000000033a87e"
+        type: string
+      nonce:
+        example: 0
+        type: integer
+      parent_hash:
+        example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d
+        type: string
+      receipts_root:
+        example: 0x24e9aae3033f9ff809675831eca331b701440009592a40a6d788756f3be983a2
+        type: string
+      sha3_uncles_hash:
+        example: 0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347
+        type: string
+      size:
+        example: 0
+        type: integer
+      state_root:
+        example: 0x9b6e76e8263c5060b61e396c65baf15dd187386d5607250be0dcc5308f0b49ef
+        type: string
+      stats:
+        $ref: '#/definitions/responses.BlockStats'
+      time:
+        example: "2023-07-04T03:10:57+00:00"
+        type: string
+      total_difficulty_hash:
+        example: "0x0"
+        type: string
+      transactions_root_hash:
+        example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d
+        type: string
+    type: object
+  responses.BlockStats:
+    properties:
+      block_time:
+        example: 1000
+        type: integer
+      height:
+        example: 100
+        type: integer
+      time:
+        example: "2023-07-04T03:10:57+00:00"
+        type: string
+      tx_count:
+        example: 12
+        type: integer
+    type: object
+  responses.State:
+    properties:
+      hash:
+        example: 0x85480d3bbf5d757b63375ab9da566e7c330e2b6b9abe965fc7f41542d3edaeaa
+        format: string
+        type: string
+      id:
+        example: 321
+        format: int64
+        type: integer
+      last_height:
+        example: 100
+        format: int64
+        type: integer
+      last_time:
+        example: "2023-07-04T03:10:57+00:00"
+        format: date-time
+        type: string
+      name:
+        example: indexer
+        format: string
+        type: string
+      total_accounts:
+        example: 43
+        format: int64
+        type: integer
+      total_tx:
+        example: 23456
+        format: int64
+        type: integer
+    type: object
+  responses.Transaction:
+    properties:
+      amount:
+        example: 1000000000000000000
+        type: integer
+      contract:
+        example: "0x0000000000000000000000000000000000000002"
+        type: string
+      cumulative_gas_used:
+        example: 21000
+        type: integer
+      effective_gas_price:
+        example: 1000000
+        type: integer
+      fee:
+        example: "21000000000"
+        type: string
+      from_address:
+        example: "0x0000000000000000000000000000000000000000"
+        type: string
+      gas:
+        example: 21000
+        type: integer
+      gas_price:
+        example: 1000000
+        type: integer
+      gas_used:
+        example: 21000
+        type: integer
+      hash:
+        example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d
+        type: string
+      height:
+        example: 100
+        type: integer
+      index:
+        example: 0
+        type: integer
+      input:
+        example: 0x
+        type: string
+      logs_bloom:
+        example: "0x00000000000000000000000000000000000000000000"
+        type: string
+      nonce:
+        example: 1
+        type: integer
+      status:
+        enum:
+        - TxStatusSuccess
+        - TxStatusRevert
+        example: TxStatusSuccess
+        type: string
+      time:
+        example: "2023-07-04T03:10:57+00:00"
+        type: string
+      to_address:
+        example: "0x0000000000000000000000000000000000000001"
+        type: string
+      type:
+        enum:
+        - TxTypeUnknown
+        - TxTypeLegacy
+        - TxTypeDynamicFee
+        example: TxTypeDynamicFee
+        type: string
+    type: object
+host: localhost:9876
+info:
+  contact:
+    email: hello@bakingbad.dev
+    name: API Support
+    url: https://github.com/baking-bad/noble-indexer
+  description: API for Noble blockchain indexer
+  license:
+    name: MIT
+    url: https://github.com/baking-bad/noble-indexer/blob/master/LICENSE
+  termsOfService: https://bakingbad.dev/terms
+  title: Noble Indexer API
+  version: "1.0"
+paths:
+  /block:
+    get:
+      description: List blocks info
+      operationId: list-block
+      parameters:
+      - description: Count of requested blocks
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        minimum: 1
+        name: offset
+        type: integer
+      - description: Sort order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Need join stats for block
+        in: query
+        name: stats
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/responses.Block'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: List blocks info
+      tags:
+      - block
+  /block/{height}:
+    get:
+      description: Get block info
+      operationId: get-block
+      parameters:
+      - description: Block height
+        in: path
+        minimum: 1
+        name: height
+        required: true
+        type: integer
+      - description: Need include stats for block
+        in: query
+        name: stats
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Block'
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Get block info
+      tags:
+      - block
+  /block/{height}/stats:
+    get:
+      description: Get block stats by height
+      operationId: get-block-stats
+      parameters:
+      - description: Block height
+        in: path
+        minimum: 1
+        name: height
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.BlockStats'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Get block stats by height
+      tags:
+      - block
+  /block/{height}/transactions:
+    get:
+      description: List block transactions
+      operationId: list-block-transactions
+      parameters:
+      - description: Block height
+        in: path
+        minimum: 1
+        name: height
+        required: true
+        type: integer
+      - description: Count of requested transactions
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        minimum: 1
+        name: offset
+        type: integer
+      - description: Sort order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/responses.Transaction'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: List block transactions
+      tags:
+      - block
+  /block/count:
+    get:
+      description: Get count of blocks in network
+      operationId: get-blocks-count
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Get count of blocks in network
+      tags:
+      - block
+  /head:
+    get:
+      description: Get current indexer head
+      operationId: head
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.State'
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Get current indexer head
+      tags:
+      - general
+schemes:
+- http
+- https
+swagger: "2.0"

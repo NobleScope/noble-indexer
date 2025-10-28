@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Bb Strategy Pte. Ltd. <celenium@baking-bad.org>
+// SPDX-License-Identifier: MIT
+
 package handler
 
 import (
@@ -62,6 +65,7 @@ type BlockTestSuite struct {
 	suite.Suite
 	block      *mock.MockIBlock
 	blockStats *mock.MockIBlockStats
+	txs        *mock.MockITx
 	state      *mock.MockIState
 	echo       *echo.Echo
 	handler    *BlockHandler
@@ -75,8 +79,9 @@ func (s *BlockTestSuite) SetupSuite() {
 	s.ctrl = gomock.NewController(s.T())
 	s.block = mock.NewMockIBlock(s.ctrl)
 	s.blockStats = mock.NewMockIBlockStats(s.ctrl)
+	s.txs = mock.NewMockITx(s.ctrl)
 	s.state = mock.NewMockIState(s.ctrl)
-	s.handler = NewBlockHandler(s.block, s.blockStats, s.state, testIndexerName)
+	s.handler = NewBlockHandler(s.block, s.blockStats, s.txs, s.state, testIndexerName)
 }
 
 // TearDownSuite -
