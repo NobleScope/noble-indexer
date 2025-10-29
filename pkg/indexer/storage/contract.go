@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/pkg/errors"
 )
 
 func saveContracts(
@@ -18,7 +19,11 @@ func saveContracts(
 	}
 
 	for _, contract := range contracts {
-		contract.TxId = txHashes[contract.Tx.Hash.String()]
+		txId, ok := txHashes[contract.Tx.Hash.String()]
+		if !ok {
+			return nil, errors.Errorf("can't find tx hash: %s", contract.Tx.Hash.String())
+		}
+		contract.TxId = &txId
 		contract.Id = addresses[contract.Address]
 	}
 

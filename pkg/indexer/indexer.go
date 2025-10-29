@@ -8,6 +8,7 @@ import (
 	internalStorage "github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/internal/storage/postgres"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
+	"github.com/baking-bad/noble-indexer/pkg/indexer/genesis"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/parser"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/receiver"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/storage"
@@ -27,10 +28,10 @@ type Indexer struct {
 	receiver *receiver.Module
 	parser   *parser.Module
 	storage  *storage.Module
-
-	stopper modules.Module
-	wg      *sync.WaitGroup
-	log     zerolog.Logger
+	genesis  *genesis.Module
+	stopper  modules.Module
+	wg       *sync.WaitGroup
+	log      zerolog.Logger
 }
 
 func New(ctx context.Context, cfg config.Config, stopperModule modules.Module) (Indexer, error) {
@@ -54,7 +55,12 @@ func New(ctx context.Context, cfg config.Config, stopperModule modules.Module) (
 		return Indexer{}, errors.Wrap(err, "while creating storage module")
 	}
 
-	err = attachStopper(stopperModule, r, p, s)
+	genesisModule, err := createGenesis(pg, cfg, r)
+	if err != nil {
+		return Indexer{}, errors.Wrap(err, "while creating genesis module")
+	}
+
+	err = attachStopper(stopperModule, r, p, s, genesisModule)
 	if err != nil {
 		return Indexer{}, errors.Wrap(err, "while creating stopper module")
 	}
@@ -65,6 +71,7 @@ func New(ctx context.Context, cfg config.Config, stopperModule modules.Module) (
 		receiver: r,
 		parser:   p,
 		storage:  s,
+		genesis:  genesisModule,
 		stopper:  stopperModule,
 		wg:       new(sync.WaitGroup),
 		log:      log.With().Str("module", "indexer").Logger(),
@@ -74,6 +81,7 @@ func New(ctx context.Context, cfg config.Config, stopperModule modules.Module) (
 func (i *Indexer) Start(ctx context.Context) {
 	i.log.Info().Msg("starting...")
 
+	i.genesis.Start(ctx)
 	i.storage.Start(ctx)
 	i.parser.Start(ctx)
 	i.receiver.Start(ctx)
@@ -85,6 +93,9 @@ func (i *Indexer) Close() error {
 
 	if err := i.receiver.Close(); err != nil {
 		log.Err(err).Msg("closing receiver")
+	}
+	if err := i.genesis.Close(); err != nil {
+		log.Err(err).Msg("closing genesis")
 	}
 	if err := i.parser.Close(); err != nil {
 		log.Err(err).Msg("closing parser")
@@ -141,11 +152,27 @@ func createStorage(pg postgres.Storage, cfg config.Config, parserModule modules.
 	return &storageModule, nil
 }
 
+func createGenesis(pg postgres.Storage, cfg config.Config, receiverModule modules.Module) (*genesis.Module, error) {
+	genesisModule := genesis.NewModule(pg, cfg.Indexer)
+
+	if err := genesisModule.AttachTo(receiverModule, receiver.GenesisOutput, genesis.InputName); err != nil {
+		return nil, errors.Wrap(err, "while attaching genesis to receiver")
+	}
+
+	genesisModulePtr := &genesisModule
+	if err := receiverModule.AttachTo(genesisModulePtr, genesis.OutputName, receiver.GenesisDoneInput); err != nil {
+		return nil, errors.Wrap(err, "while attaching receiver to genesis")
+	}
+
+	return genesisModulePtr, nil
+}
+
 func attachStopper(
 	stopperModule modules.Module,
 	receiverModule modules.Module,
 	parserModule modules.Module,
 	storageModule modules.Module,
+	genesisModule modules.Module,
 ) error {
 	if err := stopperModule.AttachTo(receiverModule, receiver.StopOutput, stopper.InputName); err != nil {
 		return errors.Wrap(err, "while attaching stopper to receiver")
@@ -157,6 +184,10 @@ func attachStopper(
 
 	if err := stopperModule.AttachTo(storageModule, storage.StopOutput, stopper.InputName); err != nil {
 		return errors.Wrap(err, "while attaching stopper to storage")
+	}
+
+	if err := stopperModule.AttachTo(genesisModule, genesis.StopOutput, stopper.InputName); err != nil {
+		return errors.Wrap(err, "while attaching stopper to genesis")
 	}
 
 	return nil

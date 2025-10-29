@@ -10,11 +10,14 @@ import (
 	"github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/dipdup-net/indexer-sdk/pkg/modules"
 	"github.com/gorilla/websocket"
+	"github.com/rs/zerolog/log"
 )
 
 const (
-	BlocksOutput = "blocks"
-	StopOutput   = "stop"
+	BlocksOutput     = "blocks"
+	GenesisOutput    = "genesis"
+	GenesisDoneInput = "genesis_done"
+	StopOutput       = "stop"
 )
 
 type Module struct {
@@ -24,6 +27,7 @@ type Module struct {
 	level            types.Level
 	blocks           chan types.BlockData
 	hash             []byte
+	needGenesis      bool
 	mx               *sync.RWMutex
 	cfg              config.Indexer
 	cancelReadBlocks context.CancelFunc
@@ -41,19 +45,23 @@ func NewModule(cfg config.Indexer, api node.Api, ws *websocket.Conn, state *stor
 	}
 
 	receiver := Module{
-		BaseModule: modules.New("receiver"),
-		api:        api,
-		cfg:        cfg,
-		ws:         ws,
-		level:      level,
-		hash:       lastHash,
-		blocks:     make(chan types.BlockData, 128),
-		mx:         new(sync.RWMutex),
+		BaseModule:  modules.New("receiver"),
+		api:         api,
+		cfg:         cfg,
+		ws:          ws,
+		level:       level,
+		hash:        lastHash,
+		needGenesis: state == nil,
+		blocks:      make(chan types.BlockData, 128),
+		mx:          new(sync.RWMutex),
 	}
 
 	receiver.w = NewWorker(api, receiver.Log, receiver.blocks, cfg.RequestBulkSize)
 
+	receiver.CreateInput(GenesisDoneInput)
+
 	receiver.CreateOutput(BlocksOutput)
+	receiver.CreateOutput(GenesisOutput)
 	receiver.CreateOutput(StopOutput)
 
 	return receiver
@@ -61,6 +69,13 @@ func NewModule(cfg config.Indexer, api node.Api, ws *websocket.Conn, state *stor
 
 func (r *Module) Start(ctx context.Context) {
 	r.Log.Info().Msg("starting receiver...")
+
+	if r.needGenesis {
+		if err := r.receiveGenesis(ctx); err != nil {
+			log.Err(err).Msg("receiving genesis error")
+			return
+		}
+	}
 
 	r.G.GoCtx(ctx, r.sequencer)
 	r.G.GoCtx(ctx, r.sync)

@@ -18,6 +18,7 @@ type Indexer struct {
 	StartLevel      int64  `validate:"omitempty"       yaml:"start_level"`
 	BlockPeriod     int64  `validate:"omitempty"       yaml:"block_period"`
 	ScriptsDir      string `validate:"omitempty,dir"   yaml:"scripts_dir"`
+	GenesisDir      string `validate:"omitempty,dir"   yaml:"genesis_dir"`
 	RequestBulkSize int    `validate:"omitempty,min=1" yaml:"request_bulk_size"`
 }
 

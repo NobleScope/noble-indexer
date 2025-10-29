@@ -48,7 +48,7 @@ var (
 		Address:  "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
 		Code:     []byte{0x60, 0x60, 0x60},
 		Verified: true,
-		TxId:     1,
+		TxId:     uint64Ptr(1),
 	}
 
 	testTxWithToAddress = storage.Tx{

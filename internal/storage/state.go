@@ -27,6 +27,7 @@ type State struct {
 	LastTime      time.Time   `bun:"last_time"          comment:"Time of last block"`
 	TotalTx       int64       `bun:"total_tx"           comment:"Transactions count"`
 	TotalAccounts int64       `bun:"total_accounts"     comment:"Accounts count"`
+	ChainId       int64       `bun:"chain_id"           comment:"Noble chain id"`
 }
 
 // TableName -

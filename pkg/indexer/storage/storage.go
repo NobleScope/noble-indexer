@@ -118,20 +118,7 @@ func (module *Module) processBlockInTransaction(ctx context.Context, tx storage.
 	block := dCtx.Block
 	state, err := module.pg.State.ByName(ctx, module.indexerName)
 	if err != nil {
-		if module.pg.State.IsNoRows(err) {
-			if err = tx.Add(ctx, &storage.State{
-				Name:          module.indexerName,
-				LastHeight:    block.Height,
-				LastTime:      block.Time,
-				LastHash:      block.Hash,
-				TotalTx:       int64(len(block.Txs)),
-				TotalAccounts: int64(len(dCtx.GetAddresses())),
-			}); err != nil {
-				return state, err
-			}
-		} else {
-			return state, err
-		}
+		return state, err
 	}
 
 	// todo: handle genesis block
