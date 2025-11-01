@@ -2,7 +2,7 @@ package storage
 
 import (
 	"context"
-
+	"github.com/baking-bad/noble-indexer/pkg/types"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 )
 
@@ -29,5 +29,14 @@ type Transaction interface {
 	SaveBalances(ctx context.Context, balances ...*Balance) error
 	SaveContracts(ctx context.Context, addresses ...*Contract) error
 
+	RollbackBlock(ctx context.Context, height types.Level) error
+	RollbackBlockStats(ctx context.Context, height types.Level) (stats BlockStats, err error)
+	RollbackAddresses(ctx context.Context, height types.Level) (addresses []Address, err error)
+	RollbackTxs(ctx context.Context, height types.Level) (txs []Tx, err error)
+	RollbackTraces(ctx context.Context, height types.Level) (traces []Trace, err error)
+	RollbackLogs(ctx context.Context, height types.Level) error
+	DeleteBalances(ctx context.Context, ids []uint64) error
+
 	State(ctx context.Context, name string) (state State, err error)
+	LastBlock(ctx context.Context) (block Block, err error)
 }

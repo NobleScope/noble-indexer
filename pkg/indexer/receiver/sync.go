@@ -23,9 +23,6 @@ func (r *Module) sync(ctx context.Context) {
 		return
 	}
 
-	ticker := time.NewTicker(time.Second * time.Duration(r.cfg.BlockPeriod))
-	defer ticker.Stop()
-
 	if r.ws != nil {
 		if err := r.live(ctx); err != nil {
 			r.Log.Err(err).Msg("while reading blocks")
@@ -33,7 +30,12 @@ func (r *Module) sync(ctx context.Context) {
 			return
 		}
 	} else {
+		ticker := time.NewTicker(time.Second * time.Duration(r.cfg.BlockPeriod))
+		defer ticker.Stop()
+
 		for {
+			r.rollbackSync.Wait()
+
 			select {
 			case <-ctx.Done():
 				return
@@ -64,6 +66,8 @@ func (r *Module) live(ctx context.Context) error {
 	r.Log.Info().Msg("websocket was subscribed on block header events")
 
 	for {
+		r.rollbackSync.Wait()
+
 		select {
 		case <-ctx.Done():
 			break

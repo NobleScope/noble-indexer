@@ -121,18 +121,17 @@ func (module *Module) processBlockInTransaction(ctx context.Context, tx storage.
 		return state, err
 	}
 
-	// todo: handle genesis block
+	addrToId, totalAccounts, err := saveAddresses(ctx, tx, dCtx.GetAddresses())
+	if err != nil {
+		return state, err
+	}
 
-	if err := tx.Add(ctx, block); err != nil {
+	err = saveBlock(ctx, tx, block, addrToId)
+	if err != nil {
 		return state, err
 	}
 
 	if err := tx.Add(ctx, block.Stats); err != nil {
-		return state, err
-	}
-
-	addrToId, totalAccounts, err := saveAddresses(ctx, tx, dCtx.GetAddresses())
-	if err != nil {
 		return state, err
 	}
 

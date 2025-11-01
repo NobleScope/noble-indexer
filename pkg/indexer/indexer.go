@@ -11,6 +11,7 @@ import (
 	"github.com/baking-bad/noble-indexer/pkg/indexer/genesis"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/parser"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/receiver"
+	"github.com/baking-bad/noble-indexer/pkg/indexer/rollback"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/storage"
 	"github.com/baking-bad/noble-indexer/pkg/node"
 	"github.com/baking-bad/noble-indexer/pkg/node/rpc"
@@ -29,7 +30,9 @@ type Indexer struct {
 	parser   *parser.Module
 	storage  *storage.Module
 	genesis  *genesis.Module
+	rollback *rollback.Module
 	stopper  modules.Module
+	pg       postgres.Storage
 	wg       *sync.WaitGroup
 	log      zerolog.Logger
 }
@@ -60,7 +63,12 @@ func New(ctx context.Context, cfg config.Config, stopperModule modules.Module) (
 		return Indexer{}, errors.Wrap(err, "while creating genesis module")
 	}
 
-	err = attachStopper(stopperModule, r, p, s, genesisModule)
+	rb, err := createRollback(r, pg, &api, cfg.Indexer)
+	if err != nil {
+		return Indexer{}, errors.Wrap(err, "while creating rollback module")
+	}
+
+	err = attachStopper(stopperModule, r, p, s, rb, genesisModule)
 	if err != nil {
 		return Indexer{}, errors.Wrap(err, "while creating stopper module")
 	}
@@ -72,7 +80,9 @@ func New(ctx context.Context, cfg config.Config, stopperModule modules.Module) (
 		parser:   p,
 		storage:  s,
 		genesis:  genesisModule,
+		rollback: rb,
 		stopper:  stopperModule,
+		pg:       pg,
 		wg:       new(sync.WaitGroup),
 		log:      log.With().Str("module", "indexer").Logger(),
 	}, nil
@@ -84,6 +94,7 @@ func (i *Indexer) Start(ctx context.Context) {
 	i.genesis.Start(ctx)
 	i.storage.Start(ctx)
 	i.parser.Start(ctx)
+	i.rollback.Start(ctx)
 	i.receiver.Start(ctx)
 }
 
@@ -102,6 +113,12 @@ func (i *Indexer) Close() error {
 	}
 	if err := i.storage.Close(); err != nil {
 		log.Err(err).Msg("closing storage")
+	}
+	if err := i.rollback.Close(); err != nil {
+		log.Err(err).Msg("closing rollback")
+	}
+	if err := i.pg.Close(); err != nil {
+		log.Err(err).Msg("closing postgres connection")
 	}
 
 	return nil
@@ -167,11 +184,28 @@ func createGenesis(pg postgres.Storage, cfg config.Config, receiverModule module
 	return genesisModulePtr, nil
 }
 
+func createRollback(receiverModule modules.Module, pg postgres.Storage, api node.Api, cfg config.Indexer) (*rollback.Module, error) {
+	rollbackModule := rollback.NewModule(pg.Transactable, pg.State, pg.Blocks, api, cfg)
+
+	// rollback <- listen signal -- receiver
+	if err := rollbackModule.AttachTo(receiverModule, receiver.RollbackOutput, rollback.InputName); err != nil {
+		return nil, errors.Wrap(err, "while attaching rollback to receiver")
+	}
+
+	// receiver <- listen state -- rollback
+	if err := receiverModule.AttachTo(&rollbackModule, rollback.OutputName, receiver.RollbackInput); err != nil {
+		return nil, errors.Wrap(err, "while attaching receiver to rollback")
+	}
+
+	return &rollbackModule, nil
+}
+
 func attachStopper(
 	stopperModule modules.Module,
 	receiverModule modules.Module,
 	parserModule modules.Module,
 	storageModule modules.Module,
+	rollbackModule modules.Module,
 	genesisModule modules.Module,
 ) error {
 	if err := stopperModule.AttachTo(receiverModule, receiver.StopOutput, stopper.InputName); err != nil {
@@ -184,6 +218,10 @@ func attachStopper(
 
 	if err := stopperModule.AttachTo(storageModule, storage.StopOutput, stopper.InputName); err != nil {
 		return errors.Wrap(err, "while attaching stopper to storage")
+	}
+
+	if err := stopperModule.AttachTo(rollbackModule, rollback.StopOutput, stopper.InputName); err != nil {
+		return errors.Wrap(err, "while attaching stopper to rollback")
 	}
 
 	if err := stopperModule.AttachTo(genesisModule, genesis.StopOutput, stopper.InputName); err != nil {

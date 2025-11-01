@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/dipdup-net/go-lib/database"
@@ -19,6 +18,15 @@ func NewBlock(db *database.Bun) *Block {
 	return &Block{
 		Table: postgres.NewTable[*storage.Block](db),
 	}
+}
+
+// Last -
+func (b *Block) Last(ctx context.Context) (block storage.Block, err error) {
+	err = b.DB().NewSelect().Model(&block).
+		Order("id DESC").
+		Limit(1).
+		Scan(ctx)
+	return
 }
 
 // ByHeight -

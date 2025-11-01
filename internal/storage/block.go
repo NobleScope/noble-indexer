@@ -14,6 +14,7 @@ import (
 type IBlock interface {
 	storage.Table[*Block]
 
+	Last(ctx context.Context) (Block, error)
 	ByHeight(ctx context.Context, height pkgTypes.Level, withStats bool) (Block, error)
 	ListWithStats(ctx context.Context, limit, offset uint64, order storage.SortOrder) ([]*Block, error)
 }
@@ -28,12 +29,12 @@ type Block struct {
 	GasLimit      decimal.Decimal `bun:"gas_limit,type:numeric"        comment:"Gas limit"`
 	GasUsed       decimal.Decimal `bun:"gas_used,type:numeric"         comment:"Gas used"`
 	BaseFeePerGas uint64          `bun:"base_fee_per_gas,type:numeric" comment:"Fee per gas"`
+	MinerId       uint64          `bun:"miner_id"                      comment:"Miner address id"`
 
 	DifficultyHash       pkgTypes.Hex `bun:"difficulty_hash"        comment:"Difficulty hash"`
 	ExtraDataHash        pkgTypes.Hex `bun:"extra_data_hash"        comment:"Extra data hash"`
 	Hash                 pkgTypes.Hex `bun:"hash"                   comment:"Block hash"`
 	LogsBloomHash        pkgTypes.Hex `bun:"logs_bloom_hash"        comment:"Logs bloom hash"`
-	MinerHash            pkgTypes.Hex `bun:"miner_hash"             comment:"Miner address hash"`
 	MixHash              pkgTypes.Hex `bun:"mix_hash"               comment:"Mix hash"`
 	NonceHash            pkgTypes.Hex `bun:"nonce_hash"             comment:"Nonce hash"`
 	ParentHashHash       pkgTypes.Hex `bun:"parent_hash"            comment:"Hash of parent block"`
@@ -44,8 +45,9 @@ type Block struct {
 	TotalDifficultyHash  pkgTypes.Hex `bun:"total_difficulty_hash"  comment:"Total difficulty hash"`
 	TransactionsRootHash pkgTypes.Hex `bun:"transactions_root_hash" comment:"Hash of transactions root"`
 
-	Txs    []*Tx       `bun:"rel:has-many"                   json:"-"`
-	Traces []*Trace    `bun:"rel:has-many"                   json:"-"`
+	Txs    []*Tx       `bun:"rel:has-many"                    json:"-"`
+	Traces []*Trace    `bun:"rel:has-many"                    json:"-"`
+	Miner  Address     `bun:"rel:belongs-to,join:miner_id=id"`
 	Stats  *BlockStats `bun:"rel:has-one,join:height=height"`
 }
 

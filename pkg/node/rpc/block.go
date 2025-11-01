@@ -38,10 +38,13 @@ func (api *API) Block(ctx context.Context, level pkgTypes.Level) (pkgTypes.Block
 	}
 
 	resp, err := api.client.POST(u.Path).
-		Context().Set(requestCtx).
-		Header().Add("User-Agent", userAgent).
-		Body().AsJSON(&request).
-		Send()
+		Context().
+		Set(requestCtx).
+		Header().
+		AddAll(map[header.Type]string{
+			header.ContentType: "application/json",
+			header.UserAgent:   userAgent}).
+		Body().AsJSON(&request).Send()
 	if err != nil {
 		return pkgTypes.Block{}, err
 	}

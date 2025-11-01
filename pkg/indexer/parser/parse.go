@@ -3,10 +3,12 @@ package parser
 import (
 	"time"
 
+	"github.com/baking-bad/noble-indexer/internal/currency"
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	storageType "github.com/baking-bad/noble-indexer/internal/storage/types"
 	dCtx "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
 	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/shopspring/decimal"
 )
 
 func (p *Module) parse(b types.BlockData) error {
@@ -44,17 +46,30 @@ func (p *Module) parse(b types.BlockData) error {
 		return err
 	}
 
+	miner := storage.Address{
+		Address:    block.Miner.String(),
+		Height:     types.Level(height),
+		LastHeight: types.Level(height),
+		Balance: []*storage.Balance{
+			{
+				Currency: currency.DefaultCurrency,
+				Value:    decimal.Zero,
+			},
+		},
+	}
+	decodeCtx.AddAddress(&miner)
+
 	decodeCtx.Block = &storage.Block{
 		Time:                 blockTime,
 		Height:               types.Level(height),
 		GasLimit:             gasLimit,
 		GasUsed:              gasUsed,
 		BaseFeePerGas:        feePerGas,
+		Miner:                miner,
 		DifficultyHash:       b.Difficulty,
 		ExtraDataHash:        b.ExtraData,
 		Hash:                 b.Hash,
 		LogsBloomHash:        b.LogsBloom,
-		MinerHash:            b.Miner,
 		MixHash:              b.MixHash,
 		NonceHash:            b.Nonce,
 		ParentHashHash:       b.ParentHash,
@@ -175,6 +190,12 @@ func (p *Module) parse(b types.BlockData) error {
 			Address:    b.Receipts[i].From.String(),
 			Height:     decodeCtx.Block.Height,
 			LastHeight: decodeCtx.Block.Height,
+			Balance: []*storage.Balance{
+				{
+					Currency: currency.DefaultCurrency,
+					Value:    decimal.Zero,
+				},
+			},
 		}
 
 		decodeCtx.AddAddress(&decodeCtx.Block.Txs[i].FromAddress)
@@ -184,6 +205,12 @@ func (p *Module) parse(b types.BlockData) error {
 				Address:    b.Receipts[i].To.String(),
 				Height:     decodeCtx.Block.Height,
 				LastHeight: decodeCtx.Block.Height,
+				Balance: []*storage.Balance{
+					{
+						Currency: currency.DefaultCurrency,
+						Value:    decimal.Zero,
+					},
+				},
 			}
 
 			decodeCtx.AddAddress(decodeCtx.Block.Txs[i].ToAddress)
@@ -241,6 +268,12 @@ func (p *Module) parse(b types.BlockData) error {
 				Address:    trace.Action.From.String(),
 				Height:     decodeCtx.Block.Height,
 				LastHeight: decodeCtx.Block.Height,
+				Balance: []*storage.Balance{
+					{
+						Currency: currency.DefaultCurrency,
+						Value:    decimal.Zero,
+					},
+				},
 			},
 			Tx: storage.Tx{
 				Hash: trace.TxHash,
@@ -273,6 +306,12 @@ func (p *Module) parse(b types.BlockData) error {
 				Address:    trace.Action.To.String(),
 				Height:     decodeCtx.Block.Height,
 				LastHeight: decodeCtx.Block.Height,
+				Balance: []*storage.Balance{
+					{
+						Currency: currency.DefaultCurrency,
+						Value:    decimal.Zero,
+					},
+				},
 			}
 
 			decodeCtx.AddAddress(newTrace.ToAddress)

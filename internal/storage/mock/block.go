@@ -198,6 +198,45 @@ func (c *MockIBlockIsNoRowsCall) DoAndReturn(f func(error) bool) *MockIBlockIsNo
 	return c
 }
 
+// Last mocks base method.
+func (m *MockIBlock) Last(ctx context.Context) (storage.Block, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Last", ctx)
+	ret0, _ := ret[0].(storage.Block)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Last indicates an expected call of Last.
+func (mr *MockIBlockMockRecorder) Last(ctx any) *MockIBlockLastCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Last", reflect.TypeOf((*MockIBlock)(nil).Last), ctx)
+	return &MockIBlockLastCall{Call: call}
+}
+
+// MockIBlockLastCall wrap *gomock.Call
+type MockIBlockLastCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockIBlockLastCall) Return(arg0 storage.Block, arg1 error) *MockIBlockLastCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockIBlockLastCall) Do(f func(context.Context) (storage.Block, error)) *MockIBlockLastCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockIBlockLastCall) DoAndReturn(f func(context.Context) (storage.Block, error)) *MockIBlockLastCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // LastID mocks base method.
 func (m *MockIBlock) LastID(ctx context.Context) (uint64, error) {
 	m.ctrl.T.Helper()

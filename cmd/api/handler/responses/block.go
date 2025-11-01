@@ -41,7 +41,7 @@ func NewBlock(block storage.Block) Block {
 		Difficulty:           block.DifficultyHash.String(),
 		ExtraData:            block.ExtraDataHash.String(),
 		LogsBloom:            block.LogsBloomHash.String(),
-		Miner:                block.MinerHash.String(),
+		Miner:                block.Miner.String(),
 		MixHash:              block.MixHash.String(),
 		ReceiptsRoot:         block.ReceiptsRootHash.String(),
 		Sha3Uncles:           block.Sha3UnclesHash.String(),

@@ -9,12 +9,15 @@ import (
 	"github.com/baking-bad/noble-indexer/pkg/node"
 	"github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/dipdup-net/indexer-sdk/pkg/modules"
+	sdkSync "github.com/dipdup-net/indexer-sdk/pkg/sync"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
 )
 
 const (
 	BlocksOutput     = "blocks"
+	RollbackOutput   = "signal"
+	RollbackInput    = "state"
 	GenesisOutput    = "genesis"
 	GenesisDoneInput = "genesis_done"
 	StopOutput       = "stop"
@@ -32,6 +35,8 @@ type Module struct {
 	cfg              config.Indexer
 	cancelReadBlocks context.CancelFunc
 	w                *Worker
+	taskQueue        *sdkSync.Map[types.Level, struct{}]
+	rollbackSync     *sync.WaitGroup
 }
 
 var _ modules.Module = (*Module)(nil)
@@ -45,22 +50,26 @@ func NewModule(cfg config.Indexer, api node.Api, ws *websocket.Conn, state *stor
 	}
 
 	receiver := Module{
-		BaseModule:  modules.New("receiver"),
-		api:         api,
-		cfg:         cfg,
-		ws:          ws,
-		level:       level,
-		hash:        lastHash,
-		needGenesis: state == nil,
-		blocks:      make(chan types.BlockData, 128),
-		mx:          new(sync.RWMutex),
+		BaseModule:   modules.New("receiver"),
+		api:          api,
+		cfg:          cfg,
+		ws:           ws,
+		level:        level,
+		hash:         lastHash,
+		needGenesis:  state == nil,
+		blocks:       make(chan types.BlockData, 128),
+		mx:           new(sync.RWMutex),
+		taskQueue:    sdkSync.NewMap[types.Level, struct{}](),
+		rollbackSync: new(sync.WaitGroup),
 	}
 
 	receiver.w = NewWorker(api, receiver.Log, receiver.blocks, cfg.RequestBulkSize)
 
+	receiver.CreateInput(RollbackInput)
 	receiver.CreateInput(GenesisDoneInput)
 
 	receiver.CreateOutput(BlocksOutput)
+	receiver.CreateOutput(RollbackOutput)
 	receiver.CreateOutput(GenesisOutput)
 	receiver.CreateOutput(StopOutput)
 
@@ -79,6 +88,7 @@ func (r *Module) Start(ctx context.Context) {
 
 	r.G.GoCtx(ctx, r.sequencer)
 	r.G.GoCtx(ctx, r.sync)
+	r.G.GoCtx(ctx, r.rollback)
 }
 
 func (r *Module) Level() (types.Level, []byte) {
@@ -94,6 +104,33 @@ func (r *Module) setLevel(level types.Level, hash []byte) {
 
 	r.level = level
 	r.hash = hash
+}
+
+func (r *Module) rollback(ctx context.Context) {
+	rollbackInput := r.MustInput(RollbackInput)
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case msg, ok := <-rollbackInput.Listen():
+			if !ok {
+				r.Log.Warn().Msg("can't read message from rollback input, channel is closed and drained")
+				continue
+			}
+
+			state, ok := msg.(storage.State)
+			if !ok {
+				r.Log.Warn().Msgf("invalid message type: %T", msg)
+				continue
+			}
+
+			r.taskQueue.Clear()
+			r.setLevel(state.LastHeight, state.LastHash)
+			r.Log.Info().Msgf("caught return from rollback to level=%d", state.LastHeight)
+			r.rollbackSync.Done()
+		}
+	}
 }
 
 func (r *Module) Close() error {

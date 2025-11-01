@@ -4,6 +4,7 @@ import (
 	"context"
 
 	models "github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/uptrace/bun"
 )
@@ -124,7 +125,83 @@ func (tx Transaction) SaveTraces(ctx context.Context, traces ...*models.Trace) e
 	}
 }
 
+func (tx Transaction) RollbackBlock(ctx context.Context, height types.Level) error {
+	_, err := tx.Tx().NewDelete().
+		Model((*models.Block)(nil)).
+		Where("height = ?", height).
+		Exec(ctx)
+	return err
+}
+
+func (tx Transaction) RollbackBlockStats(ctx context.Context, height types.Level) (stats models.BlockStats, err error) {
+	_, err = tx.Tx().NewDelete().
+		Model(&stats).
+		Where("height = ?", height).
+		Returning("*").
+		Exec(ctx)
+	return
+}
+
+func (tx Transaction) RollbackAddresses(ctx context.Context, height types.Level) (address []models.Address, err error) {
+	_, err = tx.Tx().NewDelete().
+		Model(&address).
+		Where("height = ?", height).
+		Returning("*").
+		Exec(ctx)
+	return
+}
+
+func (tx Transaction) RollbackTxs(ctx context.Context, height types.Level) (txs []models.Tx, err error) {
+	_, err = tx.Tx().NewDelete().
+		Model(&txs).
+		Where("height = ?", height).
+		Returning("*").
+		Exec(ctx)
+	return
+}
+
+func (tx Transaction) RollbackLogs(ctx context.Context, height types.Level) (err error) {
+	_, err = tx.Tx().NewDelete().
+		Model((*models.Log)(nil)).
+		Where("height = ?", height).
+		Exec(ctx)
+	return
+}
+
+func (tx Transaction) RollbackTraces(ctx context.Context, height types.Level) (traces []models.Trace, err error) {
+	_, err = tx.Tx().NewDelete().
+		Model(&traces).
+		Where("height = ?", height).
+		Returning("*").
+		Exec(ctx)
+	return
+}
+
+func (tx Transaction) DeleteBalances(ctx context.Context, ids []uint64) error {
+	if len(ids) == 0 {
+		return nil
+	}
+
+	_, err := tx.Tx().NewDelete().
+		Model((*models.Balance)(nil)).
+		Where("id IN (?)", bun.In(ids)).
+		Exec(ctx)
+	return err
+}
+
 func (tx Transaction) State(ctx context.Context, name string) (state models.State, err error) {
-	err = tx.Tx().NewSelect().Model(&state).Where("name = ?", name).Scan(ctx)
+	err = tx.Tx().NewSelect().
+		Model(&state).
+		Where("name = ?", name).
+		Scan(ctx)
+	return
+}
+
+func (tx Transaction) LastBlock(ctx context.Context) (block models.Block, err error) {
+	err = tx.Tx().NewSelect().
+		Model(&block).
+		Order("id DESC").
+		Limit(1).
+		Scan(ctx)
 	return
 }

@@ -39,7 +39,6 @@ func init() {
 		DifficultyHash:       pkgTypes.Hex{0x00},
 		ExtraDataHash:        pkgTypes.Hex{0x72, 0x65, 0x74, 0x68, 0x2f, 0x76, 0x31, 0x2e, 0x37, 0x2e, 0x30, 0x2f, 0x6c, 0x69, 0x6e, 0x75, 0x78},
 		LogsBloomHash:        pkgTypes.Hex{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00},
-		MinerHash:            pkgTypes.Hex{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
 		MixHash:              pkgTypes.Hex{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x33, 0xa8, 0x7e},
 		NonceHash:            pkgTypes.Hex{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
 		ReceiptsRootHash:     pkgTypes.Hex{0x24, 0xe9, 0xaa, 0xe3, 0x03, 0x3f, 0x9f, 0xf8, 0x09, 0x67, 0x58, 0x31, 0xec, 0xa3, 0x31, 0xb7, 0x01, 0x44, 0x00, 0x09, 0x59, 0x2a, 0x40, 0xa6, 0xd7, 0x88, 0x75, 0x6f, 0x3b, 0xe9, 0x83, 0xa2},
@@ -121,7 +120,6 @@ func (s *BlockTestSuite) TestGet() {
 	s.Require().Equal("0x00", block.Difficulty)
 	s.Require().Equal("0x726574682f76312e372e302f6c696e7578", block.ExtraData)
 	s.Require().Equal("0x000000000000000000002000000000", block.LogsBloom)
-	s.Require().Equal("0x0000000000000000000000000000000000000000", block.Miner)
 	s.Require().Equal("0x000000000000000000000000000000000000000000000000000000000033a87e", block.MixHash)
 	s.Require().Equal(uint64(0), block.Nonce)
 	s.Require().Equal("0x24e9aae3033f9ff809675831eca331b701440009592a40a6d788756f3be983a2", block.ReceiptsRoot)
@@ -160,7 +158,6 @@ func (s *BlockTestSuite) TestGetWithStats() {
 	s.Require().Equal("0x00", block.Difficulty)
 	s.Require().Equal("0x726574682f76312e372e302f6c696e7578", block.ExtraData)
 	s.Require().Equal("0x000000000000000000002000000000", block.LogsBloom)
-	s.Require().Equal("0x0000000000000000000000000000000000000000", block.Miner)
 	s.Require().Equal("0x000000000000000000000000000000000000000000000000000000000033a87e", block.MixHash)
 	s.Require().Equal(uint64(0), block.Nonce)
 	s.Require().Equal("0x24e9aae3033f9ff809675831eca331b701440009592a40a6d788756f3be983a2", block.ReceiptsRoot)
@@ -242,7 +239,6 @@ func (s *BlockTestSuite) TestList() {
 	s.Require().Equal("0x00", blocks[0].Difficulty)
 	s.Require().Equal("0x726574682f76312e372e302f6c696e7578", blocks[0].ExtraData)
 	s.Require().Equal("0x000000000000000000002000000000", blocks[0].LogsBloom)
-	s.Require().Equal("0x0000000000000000000000000000000000000000", blocks[0].Miner)
 	s.Require().Equal("0x000000000000000000000000000000000000000000000000000000000033a87e", blocks[0].MixHash)
 	s.Require().Equal(uint64(0), blocks[0].Nonce)
 	s.Require().Equal("0x24e9aae3033f9ff809675831eca331b701440009592a40a6d788756f3be983a2", blocks[0].ReceiptsRoot)
@@ -285,7 +281,6 @@ func (s *BlockTestSuite) TestListWithStats() {
 	s.Require().Equal("0x00", blocks[0].Difficulty)
 	s.Require().Equal("0x726574682f76312e372e302f6c696e7578", blocks[0].ExtraData)
 	s.Require().Equal("0x000000000000000000002000000000", blocks[0].LogsBloom)
-	s.Require().Equal("0x0000000000000000000000000000000000000000", blocks[0].Miner)
 	s.Require().Equal("0x000000000000000000000000000000000000000000000000000000000033a87e", blocks[0].MixHash)
 	s.Require().Equal(uint64(0), blocks[0].Nonce)
 	s.Require().Equal("0x24e9aae3033f9ff809675831eca331b701440009592a40a6d788756f3be983a2", blocks[0].ReceiptsRoot)
