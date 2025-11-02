@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"time"
 
 	"github.com/baking-bad/noble-indexer/internal/storage/types"
@@ -13,6 +14,8 @@ import (
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
 type ITrace interface {
 	storage.Table[*Trace]
+
+	ByTxHash(ctx context.Context, hash pkgTypes.Hex, limit, offset int, order storage.SortOrder) (traces []*Trace, err error)
 }
 
 // Trace -
@@ -45,9 +48,10 @@ type Trace struct {
 
 	Subtraces uint64 `bun:"subtraces" comment:"Amount of subtraces"`
 
-	FromAddress Address  `bun:"-"`
-	ToAddress   *Address `bun:"-"`
-	Tx          Tx       `bun:"-"`
+	FromAddress Address   `bun:"rel:belongs-to,join:from_address_id=id"`
+	ToAddress   *Address  `bun:"rel:belongs-to,join:to_address_id=id"`
+	Contract    *Contract `bun:"rel:belongs-to,join:contract_id=id"`
+	Tx          Tx        `bun:"rel:belongs-to,join:tx_id=id"`
 }
 
 // TableName -

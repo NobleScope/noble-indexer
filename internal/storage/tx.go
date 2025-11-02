@@ -16,6 +16,7 @@ type ITx interface {
 	storage.Table[*Tx]
 
 	ByHeight(ctx context.Context, height pkgTypes.Level, limit, offset int, order storage.SortOrder) (txs []*Tx, err error)
+	ByHash(ctx context.Context, hash pkgTypes.Hex) (tx Tx, err error)
 }
 
 // Tx -

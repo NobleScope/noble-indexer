@@ -43,6 +43,14 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 			heightGroup.GET("/transactions", blockHandlers.TransactionsList)
 		}
 	}
+	txHandlers := handler.NewTxHandler(db.Tx, db.Trace, cfg.Indexer.Name)
+	txGroup := v1.Group("/tx")
+	{
+		txGroup.GET("", txHandlers.List)
+		hashGroup := txGroup.Group("/:hash")
+		hashGroup.GET("", txHandlers.Get)
+		hashGroup.GET("/traces", txHandlers.Traces)
+	}
 
 	log.Info().Msg("API routes:")
 	for _, route := range e.Routes() {

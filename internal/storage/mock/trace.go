@@ -14,6 +14,7 @@ import (
 	reflect "reflect"
 
 	storage "github.com/baking-bad/noble-indexer/internal/storage"
+	types "github.com/baking-bad/noble-indexer/pkg/types"
 	storage0 "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -40,6 +41,45 @@ func NewMockITrace(ctrl *gomock.Controller) *MockITrace {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockITrace) EXPECT() *MockITraceMockRecorder {
 	return m.recorder
+}
+
+// ByTxHash mocks base method.
+func (m *MockITrace) ByTxHash(ctx context.Context, hash types.Hex, limit, offset int, order storage0.SortOrder) ([]*storage.Trace, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ByTxHash", ctx, hash, limit, offset, order)
+	ret0, _ := ret[0].([]*storage.Trace)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ByTxHash indicates an expected call of ByTxHash.
+func (mr *MockITraceMockRecorder) ByTxHash(ctx, hash, limit, offset, order any) *MockITraceByTxHashCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ByTxHash", reflect.TypeOf((*MockITrace)(nil).ByTxHash), ctx, hash, limit, offset, order)
+	return &MockITraceByTxHashCall{Call: call}
+}
+
+// MockITraceByTxHashCall wrap *gomock.Call
+type MockITraceByTxHashCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockITraceByTxHashCall) Return(traces []*storage.Trace, err error) *MockITraceByTxHashCall {
+	c.Call = c.Call.Return(traces, err)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockITraceByTxHashCall) Do(f func(context.Context, types.Hex, int, int, storage0.SortOrder) ([]*storage.Trace, error)) *MockITraceByTxHashCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockITraceByTxHashCall) DoAndReturn(f func(context.Context, types.Hex, int, int, storage0.SortOrder) ([]*storage.Trace, error)) *MockITraceByTxHashCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
 }
 
 // CursorList mocks base method.

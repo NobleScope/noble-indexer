@@ -43,7 +43,7 @@
                         "in": "query"
                     },
                     {
-                        "minimum": 1,
+                        "minimum": 0,
                         "type": "integer",
                         "description": "Offset",
                         "name": "offset",
@@ -242,7 +242,7 @@
                         "in": "query"
                     },
                     {
-                        "minimum": 1,
+                        "minimum": 0,
                         "type": "integer",
                         "description": "Offset",
                         "name": "offset",
@@ -304,6 +304,188 @@
                     },
                     "204": {
                         "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/tx": {
+            "get": {
+                "description": "List all of indexed transactions",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transactions"
+                ],
+                "summary": "Transactions list",
+                "operationId": "list-transactions",
+                "parameters": [
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Count of requested entities",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "description": "Sort order. Default: desc",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/responses.Transaction"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/tx/{hash}": {
+            "get": {
+                "description": "Get transaction by hash",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transactions"
+                ],
+                "summary": "Get transaction by hash",
+                "operationId": "get-transaction",
+                "parameters": [
+                    {
+                        "maxLength": 66,
+                        "minLength": 66,
+                        "type": "string",
+                        "description": "Transaction hash in hexadecimal with 0x prefix",
+                        "name": "hash",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/responses.Transaction"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/tx/{hash}/traces": {
+            "get": {
+                "description": "List transaction traces",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transactions"
+                ],
+                "summary": "List transaction traces",
+                "operationId": "list-transaction-traces",
+                "parameters": [
+                    {
+                        "maxLength": 66,
+                        "minLength": 66,
+                        "type": "string",
+                        "description": "Transaction hash in hexadecimal with 0x prefix",
+                        "name": "hash",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Count of requested entities",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "description": "Sort order. Default: desc",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/responses.Trace"
+                            }
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -468,6 +650,97 @@
                     "type": "integer",
                     "format": "int64",
                     "example": 23456
+                }
+            }
+        },
+        "responses.Trace": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "string",
+                    "example": "1000000000000000000"
+                },
+                "code": {
+                    "type": "string",
+                    "example": "0x6060604052600080fd5b"
+                },
+                "contract": {
+                    "type": "string",
+                    "example": "0x0000000000000000000000000000000000000002"
+                },
+                "creation_method": {
+                    "type": "string",
+                    "example": "create"
+                },
+                "from_address": {
+                    "type": "string",
+                    "example": "0x0000000000000000000000000000000000000000"
+                },
+                "gas_limit": {
+                    "type": "string",
+                    "example": "21000"
+                },
+                "gas_used": {
+                    "type": "string",
+                    "example": "21000"
+                },
+                "height": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "init_hash": {
+                    "type": "string",
+                    "example": "0x6060604052341561000f57600080fd5b"
+                },
+                "input": {
+                    "type": "string",
+                    "example": "0x0"
+                },
+                "output": {
+                    "type": "string",
+                    "example": "0x0"
+                },
+                "subtraces": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "time": {
+                    "type": "string",
+                    "example": "2023-07-04T03:10:57+00:00"
+                },
+                "to_address": {
+                    "type": "string",
+                    "example": "0x0000000000000000000000000000000000000001"
+                },
+                "trace_address": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    },
+                    "example": [
+                        0,
+                        1
+                    ]
+                },
+                "tx_hash": {
+                    "type": "string",
+                    "example": "0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22"
+                },
+                "tx_position": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "call",
+                        "delegatecall",
+                        "staticcall",
+                        "create",
+                        "create2",
+                        "selfdestruct"
+                    ],
+                    "example": "call"
                 }
             }
         },

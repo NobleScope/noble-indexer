@@ -89,7 +89,7 @@ func (p *blockListRequest) SetDefault() {
 //	@Tags			block
 //	@ID				list-block
 //	@Param			limit	query	integer	false	"Count of requested blocks" 	minimum(1)	maximum(100)
-//	@Param			offset	query	integer	false	"Offset"						minimum(1)
+//	@Param			offset	query	integer	false	"Offset"						minimum(0)
 //	@Param			sort	query	string	false	"Sort order"					Enums(asc, desc)
 //	@Param			stats	query	boolean	false	"Need join stats for block"
 //	@Produce		json
@@ -190,7 +190,7 @@ func (p *transactionsListRequest) SetDefault() {
 //	@ID				list-block-transactions
 //	@Param			height	path	integer	true	"Block height"	minimum(1)
 //	@Param			limit	query	integer	false	"Count of requested transactions" 	minimum(1)	maximum(100)
-//	@Param			offset	query	integer	false	"Offset"							minimum(1)
+//	@Param			offset	query	integer	false	"Offset"							minimum(0)
 //	@Param			sort	query	string	false	"Sort order"						Enums(asc, desc)
 //	@Produce		json
 //	@Success		200	{array}		responses.Transaction

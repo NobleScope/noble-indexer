@@ -110,6 +110,74 @@ definitions:
         format: int64
         type: integer
     type: object
+  responses.Trace:
+    properties:
+      amount:
+        example: "1000000000000000000"
+        type: string
+      code:
+        example: 0x6060604052600080fd5b
+        type: string
+      contract:
+        example: "0x0000000000000000000000000000000000000002"
+        type: string
+      creation_method:
+        example: create
+        type: string
+      from_address:
+        example: "0x0000000000000000000000000000000000000000"
+        type: string
+      gas_limit:
+        example: "21000"
+        type: string
+      gas_used:
+        example: "21000"
+        type: string
+      height:
+        example: 100
+        type: integer
+      init_hash:
+        example: 0x6060604052341561000f57600080fd5b
+        type: string
+      input:
+        example: "0x0"
+        type: string
+      output:
+        example: "0x0"
+        type: string
+      subtraces:
+        example: 0
+        type: integer
+      time:
+        example: "2023-07-04T03:10:57+00:00"
+        type: string
+      to_address:
+        example: "0x0000000000000000000000000000000000000001"
+        type: string
+      trace_address:
+        example:
+        - 0
+        - 1
+        items:
+          type: integer
+        type: array
+      tx_hash:
+        example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22
+        type: string
+      tx_position:
+        example: 0
+        type: integer
+      type:
+        enum:
+        - call
+        - delegatecall
+        - staticcall
+        - create
+        - create2
+        - selfdestruct
+        example: call
+        type: string
+    type: object
   responses.Transaction:
     properties:
       amount:
@@ -204,7 +272,7 @@ paths:
         type: integer
       - description: Offset
         in: query
-        minimum: 1
+        minimum: 0
         name: offset
         type: integer
       - description: Sort order
@@ -321,7 +389,7 @@ paths:
         type: integer
       - description: Offset
         in: query
-        minimum: 1
+        minimum: 0
         name: offset
         type: integer
       - description: Sort order
@@ -393,6 +461,131 @@ paths:
       summary: Get current indexer head
       tags:
       - general
+  /tx:
+    get:
+      description: List all of indexed transactions
+      operationId: list-transactions
+      parameters:
+      - description: Count of requested entities
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        minimum: 0
+        name: offset
+        type: integer
+      - description: 'Sort order. Default: desc'
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/responses.Transaction'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Transactions list
+      tags:
+      - transactions
+  /tx/{hash}:
+    get:
+      description: Get transaction by hash
+      operationId: get-transaction
+      parameters:
+      - description: Transaction hash in hexadecimal with 0x prefix
+        in: path
+        maxLength: 66
+        minLength: 66
+        name: hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Transaction'
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Get transaction by hash
+      tags:
+      - transactions
+  /tx/{hash}/traces:
+    get:
+      description: List transaction traces
+      operationId: list-transaction-traces
+      parameters:
+      - description: Transaction hash in hexadecimal with 0x prefix
+        in: path
+        maxLength: 66
+        minLength: 66
+        name: hash
+        required: true
+        type: string
+      - description: Count of requested entities
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        minimum: 0
+        name: offset
+        type: integer
+      - description: 'Sort order. Default: desc'
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/responses.Trace'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: List transaction traces
+      tags:
+      - transactions
 schemes:
 - http
 - https
