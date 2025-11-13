@@ -32,6 +32,7 @@ func (tx Transaction) SaveTransactions(ctx context.Context, txs ...*models.Tx) e
 		return tx.BulkSave(ctx, arr)
 	}
 }
+
 func (tx Transaction) SaveLogs(ctx context.Context, logs ...models.Log) error {
 	switch len(logs) {
 	case 0:
@@ -42,6 +43,21 @@ func (tx Transaction) SaveLogs(ctx context.Context, logs ...models.Log) error {
 		arr := make([]any, len(logs))
 		for i := range logs {
 			arr[i] = &logs[i]
+		}
+		return tx.BulkSave(ctx, arr)
+	}
+}
+
+func (tx Transaction) SaveSources(ctx context.Context, sources ...*models.Source) error {
+	switch len(sources) {
+	case 0:
+		return nil
+	case 1:
+		return tx.Add(ctx, sources[0])
+	default:
+		arr := make([]any, len(sources))
+		for i := range sources {
+			arr[i] = sources[i]
 		}
 		return tx.BulkSave(ctx, arr)
 	}
@@ -65,9 +81,12 @@ func (tx Transaction) SaveAddresses(ctx context.Context, addresses ...*models.Ad
 	}
 
 	_, err := tx.Tx().NewInsert().Model(&addr).
-		Column("address", "height", "last_height", "is_contract").
+		Column("address", "height", "last_height", "is_contract", "txs_count", "contracts_count", "interactions").
 		On("CONFLICT ON CONSTRAINT address_idx DO UPDATE").
 		Set("last_height = EXCLUDED.last_height").
+		Set("txs_count = EXCLUDED.txs_count + added_address.txs_count").
+		Set("contracts_count = EXCLUDED.contracts_count + added_address.contracts_count").
+		Set("interactions = EXCLUDED.interactions + added_address.interactions").
 		Returning("xmax, id").
 		Exec(ctx)
 	if err != nil {
@@ -104,7 +123,14 @@ func (tx Transaction) SaveContracts(ctx context.Context, contracts ...*models.Co
 	}
 
 	_, err := tx.Tx().NewInsert().Model(&contracts).
-		On("CONFLICT ON CONSTRAINT contract_idx DO NOTHING").
+		On("CONFLICT ON CONSTRAINT contract_idx DO UPDATE").
+		Set("verified = EXCLUDED.verified").
+		Set("abi = EXCLUDED.abi").
+		Set("compiler_version = EXCLUDED.compiler_version").
+		Set("metadata_link = EXCLUDED.metadata_link").
+		Set("language = EXCLUDED.language").
+		Set("optimizer_enabled = EXCLUDED.optimizer_enabled").
+		Set("tags = EXCLUDED.tags").
 		Exec(ctx)
 
 	return err

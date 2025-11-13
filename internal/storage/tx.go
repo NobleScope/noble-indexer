@@ -46,6 +46,9 @@ type Tx struct {
 	Status            types.TxStatus  `bun:"status,type:tx_status"            comment:"Transaction status"`
 	LogsBloom         []byte          `bun:"logs_bloom"                       comment:"Logs bloom"`
 
+	LogsCount   int `bun:"logs_count"   comment:"Logs count"`
+	TracesCount int `bun:"traces_count" comment:"Traces count"`
+
 	Contract    *Contract `bun:"rel:belongs-to,join:contract_id=id"`
 	FromAddress Address   `bun:"rel:belongs-to,join:from_address_id=id"`
 	ToAddress   *Address  `bun:"rel:belongs-to,join:to_address_id=id"`

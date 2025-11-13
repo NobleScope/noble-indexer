@@ -36,6 +36,20 @@ services:
     depends_on:
       - db
     logging: *indexer-logging
+    
+  metadata_resolver:
+    image: ghcr.io/noble-indexer/metadata_resolver:${TAG:-master}
+    build:
+      dockerfile: build/metadata_resolver/Dockerfile
+      context: .
+    env_file:
+      - .env
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    depends_on:
+      - db
+    logging: *indexer-logging
 
   api:
     image: ghcr.io/noble-indexer/api:${TAG:-master}

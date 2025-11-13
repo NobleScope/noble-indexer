@@ -164,6 +164,21 @@ func (p *Module) parse(b types.BlockData) error {
 			Status:            status,
 			LogsBloom:         b.Receipts[i].LogsBloom,
 			Logs:              make([]storage.Log, len(b.Receipts[i].Logs)),
+			LogsCount:         len(b.Receipts[i].Logs),
+		}
+
+		decodeCtx.Block.Txs[i].FromAddress = storage.Address{
+			Address:      b.Receipts[i].From.String(),
+			Height:       decodeCtx.Block.Height,
+			LastHeight:   decodeCtx.Block.Height,
+			Interactions: 1,
+			TxsCount:     1,
+			Balance: []*storage.Balance{
+				{
+					Currency: currency.DefaultCurrency,
+					Value:    decimal.Zero,
+				},
+			},
 		}
 
 		if b.Receipts[i].ContractAddress != nil {
@@ -174,7 +189,7 @@ func (p *Module) parse(b types.BlockData) error {
 				IsContract: true,
 			}
 
-			decodeCtx.Block.Txs[i].Contract = &storage.Contract{
+			contract := &storage.Contract{
 				Address: b.Receipts[i].ContractAddress.String(),
 				Code:    decodeCtx.Block.Txs[i].Input,
 				Tx: &storage.Tx{
@@ -182,35 +197,36 @@ func (p *Module) parse(b types.BlockData) error {
 				},
 			}
 
+			err = ParseEvmContractMetadata(contract)
+			if err != nil {
+				return err
+			}
+
+			decodeCtx.Block.Txs[i].Contract = contract
+			decodeCtx.Block.Txs[i].FromAddress.ContractsCount = 1
+
 			decodeCtx.AddAddress(&contractAddress)
 			decodeCtx.AddContract(decodeCtx.Block.Txs[i].Contract)
-		}
-
-		decodeCtx.Block.Txs[i].FromAddress = storage.Address{
-			Address:    b.Receipts[i].From.String(),
-			Height:     decodeCtx.Block.Height,
-			LastHeight: decodeCtx.Block.Height,
-			Balance: []*storage.Balance{
-				{
-					Currency: currency.DefaultCurrency,
-					Value:    decimal.Zero,
-				},
-			},
 		}
 
 		decodeCtx.AddAddress(&decodeCtx.Block.Txs[i].FromAddress)
 
 		if b.Transactions[i].To != nil {
 			decodeCtx.Block.Txs[i].ToAddress = &storage.Address{
-				Address:    b.Receipts[i].To.String(),
-				Height:     decodeCtx.Block.Height,
-				LastHeight: decodeCtx.Block.Height,
+				Address:      b.Receipts[i].To.String(),
+				Height:       decodeCtx.Block.Height,
+				LastHeight:   decodeCtx.Block.Height,
+				Interactions: 1,
 				Balance: []*storage.Balance{
 					{
 						Currency: currency.DefaultCurrency,
 						Value:    decimal.Zero,
 					},
 				},
+			}
+
+			if b.Transactions[i].From.String() == b.Transactions[i].To.String() {
+				decodeCtx.Block.Txs[i].ToAddress.Interactions = 0
 			}
 
 			decodeCtx.AddAddress(decodeCtx.Block.Txs[i].ToAddress)
@@ -265,9 +281,10 @@ func (p *Module) parse(b types.BlockData) error {
 			Time:   blockTime,
 
 			FromAddress: storage.Address{
-				Address:    trace.Action.From.String(),
-				Height:     decodeCtx.Block.Height,
-				LastHeight: decodeCtx.Block.Height,
+				Address:      trace.Action.From.String(),
+				Height:       decodeCtx.Block.Height,
+				LastHeight:   decodeCtx.Block.Height,
+				Interactions: 1,
 				Balance: []*storage.Balance{
 					{
 						Currency: currency.DefaultCurrency,
@@ -303,15 +320,19 @@ func (p *Module) parse(b types.BlockData) error {
 
 		if trace.Action.To != nil {
 			newTrace.ToAddress = &storage.Address{
-				Address:    trace.Action.To.String(),
-				Height:     decodeCtx.Block.Height,
-				LastHeight: decodeCtx.Block.Height,
+				Address:      trace.Action.To.String(),
+				Height:       decodeCtx.Block.Height,
+				LastHeight:   decodeCtx.Block.Height,
+				Interactions: 1,
 				Balance: []*storage.Balance{
 					{
 						Currency: currency.DefaultCurrency,
 						Value:    decimal.Zero,
 					},
 				},
+			}
+			if trace.Action.From.String() != trace.Action.To.String() {
+				newTrace.ToAddress.Interactions = 0
 			}
 
 			decodeCtx.AddAddress(newTrace.ToAddress)

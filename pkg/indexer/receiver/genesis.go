@@ -11,7 +11,7 @@ import (
 
 func (r *Module) receiveGenesis(ctx context.Context) error {
 	r.Log.Info().Msg("receiving genesis")
-	file, err := readGenesisFile(r.cfg.GenesisDir)
+	file, err := readGenesisFile(r.cfg.AssetsDir)
 	if err != nil {
 		return err
 	}

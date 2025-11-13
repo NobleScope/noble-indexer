@@ -13,9 +13,11 @@ var Models = []any{
 	&Log{},
 	&Address{},
 	&Contract{},
+	&Source{},
 	&Trace{},
 	&Balance{},
 	&State{},
+	&MetadataResolverState{},
 }
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
@@ -28,6 +30,7 @@ type Transaction interface {
 	SaveAddresses(ctx context.Context, addresses ...*Address) (int64, error)
 	SaveBalances(ctx context.Context, balances ...*Balance) error
 	SaveContracts(ctx context.Context, addresses ...*Contract) error
+	SaveSources(ctx context.Context, sources ...*Source) error
 
 	RollbackBlock(ctx context.Context, height types.Level) error
 	RollbackBlockStats(ctx context.Context, height types.Level) (stats BlockStats, err error)

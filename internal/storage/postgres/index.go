@@ -33,6 +33,17 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			return err
 		}
 
+		// BlockStats
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.BlockStats)(nil)).
+			Index("block_stats_height_idx").
+			Column("height").
+			Using("BRIN").
+			Exec(ctx); err != nil {
+			return err
+		}
+
 		// Tx
 		if _, err := tx.NewCreateIndex().
 			IfNotExists().
@@ -75,6 +86,54 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			Model((*storage.Log)(nil)).
 			Index("log_tx_id_idx").
 			Column("tx_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+
+		// Contract
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Contract)(nil)).
+			Index("contract_metadata_link_idx").
+			Column("metadata_link").
+			Exec(ctx); err != nil {
+			return err
+		}
+
+		// Trace
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Trace)(nil)).
+			Index("trace_height_idx").
+			Column("height").
+			Using("BRIN").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Trace)(nil)).
+			Index("trace_tx_id_idx").
+			Column("tx_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+
+		// Address
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Address)(nil)).
+			Index("address_height_idx").
+			Column("height").
+			Using("BRIN").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Address)(nil)).
+			Index("address_address_idx").
+			Column("address").
 			Exec(ctx); err != nil {
 			return err
 		}

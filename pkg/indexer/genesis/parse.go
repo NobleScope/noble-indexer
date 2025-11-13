@@ -6,6 +6,7 @@ import (
 	"github.com/baking-bad/noble-indexer/internal/currency"
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	dCtx "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
+	parser "github.com/baking-bad/noble-indexer/pkg/indexer/parser"
 	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/shopspring/decimal"
 )
@@ -68,6 +69,12 @@ func (module *Module) parse(genesis pkgTypes.Genesis) (parsedData, error) {
 				Verified: true,
 				TxId:     nil,
 			}
+
+			err = parser.ParseEvmContractMetadata(contract)
+			if err != nil {
+				return data, err
+			}
+
 			decodeCtx.AddContract(contract)
 		}
 	}

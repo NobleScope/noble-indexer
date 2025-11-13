@@ -2,6 +2,7 @@ package context
 
 import (
 	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/dipdup-net/indexer-sdk/pkg/sync"
 )
 
@@ -25,7 +26,11 @@ func (ctx *Context) AddAddress(address *storage.Address) {
 	if address == nil {
 		return
 	}
-	if _, ok := ctx.Addresses.Get(address.String()); !ok {
+	if addr, ok := ctx.Addresses.Get(address.String()); ok {
+		addr.Interactions += address.Interactions
+		addr.TxsCount += address.TxsCount
+		addr.ContractsCount += address.ContractsCount
+	} else {
 		ctx.Addresses.Set(address.String(), address)
 	}
 }
@@ -72,4 +77,11 @@ func (ctx *Context) GetTraces() []*storage.Trace {
 		traces = append(traces, ts...)
 	}
 	return traces
+}
+
+func (ctx *Context) GetTracesByTxHash(txHash types.Hex) []*storage.Trace {
+	if traces, ok := ctx.Traces.Get(txHash.String()); ok {
+		return traces
+	}
+	return nil
 }

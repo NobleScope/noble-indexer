@@ -236,6 +236,45 @@ func (c *MockIContractListCall) DoAndReturn(f func(context.Context, uint64, uint
 	return c
 }
 
+// ListWithMetadata mocks base method.
+func (m *MockIContract) ListWithMetadata(ctx context.Context, startId uint64) ([]*storage.Contract, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListWithMetadata", ctx, startId)
+	ret0, _ := ret[0].([]*storage.Contract)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListWithMetadata indicates an expected call of ListWithMetadata.
+func (mr *MockIContractMockRecorder) ListWithMetadata(ctx, startId any) *MockIContractListWithMetadataCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListWithMetadata", reflect.TypeOf((*MockIContract)(nil).ListWithMetadata), ctx, startId)
+	return &MockIContractListWithMetadataCall{Call: call}
+}
+
+// MockIContractListWithMetadataCall wrap *gomock.Call
+type MockIContractListWithMetadataCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockIContractListWithMetadataCall) Return(contracts []*storage.Contract, err error) *MockIContractListWithMetadataCall {
+	c.Call = c.Call.Return(contracts, err)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockIContractListWithMetadataCall) Do(f func(context.Context, uint64) ([]*storage.Contract, error)) *MockIContractListWithMetadataCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockIContractListWithMetadataCall) DoAndReturn(f func(context.Context, uint64) ([]*storage.Contract, error)) *MockIContractListWithMetadataCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // Save mocks base method.
 func (m_2 *MockIContract) Save(ctx context.Context, m *storage.Contract) error {
 	m_2.ctrl.T.Helper()

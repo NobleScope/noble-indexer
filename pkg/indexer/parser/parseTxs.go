@@ -10,8 +10,9 @@ import (
 )
 
 func (p *Module) parseTxs(context *dCtx.Context) error {
-	// update balances on tx
 	for _, tx := range context.Block.Txs {
+		tx.TracesCount = len(context.GetTracesByTxHash(tx.Hash))
+
 		if tx.Status == types.TxStatusRevert {
 			continue
 		}
@@ -25,7 +26,6 @@ func (p *Module) parseTxs(context *dCtx.Context) error {
 		updateBalances(&context.Block.Miner, enum.Add, fee)
 	}
 
-	// update balances on traces
 	for _, trace := range context.Block.Traces {
 		if len(trace.TraceAddress) == 0 || trace.Amount == nil || trace.Amount.IsZero() {
 			continue

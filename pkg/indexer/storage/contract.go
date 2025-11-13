@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/pkg/errors"
 )

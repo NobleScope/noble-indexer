@@ -175,7 +175,7 @@ func (module *Module) processBlockInTransaction(ctx context.Context, tx storage.
 		}
 	}
 
-	if err := updateState(block, totalAccounts, int64(len(block.Txs)), &state); err != nil {
+	if err := updateState(block, totalAccounts, int64(len(block.Txs)), int64(dCtx.Contracts.Len()), 0, &state); err != nil {
 		return state, err
 	}
 
