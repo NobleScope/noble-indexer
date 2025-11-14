@@ -22,6 +22,9 @@ type Storage struct {
 	Blocks                models.IBlock
 	BlockStats            models.IBlockStats
 	Tx                    models.ITx
+	Transfer              models.ITransfer
+	Token                 models.IToken
+	TokenBalance          models.ITokenBalance
 	Trace                 models.ITrace
 	Logs                  models.ILog
 	Addresses             models.IAddress
@@ -48,6 +51,9 @@ func Create(ctx context.Context, cfg config.Database, scriptsDir string) (Storag
 		BlockStats:            NewBlockStats(strg.Connection()),
 		Logs:                  NewLog(strg.Connection()),
 		Tx:                    NewTx(strg.Connection()),
+		Transfer:              NewTransfer(strg.Connection()),
+		Token:                 NewToken(strg.Connection()),
+		TokenBalance:          NewTokenBalance(strg.Connection()),
 		Trace:                 NewTrace(strg.Connection()),
 		Addresses:             NewAddress(strg.Connection()),
 		Contracts:             NewContract(strg.Connection()),
@@ -104,6 +110,7 @@ func createHypertables(ctx context.Context, conn *database.Bun) error {
 			&models.Block{},
 			&models.BlockStats{},
 			&models.Tx{},
+			&models.Transfer{},
 			&models.Log{},
 		} {
 			if _, err := tx.ExecContext(ctx,

@@ -141,8 +141,14 @@ func (module *Module) processBlockInTransaction(ctx context.Context, tx storage.
 	}
 
 	txHashToId := make(map[string]uint64)
+	transfers := make([]*storage.Transfer, 0)
 	for i := range block.Txs {
 		txHashToId[block.Txs[i].Hash.String()] = block.Txs[i].Id
+
+		for j := range block.Txs[i].Transfers {
+			block.Txs[i].Transfers[j].TxID = block.Txs[i].Id
+		}
+		transfers = append(transfers, block.Txs[i].Transfers...)
 	}
 
 	contractToId, err := saveContracts(ctx, tx, dCtx.GetContracts(), txHashToId, addrToId)
@@ -173,6 +179,21 @@ func (module *Module) processBlockInTransaction(ctx context.Context, tx storage.
 		if err := tx.SaveLogs(ctx, logs...); err != nil {
 			return state, err
 		}
+	}
+
+	err = saveTransfers(ctx, tx, transfers, addrToId)
+	if err != nil {
+		return state, err
+	}
+
+	err = saveTokens(ctx, tx, dCtx.GetTokens(), addrToId)
+	if err != nil {
+		return state, err
+	}
+
+	err = saveTokenBalances(ctx, tx, dCtx.GetTokenBalances(), addrToId)
+	if err != nil {
+		return state, err
 	}
 
 	if err := updateState(block, totalAccounts, int64(len(block.Txs)), int64(dCtx.Contracts.Len()), 0, &state); err != nil {

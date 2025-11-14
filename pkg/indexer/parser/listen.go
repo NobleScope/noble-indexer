@@ -31,7 +31,7 @@ func (p *Module) listen(ctx context.Context) {
 			if err := p.parse(block); err != nil {
 				height, err := block.Number.Uint64()
 				if err != nil {
-					p.Log.Warn().Err(err).Msg("can't parse block number")
+					p.Log.Warn().Err(err).Str("num", block.Number.String()).Msg("can't parse block number")
 				}
 				p.Log.Err(err).
 					Uint64("height", height).

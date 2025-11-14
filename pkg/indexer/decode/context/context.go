@@ -7,18 +7,22 @@ import (
 )
 
 type Context struct {
-	Addresses *sync.Map[string, *storage.Address]
-	Contracts *sync.Map[string, *storage.Contract]
-	Traces    *sync.Map[string, []*storage.Trace]
+	Addresses     *sync.Map[string, *storage.Address]
+	Contracts     *sync.Map[string, *storage.Contract]
+	Tokens        *sync.Map[string, *storage.Token]
+	TokenBalances *sync.Map[string, *storage.TokenBalance]
+	Traces        *sync.Map[string, []*storage.Trace]
 
 	Block *storage.Block
 }
 
 func NewContext() *Context {
 	return &Context{
-		Addresses: sync.NewMap[string, *storage.Address](),
-		Contracts: sync.NewMap[string, *storage.Contract](),
-		Traces:    sync.NewMap[string, []*storage.Trace](),
+		Addresses:     sync.NewMap[string, *storage.Address](),
+		Contracts:     sync.NewMap[string, *storage.Contract](),
+		Tokens:        sync.NewMap[string, *storage.Token](),
+		TokenBalances: sync.NewMap[string, *storage.TokenBalance](),
+		Traces:        sync.NewMap[string, []*storage.Trace](),
 	}
 }
 
@@ -57,6 +61,26 @@ func (ctx *Context) AddTrace(trace *storage.Trace) {
 	}
 }
 
+func (ctx *Context) AddToken(token *storage.Token) {
+	if token == nil {
+		return
+	}
+	if _, ok := ctx.Tokens.Get(token.String()); !ok {
+		ctx.Tokens.Set(token.String(), token)
+	}
+}
+
+func (ctx *Context) AddTokenBalance(tokenBalance *storage.TokenBalance) {
+	if tokenBalance == nil {
+		return
+	}
+	if tb, ok := ctx.TokenBalances.Get(tokenBalance.String()); !ok {
+		ctx.TokenBalances.Set(tokenBalance.String(), tokenBalance)
+	} else {
+		tb.Balance.Add(tokenBalance.Balance)
+	}
+}
+
 func (ctx *Context) GetAddresses() []*storage.Address {
 	addresses := make([]*storage.Address, 0)
 	addresses = append(addresses, ctx.Addresses.Values()...)
@@ -84,4 +108,18 @@ func (ctx *Context) GetTracesByTxHash(txHash types.Hex) []*storage.Trace {
 		return traces
 	}
 	return nil
+}
+
+func (ctx *Context) GetTokens() []*storage.Token {
+	tokens := make([]*storage.Token, 0)
+	tokens = append(tokens, ctx.Tokens.Values()...)
+
+	return tokens
+}
+
+func (ctx *Context) GetTokenBalances() []*storage.TokenBalance {
+	tokenBalances := make([]*storage.TokenBalance, 0)
+	tokenBalances = append(tokenBalances, ctx.TokenBalances.Values()...)
+
+	return tokenBalances
 }

@@ -249,10 +249,11 @@ func (p *Module) parse(b types.BlockData) error {
 				Index:   logIndex,
 				Name:    name,
 				Data:    log.Data,
+				Topics:  log.Topics,
+				Address: log.Address,
 				Removed: log.Removed,
 			}
 		}
-
 	}
 
 	for i, trace := range b.Traces {
@@ -351,6 +352,11 @@ func (p *Module) parse(b types.BlockData) error {
 	}
 
 	err = p.parseTxs(decodeCtx)
+	if err != nil {
+		return err
+	}
+
+	err = p.parseTransfers(decodeCtx)
 	if err != nil {
 		return err
 	}

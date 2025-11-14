@@ -8,7 +8,8 @@ package types
 		staticcall,
 		create,
 		create2,
-		selfdestruct
+		selfdestruct,
+		reward
 	)
 */
 //go:generate go-enum --marshal --sql --values --noprefix --names

@@ -42,6 +42,26 @@ func createTypes(ctx context.Context, conn *database.Bun) error {
 			return err
 		}
 
+		if _, err := tx.ExecContext(
+			ctx,
+			createTypeQuery,
+			"transfer_type",
+			bun.Safe("transfer_type"),
+			bun.In(types.TransferTypeValues()),
+		); err != nil {
+			return err
+		}
+
+		if _, err := tx.ExecContext(
+			ctx,
+			createTypeQuery,
+			"token_type",
+			bun.Safe("token_type"),
+			bun.In(types.TokenTypeValues()),
+		); err != nil {
+			return err
+		}
+
 		return nil
 	})
 }

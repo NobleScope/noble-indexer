@@ -151,6 +151,48 @@ func (tx Transaction) SaveTraces(ctx context.Context, traces ...*models.Trace) e
 	}
 }
 
+func (tx Transaction) SaveTransfers(ctx context.Context, transfers ...*models.Transfer) error {
+	switch len(transfers) {
+	case 0:
+		return nil
+	case 1:
+		return tx.Add(ctx, transfers[0])
+	default:
+		arr := make([]any, len(transfers))
+		for i := range transfers {
+			arr[i] = transfers[i]
+		}
+		return tx.BulkSave(ctx, arr)
+	}
+}
+
+func (tx Transaction) SaveTokens(ctx context.Context, tokens ...*models.Token) error {
+	if len(tokens) == 0 {
+		return nil
+	}
+
+	_, err := tx.Tx().NewInsert().Model(&tokens).
+		On("CONFLICT (token_id, contract_id) DO UPDATE").
+		Set("transfers_count = token.transfers_count + EXCLUDED.transfers_count").
+		Set("supply = token.supply + EXCLUDED.supply").
+		Exec(ctx)
+
+	return err
+}
+
+func (tx Transaction) SaveTokenBalances(ctx context.Context, tokens ...*models.TokenBalance) error {
+	if len(tokens) == 0 {
+		return nil
+	}
+
+	_, err := tx.Tx().NewInsert().Model(&tokens).
+		On("CONFLICT ON CONSTRAINT token_balance_idx DO UPDATE").
+		Set("balance = token_balance.balance + EXCLUDED.balance").
+		Exec(ctx)
+
+	return err
+}
+
 func (tx Transaction) RollbackBlock(ctx context.Context, height types.Level) error {
 	_, err := tx.Tx().NewDelete().
 		Model((*models.Block)(nil)).

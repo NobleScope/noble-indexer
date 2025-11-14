@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+
 	"github.com/baking-bad/noble-indexer/pkg/types"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 )
@@ -10,6 +11,9 @@ var Models = []any{
 	&Block{},
 	&BlockStats{},
 	&Tx{},
+	&Transfer{},
+	&Token{},
+	&TokenBalance{},
 	&Log{},
 	&Address{},
 	&Contract{},
@@ -30,6 +34,9 @@ type Transaction interface {
 	SaveAddresses(ctx context.Context, addresses ...*Address) (int64, error)
 	SaveBalances(ctx context.Context, balances ...*Balance) error
 	SaveContracts(ctx context.Context, addresses ...*Contract) error
+	SaveTransfers(ctx context.Context, transfers ...*Transfer) error
+	SaveTokens(ctx context.Context, tokens ...*Token) error
+	SaveTokenBalances(ctx context.Context, tokenBalances ...*TokenBalance) error
 	SaveSources(ctx context.Context, sources ...*Source) error
 
 	RollbackBlock(ctx context.Context, height types.Level) error

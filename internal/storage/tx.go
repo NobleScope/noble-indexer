@@ -49,10 +49,11 @@ type Tx struct {
 	LogsCount   int `bun:"logs_count"   comment:"Logs count"`
 	TracesCount int `bun:"traces_count" comment:"Traces count"`
 
-	Contract    *Contract `bun:"rel:belongs-to,join:contract_id=id"`
-	FromAddress Address   `bun:"rel:belongs-to,join:from_address_id=id"`
-	ToAddress   *Address  `bun:"rel:belongs-to,join:to_address_id=id"`
-	Logs        []Log     `bun:"rel:has-many"`
+	Contract    *Contract   `bun:"rel:belongs-to,join:contract_id=id"`
+	FromAddress Address     `bun:"rel:belongs-to,join:from_address_id=id"`
+	ToAddress   *Address    `bun:"rel:belongs-to,join:to_address_id=id"`
+	Logs        []Log       `bun:"rel:has-many"`
+	Transfers   []*Transfer `bun:"rel:has-many"`
 }
 
 // TableName -
