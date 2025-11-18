@@ -5,7 +5,9 @@ package types
 	ENUM(
 		TxTypeUnknown,
 		TxTypeLegacy,
-		TxTypeDynamicFee
+		TxTypeDynamicFee,
+		TxTypeBlob,
+		TxTypeSetCode
 	)
 */
 //go:generate go-enum --marshal --sql --values --noprefix --names

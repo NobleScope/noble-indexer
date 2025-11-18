@@ -29,7 +29,7 @@ type Tx struct {
 
 	Gas      decimal.Decimal `bun:"gas,type:numeric"       comment:"Gas"`
 	GasPrice decimal.Decimal `bun:"gas_price,type:numeric" comment:"Gas price"`
-	Hash     pkgTypes.Hex    `bun:"hash"                   comment:"Transaction hash"`
+	Hash     pkgTypes.Hex    `bun:"hash,type:bytea"        comment:"Transaction hash"`
 	Nonce    int64           `bun:"nonce"                  comment:"Nonce"`
 	Index    int64           `bun:"index"                  comment:"Transaction index in the block"`
 	Amount   decimal.Decimal `bun:"amount,type:numeric"    comment:"Value in Wei"`

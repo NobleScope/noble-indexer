@@ -24,8 +24,8 @@ type Log struct {
 	Name    string         `bun:"name"                        comment:"Log name"`
 	TxId    uint64         `bun:"tx_id"                       comment:"Transaction id"`
 	Data    []byte         `bun:"data"                        comment:"Log data"`
-	Topics  []pkgTypes.Hex `bun:"topics"                      comment:"Log topics"`
-	Address pkgTypes.Hex   `bun:"address"                     comment:"Contract address whose invocation generated this log"`
+	Topics  []pkgTypes.Hex `bun:"topics,type:bytea"           comment:"Log topics"`
+	Address pkgTypes.Hex   `bun:"address,type:bytea"          comment:"Contract address whose invocation generated this log"`
 
 	Removed bool `bun:"removed" comment:"Removed during the reorg"`
 }

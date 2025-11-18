@@ -102,12 +102,18 @@ func (h Hex) Bytes() []byte {
 	return []byte(h)
 }
 
+func (h Hex) Hex() string {
+	if len(h) == 0 {
+		return ""
+	}
+	return "0x" + hex.EncodeToString(h)
+}
+
 func (h Hex) String() string {
 	if len(h) == 0 {
 		return ""
 	}
-	hexStr := hex.EncodeToString(h)
-	return "0x" + hexStr
+	return hex.EncodeToString(h)
 }
 
 func (h Hex) Int64() (int64, error) {

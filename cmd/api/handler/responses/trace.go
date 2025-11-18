@@ -33,7 +33,7 @@ func NewTrace(t *storage.Trace) Trace {
 	result := Trace{
 		Height:         uint64(t.Height),
 		Time:           t.Time,
-		TxHash:         t.Tx.Hash.String(),
+		TxHash:         t.Tx.Hash.Hex(),
 		FromAddress:    t.FromAddress.String(),
 		GasLimit:       t.GasLimit,
 		Amount:         t.Amount,

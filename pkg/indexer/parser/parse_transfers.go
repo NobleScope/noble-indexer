@@ -82,7 +82,7 @@ func (p *Module) parseTransfers(ctx *dCtx.Context) error {
 					log.Address.String(),
 				)
 			case types.ERC1155:
-				if log.Topics[0].String() == ERC1155TransferSingleFirstTopic {
+				if log.Topics[0].Hex() == ERC1155TransferSingleFirstTopic {
 					transferEvent, err := parseLogs[erc1155.EventTransferSingle](p.abi[tokenType], log.Data, log.Topics)
 					if err != nil {
 						return err
@@ -102,7 +102,7 @@ func (p *Module) parseTransfers(ctx *dCtx.Context) error {
 					)
 				}
 
-				if log.Topics[0].String() == ERC1155TransferBatchFirstTopic {
+				if log.Topics[0].Hex() == ERC1155TransferBatchFirstTopic {
 					transferEvent, err := parseLogs[erc1155.EventTransferBatch](p.abi[tokenType], log.Data, log.Topics)
 					if err != nil {
 						return err
@@ -202,7 +202,7 @@ func isERC20(topics []pkgTypes.Hex) (bool, types.TransferType) {
 	if len(topics) != 3 {
 		return false, types.Unknown
 	}
-	if topics[0].String() != ERC20FirstTopic {
+	if topics[0].Hex() != ERC20FirstTopic {
 		return false, types.Unknown
 	}
 	if !isAddress(topics[1]) {
@@ -219,7 +219,7 @@ func isERC721(topics []pkgTypes.Hex) (bool, types.TransferType) {
 	if len(topics) != 4 {
 		return false, types.Unknown
 	}
-	if topics[0].String() != ERC721FirstTopic {
+	if topics[0].Hex() != ERC721FirstTopic {
 		return false, types.Unknown
 	}
 	if !isAddress(topics[1]) {
@@ -236,7 +236,7 @@ func isERC1155(topics []pkgTypes.Hex) (bool, types.TransferType) {
 	if len(topics) != 4 {
 		return false, types.Unknown
 	}
-	if topics[0].String() != ERC1155TransferSingleFirstTopic && topics[0].String() != ERC1155TransferBatchFirstTopic {
+	if topics[0].Hex() != ERC1155TransferSingleFirstTopic && topics[0].Hex() != ERC1155TransferBatchFirstTopic {
 		return false, types.Unknown
 	}
 	if !isAddress(topics[1]) {

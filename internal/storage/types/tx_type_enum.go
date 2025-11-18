@@ -20,6 +20,10 @@ const (
 	TxTypeLegacy TxType = "TxTypeLegacy"
 	// TxTypeDynamicFee is a TxType of type TxTypeDynamicFee.
 	TxTypeDynamicFee TxType = "TxTypeDynamicFee"
+	// TxTypeBlob is a TxType of type TxTypeBlob.
+	TxTypeBlob TxType = "TxTypeBlob"
+	// TxTypeSetCode is a TxType of type TxTypeSetCode.
+	TxTypeSetCode TxType = "TxTypeSetCode"
 )
 
 var ErrInvalidTxType = fmt.Errorf("not a valid TxType, try [%s]", strings.Join(_TxTypeNames, ", "))
@@ -28,6 +32,8 @@ var _TxTypeNames = []string{
 	string(TxTypeUnknown),
 	string(TxTypeLegacy),
 	string(TxTypeDynamicFee),
+	string(TxTypeBlob),
+	string(TxTypeSetCode),
 }
 
 // TxTypeNames returns a list of possible string values of TxType.
@@ -43,6 +49,8 @@ func TxTypeValues() []TxType {
 		TxTypeUnknown,
 		TxTypeLegacy,
 		TxTypeDynamicFee,
+		TxTypeBlob,
+		TxTypeSetCode,
 	}
 }
 
@@ -62,6 +70,8 @@ var _TxTypeValue = map[string]TxType{
 	"TxTypeUnknown":    TxTypeUnknown,
 	"TxTypeLegacy":     TxTypeLegacy,
 	"TxTypeDynamicFee": TxTypeDynamicFee,
+	"TxTypeBlob":       TxTypeBlob,
+	"TxTypeSetCode":    TxTypeSetCode,
 }
 
 // ParseTxType attempts to convert a string to a TxType.

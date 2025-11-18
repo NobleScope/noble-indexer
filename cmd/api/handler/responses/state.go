@@ -22,7 +22,7 @@ func NewState(state storage.State) State {
 		Id:            state.Id,
 		Name:          state.Name,
 		LastHeight:    state.LastHeight,
-		LastHash:      pkgTypes.Hex(state.LastHash).String(),
+		LastHash:      pkgTypes.Hex(state.LastHash).Hex(),
 		LastTime:      state.LastTime,
 		TotalTx:       state.TotalTx,
 		TotalAccounts: state.TotalAccounts,

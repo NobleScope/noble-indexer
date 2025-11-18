@@ -37,14 +37,14 @@ type Trace struct {
 	TxPosition     uint64           `bun:"tx_position"            comment:"Transaction position"`
 	TraceAddress   []uint64         `bun:"trace_address"          comment:"Trace position in the call tree"`
 	Type           types.TraceType  `bun:"type"                   comment:"Trace type"`
-	InitHash       *pkgTypes.Hex    `bun:"init_hash"              comment:"Code of the contract being created"`
+	InitHash       *pkgTypes.Hex    `bun:"init_hash,type:bytea"   comment:"Code of the contract being created"`
 	CreationMethod *string          `bun:"creation_method"        comment:"Creation method"`
 
 	// result
 	GasUsed    decimal.Decimal `bun:"gas_used,type:numeric" comment:"Gas used"`
 	Output     []byte          `bun:"output"                comment:"Output data"`
 	ContractId *uint64         `bun:"contract_id"           comment:"Address identity of the new contract"`
-	Code       *pkgTypes.Hex   `bun:"code"                  comment:"New contract code"`
+	Code       *pkgTypes.Hex   `bun:"code,type:bytea"       comment:"New contract code"`
 
 	Subtraces uint64 `bun:"subtraces" comment:"Amount of subtraces"`
 

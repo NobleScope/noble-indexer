@@ -151,12 +151,12 @@ func (module *Module) processBlockInTransaction(ctx context.Context, tx storage.
 		transfers = append(transfers, block.Txs[i].Transfers...)
 	}
 
-	contractToId, err := saveContracts(ctx, tx, dCtx.GetContracts(), txHashToId, addrToId)
+	err = saveContracts(ctx, tx, dCtx.GetContracts(), txHashToId, addrToId)
 	if err != nil {
 		return state, err
 	}
 
-	err = saveTraces(ctx, tx, dCtx.GetTraces(), txHashToId, addrToId, contractToId)
+	err = saveTraces(ctx, tx, dCtx.GetTraces(), txHashToId, addrToId)
 	if err != nil {
 		return state, err
 	}

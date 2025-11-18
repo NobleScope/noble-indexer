@@ -34,7 +34,7 @@ func NewTransaction(tx storage.Tx) Transaction {
 	result := Transaction{
 		Height:            uint64(tx.Height),
 		Time:              tx.Time,
-		Hash:              tx.Hash.String(),
+		Hash:              tx.Hash.Hex(),
 		Index:             tx.Index,
 		Nonce:             tx.Nonce,
 		Type:              string(tx.Type),
@@ -47,8 +47,8 @@ func NewTransaction(tx storage.Tx) Transaction {
 		Fee:               tx.Fee,
 		Amount:            tx.Amount,
 		FromAddress:       tx.FromAddress.String(),
-		Input:             types.Hex(tx.Input).String(),
-		LogsBloom:         types.Hex(tx.LogsBloom).String(),
+		Input:             types.Hex(tx.Input).Hex(),
+		LogsBloom:         types.Hex(tx.LogsBloom).Hex(),
 	}
 
 	if tx.ToAddress != nil {

@@ -12,7 +12,6 @@ func saveTraces(
 	traces []*storage.Trace,
 	txHashes map[string]uint64,
 	addresses map[string]uint64,
-	contracts map[string]uint64,
 ) error {
 	if len(traces) == 0 {
 		return nil
@@ -27,7 +26,7 @@ func saveTraces(
 		}
 
 		if traces[i].Tx.Contract != nil {
-			id := contracts[traces[i].Tx.Contract.Address]
+			id := addresses[traces[i].Tx.Contract.Address]
 			traces[i].ContractId = &id
 		}
 	}

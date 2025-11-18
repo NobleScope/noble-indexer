@@ -31,19 +31,19 @@ type Block struct {
 	BaseFeePerGas uint64          `bun:"base_fee_per_gas,type:numeric" comment:"Fee per gas"`
 	MinerId       uint64          `bun:"miner_id"                      comment:"Miner address id"`
 
-	DifficultyHash       pkgTypes.Hex `bun:"difficulty_hash"        comment:"Difficulty hash"`
-	ExtraDataHash        pkgTypes.Hex `bun:"extra_data_hash"        comment:"Extra data hash"`
-	Hash                 pkgTypes.Hex `bun:"hash"                   comment:"Block hash"`
-	LogsBloomHash        pkgTypes.Hex `bun:"logs_bloom_hash"        comment:"Logs bloom hash"`
-	MixHash              pkgTypes.Hex `bun:"mix_hash"               comment:"Mix hash"`
-	NonceHash            pkgTypes.Hex `bun:"nonce_hash"             comment:"Nonce hash"`
-	ParentHashHash       pkgTypes.Hex `bun:"parent_hash"            comment:"Hash of parent block"`
-	ReceiptsRootHash     pkgTypes.Hex `bun:"receipts_root_hash"     comment:"Hash of receipts root"`
-	Sha3UnclesHash       pkgTypes.Hex `bun:"sha3_uncles_hash"       comment:"Sha3 hash"`
-	SizeHash             pkgTypes.Hex `bun:"size_hash"              comment:"Size of block in bytes"`
-	StateRootHash        pkgTypes.Hex `bun:"state_root_hash"        comment:"Hash of state root"`
-	TotalDifficultyHash  pkgTypes.Hex `bun:"total_difficulty_hash"  comment:"Total difficulty hash"`
-	TransactionsRootHash pkgTypes.Hex `bun:"transactions_root_hash" comment:"Hash of transactions root"`
+	DifficultyHash       pkgTypes.Hex `bun:"difficulty_hash,type:bytea"        comment:"Difficulty hash"`
+	ExtraDataHash        pkgTypes.Hex `bun:"extra_data_hash,type:bytea"        comment:"Extra data hash"`
+	Hash                 pkgTypes.Hex `bun:"hash,type:bytea"                   comment:"Block hash"`
+	LogsBloomHash        pkgTypes.Hex `bun:"logs_bloom_hash,type:bytea"        comment:"Logs bloom hash"`
+	MixHash              pkgTypes.Hex `bun:"mix_hash,type:bytea"               comment:"Mix hash"`
+	NonceHash            pkgTypes.Hex `bun:"nonce_hash,type:bytea"             comment:"Nonce hash"`
+	ParentHashHash       pkgTypes.Hex `bun:"parent_hash,type:bytea"            comment:"Hash of parent block"`
+	ReceiptsRootHash     pkgTypes.Hex `bun:"receipts_root_hash,type:bytea"     comment:"Hash of receipts root"`
+	Sha3UnclesHash       pkgTypes.Hex `bun:"sha3_uncles_hash,type:bytea"       comment:"Sha3 hash"`
+	SizeHash             pkgTypes.Hex `bun:"size_hash,type:bytea"              comment:"Size of block in bytes"`
+	StateRootHash        pkgTypes.Hex `bun:"state_root_hash,type:bytea"        comment:"Hash of state root"`
+	TotalDifficultyHash  pkgTypes.Hex `bun:"total_difficulty_hash,type:bytea"  comment:"Total difficulty hash"`
+	TransactionsRootHash pkgTypes.Hex `bun:"transactions_root_hash,type:bytea" comment:"Hash of transactions root"`
 
 	Txs    []*Tx       `bun:"rel:has-many"                    json:"-"`
 	Traces []*Trace    `bun:"rel:has-many"                    json:"-"`

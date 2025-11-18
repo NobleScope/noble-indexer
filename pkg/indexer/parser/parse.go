@@ -105,13 +105,20 @@ func (p *Module) parse(b types.BlockData) error {
 		if err != nil {
 			return err
 		}
-
+		typ, err := tx.Type.Int64()
+		if err != nil {
+			return err
+		}
 		var txType storageType.TxType
-		switch tx.Type.String() {
-		case "0x00":
+		switch typ {
+		case 0:
 			txType = storageType.TxTypeLegacy
-		case "0x02":
+		case 2:
 			txType = storageType.TxTypeDynamicFee
+		case 3:
+			txType = storageType.TxTypeBlob
+		case 4:
+			txType = storageType.TxTypeSetCode
 		default:
 			txType = storageType.TxTypeUnknown
 		}
@@ -124,6 +131,7 @@ func (p *Module) parse(b types.BlockData) error {
 		if err != nil {
 			return err
 		}
+		fee := cumulativeGasUsed.Mul(effectiveGasPrice)
 		txGasUsed, err := b.Receipts[i].GasUsed.Decimal()
 		if err != nil {
 			return err
@@ -132,14 +140,16 @@ func (p *Module) parse(b types.BlockData) error {
 		if err != nil {
 			return err
 		}
-
-		fee := cumulativeGasUsed.Mul(effectiveGasPrice)
+		txStatus, err := b.Receipts[i].Status.Int64()
+		if err != nil {
+			return err
+		}
 
 		var status storageType.TxStatus
-		switch b.Receipts[i].Status.String() {
-		case "0x01":
+		switch txStatus {
+		case 1:
 			status = storageType.TxStatusSuccess
-		case "0x00":
+		case 0:
 			status = storageType.TxStatusRevert
 		default:
 			status = storageType.TxStatusRevert
