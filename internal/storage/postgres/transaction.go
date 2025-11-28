@@ -131,6 +131,10 @@ func (tx Transaction) SaveContracts(ctx context.Context, contracts ...*models.Co
 		Set("language = EXCLUDED.language").
 		Set("optimizer_enabled = EXCLUDED.optimizer_enabled").
 		Set("tags = EXCLUDED.tags").
+		Set("status = EXCLUDED.status").
+		Set("retry_count = EXCLUDED.retry_count").
+		Set("error = EXCLUDED.error").
+		Set("updated_at = now()").
 		Exec(ctx)
 
 	return err
@@ -175,6 +179,15 @@ func (tx Transaction) SaveTokens(ctx context.Context, tokens ...*models.Token) e
 		On("CONFLICT (token_id, contract_id) DO UPDATE").
 		Set("transfers_count = token.transfers_count + EXCLUDED.transfers_count").
 		Set("supply = token.supply + EXCLUDED.supply").
+		Set("name = EXCLUDED.name").
+		Set("symbol = EXCLUDED.symbol").
+		Set("decimals = EXCLUDED.decimals").
+		Set("status = EXCLUDED.status").
+		Set("metadata_link = EXCLUDED.metadata_link").
+		Set("metadata = EXCLUDED.metadata").
+		Set("retry_count = EXCLUDED.retry_count").
+		Set("error = EXCLUDED.error").
+		Set("updated_at = now()").
 		Exec(ctx)
 
 	return err

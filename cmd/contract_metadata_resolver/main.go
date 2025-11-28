@@ -5,18 +5,17 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/baking-bad/noble-indexer/cmd/common"
 	"github.com/baking-bad/noble-indexer/internal/storage/postgres"
-	"github.com/baking-bad/noble-indexer/pkg/metadata_resolver"
+	"github.com/baking-bad/noble-indexer/pkg/contract_metadata"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "metadata_resolver",
-	Short: "Noble contract metadata scanner",
+	Use:   "contract_metadata_resolver",
+	Short: "Noble | Contract metadata resolver",
 }
 
 func main() {
@@ -28,7 +27,7 @@ func main() {
 	if err = common.InitLogger(cfg.LogLevel); err != nil {
 		return
 	}
-	prscp, err := common.InitProfiler(cfg.Profiler, "metadata resolver")
+	prscp, err := common.InitProfiler(cfg.Profiler, "contract metadata resolver")
 	if err != nil {
 		return
 	}
@@ -44,10 +43,7 @@ func main() {
 		return
 	}
 
-	metadataResolver := metadata_resolver.NewModule(
-		pg,
-		*cfg,
-		metadata_resolver.WithSyncPeriod(time.Second*time.Duration(cfg.MetadataResolver.SyncPeriod)))
+	metadataResolver := contract_metadata.NewModule(pg, *cfg)
 	metadataResolver.Start(ctx)
 
 	<-notifyCtx.Done()

@@ -1,4 +1,4 @@
-package metadata_resolver
+package contract_metadata
 
 import (
 	"encoding/json"

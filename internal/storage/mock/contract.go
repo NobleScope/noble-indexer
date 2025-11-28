@@ -12,6 +12,7 @@ package mock
 import (
 	context "context"
 	reflect "reflect"
+	time "time"
 
 	storage "github.com/baking-bad/noble-indexer/internal/storage"
 	storage0 "github.com/dipdup-net/indexer-sdk/pkg/storage"
@@ -236,41 +237,41 @@ func (c *MockIContractListCall) DoAndReturn(f func(context.Context, uint64, uint
 	return c
 }
 
-// ListWithMetadata mocks base method.
-func (m *MockIContract) ListWithMetadata(ctx context.Context, startId uint64) ([]*storage.Contract, error) {
+// PendingMetadata mocks base method.
+func (m *MockIContract) PendingMetadata(ctx context.Context, delay time.Duration, limit int) ([]*storage.Contract, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListWithMetadata", ctx, startId)
+	ret := m.ctrl.Call(m, "PendingMetadata", ctx, delay, limit)
 	ret0, _ := ret[0].([]*storage.Contract)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ListWithMetadata indicates an expected call of ListWithMetadata.
-func (mr *MockIContractMockRecorder) ListWithMetadata(ctx, startId any) *MockIContractListWithMetadataCall {
+// PendingMetadata indicates an expected call of PendingMetadata.
+func (mr *MockIContractMockRecorder) PendingMetadata(ctx, delay, limit any) *MockIContractPendingMetadataCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListWithMetadata", reflect.TypeOf((*MockIContract)(nil).ListWithMetadata), ctx, startId)
-	return &MockIContractListWithMetadataCall{Call: call}
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PendingMetadata", reflect.TypeOf((*MockIContract)(nil).PendingMetadata), ctx, delay, limit)
+	return &MockIContractPendingMetadataCall{Call: call}
 }
 
-// MockIContractListWithMetadataCall wrap *gomock.Call
-type MockIContractListWithMetadataCall struct {
+// MockIContractPendingMetadataCall wrap *gomock.Call
+type MockIContractPendingMetadataCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockIContractListWithMetadataCall) Return(contracts []*storage.Contract, err error) *MockIContractListWithMetadataCall {
+func (c *MockIContractPendingMetadataCall) Return(contracts []*storage.Contract, err error) *MockIContractPendingMetadataCall {
 	c.Call = c.Call.Return(contracts, err)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockIContractListWithMetadataCall) Do(f func(context.Context, uint64) ([]*storage.Contract, error)) *MockIContractListWithMetadataCall {
+func (c *MockIContractPendingMetadataCall) Do(f func(context.Context, time.Duration, int) ([]*storage.Contract, error)) *MockIContractPendingMetadataCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockIContractListWithMetadataCall) DoAndReturn(f func(context.Context, uint64) ([]*storage.Contract, error)) *MockIContractListWithMetadataCall {
+func (c *MockIContractPendingMetadataCall) DoAndReturn(f func(context.Context, time.Duration, int) ([]*storage.Contract, error)) *MockIContractPendingMetadataCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

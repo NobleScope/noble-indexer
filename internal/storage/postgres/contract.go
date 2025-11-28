@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"time"
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/dipdup-net/go-lib/database"
@@ -20,13 +21,15 @@ func NewContract(db *database.Bun) *Contract {
 	}
 }
 
-// ListWithMetadata -
-func (c *Contract) ListWithMetadata(ctx context.Context, startId uint64) (contracts []*storage.Contract, err error) {
+// PendingMetadata -
+func (c *Contract) PendingMetadata(ctx context.Context, retryDelay time.Duration, limit int) (contracts []*storage.Contract, err error) {
+	threshold := time.Now().UTC().Add(-retryDelay)
 	err = c.DB().NewSelect().
 		Model(&contracts).
-		Where("id > ?", startId).
 		Where("metadata_link IS NOT NULL AND metadata_link <> ''").
+		Where("status = 'pending' AND (updated_at < ? OR retry_count = 0)", threshold).
 		Order("id ASC").
+		Limit(limit).
 		Scan(ctx)
 
 	return

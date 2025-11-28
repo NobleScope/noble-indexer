@@ -37,10 +37,24 @@ services:
       - db
     logging: *indexer-logging
     
-  metadata_resolver:
-    image: ghcr.io/noble-indexer/metadata_resolver:${TAG:-master}
+  contract_metadata_resolver:
+    image: ghcr.io/noble-indexer/contract_metadata_resolver:${TAG:-master}
     build:
-      dockerfile: build/metadata_resolver/Dockerfile
+      dockerfile: build/contract_metadata_resolver/Dockerfile
+      context: .
+    env_file:
+      - .env
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    depends_on:
+      - db
+    logging: *indexer-logging
+    
+  token_metadata_resolver:
+    image: ghcr.io/noble-indexer/token_metadata_resolver:${TAG:-master}
+    build:
+      dockerfile: build/token_metadata_resolver/Dockerfile
       context: .
     env_file:
       - .env

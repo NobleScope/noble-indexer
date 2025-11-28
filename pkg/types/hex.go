@@ -3,6 +3,7 @@ package types
 import (
 	"bytes"
 	"database/sql/driver"
+	"encoding/binary"
 	"encoding/hex"
 	"math/big"
 	"strconv"
@@ -116,39 +117,51 @@ func (h Hex) String() string {
 	return hex.EncodeToString(h)
 }
 
-func (h Hex) Int64() (int64, error) {
-	if len(h) == 0 {
-		return 0, nil
-	}
-
-	hexStr := hex.EncodeToString(h)
-	if hexStr == "" {
-		return 0, nil
-	}
-
-	value, err := strconv.ParseInt(hexStr, 16, 64)
-	if err != nil {
-		return 0, errors.Wrap(err, "failed to parse hex to int64")
-	}
-
-	return value, nil
-}
-
 func (h Hex) Uint64() (uint64, error) {
 	if len(h) == 0 {
 		return 0, nil
 	}
 
-	hexStr := hex.EncodeToString(h)
-	if hexStr == "" {
+	b := trimToNBytes(h, 8)
+	return binary.BigEndian.Uint64(b), nil
+}
+
+func (h Hex) Uint32() (uint32, error) {
+	if len(h) == 0 {
 		return 0, nil
 	}
 
-	val, err := strconv.ParseUint(hexStr, 16, 64)
-	if err != nil {
-		return 0, errors.Wrap(err, "failed to parse hex to uint64")
+	b := trimToNBytes(h, 4)
+	return binary.BigEndian.Uint32(b), nil
+}
+
+func trimToNBytes(b []byte, n int) []byte {
+	if len(b) > n {
+		return b[len(b)-n:]
 	}
-	return val, nil
+
+	if len(b) < n {
+		return append(bytes.Repeat([]byte{0}, n-len(b)), b...)
+	}
+
+	return b
+}
+
+func (h Hex) Int64() (int64, error) {
+	val, err := h.Uint64()
+	if err != nil {
+		return 0, err
+	}
+	return int64(val), err
+}
+
+func (h Hex) Uint() (uint, error) {
+	val, err := h.Uint32()
+	if err != nil {
+		return 0, err
+	}
+
+	return uint(val), nil
 }
 
 func (h Hex) Time() (time.Time, error) {

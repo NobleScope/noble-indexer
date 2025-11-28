@@ -3,6 +3,9 @@ package ipfs
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"net"
+	"net/url"
 	"strings"
 
 	"github.com/dipdup-io/ipfs-tools"
@@ -20,6 +23,13 @@ type ContractMetadata struct {
 	Output   Output            `json:"output"`
 	Settings Settings          `json:"settings"`
 	Sources  map[string]Source `json:"sources"`
+}
+
+type TokenMetadata struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Image       string `json:"image"`
+	Attributes  []any  `json:"attributes"`
 }
 
 type Compiler struct {
@@ -92,19 +102,88 @@ func New(gateways string) (Pool, error) {
 	return pool, nil
 }
 
-func (p Pool) ContractMetadata(ctx context.Context, cid string) (metadata ContractMetadata, err error) {
-	s := ipfs.Path(cid)
-	data, err := p.ipfs.Get(ctx, s)
-	if err != nil {
-		return ContractMetadata{}, errors.Wrap(err, "getting metadata")
-	}
-	if data.Raw != nil {
-		if err := json.Unmarshal(data.Raw, &metadata); err != nil {
-			return ContractMetadata{}, errors.Wrap(err, "getting metadata")
+func (p Pool) ValidateURL(link *url.URL) error {
+	host := link.Host
+	if strings.Contains(host, ":") {
+		newHost, _, err := net.SplitHostPort(link.Host)
+		if err != nil {
+			return err
 		}
+		host = newHost
+	}
+	if host == "localhost" || host == "127.0.0.1" {
+		return errors.Wrap(ErrInvalidURI, fmt.Sprintf("invalid host: %s", host))
 	}
 
-	return metadata, nil
+	for _, mask := range []string{
+		"10.0.0.0/8",
+		"100.64.0.0/10",
+		"169.254.0.0/16",
+		"172.16.0.0/12",
+		"192.0.0.0/24",
+		"192.0.2.0/24",
+		"192.168.0.0/16",
+		"198.18.0.0/15",
+		"198.51.100.0/24",
+		"203.0.113.0/24",
+		"240.0.0.0/4",
+	} {
+		_, cidr, err := net.ParseCIDR(mask)
+		if err != nil {
+			return err
+		}
+
+		ip := net.ParseIP(host)
+		if ip != nil && cidr.Contains(ip) {
+			return errors.Wrap(ErrInvalidURI, fmt.Sprintf("restricted subnet: %s", mask))
+		}
+	}
+	return nil
+}
+
+func (p Pool) ContractMetadata(ctx context.Context, cid string) (ContractMetadata, error) {
+	raw, err := p.LoadMetadata(ctx, cid)
+	if err != nil {
+		return ContractMetadata{}, err
+	}
+
+	var md ContractMetadata
+	err = json.Unmarshal(raw, &md)
+	return md, err
+}
+
+func (p Pool) TokenMetadata(ctx context.Context, cid string) (TokenMetadata, error) {
+	raw, err := p.LoadMetadata(ctx, cid)
+	if err != nil {
+		return TokenMetadata{}, err
+	}
+
+	var md TokenMetadata
+	err = json.Unmarshal(raw, &md)
+	return md, err
+}
+
+func (p Pool) LoadMetadata(ctx context.Context, cid string) ([]byte, error) {
+	parsed, err := url.ParseRequestURI(cid)
+	if err != nil {
+		return nil, ErrInvalidURI
+	}
+
+	if err := p.ValidateURL(parsed); err != nil {
+		return nil, err
+	}
+
+	path := ipfs.Path(cid)
+	data, err := p.ipfs.Get(ctx, path)
+	if err != nil {
+		return nil, errors.Wrap(err, "getting metadata")
+	}
+
+	if data.Raw == nil {
+		return nil, errors.New("empty metadata")
+	}
+
+	return data.Raw, nil
 }
 
 func (p Pool) ContractText(ctx context.Context, urls []string) (contract string, err error) {

@@ -62,6 +62,16 @@ func createTypes(ctx context.Context, conn *database.Bun) error {
 			return err
 		}
 
+		if _, err := tx.ExecContext(
+			ctx,
+			createTypeQuery,
+			"metadata_status",
+			bun.Safe("metadata_status"),
+			bun.In(types.MetadataStatusValues()),
+		); err != nil {
+			return err
+		}
+
 		return nil
 	})
 }

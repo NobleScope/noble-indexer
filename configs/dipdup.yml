@@ -18,10 +18,21 @@ database:
   password: ${POSTGRES_PASSWORD}
   database: ${POSTGRES_DB:-noble}
 
-metadata_resolver:
-  name: ${RESOLVER_NAME:-metadata_resolver}
-  sync_period: ${RESOLVER_SYNC_PERIOD:-30} # seconds
-  metadata_gateways: ${RESOLVER_METADATA_GATEWAYS:-https://ipfs.io} # delimiter - ';' 
+contract_resolver:
+  name: ${CONTRACT_RESOLVER_NAME:-contract_metadata}
+  sync_period: ${CONTRACT_RESOLVER_SYNC_PERIOD:-10} # seconds
+  metadata_gateways: ${CONTRACT_RESOLVER_GATEWAYS:-https://ipfs.io} # delimiter - ';'
+  request_bulk_size: ${CONTRACT_RESOLVER_REQUEST_BULK_SIZE:-5}
+  retry_count: ${CONTRACT_RESOLVER_RETRY_COUNT:-7}
+  retry_delay: ${CONTRACT_RESOLVER_RETRY_DELAY:-10} # minutes
+  
+token_resolver:
+  name: ${TOKEN_RESOLVER_NAME:-token_metadata}
+  sync_period: ${TOKEN_RESOLVER_SYNC_PERIOD:-5} # seconds
+  metadata_gateways: ${TOKEN_RESOLVER_GATEWAYS:-https://ipfs.io} # delimiter - ';' 
+  request_bulk_size: ${TOKEN_RESOLVER_REQUEST_BULK_SIZE:-10}
+  retry_count: ${TOKEN_RESOLVER_RETRY_COUNT:-7}
+  retry_delay: ${TOKEN_RESOLVER_RETRY_DELAY:-30} # minutes
 
 datasources:
   node_rpc:

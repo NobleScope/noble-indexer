@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/baking-bad/noble-indexer/internal/storage/types"
 	"github.com/pkg/errors"
 	"github.com/unpackdev/solgo/bytecode"
 )
@@ -28,6 +29,7 @@ func ParseEvmContractMetadata(contract *storage.Contract) error {
 
 	contract.CompilerVersion = metadata.GetCompilerVersion()
 	contract.MetadataLink = metadata.GetIPFS()
+	contract.Status = types.Pending
 
 	return nil
 }

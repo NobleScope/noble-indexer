@@ -17,7 +17,7 @@ COPY cmd/ cmd/
 COPY internal/ internal/
 COPY pkg/ pkg/
 
-RUN go build -ldflags="-w -s" -a -o /go/bin/metadata_resolver ./cmd/metadata_resolver/
+RUN go build -ldflags="-w -s" -a -o /go/bin/token_metadata_resolver ./cmd/token_metadata_resolver/
 
 # ---------------------------------------------------------------------
 #  The second stage container, for running the application
@@ -27,7 +27,7 @@ FROM scratch
 WORKDIR /app
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /go/bin/metadata_resolver /app/metadata_resolver
+COPY --from=builder /go/bin/token_metadata_resolver /app/token_metadata_resolver
 COPY configs/dipdup.yml /app/config.yml
 
-ENTRYPOINT ["/app/metadata_resolver", "-c", "/app/config.yml"]
+ENTRYPOINT ["/app/token_metadata_resolver", "-c", "/app/config.yml"]

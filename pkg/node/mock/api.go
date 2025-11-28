@@ -162,3 +162,42 @@ func (c *MockApiHeadCall) DoAndReturn(f func(context.Context) (types.Level, erro
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
+
+// TokenMetadataBulk mocks base method.
+func (m *MockApi) TokenMetadataBulk(ctx context.Context, request []types.TokenMetadataRequest) (map[uint64]types.TokenMetadata, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "TokenMetadataBulk", ctx, request)
+	ret0, _ := ret[0].(map[uint64]types.TokenMetadata)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// TokenMetadataBulk indicates an expected call of TokenMetadataBulk.
+func (mr *MockApiMockRecorder) TokenMetadataBulk(ctx, request any) *MockApiTokenMetadataBulkCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TokenMetadataBulk", reflect.TypeOf((*MockApi)(nil).TokenMetadataBulk), ctx, request)
+	return &MockApiTokenMetadataBulkCall{Call: call}
+}
+
+// MockApiTokenMetadataBulkCall wrap *gomock.Call
+type MockApiTokenMetadataBulkCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockApiTokenMetadataBulkCall) Return(arg0 map[uint64]types.TokenMetadata, arg1 error) *MockApiTokenMetadataBulkCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockApiTokenMetadataBulkCall) Do(f func(context.Context, []types.TokenMetadataRequest) (map[uint64]types.TokenMetadata, error)) *MockApiTokenMetadataBulkCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockApiTokenMetadataBulkCall) DoAndReturn(f func(context.Context, []types.TokenMetadataRequest) (map[uint64]types.TokenMetadata, error)) *MockApiTokenMetadataBulkCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}

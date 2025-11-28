@@ -21,7 +21,6 @@ var Models = []any{
 	&Trace{},
 	&Balance{},
 	&State{},
-	&MetadataResolverState{},
 }
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
