@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/baking-bad/noble-indexer/internal/storage/types"
+	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
@@ -26,6 +27,8 @@ type Token struct {
 	TokenID        decimal.Decimal      `bun:"token_id,pk,type:numeric"         comment:"Token ID"`
 	ContractId     uint64               `bun:"contract_id,pk"                   comment:"Contract address id"`
 	Type           types.TokenType      `bun:",type:token_type"                 comment:"Token type"`
+	Height         pkgTypes.Level       `bun:"height"                           comment:"Block number of the first token occurrence"`
+	LastHeight     pkgTypes.Level       `bun:"last_height"                      comment:"Block number of the last token occurrence"`
 	Name           string               `bun:"name"                             comment:"Token name"`
 	Symbol         string               `bun:"symbol"                           comment:"Token symbol"`
 	Decimals       uint8                `bun:"decimals"                         comment:"Decimals"`

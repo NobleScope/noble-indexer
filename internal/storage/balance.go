@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"github.com/baking-bad/noble-indexer/internal/currency"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
@@ -21,4 +22,11 @@ type Balance struct {
 
 func (Balance) TableName() string {
 	return "balance"
+}
+
+func EmptyBalance() *Balance {
+	return &Balance{
+		Currency: currency.DefaultCurrency,
+		Value:    decimal.Zero,
+	}
 }

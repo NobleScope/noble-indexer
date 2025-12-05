@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/baking-bad/noble-indexer/internal/storage/types"
+	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/uptrace/bun"
 )
@@ -22,6 +23,7 @@ type Contract struct {
 	bun.BaseModel `bun:"contract" comment:"Table with contracts."`
 
 	Id               uint64               `bun:"id,pk,notnull"                    comment:"Unique internal identity"`
+	Height           pkgTypes.Level       `bun:"height"                           comment:"Block number in which the contract was deployed"`
 	Address          string               `bun:"address,unique:contract_idx"      comment:"Human-readable address"`
 	Code             []byte               `bun:"code"                             comment:"Contract code"`
 	Verified         bool                 `bun:"verified,default:false,notnull"   comment:"Verified or not"`

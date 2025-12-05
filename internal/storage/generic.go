@@ -35,7 +35,8 @@ type Transaction interface {
 	SaveContracts(ctx context.Context, addresses ...*Contract) error
 	SaveTransfers(ctx context.Context, transfers ...*Transfer) error
 	SaveTokens(ctx context.Context, tokens ...*Token) error
-	SaveTokenBalances(ctx context.Context, tokenBalances ...*TokenBalance) error
+	SaveTokenBalances(ctx context.Context, tokenBalances ...*TokenBalance) (tb []TokenBalance, err error)
+	SaveTokenMetadata(ctx context.Context, tokens ...*Token) error
 	SaveSources(ctx context.Context, sources ...*Source) error
 
 	RollbackBlock(ctx context.Context, height types.Level) error
@@ -44,7 +45,11 @@ type Transaction interface {
 	RollbackTxs(ctx context.Context, height types.Level) (txs []Tx, err error)
 	RollbackTraces(ctx context.Context, height types.Level) (traces []Trace, err error)
 	RollbackLogs(ctx context.Context, height types.Level) error
+	RollbackTransfers(ctx context.Context, height types.Level) (transfers []Transfer, err error)
+	RollbackTokens(ctx context.Context, height types.Level) (tokens []Token, err error)
+	RollbackContracts(ctx context.Context, height types.Level) error
 	DeleteBalances(ctx context.Context, ids []uint64) error
+	DeleteTokenBalances(ctx context.Context, tokenIds []string, contractIds []uint64, zeroBalances []*TokenBalance) error
 
 	State(ctx context.Context, name string) (state State, err error)
 	LastBlock(ctx context.Context) (block Block, err error)

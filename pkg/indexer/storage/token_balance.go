@@ -31,6 +31,6 @@ func saveTokenBalances(
 		tokenBalances[i].AddressID = addressID
 	}
 
-	err := tx.SaveTokenBalances(ctx, tokenBalances...)
+	_, err := tx.SaveTokenBalances(ctx, tokenBalances...)
 	return err
 }

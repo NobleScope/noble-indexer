@@ -15,6 +15,8 @@ func (module *Module) rollbackBalances(
 	block storage.Block,
 	deletedTxs []storage.Tx,
 	deletedTraces []storage.Trace,
+	deletedTransfers []storage.Transfer,
+	deletedTokens []storage.Token,
 	deletedAddresses []storage.Address,
 ) error {
 	var (
@@ -40,6 +42,39 @@ func (module *Module) rollbackBalances(
 	}
 
 	err = tx.SaveBalances(ctx, updates...)
+	if err != nil {
+		return err
+	}
+
+	tokenUpdates, err := getTokenBalanceUpdates(deletedTransfers)
+	if err != nil {
+		return err
+	}
+
+	tbs, err := tx.SaveTokenBalances(ctx, tokenUpdates...)
+	if err != nil {
+		return err
+	}
+
+	var zeroTokenBalances = make([]*storage.TokenBalance, 0)
+	for i := range tbs {
+		if tbs[i].Balance.IsZero() {
+			zeroTokenBalances = append(zeroTokenBalances, &tbs[i])
+		}
+	}
+
+	var (
+		tokenIds    = make([]string, len(deletedTokens))
+		contractIds = make([]uint64, len(deletedTokens))
+	)
+
+	for i, t := range deletedTokens {
+		tokenIds[i] = t.TokenID.String()
+		contractIds[i] = t.ContractId
+	}
+
+	err = tx.DeleteTokenBalances(ctx, tokenIds, contractIds, zeroTokenBalances)
+
 	return err
 }
 
@@ -97,5 +132,54 @@ func getBalanceUpdates(
 		result = append(result, balance)
 	}
 	// TODO: update LastHeight for addresses
+	return result, nil
+}
+
+func getTokenBalanceUpdates(
+	deletedTransfers []storage.Transfer,
+) ([]*storage.TokenBalance, error) {
+	type key struct {
+		TokenID    string
+		ContractID uint64
+		AddressID  uint64
+	}
+
+	agg := make(map[key]*storage.TokenBalance)
+
+	add := func(tokenID decimal.Decimal, contractID uint64, addrID uint64, amount decimal.Decimal) {
+		k := key{tokenID.String(), contractID, addrID}
+
+		if tb, ok := agg[k]; ok {
+			tb.Balance = tb.Balance.Add(amount)
+		} else {
+			agg[k] = &storage.TokenBalance{
+				TokenID:    tokenID,
+				ContractID: contractID,
+				AddressID:  addrID,
+				Balance:    amount,
+			}
+		}
+	}
+
+	for _, t := range deletedTransfers {
+		switch t.Type {
+
+		case types.Mint:
+			add(t.TokenID, t.ContractId, *t.ToAddressId, t.Amount.Neg())
+
+		case types.Burn:
+			add(t.TokenID, t.ContractId, *t.FromAddressId, t.Amount)
+
+		case types.Transfer:
+			add(t.TokenID, t.ContractId, *t.FromAddressId, t.Amount)
+			add(t.TokenID, t.ContractId, *t.ToAddressId, t.Amount.Neg())
+		}
+	}
+
+	result := make([]*storage.TokenBalance, 0, len(agg))
+	for _, v := range agg {
+		result = append(result, v)
+	}
+
 	return result, nil
 }

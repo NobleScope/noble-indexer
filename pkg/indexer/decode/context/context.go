@@ -77,7 +77,7 @@ func (ctx *Context) AddTokenBalance(tokenBalance *storage.TokenBalance) {
 	if tb, ok := ctx.TokenBalances.Get(tokenBalance.String()); !ok {
 		ctx.TokenBalances.Set(tokenBalance.String(), tokenBalance)
 	} else {
-		tb.Balance.Add(tokenBalance.Balance)
+		tb.Balance = tb.Balance.Add(tokenBalance.Balance)
 	}
 }
 

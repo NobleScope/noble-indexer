@@ -275,9 +275,9 @@ func (m *Module) save(ctx context.Context, tokens []*storage.Token) error {
 	}
 	defer tx.Close(ctx)
 
-	err = tx.SaveTokens(ctx, tokens...)
+	err = tx.SaveTokenMetadata(ctx, tokens...)
 	if err != nil {
-		return errors.Wrap(err, "save tokens")
+		return errors.Wrap(err, "save token metadata")
 	}
 	m.Log.Info().Int("count", len(tokens)).Msg("token metadata saved")
 

@@ -8,7 +8,6 @@ import (
 	dCtx "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
 	parser "github.com/baking-bad/noble-indexer/pkg/indexer/parser"
 	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
-	"github.com/shopspring/decimal"
 )
 
 type parsedData struct {
@@ -33,12 +32,7 @@ func (module *Module) parse(genesis pkgTypes.Genesis) (parsedData, error) {
 		Address:    genesis.Coinbase.String(),
 		Height:     0,
 		LastHeight: 0,
-		Balance: []*storage.Balance{
-			{
-				Currency: currency.DefaultCurrency,
-				Value:    decimal.Zero,
-			},
-		},
+		Balance:    storage.EmptyBalance(),
 	}
 	decodeCtx.AddAddress(coinbase)
 
@@ -52,11 +46,9 @@ func (module *Module) parse(genesis pkgTypes.Genesis) (parsedData, error) {
 			Address:    k,
 			Height:     0,
 			LastHeight: 0,
-			Balance: []*storage.Balance{
-				{
-					Currency: currency.DefaultCurrency,
-					Value:    balance,
-				},
+			Balance: &storage.Balance{
+				Currency: currency.DefaultCurrency,
+				Value:    balance,
 			},
 		}
 		decodeCtx.AddAddress(address)
@@ -64,10 +56,10 @@ func (module *Module) parse(genesis pkgTypes.Genesis) (parsedData, error) {
 		if v.Code != nil {
 			address.IsContract = true
 			contract := &storage.Contract{
-				Address:  k,
-				Code:     v.Code,
-				Verified: true,
-				TxId:     nil,
+				Height:  0,
+				Address: k,
+				Code:    v.Code,
+				TxId:    nil,
 			}
 
 			err = parser.ParseEvmContractMetadata(contract)

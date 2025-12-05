@@ -5,7 +5,6 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/baking-bad/noble-indexer/internal/currency"
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/internal/storage/types"
 	dCtx "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
@@ -132,10 +131,9 @@ func (p *Module) parseTransfers(ctx *dCtx.Context) error {
 						ctx.Block.Txs[i].Transfers = append(ctx.Block.Txs[i].Transfers, batchTransfer)
 						ctx.AddToken(&storage.Token{
 							TokenID:        batchTransfer.TokenID,
+							Height:         ctx.Block.Height,
+							LastHeight:     ctx.Block.Height,
 							Type:           tokenType,
-							Name:           "",
-							Symbol:         "",
-							Decimals:       0,
 							Status:         types.Pending,
 							Contract:       batchTransfer.Contract,
 							TransfersCount: 1,
@@ -155,10 +153,9 @@ func (p *Module) parseTransfers(ctx *dCtx.Context) error {
 			ctx.Block.Txs[i].Transfers = append(ctx.Block.Txs[i].Transfers, transfer)
 			ctx.AddToken(&storage.Token{
 				TokenID:        transfer.TokenID,
+				Height:         ctx.Block.Height,
+				LastHeight:     ctx.Block.Height,
 				Type:           tokenType,
-				Name:           "",
-				Symbol:         "",
-				Decimals:       0,
 				Status:         types.Pending,
 				Contract:       transfer.Contract,
 				TransfersCount: 1,
@@ -289,23 +286,13 @@ func setAddresses(ctx *dCtx.Context, transferType types.TransferType, transfer *
 		Address:    strings.ToLower(from),
 		Height:     ctx.Block.Height,
 		LastHeight: ctx.Block.Height,
-		Balance: []*storage.Balance{
-			{
-				Currency: currency.DefaultCurrency,
-				Value:    decimal.Zero,
-			},
-		},
+		Balance:    storage.EmptyBalance(),
 	}
 	toAddress := &storage.Address{
 		Address:    strings.ToLower(to),
 		Height:     ctx.Block.Height,
 		LastHeight: ctx.Block.Height,
-		Balance: []*storage.Balance{
-			{
-				Currency: currency.DefaultCurrency,
-				Value:    decimal.Zero,
-			},
-		},
+		Balance:    storage.EmptyBalance(),
 	}
 	contractAddress := &storage.Address{
 		Address:    strings.ToLower(contract),
@@ -316,6 +303,7 @@ func setAddresses(ctx *dCtx.Context, transferType types.TransferType, transfer *
 
 	storageContract := &storage.Contract{
 		Address: contractAddress.Address,
+		Height:  ctx.Block.Height,
 	}
 
 	ctx.AddContract(storageContract)

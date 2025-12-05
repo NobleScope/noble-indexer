@@ -24,11 +24,8 @@ func saveAddresses(
 	balances := make([]*storage.Balance, 0)
 	for i := range addresses {
 		addrToId[addresses[i].Address] = addresses[i].Id
-
-		for _, b := range addresses[i].Balance {
-			b.Id = addresses[i].Id
-			balances = append(balances, b)
-		}
+		addresses[i].Balance.Id = addresses[i].Id
+		balances = append(balances, addresses[i].Balance)
 	}
 	err = tx.SaveBalances(ctx, balances...)
 

@@ -24,7 +24,7 @@ type Address struct {
 	ContractsCount int         `bun:"contracts_count"                   comment:"Deployed contracts count"`
 	Interactions   int         `bun:"interactions"                      comment:"Txs count with traces count where the address is specified as from or to"`
 
-	Balance []*Balance `bun:"rel:has-many,join:id=id"`
+	Balance *Balance `bun:"rel:has-one,join:id=id"`
 }
 
 // TableName -

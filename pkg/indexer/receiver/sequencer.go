@@ -33,7 +33,7 @@ func (r *Module) sequencer(ctx context.Context) {
 			b, ok := orderedBlocks[currentBlock]
 			for ok {
 				if prevBlockHash != nil {
-					if !bytes.Equal(b.Hash, prevBlockHash) {
+					if !bytes.Equal(b.ParentHash, prevBlockHash) {
 						prevBlockHash, currentBlock, orderedBlocks = r.startRollback(b, prevBlockHash)
 						break
 					}
@@ -45,6 +45,7 @@ func (r *Module) sequencer(ctx context.Context) {
 					Uint64("height", currentBlock).
 					Msg("put in order block")
 
+				prevBlockHash = b.Hash
 				delete(orderedBlocks, currentBlock)
 				currentBlock += 1
 

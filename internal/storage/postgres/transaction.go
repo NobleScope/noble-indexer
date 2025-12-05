@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"errors"
 
 	models "github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/pkg/types"
@@ -179,6 +180,19 @@ func (tx Transaction) SaveTokens(ctx context.Context, tokens ...*models.Token) e
 		On("CONFLICT (token_id, contract_id) DO UPDATE").
 		Set("transfers_count = token.transfers_count + EXCLUDED.transfers_count").
 		Set("supply = token.supply + EXCLUDED.supply").
+		Set("last_height = EXCLUDED.last_height").
+		Exec(ctx)
+
+	return err
+}
+
+func (tx Transaction) SaveTokenMetadata(ctx context.Context, tokens ...*models.Token) error {
+	if len(tokens) == 0 {
+		return nil
+	}
+
+	_, err := tx.Tx().NewInsert().Model(&tokens).
+		On("CONFLICT (token_id, contract_id) DO UPDATE").
 		Set("name = EXCLUDED.name").
 		Set("symbol = EXCLUDED.symbol").
 		Set("decimals = EXCLUDED.decimals").
@@ -193,17 +207,23 @@ func (tx Transaction) SaveTokens(ctx context.Context, tokens ...*models.Token) e
 	return err
 }
 
-func (tx Transaction) SaveTokenBalances(ctx context.Context, tokens ...*models.TokenBalance) error {
+func (tx Transaction) SaveTokenBalances(ctx context.Context, tokens ...*models.TokenBalance) ([]models.TokenBalance, error) {
 	if len(tokens) == 0 {
-		return nil
+		return nil, nil
 	}
 
-	_, err := tx.Tx().NewInsert().Model(&tokens).
+	var tbs []models.TokenBalance
+	err := tx.Tx().NewInsert().Model(&tokens).
 		On("CONFLICT ON CONSTRAINT token_balance_idx DO UPDATE").
 		Set("balance = token_balance.balance + EXCLUDED.balance").
-		Exec(ctx)
+		Returning("*").
+		Scan(ctx, &tbs)
 
-	return err
+	if err != nil {
+		return nil, err
+	}
+
+	return tbs, nil
 }
 
 func (tx Transaction) RollbackBlock(ctx context.Context, height types.Level) error {
@@ -258,6 +278,32 @@ func (tx Transaction) RollbackTraces(ctx context.Context, height types.Level) (t
 	return
 }
 
+func (tx Transaction) RollbackTransfers(ctx context.Context, height types.Level) (transfers []models.Transfer, err error) {
+	_, err = tx.Tx().NewDelete().
+		Model(&transfers).
+		Where("height = ?", height).
+		Returning("*").
+		Exec(ctx)
+	return
+}
+
+func (tx Transaction) RollbackTokens(ctx context.Context, height types.Level) (tokens []models.Token, err error) {
+	_, err = tx.Tx().NewDelete().
+		Model(&tokens).
+		Where("height = ?", height).
+		Returning("*").
+		Exec(ctx)
+	return
+}
+
+func (tx Transaction) RollbackContracts(ctx context.Context, height types.Level) (err error) {
+	_, err = tx.Tx().NewDelete().
+		Model((*models.Contract)(nil)).
+		Where("height = ?", height).
+		Exec(ctx)
+	return
+}
+
 func (tx Transaction) DeleteBalances(ctx context.Context, ids []uint64) error {
 	if len(ids) == 0 {
 		return nil
@@ -267,6 +313,41 @@ func (tx Transaction) DeleteBalances(ctx context.Context, ids []uint64) error {
 		Model((*models.Balance)(nil)).
 		Where("id IN (?)", bun.In(ids)).
 		Exec(ctx)
+	return err
+}
+
+func (tx Transaction) DeleteTokenBalances(ctx context.Context, tokenIds []string, contractIds []uint64, zeroBalances []*models.TokenBalance) error {
+	if len(tokenIds) != len(contractIds) {
+		return errors.New("tokenIds and contractIds must have same length")
+	}
+
+	query := tx.Tx().
+		NewDelete().
+		Model((*models.TokenBalance)(nil))
+
+	query = query.WhereGroup("OR", func(q *bun.DeleteQuery) *bun.DeleteQuery {
+		for i := range tokenIds {
+			q = q.WhereOr(
+				"(token_id = ?::numeric AND contract_id = ?)",
+				tokenIds[i],
+				contractIds[i],
+			)
+		}
+
+		for _, t := range zeroBalances {
+			q = q.WhereOr(
+				"(token_id = ?::numeric AND contract_id = ? AND address_id = ?)",
+				t.TokenID,
+				t.ContractID,
+				t.AddressID,
+			)
+		}
+
+		return q
+	})
+
+	_, err := query.Exec(ctx)
+
 	return err
 }
 

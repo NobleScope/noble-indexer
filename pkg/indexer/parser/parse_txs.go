@@ -43,16 +43,12 @@ func updateBalances(address *storage.Address, op enum.BalanceOp, amount decimal.
 		return
 	}
 
-	if len(address.Balance) > 0 {
-		for _, b := range address.Balance {
-			if b.Currency == currency.DefaultCurrency {
-				switch op {
-				case enum.Add:
-					b.Value = b.Value.Add(amount)
-				case enum.Sub:
-					b.Value = b.Value.Sub(amount)
-				}
-			}
+	if address.Balance != nil {
+		switch op {
+		case enum.Add:
+			address.Balance.Value = address.Balance.Value.Add(amount)
+		case enum.Sub:
+			address.Balance.Value = address.Balance.Value.Sub(amount)
 		}
 		return
 	}
@@ -65,10 +61,8 @@ func updateBalances(address *storage.Address, op enum.BalanceOp, amount decimal.
 		initial = decimal.Zero.Sub(amount)
 	}
 
-	address.Balance = []*storage.Balance{
-		{
-			Currency: currency.DefaultCurrency,
-			Value:    initial,
-		},
+	address.Balance = &storage.Balance{
+		Currency: currency.DefaultCurrency,
+		Value:    initial,
 	}
 }

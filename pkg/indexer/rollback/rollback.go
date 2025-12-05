@@ -166,6 +166,11 @@ func (module *Module) rollbackBlock(ctx context.Context, block storage.Block) er
 		return tx.HandleError(ctx, err)
 	}
 
+	err = tx.RollbackContracts(ctx, height)
+	if err != nil {
+		return tx.HandleError(ctx, err)
+	}
+
 	err = tx.RollbackLogs(ctx, height)
 	if err != nil {
 		return tx.HandleError(ctx, err)
@@ -176,7 +181,17 @@ func (module *Module) rollbackBlock(ctx context.Context, block storage.Block) er
 		return tx.HandleError(ctx, err)
 	}
 
-	if err := module.rollbackBalances(ctx, tx, block, txs, traces, addresses); err != nil {
+	transfers, err := tx.RollbackTransfers(ctx, height)
+	if err != nil {
+		return tx.HandleError(ctx, err)
+	}
+
+	tokens, err := tx.RollbackTokens(ctx, height)
+	if err != nil {
+		return tx.HandleError(ctx, err)
+	}
+
+	if err := module.rollbackBalances(ctx, tx, block, txs, traces, transfers, tokens, addresses); err != nil {
 		return tx.HandleError(ctx, err)
 	}
 

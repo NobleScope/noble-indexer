@@ -94,8 +94,25 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 		if _, err := tx.NewCreateIndex().
 			IfNotExists().
 			Model((*storage.Contract)(nil)).
+			Index("contract_height_idx").
+			Column("height").
+			Using("BRIN").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Contract)(nil)).
 			Index("contract_metadata_link_idx").
 			Column("metadata_link").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Contract)(nil)).
+			Index("contract_tx_id_idx").
+			Column("tx_id").
 			Exec(ctx); err != nil {
 			return err
 		}
@@ -134,6 +151,36 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			Model((*storage.Address)(nil)).
 			Index("address_address_idx").
 			Column("address").
+			Exec(ctx); err != nil {
+			return err
+		}
+
+		// Transfer
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Transfer)(nil)).
+			Index("transfer_height_idx").
+			Column("height").
+			Using("BRIN").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Transfer)(nil)).
+			Index("transfer_tx_id_idx").
+			Column("tx_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+
+		// Token
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Token)(nil)).
+			Index("token_symbol_idx").
+			ColumnExpr("symbol gin_trgm_ops").
+			Using("GIN").
 			Exec(ctx); err != nil {
 			return err
 		}

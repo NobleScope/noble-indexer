@@ -31,10 +31,8 @@ func (module *Module) save(ctx context.Context, data parsedData) error {
 
 		balances := make([]*storage.Balance, 0)
 		for i := range entities {
-			for _, b := range entities[i].Balance {
-				b.Id = entities[i].Id
-				balances = append(balances, b)
-			}
+			entities[i].Balance.Id = entities[i].Id
+			balances = append(balances, entities[i].Balance)
 		}
 
 		if err := tx.SaveBalances(ctx, balances...); err != nil {

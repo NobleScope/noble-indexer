@@ -3,12 +3,10 @@ package parser
 import (
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/currency"
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	storageType "github.com/baking-bad/noble-indexer/internal/storage/types"
 	dCtx "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
 	"github.com/baking-bad/noble-indexer/pkg/types"
-	"github.com/shopspring/decimal"
 )
 
 func (p *Module) parse(b types.BlockData) error {
@@ -50,12 +48,7 @@ func (p *Module) parse(b types.BlockData) error {
 		Address:    block.Miner.String(),
 		Height:     types.Level(height),
 		LastHeight: types.Level(height),
-		Balance: []*storage.Balance{
-			{
-				Currency: currency.DefaultCurrency,
-				Value:    decimal.Zero,
-			},
-		},
+		Balance:    storage.EmptyBalance(),
 	}
 	decodeCtx.AddAddress(&miner)
 
@@ -183,12 +176,7 @@ func (p *Module) parse(b types.BlockData) error {
 			LastHeight:   decodeCtx.Block.Height,
 			Interactions: 1,
 			TxsCount:     1,
-			Balance: []*storage.Balance{
-				{
-					Currency: currency.DefaultCurrency,
-					Value:    decimal.Zero,
-				},
-			},
+			Balance:      storage.EmptyBalance(),
 		}
 
 		if b.Receipts[i].ContractAddress != nil {
@@ -196,10 +184,12 @@ func (p *Module) parse(b types.BlockData) error {
 				Address:    b.Receipts[i].ContractAddress.String(),
 				Height:     decodeCtx.Block.Height,
 				LastHeight: decodeCtx.Block.Height,
+				Balance:    storage.EmptyBalance(),
 				IsContract: true,
 			}
 
 			contract := &storage.Contract{
+				Height:  decodeCtx.Block.Height,
 				Address: b.Receipts[i].ContractAddress.String(),
 				Code:    decodeCtx.Block.Txs[i].Input,
 				Tx: &storage.Tx{
@@ -227,12 +217,7 @@ func (p *Module) parse(b types.BlockData) error {
 				Height:       decodeCtx.Block.Height,
 				LastHeight:   decodeCtx.Block.Height,
 				Interactions: 1,
-				Balance: []*storage.Balance{
-					{
-						Currency: currency.DefaultCurrency,
-						Value:    decimal.Zero,
-					},
-				},
+				Balance:      storage.EmptyBalance(),
 			}
 
 			if b.Transactions[i].From.String() == b.Transactions[i].To.String() {
@@ -296,12 +281,7 @@ func (p *Module) parse(b types.BlockData) error {
 				Height:       decodeCtx.Block.Height,
 				LastHeight:   decodeCtx.Block.Height,
 				Interactions: 1,
-				Balance: []*storage.Balance{
-					{
-						Currency: currency.DefaultCurrency,
-						Value:    decimal.Zero,
-					},
-				},
+				Balance:      storage.EmptyBalance(),
 			},
 			Tx: storage.Tx{
 				Hash: trace.TxHash,
@@ -323,6 +303,7 @@ func (p *Module) parse(b types.BlockData) error {
 
 		if trace.Result.Address != nil {
 			newTrace.Tx.Contract = &storage.Contract{
+				Height:  decodeCtx.Block.Height,
 				Address: trace.Result.Address.String(),
 			}
 		}
@@ -335,12 +316,7 @@ func (p *Module) parse(b types.BlockData) error {
 				Height:       decodeCtx.Block.Height,
 				LastHeight:   decodeCtx.Block.Height,
 				Interactions: 1,
-				Balance: []*storage.Balance{
-					{
-						Currency: currency.DefaultCurrency,
-						Value:    decimal.Zero,
-					},
-				},
+				Balance:      storage.EmptyBalance(),
 			}
 			if trace.Action.From.String() != trace.Action.To.String() {
 				newTrace.ToAddress.Interactions = 0

@@ -9,7 +9,6 @@ import (
 	"github.com/baking-bad/noble-indexer/pkg/node"
 	"github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/dipdup-net/indexer-sdk/pkg/modules"
-	sdkSync "github.com/dipdup-net/indexer-sdk/pkg/sync"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
 )
@@ -35,7 +34,6 @@ type Module struct {
 	cfg              config.Indexer
 	cancelReadBlocks context.CancelFunc
 	w                *Worker
-	taskQueue        *sdkSync.Map[types.Level, struct{}]
 	rollbackSync     *sync.WaitGroup
 }
 
@@ -59,7 +57,6 @@ func NewModule(cfg config.Indexer, api node.Api, ws *websocket.Conn, state *stor
 		needGenesis:  state == nil,
 		blocks:       make(chan types.BlockData, 128),
 		mx:           new(sync.RWMutex),
-		taskQueue:    sdkSync.NewMap[types.Level, struct{}](),
 		rollbackSync: new(sync.WaitGroup),
 	}
 
@@ -125,7 +122,7 @@ func (r *Module) rollback(ctx context.Context) {
 				continue
 			}
 
-			r.taskQueue.Clear()
+			r.w.queue = r.w.queue[:0]
 			r.setLevel(state.LastHeight, state.LastHash)
 			r.Log.Info().Msgf("caught return from rollback to level=%d", state.LastHeight)
 			r.rollbackSync.Done()
