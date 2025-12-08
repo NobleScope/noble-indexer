@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"github.com/baking-bad/noble-indexer/internal/storage"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/uptrace/bun"
 )
@@ -17,4 +18,24 @@ func sortScope(q *bun.SelectQuery, field string, sort sdk.SortOrder) *bun.Select
 		sort = sdk.SortOrderAsc
 	}
 	return q.OrderExpr("? ?", bun.Ident(field), bun.Safe(sort))
+}
+
+func addressListFilter(query *bun.SelectQuery, fltrs storage.AddressListFilter) *bun.SelectQuery {
+	query = limitScope(query, fltrs.Limit)
+	query = query.Offset(fltrs.Offset)
+
+	switch fltrs.SortField {
+	case "id", "value", "last_height":
+		query = sortScope(query, fltrs.SortField, fltrs.Sort)
+	case "first_height":
+		query = sortScope(query, "height", fltrs.Sort)
+	default:
+		query = sortScope(query, "id", fltrs.Sort)
+	}
+
+	if fltrs.OnlyContracts {
+		query = query.Where("is_contract = ?", true)
+	}
+
+	return query
 }

@@ -52,6 +52,16 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 		hashGroup.GET("/traces", txHandlers.Traces)
 	}
 
+	addressHandlers := handler.NewAddressHandler(db.Addresses, db.Tx, db.State, cfg.Indexer.Name)
+	addressesGroup := v1.Group("/address")
+	{
+		addressesGroup.GET("", addressHandlers.List)
+		addressGroup := addressesGroup.Group("/:hash")
+		{
+			addressGroup.GET("", addressHandlers.Get)
+		}
+	}
+
 	log.Info().Msg("API routes:")
 	for _, route := range e.Routes() {
 		log.Info().Msgf("[%s] %s -> %s", route.Method, route.Path, route.Name)
