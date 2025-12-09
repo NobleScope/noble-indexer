@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
+	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/dipdup-net/go-lib/database"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage/postgres"
 )
@@ -27,10 +28,10 @@ func (a *Address) ListWithBalance(ctx context.Context, filters storage.AddressLi
 
 		query = addressListFilter(query, filters)
 		query = a.DB().NewSelect().
-			TableExpr("(?) as balance", query).
+			TableExpr("(?) AS balance", query).
 			ColumnExpr("address.*").
-			ColumnExpr("balance.currency as balance__currency, balance.value as balance__value").
-			Join("left join address on balance.id = address.id")
+			ColumnExpr("balance.currency AS balance__currency, balance.value AS balance__value").
+			Join("LEFT JOIN address ON balance.id = address.id")
 
 		query = addressListFilter(query, filters)
 		err = query.Scan(ctx, &result)
@@ -40,10 +41,10 @@ func (a *Address) ListWithBalance(ctx context.Context, filters storage.AddressLi
 
 		query = addressListFilter(query, filters)
 		query = a.DB().NewSelect().
-			TableExpr("(?) as address", query).
+			TableExpr("(?) AS address", query).
 			ColumnExpr("address.*").
-			ColumnExpr("balance.currency as balance__currency, balance.value as balance__value").
-			Join("left join balance on balance.id = address.id")
+			ColumnExpr("balance.currency AS balance__currency, balance.value AS balance__value").
+			Join("LEFT JOIN balance ON balance.id = address.id")
 
 		query = addressListFilter(query, filters)
 		err = query.Scan(ctx, &result)
@@ -52,15 +53,16 @@ func (a *Address) ListWithBalance(ctx context.Context, filters storage.AddressLi
 	return
 }
 
-func (a *Address) ByHash(ctx context.Context, hash string) (address storage.Address, err error) {
+func (a *Address) ByHash(ctx context.Context, hash pkgTypes.Hex) (address storage.Address, err error) {
 	addressQuery := a.DB().NewSelect().
 		Model((*storage.Address)(nil)).
 		Where("address = ?", hash)
 
-	err = a.DB().NewSelect().TableExpr("(?) as address", addressQuery).
+	err = a.DB().NewSelect().TableExpr("(?) AS address", addressQuery).
 		ColumnExpr("address.*").
-		ColumnExpr("balance.currency as balance__currency, balance.value as balance__value").
-		Join("left join balance on balance.id = address.id").
+		ColumnExpr("balance.currency AS balance__currency, balance.value AS balance__value").
+		Join("LEFT JOIN balance ON balance.id = address.id").
 		Scan(ctx, &address)
+
 	return
 }

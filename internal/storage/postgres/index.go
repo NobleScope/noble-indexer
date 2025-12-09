@@ -185,6 +185,16 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			return err
 		}
 
+		// Source
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Source)(nil)).
+			Index("source_contract_id_idx").
+			Column("contract_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+
 		return nil
 	})
 }

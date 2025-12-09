@@ -21,7 +21,7 @@ type IAddress interface {
 	storage.Table[*Address]
 
 	ListWithBalance(ctx context.Context, filters AddressListFilter) ([]Address, error)
-	ByHash(ctx context.Context, hash string) (Address, error)
+	ByHash(ctx context.Context, hash types.Hex) (Address, error)
 }
 
 // Address -

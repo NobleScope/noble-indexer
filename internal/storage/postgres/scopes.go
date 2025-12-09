@@ -21,6 +21,10 @@ func sortScope(q *bun.SelectQuery, field string, sort sdk.SortOrder) *bun.Select
 }
 
 func addressListFilter(query *bun.SelectQuery, fltrs storage.AddressListFilter) *bun.SelectQuery {
+	if fltrs.OnlyContracts {
+		query = query.Where("is_contract = ?", true)
+	}
+
 	query = limitScope(query, fltrs.Limit)
 	query = query.Offset(fltrs.Offset)
 
@@ -33,8 +37,26 @@ func addressListFilter(query *bun.SelectQuery, fltrs storage.AddressListFilter) 
 		query = sortScope(query, "id", fltrs.Sort)
 	}
 
-	if fltrs.OnlyContracts {
-		query = query.Where("is_contract = ?", true)
+	return query
+}
+
+func contractListFilter(query *bun.SelectQuery, fltrs storage.ContractListFilter) *bun.SelectQuery {
+	if fltrs.TxId != nil {
+		query = query.Where("tx_id = ?", fltrs.TxId)
+	}
+
+	if fltrs.IsVerified {
+		query = query.Where("is_verified = ?", true)
+	}
+
+	query = limitScope(query, fltrs.Limit)
+	query = query.Offset(fltrs.Offset)
+
+	switch fltrs.SortField {
+	case "id", "height":
+		query = sortScope(query, fltrs.SortField, fltrs.Sort)
+	default:
+		query = sortScope(query, "id", fltrs.Sort)
 	}
 
 	return query

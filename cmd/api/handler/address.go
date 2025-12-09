@@ -5,27 +5,19 @@ import (
 
 	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
 	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/labstack/echo/v4"
 )
 
 type AddressHandler struct {
-	address     storage.IAddress
-	txs         storage.ITx
-	state       storage.IState
-	indexerName string
+	address storage.IAddress
 }
 
 func NewAddressHandler(
 	address storage.IAddress,
-	txs storage.ITx,
-	state storage.IState,
-	indexerName string,
 ) *AddressHandler {
 	return &AddressHandler{
-		address:     address,
-		txs:         txs,
-		state:       state,
-		indexerName: indexerName,
+		address: address,
 	}
 }
 
@@ -69,7 +61,7 @@ func (handler *AddressHandler) List(c echo.Context) error {
 	}
 	req.SetDefault()
 
-	fltrs := storage.AddressListFilter{
+	filters := storage.AddressListFilter{
 		Limit:         req.Limit,
 		Offset:        req.Offset,
 		Sort:          pgSort(req.Sort),
@@ -77,14 +69,14 @@ func (handler *AddressHandler) List(c echo.Context) error {
 		OnlyContracts: req.OnlyContracts,
 	}
 
-	address, err := handler.address.ListWithBalance(c.Request().Context(), fltrs)
+	addresses, err := handler.address.ListWithBalance(c.Request().Context(), filters)
 	if err != nil {
 		return handleError(c, err, handler.address)
 	}
 
-	response := make([]responses.Address, len(address))
-	for i := range address {
-		response[i] = responses.NewAddress(address[i])
+	response := make([]responses.Address, len(addresses))
+	for i := range addresses {
+		response[i] = responses.NewAddress(addresses[i])
 	}
 
 	return returnArray(c, response)
@@ -113,7 +105,12 @@ func (handler *AddressHandler) Get(c echo.Context) error {
 		return badRequestError(c, err)
 	}
 
-	address, err := handler.address.ByHash(c.Request().Context(), req.Hash)
+	hash, err := types.HexFromString(req.Hash)
+	if err != nil {
+		return badRequestError(c, err)
+	}
+
+	address, err := handler.address.ByHash(c.Request().Context(), hash)
 	if err != nil {
 		return handleError(c, err, handler.address)
 	}
