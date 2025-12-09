@@ -18,9 +18,9 @@ func saveTransfers(
 	}
 
 	for i := range transfers {
-		contractID, ok := addresses[transfers[i].Contract.Address]
+		contractID, ok := addresses[transfers[i].Contract.Address.Address]
 		if !ok {
-			return errors.Errorf("can't find contract key: %s", transfers[i].Contract.Address)
+			return errors.Errorf("can't find contract key: %s", transfers[i].Contract.Address.Address)
 		}
 		transfers[i].ContractId = contractID
 

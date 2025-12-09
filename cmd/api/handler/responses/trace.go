@@ -25,7 +25,6 @@ type Trace struct {
 	GasUsed        decimal.Decimal  `example:"21000"                                                  json:"gas_used"        swaggertype:"string"`
 	Output         *string          `example:"0x0"                                                    json:"output"          swaggertype:"string"`
 	Contract       *string          `example:"0x0000000000000000000000000000000000000002"             json:"contract"        swaggertype:"string"`
-	Code           *string          `example:"0x6060604052600080fd5b"                                 json:"code"            swaggertype:"string"`
 	Subtraces      uint64           `example:"0"                                                      json:"subtraces"       swaggertype:"integer"`
 }
 
@@ -64,10 +63,6 @@ func NewTrace(t *storage.Trace) Trace {
 	if t.Contract != nil {
 		contract := t.Contract.String()
 		result.Contract = &contract
-	}
-	if t.Code != nil {
-		code := t.Code.String()
-		result.Code = &code
 	}
 
 	return result

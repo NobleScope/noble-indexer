@@ -27,6 +27,8 @@ const (
 	Selfdestruct TraceType = "selfdestruct"
 	// Reward is a TraceType of type reward.
 	Reward TraceType = "reward"
+	// Suicide is a TraceType of type suicide.
+	Suicide TraceType = "suicide"
 )
 
 var ErrInvalidTraceType = fmt.Errorf("not a valid TraceType, try [%s]", strings.Join(_TraceTypeNames, ", "))
@@ -39,6 +41,7 @@ var _TraceTypeNames = []string{
 	string(Create2),
 	string(Selfdestruct),
 	string(Reward),
+	string(Suicide),
 }
 
 // TraceTypeNames returns a list of possible string values of TraceType.
@@ -58,6 +61,7 @@ func TraceTypeValues() []TraceType {
 		Create2,
 		Selfdestruct,
 		Reward,
+		Suicide,
 	}
 }
 
@@ -81,6 +85,7 @@ var _TraceTypeValue = map[string]TraceType{
 	"create2":      Create2,
 	"selfdestruct": Selfdestruct,
 	"reward":       Reward,
+	"suicide":      Suicide,
 }
 
 // ParseTraceType attempts to convert a string to a TraceType.

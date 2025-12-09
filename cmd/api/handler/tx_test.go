@@ -83,7 +83,6 @@ func (s *TxHandlerTestSuite) TestGetSuccess() {
 	s.Require().Equal("0x1234567890123456789012345678901234567890", tx.FromAddress)
 	s.Require().NotNil(tx.ToAddress)
 	s.Require().Equal("0x0987654321098765432109876543210987654321", *tx.ToAddress)
-	s.Require().Nil(tx.Contract)
 	s.Require().Equal("1000000000000000000", tx.Amount.String())
 	s.Require().Equal("21000", tx.Gas.String())
 	s.Require().Equal("1000000", tx.GasPrice.String())
@@ -120,8 +119,6 @@ func (s *TxHandlerTestSuite) TestGetContractCreation() {
 	s.Require().EqualValues(1, tx.Index)
 	s.Require().Equal("0x1234567890123456789012345678901234567890", tx.FromAddress)
 	s.Require().Nil(tx.ToAddress)
-	s.Require().NotNil(tx.Contract)
-	s.Require().Equal("0xabcdefabcdefabcdefabcdefabcdefabcdefabcd", *tx.Contract)
 	s.Require().Equal("0", tx.Amount.String())
 	s.Require().Equal("100000", tx.Gas.String())
 	s.Require().Equal("2000000", tx.GasPrice.String())
@@ -159,8 +156,6 @@ func (s *TxHandlerTestSuite) TestGetContractCall() {
 	s.Require().Equal("0x1234567890123456789012345678901234567890", tx.FromAddress)
 	s.Require().NotNil(tx.ToAddress)
 	s.Require().Equal("0x0987654321098765432109876543210987654321", *tx.ToAddress)
-	s.Require().NotNil(tx.Contract)
-	s.Require().Equal("0xabcdefabcdefabcdefabcdefabcdefabcdefabcd", *tx.Contract)
 	s.Require().Equal("100000000", tx.Amount.String())
 	s.Require().Equal("50000", tx.Gas.String())
 	s.Require().Equal("1500000", tx.GasPrice.String())
@@ -297,19 +292,16 @@ func (s *TxHandlerTestSuite) TestListSuccess() {
 	s.Require().Equal("0x1234567890123456789012345678901234567890", txs[0].FromAddress)
 	s.Require().NotNil(txs[0].ToAddress)
 	s.Require().Equal("0x0987654321098765432109876543210987654321", *txs[0].ToAddress)
-	s.Require().Nil(txs[0].Contract)
 
 	s.Require().EqualValues(100, txs[1].Height)
 	s.Require().Equal("0x040506", txs[1].Hash)
 	s.Require().EqualValues(1, txs[1].Index)
 	s.Require().Nil(txs[1].ToAddress)
-	s.Require().NotNil(txs[1].Contract)
 
 	s.Require().EqualValues(100, txs[2].Height)
 	s.Require().Equal("0x070809", txs[2].Hash)
 	s.Require().EqualValues(2, txs[2].Index)
 	s.Require().NotNil(txs[2].ToAddress)
-	s.Require().NotNil(txs[2].Contract)
 }
 
 // TestListWithLimit tests list with custom limit parameter

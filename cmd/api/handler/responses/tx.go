@@ -25,7 +25,6 @@ type Transaction struct {
 	Amount            decimal.Decimal `example:"1000000000000000000"                                                json:"amount"              swaggertype:"integer"`
 	FromAddress       string          `example:"0x0000000000000000000000000000000000000000"                         json:"from_address"        swaggertype:"string"`
 	ToAddress         *string         `example:"0x0000000000000000000000000000000000000001"                         json:"to_address"          swaggertype:"string"`
-	Contract          *string         `example:"0x0000000000000000000000000000000000000002"                         json:"contract"            swaggertype:"string"`
 	Input             string          `example:"0x"                                                                 json:"input"               swaggertype:"string"`
 	LogsBloom         string          `example:"0x00000000000000000000000000000000000000000000"                     json:"logs_bloom"          swaggertype:"string"`
 }
@@ -54,11 +53,6 @@ func NewTransaction(tx storage.Tx) Transaction {
 	if tx.ToAddress != nil {
 		toAddr := tx.ToAddress.String()
 		result.ToAddress = &toAddr
-	}
-
-	if tx.Contract != nil {
-		contractAddr := tx.Contract.String()
-		result.Contract = &contractAddr
 	}
 
 	return result

@@ -25,8 +25,8 @@ func saveTraces(
 			traces[i].To = &id
 		}
 
-		if traces[i].Tx.Contract != nil {
-			id := addresses[traces[i].Tx.Contract.Address]
+		if traces[i].Contract != nil {
+			id := addresses[traces[i].Contract.Address.Address]
 			traces[i].ContractId = &id
 		}
 	}

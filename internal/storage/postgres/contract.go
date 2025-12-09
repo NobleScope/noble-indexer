@@ -26,6 +26,7 @@ func (c *Contract) PendingMetadata(ctx context.Context, retryDelay time.Duration
 	threshold := time.Now().UTC().Add(-retryDelay)
 	err = c.DB().NewSelect().
 		Model(&contracts).
+		Relation("Address").
 		Where("metadata_link IS NOT NULL AND metadata_link <> ''").
 		Where("status = 'pending' AND (updated_at < ? OR retry_count = 0)", threshold).
 		Order("id ASC").

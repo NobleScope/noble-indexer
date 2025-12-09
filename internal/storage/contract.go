@@ -24,7 +24,6 @@ type Contract struct {
 
 	Id               uint64               `bun:"id,pk,notnull"                    comment:"Unique internal identity"`
 	Height           pkgTypes.Level       `bun:"height"                           comment:"Block number in which the contract was deployed"`
-	Address          string               `bun:"address,unique:contract_idx"      comment:"Human-readable address"`
 	Code             []byte               `bun:"code"                             comment:"Contract code"`
 	Verified         bool                 `bun:"verified,default:false,notnull"   comment:"Verified or not"`
 	TxId             *uint64              `bun:"tx_id"                            comment:"Transaction in which this contract was deployed"`
@@ -39,7 +38,8 @@ type Contract struct {
 	Error            string               `bun:"error"                            comment:"Error"`
 	UpdatedAt        time.Time            `bun:"updated_at,notnull,default:now()" comment:"last update time"`
 
-	Tx *Tx `bun:"-"`
+	Address Address `bun:"rel:belongs-to,join:id=id"`
+	Tx      *Tx     `bun:"-"`
 }
 
 // TableName -
@@ -48,5 +48,5 @@ func (Contract) TableName() string {
 }
 
 func (contract Contract) String() string {
-	return contract.Address
+	return contract.Address.Address
 }

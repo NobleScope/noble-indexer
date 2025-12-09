@@ -6,7 +6,7 @@ import (
 	"github.com/baking-bad/noble-indexer/internal/currency"
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	dCtx "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
-	parser "github.com/baking-bad/noble-indexer/pkg/indexer/parser"
+	"github.com/baking-bad/noble-indexer/pkg/indexer/parser"
 	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 )
 
@@ -56,10 +56,12 @@ func (module *Module) parse(genesis pkgTypes.Genesis) (parsedData, error) {
 		if v.Code != nil {
 			address.IsContract = true
 			contract := &storage.Contract{
-				Height:  0,
-				Address: k,
-				Code:    v.Code,
-				TxId:    nil,
+				Height: 0,
+				Address: storage.Address{
+					Address: k,
+				},
+				Code: v.Code,
+				TxId: nil,
 			}
 
 			err = parser.ParseEvmContractMetadata(contract)
@@ -76,7 +78,7 @@ func (module *Module) parse(genesis pkgTypes.Genesis) (parsedData, error) {
 	}
 
 	for _, c := range decodeCtx.GetContracts() {
-		data.contracts[c.Address] = c
+		data.contracts[c.Address.Address] = c
 	}
 	data.chainId = genesis.Config.ChainID
 	genesisTime, err := genesis.Timestamp.Time()

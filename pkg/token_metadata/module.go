@@ -122,7 +122,7 @@ func (m *Module) sync(ctx context.Context) error {
 		tokens[t.Id] = t
 		tokenMetadata = append(tokenMetadata, pkgTypes.TokenMetadataRequest{
 			Id:        t.Id,
-			Address:   contract.Address,
+			Address:   contract.Address.Address,
 			ABI:       iABI,
 			Interface: t.Type,
 			TokenID:   t.TokenID.BigInt(),

@@ -124,7 +124,7 @@ func (tx Transaction) SaveContracts(ctx context.Context, contracts ...*models.Co
 	}
 
 	_, err := tx.Tx().NewInsert().Model(&contracts).
-		On("CONFLICT ON CONSTRAINT contract_idx DO UPDATE").
+		On("CONFLICT (id) DO UPDATE").
 		Set("verified = EXCLUDED.verified").
 		Set("abi = EXCLUDED.abi").
 		Set("compiler_version = EXCLUDED.compiler_version").

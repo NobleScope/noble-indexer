@@ -39,7 +39,9 @@ func (p *Module) parseTransfers(ctx *dCtx.Context) error {
 				Height: ctx.Block.Height,
 				Time:   ctx.Block.Time,
 				Contract: storage.Contract{
-					Address: log.Address.String(),
+					Address: storage.Address{
+						Address: log.Address.String(),
+					},
 				},
 			}
 
@@ -114,7 +116,9 @@ func (p *Module) parseTransfers(ctx *dCtx.Context) error {
 							Height: ctx.Block.Height,
 							Time:   ctx.Block.Time,
 							Contract: storage.Contract{
-								Address: log.Address.String(),
+								Address: storage.Address{
+									Address: log.Address.String(),
+								},
 							},
 							TokenID: decimal.NewFromBigInt(transferEvent.Ids[id], 0),
 							Amount:  decimal.NewFromBigInt(transferEvent.Values[id], 0),
@@ -302,8 +306,10 @@ func setAddresses(ctx *dCtx.Context, transferType types.TransferType, transfer *
 	}
 
 	storageContract := &storage.Contract{
-		Address: contractAddress.Address,
-		Height:  ctx.Block.Height,
+		Address: storage.Address{
+			Address: contractAddress.Address,
+		},
+		Height: ctx.Block.Height,
 	}
 
 	ctx.AddContract(storageContract)
