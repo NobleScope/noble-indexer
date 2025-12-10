@@ -249,8 +249,8 @@ func getEIP1967Proxy(logs []storage.Log) map[string]string {
 		}
 
 		for range logs[i].Topics {
-			if logs[i].Topics[0].Hex() == eip1967.EventUpgradedSignature ||
-				logs[i].Topics[0].Hex() == eip1967.EventBeaconUpgradedSignature {
+			if len(logs[i].Topics) > 1 && (logs[i].Topics[0].Hex() == eip1967.EventUpgradedSignature ||
+				logs[i].Topics[0].Hex() == eip1967.EventBeaconUpgradedSignature) {
 				implementationAddress := logs[i].Topics[1]
 				if len(implementationAddress) > AddressBytesLength {
 					implementationAddress = implementationAddress[len(implementationAddress)-AddressBytesLength:]
