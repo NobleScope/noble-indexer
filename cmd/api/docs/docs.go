@@ -662,10 +662,6 @@ const docTemplate = `{
                     "type": "string",
                     "example": "1000000000000000000"
                 },
-                "code": {
-                    "type": "string",
-                    "example": "0x6060604052600080fd5b"
-                },
                 "contract": {
                     "type": "string",
                     "example": "0x0000000000000000000000000000000000000002"
@@ -753,10 +749,6 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1000000000000000000
                 },
-                "contract": {
-                    "type": "string",
-                    "example": "0x0000000000000000000000000000000000000002"
-                },
                 "cumulative_gas_used": {
                     "type": "integer",
                     "example": 21000
@@ -842,7 +834,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:9876",
+	Host:             "noble.dipdup.net",
 	BasePath:         "/v1",
 	Schemes:          []string{"http", "https"},
 	Title:            "Noble Indexer API",
