@@ -27,7 +27,9 @@ FROM scratch
 WORKDIR /app
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /go/bin/indexer /app/indexer
-COPY configs/dipdup.yml /app/config.yml
+COPY --from=builder /go/bin/indexer ./indexer
+COPY configs/dipdup.yml ./config.yml
+COPY assets ./assets
+COPY database ./database
 
-ENTRYPOINT ["/app/indexer", "-c", "/app/config.yml"]
+ENTRYPOINT ["./indexer", "-c", "./config.yml"]
