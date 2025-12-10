@@ -70,3 +70,39 @@ jobs:
           cache-to: type=gha,mode=max,scope=api
           tags: ${{ steps.meta-api.outputs.tags }}
           labels: ${{ steps.meta-api.outputs.labels }}
+
+      # Contract metadata
+      - name: Contract metadata image tags & labels
+        id: meta-contract-metadata
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_BASE }}/contract-metadata
+
+      - name: Contract metadata image build & push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: build/contract_metadata_resolver/Dockerfile
+          push: true
+          cache-from: type=gha,scope=contract-metadata
+          cache-to: type=gha,mode=max,scope=contract-metadata
+          tags: ${{ steps.meta-contract-metadata.outputs.tags }}
+          labels: ${{ steps.meta-contract-metadata.outputs.labels }}
+
+      # Token metadata
+      - name: Token metadata image tags & labels
+        id: meta-token-metadata
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_BASE }}/token-metadata
+
+      - name: Token metadata image build & push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: build/token_metadata_resolver/Dockerfile
+          push: true
+          cache-from: type=gha,scope=token-metadata
+          cache-to: type=gha,mode=max,scope=token-metadata
+          tags: ${{ steps.meta-token-metadata.outputs.tags }}
+          labels: ${{ steps.meta-token-metadata.outputs.labels }}
