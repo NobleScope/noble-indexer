@@ -29,6 +29,7 @@ type TxHandlerTestSuite struct {
 	suite.Suite
 	tx      *mock.MockITx
 	trace   *mock.MockITrace
+	address *mock.MockIAddress
 	echo    *echo.Echo
 	handler *TxHandler
 	ctrl    *gomock.Controller
@@ -41,7 +42,8 @@ func (s *TxHandlerTestSuite) SetupSuite() {
 	s.ctrl = gomock.NewController(s.T())
 	s.tx = mock.NewMockITx(s.ctrl)
 	s.trace = mock.NewMockITrace(s.ctrl)
-	s.handler = NewTxHandler(s.tx, s.trace, testIndexerName)
+	s.address = mock.NewMockIAddress(s.ctrl)
+	s.handler = NewTxHandler(s.tx, s.trace, s.address, testIndexerName)
 }
 
 // TearDownSuite -

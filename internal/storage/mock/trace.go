@@ -121,6 +121,45 @@ func (c *MockITraceCursorListCall) DoAndReturn(f func(context.Context, uint64, u
 	return c
 }
 
+// Filter mocks base method.
+func (m *MockITrace) Filter(ctx context.Context, filter storage.TraceListFilter) ([]*storage.Trace, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Filter", ctx, filter)
+	ret0, _ := ret[0].([]*storage.Trace)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Filter indicates an expected call of Filter.
+func (mr *MockITraceMockRecorder) Filter(ctx, filter any) *MockITraceFilterCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Filter", reflect.TypeOf((*MockITrace)(nil).Filter), ctx, filter)
+	return &MockITraceFilterCall{Call: call}
+}
+
+// MockITraceFilterCall wrap *gomock.Call
+type MockITraceFilterCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockITraceFilterCall) Return(traces []*storage.Trace, err error) *MockITraceFilterCall {
+	c.Call = c.Call.Return(traces, err)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockITraceFilterCall) Do(f func(context.Context, storage.TraceListFilter) ([]*storage.Trace, error)) *MockITraceFilterCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockITraceFilterCall) DoAndReturn(f func(context.Context, storage.TraceListFilter) ([]*storage.Trace, error)) *MockITraceFilterCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetByID mocks base method.
 func (m *MockITrace) GetByID(ctx context.Context, id uint64) (*storage.Trace, error) {
 	m.ctrl.T.Helper()

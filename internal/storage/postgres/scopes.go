@@ -61,3 +61,30 @@ func contractListFilter(query *bun.SelectQuery, fltrs storage.ContractListFilter
 
 	return query
 }
+
+func traceListFilter(query *bun.SelectQuery, fltrs storage.TraceListFilter) *bun.SelectQuery {
+	if fltrs.TxId != nil {
+		query = query.Where("tx_id = ?", *fltrs.TxId)
+	}
+	if fltrs.AddressFromId != nil {
+		query = query.Where("from_address_id = ?", *fltrs.AddressFromId)
+	}
+	if fltrs.AddressToId != nil {
+		query = query.Where("to_address_id = ?", *fltrs.AddressToId)
+	}
+	if fltrs.ContractId != nil {
+		query = query.Where("contract_id = ?", *fltrs.ContractId)
+	}
+	if fltrs.Height != nil {
+		query = query.Where("height = ?", *fltrs.Height)
+	}
+
+	if len(fltrs.Type) > 0 {
+		query = query.Where("type IN (?)", bun.In(fltrs.Type))
+	}
+	query = limitScope(query, fltrs.Limit)
+	query = query.Offset(fltrs.Offset)
+	query = sortScope(query, "id", fltrs.Sort)
+
+	return query
+}

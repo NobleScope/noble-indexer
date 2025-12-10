@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"strings"
+
 	"github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/labstack/echo/v4"
 )
@@ -30,4 +32,11 @@ func bindAndValidate[T any](c echo.Context) (*T, error) {
 		return req, err
 	}
 	return req, nil
+}
+
+type StringArray []string
+
+func (s *StringArray) UnmarshalParam(param string) error {
+	*s = StringArray(strings.Split(param, ","))
+	return nil
 }

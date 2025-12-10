@@ -33,7 +33,7 @@ type contractListRequest struct {
 	Sort       string `query:"sort"        validate:"omitempty,oneof=asc desc"`
 	SortBy     string `query:"sort_by"     validate:"omitempty,oneof=id height"`
 	IsVerified bool   `query:"is_verified" validate:"omitempty"`
-	TxHash     string `query:"tx_hash"     validate:"omitempty,txHash"`
+	TxHash     string `query:"tx_hash"     validate:"omitempty,tx_hash"`
 }
 
 func (p *contractListRequest) SetDefault() {
@@ -105,7 +105,7 @@ func (handler *ContractHandler) List(c echo.Context) error {
 }
 
 type getByTxHashRequest struct {
-	Hash string `param:"hash" validate:"required,txHash"`
+	Hash string `param:"hash" validate:"required,tx_hash"`
 }
 
 // Get godoc
@@ -146,7 +146,7 @@ func (handler *ContractHandler) Get(c echo.Context) error {
 }
 
 type getSourcesRequest struct {
-	Hash   string `param:"hash"   validate:"required,txHash"`
+	Hash   string `param:"hash"   validate:"required,tx_hash"`
 	Limit  int    `query:"limit"  validate:"omitempty,min=1,max=100"`
 	Offset int    `query:"offset" validate:"omitempty,min=0"`
 }

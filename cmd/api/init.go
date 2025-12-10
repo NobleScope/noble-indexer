@@ -43,16 +43,13 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 			heightGroup.GET("/transactions", blockHandlers.TransactionsList)
 		}
 	}
-	txHandlers := handler.NewTxHandler(db.Tx, db.Trace, cfg.Indexer.Name)
+	txHandlers := handler.NewTxHandler(db.Tx, db.Trace, db.Addresses, cfg.Indexer.Name)
 	txGroup := v1.Group("/tx")
 	{
 		txGroup.GET("", txHandlers.List)
-		hashGroup := txGroup.Group("/:hash")
-		{
-			hashGroup.GET("", txHandlers.Get)
-			hashGroup.GET("/traces", txHandlers.Traces)
-		}
+		txGroup.GET("/:hash", txHandlers.Get)
 	}
+	v1.GET("/traces", txHandlers.Traces)
 
 	addressHandlers := handler.NewAddressHandler(db.Addresses)
 	addressesGroup := v1.Group("/address")
