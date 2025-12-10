@@ -27,7 +27,9 @@ FROM scratch
 WORKDIR /app
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /go/bin/token_metadata_resolver /app/token_metadata_resolver
-COPY configs/dipdup.yml /app/config.yml
+COPY --from=builder /go/bin/token_metadata_resolver ./token_metadata_resolver
+COPY configs/dipdup.yml ./config.yml
+COPY assets ./assets
+COPY database ./database
 
-ENTRYPOINT ["/app/token_metadata_resolver", "-c", "/app/config.yml"]
+ENTRYPOINT ["./token_metadata_resolver", "-c", "./config.yml"]
