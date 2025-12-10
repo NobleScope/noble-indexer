@@ -24,7 +24,7 @@ type Contract struct {
 
 	Id               uint64               `bun:"id,pk,notnull"                    comment:"Unique internal identity"`
 	Height           pkgTypes.Level       `bun:"height"                           comment:"Block number in which the contract was deployed"`
-	Code             []byte               `bun:"code"                             comment:"Contract code"`
+	Code             pkgTypes.Hex         `bun:"code,type:bytea"                  comment:"Contract code"`
 	Verified         bool                 `bun:"verified,default:false,notnull"   comment:"Verified or not"`
 	TxId             *uint64              `bun:"tx_id"                            comment:"Transaction in which this contract was deployed"`
 	ABI              json.RawMessage      `bun:"abi,type:jsonb,nullzero"          comment:"Contract ABI"`

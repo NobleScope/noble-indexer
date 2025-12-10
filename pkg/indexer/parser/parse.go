@@ -220,6 +220,8 @@ func (p *Module) parse(b types.BlockData) error {
 				Removed: log.Removed,
 			}
 		}
+
+		p.parseEIP1967Proxy(decodeCtx, decodeCtx.Block.Txs[i].Logs)
 	}
 
 	for i, trace := range b.Traces {
@@ -300,6 +302,12 @@ func (p *Module) parse(b types.BlockData) error {
 		}
 
 		if trace.Result.Address != nil && trace.Result.Code != nil && len(*trace.Result.Code) > 0 {
+			deployerAddress := storage.Address{
+				Address:        b.Transactions[trace.TxPosition].From.String(),
+				LastHeight:     decodeCtx.Block.Height,
+				Balance:        storage.EmptyBalance(),
+				ContractsCount: 1,
+			}
 			contractAddress := storage.Address{
 				Address:    trace.Result.Address.String(),
 				Height:     decodeCtx.Block.Height,
@@ -321,21 +329,23 @@ func (p *Module) parse(b types.BlockData) error {
 			}
 
 			newTrace.Contract = contract
+			decodeCtx.AddAddress(&deployerAddress)
 			decodeCtx.AddAddress(&contractAddress)
 			decodeCtx.AddContract(contract)
+			if err = p.parseProxyContract(decodeCtx, contract); err != nil {
+				return err
+			}
 		}
 
 		decodeCtx.Block.Traces[i] = newTrace
 		decodeCtx.AddTrace(newTrace)
 	}
 
-	err = p.parseTxs(decodeCtx)
-	if err != nil {
+	if err = p.parseTxs(decodeCtx); err != nil {
 		return err
 	}
 
-	err = p.parseTransfers(decodeCtx)
-	if err != nil {
+	if err = p.parseTransfers(decodeCtx); err != nil {
 		return err
 	}
 

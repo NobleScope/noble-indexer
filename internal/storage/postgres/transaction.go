@@ -84,7 +84,7 @@ func (tx Transaction) SaveAddresses(ctx context.Context, addresses ...*models.Ad
 	_, err := tx.Tx().NewInsert().Model(&addr).
 		Column("address", "height", "last_height", "is_contract", "txs_count", "contracts_count", "interactions").
 		On("CONFLICT ON CONSTRAINT address_idx DO UPDATE").
-		Set("last_height = EXCLUDED.last_height").
+		Set("last_height = GREATEST(EXCLUDED.last_height, added_address.last_height)").
 		Set("txs_count = EXCLUDED.txs_count + added_address.txs_count").
 		Set("contracts_count = EXCLUDED.contracts_count + added_address.contracts_count").
 		Set("interactions = EXCLUDED.interactions + added_address.interactions").
@@ -224,6 +224,30 @@ func (tx Transaction) SaveTokenBalances(ctx context.Context, tokens ...*models.T
 	}
 
 	return tbs, nil
+}
+
+func (tx Transaction) SaveProxyContracts(ctx context.Context, contracts ...*models.ProxyContract) error {
+	if len(contracts) == 0 {
+		return nil
+	}
+
+	_, err := tx.Tx().NewInsert().Model(&contracts).
+		On("CONFLICT (id) DO UPDATE").
+		Set(`implementation_id = CASE
+				WHEN proxy_contract.implementation_id IS NULL OR EXCLUDED.height > proxy_contract.height
+				THEN EXCLUDED.implementation_id
+				ELSE proxy_contract.implementation_id
+			END`).
+		Set("height = GREATEST(EXCLUDED.height, proxy_contract.height)").
+		Set(`status = CASE
+				WHEN proxy_contract.implementation_id IS NULL OR EXCLUDED.height > proxy_contract.height
+				THEN EXCLUDED.status
+				ELSE proxy_contract.status
+			END`).
+		Set("resolving_attempts = EXCLUDED.resolving_attempts").
+		Exec(ctx)
+
+	return err
 }
 
 func (tx Transaction) RollbackBlock(ctx context.Context, height types.Level) error {

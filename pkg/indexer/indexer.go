@@ -10,6 +10,7 @@ import (
 	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/genesis"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/parser"
+	proxy "github.com/baking-bad/noble-indexer/pkg/indexer/proxy_contracts_resolver"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/receiver"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/rollback"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/storage"
@@ -24,17 +25,18 @@ import (
 )
 
 type Indexer struct {
-	cfg      config.Config
-	api      node.Api
-	receiver *receiver.Module
-	parser   *parser.Module
-	storage  *storage.Module
-	genesis  *genesis.Module
-	rollback *rollback.Module
-	stopper  modules.Module
-	pg       postgres.Storage
-	wg       *sync.WaitGroup
-	log      zerolog.Logger
+	cfg           config.Config
+	api           node.Api
+	receiver      *receiver.Module
+	parser        *parser.Module
+	proxyResolver *proxy.Module
+	storage       *storage.Module
+	genesis       *genesis.Module
+	rollback      *rollback.Module
+	stopper       modules.Module
+	pg            postgres.Storage
+	wg            *sync.WaitGroup
+	log           zerolog.Logger
 }
 
 func New(ctx context.Context, cfg config.Config, stopperModule modules.Module) (Indexer, error) {
@@ -53,7 +55,12 @@ func New(ctx context.Context, cfg config.Config, stopperModule modules.Module) (
 		return Indexer{}, errors.Wrap(err, "while creating parser module")
 	}
 
-	s, err := createStorage(pg, cfg, p)
+	proxyResolver, err := createProxyContractsResolver(cfg.Indexer, &api, &pg)
+	if err != nil {
+		return Indexer{}, errors.Wrap(err, "while creating parser module")
+	}
+
+	s, err := createStorage(pg, cfg, p, proxyResolver)
 	if err != nil {
 		return Indexer{}, errors.Wrap(err, "while creating storage module")
 	}
@@ -68,23 +75,24 @@ func New(ctx context.Context, cfg config.Config, stopperModule modules.Module) (
 		return Indexer{}, errors.Wrap(err, "while creating rollback module")
 	}
 
-	err = attachStopper(stopperModule, r, p, s, rb, genesisModule)
+	err = attachStopper(stopperModule, r, p, s, rb, genesisModule, proxyResolver)
 	if err != nil {
 		return Indexer{}, errors.Wrap(err, "while creating stopper module")
 	}
 
 	return Indexer{
-		api:      &api,
-		cfg:      cfg,
-		receiver: r,
-		parser:   p,
-		storage:  s,
-		genesis:  genesisModule,
-		rollback: rb,
-		stopper:  stopperModule,
-		pg:       pg,
-		wg:       new(sync.WaitGroup),
-		log:      log.With().Str("module", "indexer").Logger(),
+		api:           &api,
+		cfg:           cfg,
+		receiver:      r,
+		parser:        p,
+		proxyResolver: proxyResolver,
+		storage:       s,
+		genesis:       genesisModule,
+		rollback:      rb,
+		stopper:       stopperModule,
+		pg:            pg,
+		wg:            new(sync.WaitGroup),
+		log:           log.With().Str("module", "indexer").Logger(),
 	}, nil
 }
 
@@ -93,6 +101,7 @@ func (i *Indexer) Start(ctx context.Context) {
 
 	i.genesis.Start(ctx)
 	i.storage.Start(ctx)
+	i.proxyResolver.Start(ctx)
 	i.parser.Start(ctx)
 	i.rollback.Start(ctx)
 	i.receiver.Start(ctx)
@@ -110,6 +119,9 @@ func (i *Indexer) Close() error {
 	}
 	if err := i.parser.Close(); err != nil {
 		log.Err(err).Msg("closing parser")
+	}
+	if err := i.proxyResolver.Close(); err != nil {
+		log.Err(err).Msg("closing proxy contracts resolver")
 	}
 	if err := i.storage.Close(); err != nil {
 		log.Err(err).Msg("closing storage")
@@ -159,11 +171,29 @@ func createParser(cfg config.Indexer, receiverModule modules.Module) (*parser.Mo
 	return &parserModule, nil
 }
 
-func createStorage(pg postgres.Storage, cfg config.Config, parserModule modules.Module) (*storage.Module, error) {
+func createProxyContractsResolver(cfg config.Indexer, api *rpc.API, pg *postgres.Storage) (*proxy.Module, error) {
+	proxyContractsResolver := proxy.NewModule(cfg, api, pg)
+	return &proxyContractsResolver, nil
+}
+
+func createStorage(
+	pg postgres.Storage,
+	cfg config.Config,
+	parserModule modules.Module,
+	proxyResolverModule modules.Module,
+) (*storage.Module, error) {
 	storageModule := storage.NewModule(pg, cfg.Indexer)
 
 	if err := storageModule.AttachTo(parserModule, parser.OutputName, storage.InputName); err != nil {
 		return nil, errors.Wrap(err, "while attaching storage to parser")
+	}
+
+	if err := storageModule.AttachTo(
+		proxyResolverModule,
+		proxy.OutputName,
+		storage.ProxyContractsInput,
+	); err != nil {
+		return nil, errors.Wrap(err, "while attaching storage to proxy contracts resolver")
 	}
 
 	return &storageModule, nil
@@ -207,6 +237,7 @@ func attachStopper(
 	storageModule modules.Module,
 	rollbackModule modules.Module,
 	genesisModule modules.Module,
+	proxyResolverModule modules.Module,
 ) error {
 	if err := stopperModule.AttachTo(receiverModule, receiver.StopOutput, stopper.InputName); err != nil {
 		return errors.Wrap(err, "while attaching stopper to receiver")
@@ -226,6 +257,10 @@ func attachStopper(
 
 	if err := stopperModule.AttachTo(genesisModule, genesis.StopOutput, stopper.InputName); err != nil {
 		return errors.Wrap(err, "while attaching stopper to genesis")
+	}
+
+	if err := stopperModule.AttachTo(proxyResolverModule, proxy.StopOutput, stopper.InputName); err != nil {
+		return errors.Wrap(err, "while attaching stopper to proxy contracts resolver")
 	}
 
 	return nil

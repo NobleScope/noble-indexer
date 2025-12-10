@@ -990,6 +990,49 @@ func (c *MockTransactionSaveLogsCall) DoAndReturn(f func(context.Context, ...sto
 	return c
 }
 
+// SaveProxyContracts mocks base method.
+func (m *MockTransaction) SaveProxyContracts(ctx context.Context, contracts ...*storage.ProxyContract) error {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx}
+	for _, a := range contracts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SaveProxyContracts", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveProxyContracts indicates an expected call of SaveProxyContracts.
+func (mr *MockTransactionMockRecorder) SaveProxyContracts(ctx any, contracts ...any) *MockTransactionSaveProxyContractsCall {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx}, contracts...)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveProxyContracts", reflect.TypeOf((*MockTransaction)(nil).SaveProxyContracts), varargs...)
+	return &MockTransactionSaveProxyContractsCall{Call: call}
+}
+
+// MockTransactionSaveProxyContractsCall wrap *gomock.Call
+type MockTransactionSaveProxyContractsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionSaveProxyContractsCall) Return(arg0 error) *MockTransactionSaveProxyContractsCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionSaveProxyContractsCall) Do(f func(context.Context, ...*storage.ProxyContract) error) *MockTransactionSaveProxyContractsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionSaveProxyContractsCall) DoAndReturn(f func(context.Context, ...*storage.ProxyContract) error) *MockTransactionSaveProxyContractsCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // SaveSources mocks base method.
 func (m *MockTransaction) SaveSources(ctx context.Context, sources ...*storage.Source) error {
 	m.ctrl.T.Helper()

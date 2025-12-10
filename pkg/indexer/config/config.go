@@ -16,12 +16,13 @@ type Config struct {
 }
 
 type Indexer struct {
-	Name            string `validate:"omitempty"     yaml:"name"`
-	StartLevel      int64  `validate:"omitempty"     yaml:"start_level"`
-	BlockPeriod     int64  `validate:"omitempty"     yaml:"block_period"`
-	ScriptsDir      string `validate:"omitempty,dir" yaml:"scripts_dir"`
-	AssetsDir       string `validate:"omitempty,dir" yaml:"assets_dir"`
-	RequestBulkSize int    `validate:"min=1"         yaml:"request_bulk_size"`
+	Name            string         `validate:"omitempty"     yaml:"name"`
+	StartLevel      int64          `validate:"omitempty"     yaml:"start_level"`
+	BlockPeriod     int64          `validate:"omitempty"     yaml:"block_period"`
+	ScriptsDir      string         `validate:"omitempty,dir" yaml:"scripts_dir"`
+	AssetsDir       string         `validate:"omitempty,dir" yaml:"assets_dir"`
+	RequestBulkSize int            `validate:"min=1"         yaml:"request_bulk_size"`
+	Proxy           ProxyContracts `yaml:"proxy_contracts"`
 }
 
 type API struct {
@@ -37,6 +38,13 @@ type MetadataResolver struct {
 	RequestBulkSize  int    `validate:"min=1"     yaml:"request_bulk_size"`
 	RetryDelay       int    `validate:"min=1"     yaml:"retry_delay"`
 	RetryCount       uint64 `validate:"omitempty" yaml:"retry_count"`
+}
+
+type ProxyContracts struct {
+	Threads              int  `validate:"min=1" yaml:"threads"`
+	SyncPeriodSeconds    int  `validate:"min=1" yaml:"sync_period_seconds"`
+	BatchSize            int  `validate:"min=1" yaml:"node_batch_size"`
+	MaxResolvingAttempts uint `validate:"min=1" yaml:"max_resolving_attempts"`
 }
 
 // Substitute -

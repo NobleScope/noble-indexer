@@ -39,6 +39,14 @@ func HexFromString(hexStr string) (Hex, error) {
 	return resultBytes, nil
 }
 
+func MustDecodeHex(s string) []byte {
+	h, err := HexFromString(s)
+	if err != nil {
+		panic("invalid hex string: " + s)
+	}
+	return h.Bytes()
+}
+
 func (h *Hex) UnmarshalJSON(data []byte) error {
 	if h == nil {
 		return nil

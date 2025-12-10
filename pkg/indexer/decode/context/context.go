@@ -7,22 +7,24 @@ import (
 )
 
 type Context struct {
-	Addresses     *sync.Map[string, *storage.Address]
-	Contracts     *sync.Map[string, *storage.Contract]
-	Tokens        *sync.Map[string, *storage.Token]
-	TokenBalances *sync.Map[string, *storage.TokenBalance]
-	Traces        *sync.Map[string, []*storage.Trace]
+	Addresses      *sync.Map[string, *storage.Address]
+	Contracts      *sync.Map[string, *storage.Contract]
+	Tokens         *sync.Map[string, *storage.Token]
+	TokenBalances  *sync.Map[string, *storage.TokenBalance]
+	ProxyContracts *sync.Map[string, *storage.ProxyContract]
+	Traces         *sync.Map[string, []*storage.Trace]
 
 	Block *storage.Block
 }
 
 func NewContext() *Context {
 	return &Context{
-		Addresses:     sync.NewMap[string, *storage.Address](),
-		Contracts:     sync.NewMap[string, *storage.Contract](),
-		Tokens:        sync.NewMap[string, *storage.Token](),
-		TokenBalances: sync.NewMap[string, *storage.TokenBalance](),
-		Traces:        sync.NewMap[string, []*storage.Trace](),
+		Addresses:      sync.NewMap[string, *storage.Address](),
+		Contracts:      sync.NewMap[string, *storage.Contract](),
+		Tokens:         sync.NewMap[string, *storage.Token](),
+		TokenBalances:  sync.NewMap[string, *storage.TokenBalance](),
+		ProxyContracts: sync.NewMap[string, *storage.ProxyContract](),
+		Traces:         sync.NewMap[string, []*storage.Trace](),
 	}
 }
 
@@ -81,6 +83,15 @@ func (ctx *Context) AddTokenBalance(tokenBalance *storage.TokenBalance) {
 	}
 }
 
+func (ctx *Context) AddProxyContract(proxyContract *storage.ProxyContract) {
+	if proxyContract == nil {
+		return
+	}
+	if _, ok := ctx.ProxyContracts.Get(proxyContract.String()); !ok {
+		ctx.ProxyContracts.Set(proxyContract.String(), proxyContract)
+	}
+}
+
 func (ctx *Context) GetAddresses() []*storage.Address {
 	addresses := make([]*storage.Address, 0)
 	addresses = append(addresses, ctx.Addresses.Values()...)
@@ -122,4 +133,8 @@ func (ctx *Context) GetTokenBalances() []*storage.TokenBalance {
 	tokenBalances = append(tokenBalances, ctx.TokenBalances.Values()...)
 
 	return tokenBalances
+}
+
+func (ctx *Context) GetProxyContracts() []*storage.ProxyContract {
+	return ctx.ProxyContracts.Values()
 }

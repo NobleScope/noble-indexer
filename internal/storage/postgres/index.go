@@ -185,6 +185,25 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			return err
 		}
 
+		// Index for proxy contracts by status and height
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.ProxyContract)(nil)).
+			Index("proxy_contract_status_height_idx").
+			Column("status", "height").
+			Exec(ctx); err != nil {
+			return err
+		}
+		// Index for implementation lookup
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.ProxyContract)(nil)).
+			Index("proxy_contract_implementation_idx").
+			Column("implementation_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+
 		return nil
 	})
 }

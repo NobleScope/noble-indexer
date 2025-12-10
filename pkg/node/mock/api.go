@@ -163,6 +163,45 @@ func (c *MockApiHeadCall) DoAndReturn(f func(context.Context) (types.Level, erro
 	return c
 }
 
+// Storage mocks base method.
+func (m *MockApi) Storage(ctx context.Context, requestData []types.StorageRequest) ([]types.Hex, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Storage", ctx, requestData)
+	ret0, _ := ret[0].([]types.Hex)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Storage indicates an expected call of Storage.
+func (mr *MockApiMockRecorder) Storage(ctx, requestData any) *MockApiStorageCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Storage", reflect.TypeOf((*MockApi)(nil).Storage), ctx, requestData)
+	return &MockApiStorageCall{Call: call}
+}
+
+// MockApiStorageCall wrap *gomock.Call
+type MockApiStorageCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockApiStorageCall) Return(arg0 []types.Hex, arg1 error) *MockApiStorageCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockApiStorageCall) Do(f func(context.Context, []types.StorageRequest) ([]types.Hex, error)) *MockApiStorageCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockApiStorageCall) DoAndReturn(f func(context.Context, []types.StorageRequest) ([]types.Hex, error)) *MockApiStorageCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // TokenMetadataBulk mocks base method.
 func (m *MockApi) TokenMetadataBulk(ctx context.Context, request []types.TokenMetadataRequest) (map[uint64]types.TokenMetadata, error) {
 	m.ctrl.T.Helper()
