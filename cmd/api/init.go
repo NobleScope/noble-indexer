@@ -31,6 +31,9 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 	stateHandlers := handler.NewStateHandler(db.State, cfg.Indexer.Name)
 	v1.GET("/head", stateHandlers.Head)
 
+	constantsHandler := handler.NewConstantHandler()
+	v1.GET("/enums", constantsHandler.Enums)
+
 	blockHandlers := handler.NewBlockHandler(db.Blocks, db.BlockStats, db.Tx, db.State, cfg.Indexer.Name)
 	blockGroup := v1.Group("/block")
 	{
