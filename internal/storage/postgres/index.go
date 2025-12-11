@@ -135,6 +135,30 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			Exec(ctx); err != nil {
 			return err
 		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Trace)(nil)).
+			Index("trace_from_address_id_idx").
+			Column("from_address_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Trace)(nil)).
+			Index("trace_to_address_id_idx").
+			Column("to_address_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Trace)(nil)).
+			Index("trace_contract_id_idx").
+			Column("contract_id").
+			Exec(ctx); err != nil {
+			return err
+		}
 
 		// Address
 		if _, err := tx.NewCreateIndex().

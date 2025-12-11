@@ -27,6 +27,12 @@ func NewApiValidator() *ApiValidator {
 	if err := v.RegisterValidation("trace_type", traceTypeValidator()); err != nil {
 		panic(err)
 	}
+	if err := v.RegisterValidation("token_type", tokenTypeValidator()); err != nil {
+		panic(err)
+	}
+	if err := v.RegisterValidation("transfer_type", transferTypeValidator()); err != nil {
+		panic(err)
+	}
 	return &ApiValidator{validator: v}
 }
 
@@ -54,6 +60,19 @@ func txHashValidator() validator.Func {
 func traceTypeValidator() validator.Func {
 	return func(fl validator.FieldLevel) bool {
 		_, err := types.ParseTraceType(fl.Field().String())
+		return err == nil
+	}
+}
+
+func tokenTypeValidator() validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		_, err := types.ParseTokenType(fl.Field().String())
+		return err == nil
+	}
+}
+func transferTypeValidator() validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		_, err := types.ParseTransferType(fl.Field().String())
 		return err == nil
 	}
 }

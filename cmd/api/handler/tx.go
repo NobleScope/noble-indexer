@@ -160,7 +160,7 @@ func (handler *TxHandler) Traces(c echo.Context) error {
 
 		address, err := handler.address.ByHash(c.Request().Context(), hash)
 		if err != nil {
-			return handleError(c, err, handler.tx)
+			return handleError(c, err, handler.address)
 		}
 
 		filters.AddressToId = &address.Id
@@ -174,7 +174,7 @@ func (handler *TxHandler) Traces(c echo.Context) error {
 
 		address, err := handler.address.ByHash(c.Request().Context(), hash)
 		if err != nil {
-			return handleError(c, err, handler.tx)
+			return handleError(c, err, handler.address)
 		}
 
 		filters.ContractId = &address.Id

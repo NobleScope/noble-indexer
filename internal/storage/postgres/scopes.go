@@ -88,3 +88,74 @@ func traceListFilter(query *bun.SelectQuery, fltrs storage.TraceListFilter) *bun
 
 	return query
 }
+
+func tokenListFilter(query *bun.SelectQuery, fltrs storage.TokenListFilter) *bun.SelectQuery {
+	if fltrs.ContractId != nil {
+		query = query.Where("contract_id = ?", *fltrs.ContractId)
+	}
+
+	if len(fltrs.Type) > 0 {
+		query = query.Where("type IN (?)", bun.In(fltrs.Type))
+	}
+
+	query = limitScope(query, fltrs.Limit)
+	query = query.Offset(fltrs.Offset)
+	query = sortScope(query, "id", fltrs.Sort)
+
+	return query
+}
+
+func transferListFilter(query *bun.SelectQuery, fltrs storage.TransferListFilter) *bun.SelectQuery {
+	if fltrs.TokenId != nil {
+		query = query.Where("token_id = ?", *fltrs.TokenId)
+	}
+	if fltrs.TxId != nil {
+		query = query.Where("tx_id = ?", *fltrs.TxId)
+	}
+	if fltrs.AddressFromId != nil {
+		query = query.Where("from_address_id = ?", *fltrs.AddressFromId)
+	}
+	if fltrs.AddressToId != nil {
+		query = query.Where("to_address_id = ?", *fltrs.AddressToId)
+	}
+	if fltrs.ContractId != nil {
+		query = query.Where("contract_id = ?", *fltrs.ContractId)
+	}
+	if fltrs.Height != nil {
+		query = query.Where("height = ?", *fltrs.Height)
+	}
+	if len(fltrs.Type) > 0 {
+		query = query.Where("type IN (?)", bun.In(fltrs.Type))
+	}
+
+	if !fltrs.TimeFrom.IsZero() {
+		query = query.Where("time >= ?", fltrs.TimeFrom)
+	}
+	if !fltrs.TimeTo.IsZero() {
+		query = query.Where("time < ?", fltrs.TimeTo)
+	}
+
+	query = limitScope(query, fltrs.Limit)
+	query = query.Offset(fltrs.Offset)
+	query = sortScope(query, "id", fltrs.Sort)
+
+	return query
+}
+
+func tokenBalanceListFilter(query *bun.SelectQuery, fltrs storage.TokenBalanceListFilter) *bun.SelectQuery {
+	if fltrs.TokenId != nil {
+		query = query.Where("token_id = ?", *fltrs.TokenId)
+	}
+	if fltrs.AddressId != nil {
+		query = query.Where("address_id = ?", *fltrs.AddressId)
+	}
+	if fltrs.ContractId != nil {
+		query = query.Where("contract_id = ?", *fltrs.ContractId)
+	}
+
+	query = limitScope(query, fltrs.Limit)
+	query = query.Offset(fltrs.Offset)
+	query = sortScope(query, "balance", fltrs.Sort)
+
+	return query
+}

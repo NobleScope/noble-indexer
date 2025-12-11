@@ -72,6 +72,19 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 		}
 	}
 
+	tokenHandlers := handler.NewTokenHandler(db.Token, db.Transfer, db.TokenBalance, db.Addresses)
+	tokensGroup := v1.Group("/token")
+	{
+		tokensGroup.GET("", tokenHandlers.List)
+		tokensGroup.GET("/:contract/:token_id", tokenHandlers.Get)
+	}
+	tokenTransfersGroup := v1.Group("/transfers")
+	{
+		tokenTransfersGroup.GET("", tokenHandlers.TransferList)
+		tokenTransfersGroup.GET("/:id", tokenHandlers.GetTransfer)
+	}
+	v1.GET("/token_balance", tokenHandlers.TokenBalanceList)
+
 	log.Info().Msg("API routes:")
 	for _, route := range e.Routes() {
 		log.Info().Msgf("[%s] %s -> %s", route.Method, route.Path, route.Name)
