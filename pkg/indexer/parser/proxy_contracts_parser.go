@@ -90,7 +90,7 @@ func (p *Module) parseProxyContract(ctx *dCtx.Context, contract *storage.Contrac
 	return nil
 }
 
-func (p *Module) parseEIP1967Proxy(ctx *dCtx.Context, logs []storage.Log) {
+func (p *Module) parseEIP1967Proxy(ctx *dCtx.Context, logs []*storage.Log) {
 	eip1967Contracts := getEIP1967Proxy(logs)
 	for proxyAddress, implementationAddress := range eip1967Contracts {
 		storageImplementationAddress := storage.Address{
@@ -237,7 +237,7 @@ func isCloneWithImmutableArgs(contract *storage.Contract) bool {
 		bytes.Equal(contract.Code[clone.FifthStart:clone.FifthEnd], clone.Fifth)
 }
 
-func getEIP1967Proxy(logs []storage.Log) map[string]string {
+func getEIP1967Proxy(logs []*storage.Log) map[string]string {
 	result := make(map[string]string)
 	if len(logs) == 0 {
 		return result
