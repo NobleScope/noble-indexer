@@ -51,6 +51,9 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 	}
 	v1.GET("/traces", txHandlers.Traces)
 
+	logHandlers := handler.NewLogHandler(db.Logs, db.Tx, db.Addresses)
+	v1.GET("/log", logHandlers.List)
+
 	addressHandlers := handler.NewAddressHandler(db.Addresses)
 	addressesGroup := v1.Group("/address")
 	{

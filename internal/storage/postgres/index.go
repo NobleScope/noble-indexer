@@ -89,6 +89,14 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			Exec(ctx); err != nil {
 			return err
 		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Log)(nil)).
+			Index("log_address_id_idx").
+			Column("address_id").
+			Exec(ctx); err != nil {
+			return err
+		}
 
 		// Contract
 		if _, err := tx.NewCreateIndex().

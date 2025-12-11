@@ -159,3 +159,28 @@ func tokenBalanceListFilter(query *bun.SelectQuery, fltrs storage.TokenBalanceLi
 
 	return query
 }
+
+func logListFilter(query *bun.SelectQuery, fltrs storage.LogListFilter) *bun.SelectQuery {
+	if fltrs.TxId != nil {
+		query = query.Where("tx_id = ?", *fltrs.TxId)
+	}
+	if fltrs.AddressId != nil {
+		query = query.Where("address_id = ?", *fltrs.AddressId)
+	}
+	if fltrs.Height != nil {
+		query = query.Where("height = ?", *fltrs.Height)
+	}
+
+	if !fltrs.TimeFrom.IsZero() {
+		query = query.Where("time >= ?", fltrs.TimeFrom)
+	}
+	if !fltrs.TimeTo.IsZero() {
+		query = query.Where("time < ?", fltrs.TimeTo)
+	}
+
+	query = limitScope(query, fltrs.Limit)
+	query = query.Offset(fltrs.Offset)
+	query = sortScope(query, "id", fltrs.Sort)
+
+	return query
+}
