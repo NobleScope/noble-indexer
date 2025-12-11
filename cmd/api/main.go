@@ -29,7 +29,7 @@ import (
 //	@license.name	MIT
 //	@license.url	https://github.com/baking-bad/noble-indexer/blob/master/LICENSE
 
-//	@host		localhost:9876
+//	@host		noble.dipdup.net
 //	@BasePath	/v1
 
 //	@schemes	http https

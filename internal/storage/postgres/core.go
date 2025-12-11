@@ -19,18 +19,19 @@ type Storage struct {
 	cfg        config.Database
 	scriptsDir string
 
-	Blocks       models.IBlock
-	BlockStats   models.IBlockStats
-	Tx           models.ITx
-	Transfer     models.ITransfer
-	Token        models.IToken
-	TokenBalance models.ITokenBalance
-	Trace        models.ITrace
-	Logs         models.ILog
-	Addresses    models.IAddress
-	Contracts    models.IContract
-	Sources      models.ISource
-	State        models.IState
+	Blocks         models.IBlock
+	BlockStats     models.IBlockStats
+	Tx             models.ITx
+	Transfer       models.ITransfer
+	Token          models.IToken
+	TokenBalance   models.ITokenBalance
+	Trace          models.ITrace
+	Logs           models.ILog
+	Addresses      models.IAddress
+	Contracts      models.IContract
+	ProxyContracts models.IProxyContract
+	Sources        models.ISource
+	State          models.IState
 }
 
 // Create -
@@ -43,21 +44,22 @@ func Create(ctx context.Context, cfg config.Database, scriptsDir string) (Storag
 	}
 
 	s := Storage{
-		cfg:          cfg,
-		scriptsDir:   scriptsDir,
-		Storage:      strg,
-		Blocks:       NewBlock(strg.Connection()),
-		BlockStats:   NewBlockStats(strg.Connection()),
-		Logs:         NewLog(strg.Connection()),
-		Tx:           NewTx(strg.Connection()),
-		Transfer:     NewTransfer(strg.Connection()),
-		Token:        NewToken(strg.Connection()),
-		TokenBalance: NewTokenBalance(strg.Connection()),
-		Trace:        NewTrace(strg.Connection()),
-		Addresses:    NewAddress(strg.Connection()),
-		Contracts:    NewContract(strg.Connection()),
-		Sources:      NewSource(strg.Connection()),
-		State:        NewState(strg.Connection()),
+		cfg:            cfg,
+		scriptsDir:     scriptsDir,
+		Storage:        strg,
+		Blocks:         NewBlock(strg.Connection()),
+		BlockStats:     NewBlockStats(strg.Connection()),
+		Logs:           NewLog(strg.Connection()),
+		Tx:             NewTx(strg.Connection()),
+		Transfer:       NewTransfer(strg.Connection()),
+		Token:          NewToken(strg.Connection()),
+		TokenBalance:   NewTokenBalance(strg.Connection()),
+		Trace:          NewTrace(strg.Connection()),
+		Addresses:      NewAddress(strg.Connection()),
+		Contracts:      NewContract(strg.Connection()),
+		ProxyContracts: NewProxyContract(strg.Connection()),
+		Sources:        NewSource(strg.Connection()),
+		State:          NewState(strg.Connection()),
 	}
 
 	if err := s.createScripts(ctx, "functions", false); err != nil {

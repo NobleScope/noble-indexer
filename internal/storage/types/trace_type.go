@@ -9,7 +9,8 @@ package types
 		create,
 		create2,
 		selfdestruct,
-		reward
+		reward,
+		suicide
 	)
 */
 //go:generate go-enum --marshal --sql --values --noprefix --names

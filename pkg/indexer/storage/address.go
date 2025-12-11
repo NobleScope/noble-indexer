@@ -27,7 +27,9 @@ func saveAddresses(
 		addresses[i].Balance.Id = addresses[i].Id
 		balances = append(balances, addresses[i].Balance)
 	}
-	err = tx.SaveBalances(ctx, balances...)
+	if len(balances) > 0 {
+		err = tx.SaveBalances(ctx, balances...)
+	}
 
 	return addrToId, totalAccounts, err
 }

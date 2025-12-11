@@ -17,6 +17,7 @@ var Models = []any{
 	&Log{},
 	&Address{},
 	&Contract{},
+	&ProxyContract{},
 	&Source{},
 	&Trace{},
 	&Balance{},
@@ -38,6 +39,7 @@ type Transaction interface {
 	SaveTokenBalances(ctx context.Context, tokenBalances ...*TokenBalance) (tb []TokenBalance, err error)
 	SaveTokenMetadata(ctx context.Context, tokens ...*Token) error
 	SaveSources(ctx context.Context, sources ...*Source) error
+	SaveProxyContracts(ctx context.Context, contracts ...*ProxyContract) error
 
 	RollbackBlock(ctx context.Context, height types.Level) error
 	RollbackBlockStats(ctx context.Context, height types.Level) (stats BlockStats, err error)

@@ -9,11 +9,16 @@ indexer:
   assets_dir: ${INDEXER_ASSETS_DIR:-./assets}
   request_bulk_size: ${INDEXER_REQUEST_BULK_SIZE:-10}
   start_level: ${INDEXER_START_LEVEL:-0}
+  proxy_contracts:
+    threads: ${PROXY_THREADS:-5}
+    sync_period_seconds: ${PROXY_SYNC_PERIOD_SECONDS:-10}
+    node_batch_size: ${PROXY_NODE_BATCH_SIZE:-20}
+    max_resolving_attempts: ${PROXY_MAX_RESOLVING_ATTEMPTS:-10}
 
 database:
   kind: postgres
-  host: ${POSTGRES_HOST:-db}
   port: ${POSTGRES_PORT:-5432}
+  host: ${POSTGRES_HOST:-db}
   user: ${POSTGRES_USER}
   password: ${POSTGRES_PASSWORD}
   database: ${POSTGRES_DB:-noble}
@@ -25,7 +30,7 @@ contract_resolver:
   request_bulk_size: ${CONTRACT_RESOLVER_REQUEST_BULK_SIZE:-5}
   retry_count: ${CONTRACT_RESOLVER_RETRY_COUNT:-7}
   retry_delay: ${CONTRACT_RESOLVER_RETRY_DELAY:-10} # minutes
-  
+
 token_resolver:
   name: ${TOKEN_RESOLVER_NAME:-token_metadata}
   sync_period: ${TOKEN_RESOLVER_SYNC_PERIOD:-5} # seconds

@@ -93,7 +93,7 @@ func (m *Module) sync(ctx context.Context) error {
 	contracts := make([]*storage.Contract, 0)
 	sources := make([]*storage.Source, 0)
 	for _, c := range cs {
-		m.Log.Info().Str("contract", c.Address).Str("metadata_link", c.MetadataLink).Msg("getting metadata...")
+		m.Log.Info().Str("contract", c.Address.Address).Str("metadata_link", c.MetadataLink).Msg("getting metadata...")
 		metadata, err := m.pool.ContractMetadata(ctx, c.MetadataLink)
 		if err != nil {
 			m.failMetadata(c, err)
@@ -105,7 +105,7 @@ func (m *Module) sync(ctx context.Context) error {
 			if metadata.Output.ABI != nil {
 				interfaces, err := m.abiRegistry.MatchABI(c.ABI)
 				if err != nil {
-					m.Log.Err(err).Str("contract", c.Address).Any("ABI", c.ABI).Msg("failed ABI")
+					m.Log.Err(err).Str("contract", c.Address.Address).Any("ABI", c.ABI).Msg("failed ABI")
 				}
 				c.Tags = interfaces
 			}
@@ -172,7 +172,7 @@ func (m *Module) save(ctx context.Context, contracts []*storage.Contract, source
 
 func (m *Module) failMetadata(contract *storage.Contract, err error) {
 	m.Log.Err(err).
-		Str("contract", contract.Address).
+		Str("contract", contract.Address.Address).
 		Str("metadata_link", contract.MetadataLink).
 		Msg(err.Error())
 

@@ -13,8 +13,9 @@ import (
 )
 
 const (
-	InputName  = "data"
-	StopOutput = "stop"
+	InputName           = "data"
+	ProxyContractsInput = "proxy_contracts"
+	StopOutput          = "stop"
 )
 
 type Module struct {
@@ -38,6 +39,7 @@ func NewModule(
 	}
 
 	m.CreateInputWithCapacity(InputName, 128)
+	m.CreateInputWithCapacity(ProxyContractsInput, 128)
 	m.CreateOutput(StopOutput)
 
 	return m
@@ -45,6 +47,7 @@ func NewModule(
 
 func (module *Module) Start(ctx context.Context) {
 	module.G.GoCtx(ctx, module.listen)
+	module.G.GoCtx(ctx, module.listenProxyImplementations)
 }
 
 func (module *Module) listen(ctx context.Context) {
@@ -114,7 +117,11 @@ func (module *Module) saveBlock(ctx context.Context, dCtx *decodeContext.Context
 	return state, nil
 }
 
-func (module *Module) processBlockInTransaction(ctx context.Context, tx storage.Transaction, dCtx *decodeContext.Context) (storage.State, error) {
+func (module *Module) processBlockInTransaction(
+	ctx context.Context,
+	tx storage.Transaction,
+	dCtx *decodeContext.Context,
+) (storage.State, error) {
 	block := dCtx.Block
 	state, err := module.pg.State.ByName(ctx, module.indexerName)
 	if err != nil {
@@ -177,6 +184,11 @@ func (module *Module) processBlockInTransaction(ctx context.Context, tx storage.
 	}
 
 	err = saveTokenBalances(ctx, tx, dCtx.GetTokenBalances(), addrToId)
+	if err != nil {
+		return state, err
+	}
+
+	err = saveProxyContracts(ctx, tx, dCtx.GetProxyContracts(), addrToId)
 	if err != nil {
 		return state, err
 	}

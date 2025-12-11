@@ -72,6 +72,26 @@ func createTypes(ctx context.Context, conn *database.Bun) error {
 			return err
 		}
 
+		if _, err := tx.ExecContext(
+			ctx,
+			createTypeQuery,
+			"proxy_type",
+			bun.Safe("proxy_type"),
+			bun.In(types.ProxyTypeValues()),
+		); err != nil {
+			return err
+		}
+
+		if _, err := tx.ExecContext(
+			ctx,
+			createTypeQuery,
+			"proxy_status",
+			bun.Safe("proxy_status"),
+			bun.In(types.ProxyStatusValues()),
+		); err != nil {
+			return err
+		}
+
 		return nil
 	})
 }

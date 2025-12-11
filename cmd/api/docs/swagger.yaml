@@ -115,9 +115,6 @@ definitions:
       amount:
         example: "1000000000000000000"
         type: string
-      code:
-        example: 0x6060604052600080fd5b
-        type: string
       contract:
         example: "0x0000000000000000000000000000000000000002"
         type: string
@@ -183,9 +180,6 @@ definitions:
       amount:
         example: 1000000000000000000
         type: integer
-      contract:
-        example: "0x0000000000000000000000000000000000000002"
-        type: string
       cumulative_gas_used:
         example: 21000
         type: integer
@@ -245,7 +239,7 @@ definitions:
         example: TxTypeDynamicFee
         type: string
     type: object
-host: localhost:9876
+host: noble.dipdup.net
 info:
   contact:
     email: hello@bakingbad.dev

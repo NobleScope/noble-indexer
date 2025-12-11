@@ -19,7 +19,7 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:9876",
+    "host": "noble.dipdup.net",
     "basePath": "/v1",
     "paths": {
         "/block": {
@@ -660,10 +660,6 @@
                     "type": "string",
                     "example": "1000000000000000000"
                 },
-                "code": {
-                    "type": "string",
-                    "example": "0x6060604052600080fd5b"
-                },
                 "contract": {
                     "type": "string",
                     "example": "0x0000000000000000000000000000000000000002"
@@ -750,10 +746,6 @@
                 "amount": {
                     "type": "integer",
                     "example": 1000000000000000000
-                },
-                "contract": {
-                    "type": "string",
-                    "example": "0x0000000000000000000000000000000000000002"
                 },
                 "cumulative_gas_used": {
                     "type": "integer",

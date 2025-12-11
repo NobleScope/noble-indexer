@@ -44,8 +44,10 @@ var (
 	}
 
 	testContract = storage.Contract{
-		Id:       1,
-		Address:  "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+		Id: 1,
+		Address: storage.Address{
+			Address: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+		},
 		Code:     []byte{0x60, 0x60, 0x60},
 		Verified: true,
 		TxId:     uint64Ptr(1),
@@ -63,7 +65,6 @@ var (
 		Amount:            decimal.NewFromInt(1000000000000000000),
 		Type:              types.TxTypeDynamicFee,
 		Input:             pkgTypes.Hex{},
-		ContractId:        nil,
 		CumulativeGasUsed: decimal.NewFromInt(21000),
 		EffectiveGasPrice: decimal.NewFromInt(1000000),
 		FromAddressId:     1,
@@ -74,7 +75,6 @@ var (
 		LogsBloom:         pkgTypes.Hex{0x00},
 		FromAddress:       testFromAddress,
 		ToAddress:         &testToAddress,
-		Contract:          nil,
 	}
 
 	testTxContractCreation = storage.Tx{
@@ -89,7 +89,6 @@ var (
 		Amount:            decimal.Zero,
 		Type:              types.TxTypeDynamicFee,
 		Input:             pkgTypes.Hex{0x60, 0x60, 0x60},
-		ContractId:        uint64Ptr(1),
 		CumulativeGasUsed: decimal.NewFromInt(121000),
 		EffectiveGasPrice: decimal.NewFromInt(2000000),
 		FromAddressId:     1,
@@ -100,7 +99,6 @@ var (
 		LogsBloom:         pkgTypes.Hex{0x00},
 		FromAddress:       testFromAddress,
 		ToAddress:         nil,
-		Contract:          &testContract,
 	}
 
 	testTxContractCall = storage.Tx{
@@ -115,7 +113,6 @@ var (
 		Amount:            decimal.NewFromInt(100000000),
 		Type:              types.TxTypeDynamicFee,
 		Input:             pkgTypes.Hex{0xa9, 0x05, 0x9c, 0xbb},
-		ContractId:        uint64Ptr(1),
 		CumulativeGasUsed: decimal.NewFromInt(171000),
 		EffectiveGasPrice: decimal.NewFromInt(1500000),
 		FromAddressId:     1,
@@ -126,7 +123,6 @@ var (
 		LogsBloom:         pkgTypes.Hex{0x00},
 		FromAddress:       testFromAddress,
 		ToAddress:         &testToAddress,
-		Contract:          &testContract,
 	}
 )
 
@@ -189,15 +185,12 @@ func (s *TxTestSuite) TestTxsList() {
 	s.Require().Equal("0x1234567890123456789012345678901234567890", txs[0].FromAddress)
 	s.Require().NotNil(txs[0].ToAddress)
 	s.Require().Equal("0x0987654321098765432109876543210987654321", *txs[0].ToAddress)
-	s.Require().Nil(txs[0].Contract)
 
 	s.Require().EqualValues(100, txs[1].Height)
 	s.Require().Equal("0x040506", txs[1].Hash)
 	s.Require().EqualValues(1, txs[1].Index)
 	s.Require().Equal("0x1234567890123456789012345678901234567890", txs[1].FromAddress)
 	s.Require().Nil(txs[1].ToAddress)
-	s.Require().NotNil(txs[1].Contract)
-	s.Require().Equal("0xabcdefabcdefabcdefabcdefabcdefabcdefabcd", *txs[1].Contract)
 
 	s.Require().EqualValues(100, txs[2].Height)
 	s.Require().Equal("0x070809", txs[2].Hash)
@@ -205,8 +198,6 @@ func (s *TxTestSuite) TestTxsList() {
 	s.Require().Equal("0x1234567890123456789012345678901234567890", txs[2].FromAddress)
 	s.Require().NotNil(txs[2].ToAddress)
 	s.Require().Equal("0x0987654321098765432109876543210987654321", *txs[2].ToAddress)
-	s.Require().NotNil(txs[2].Contract)
-	s.Require().Equal("0xabcdefabcdefabcdefabcdefabcdefabcdefabcd", *txs[2].Contract)
 }
 
 // TestTxsListWithLimit
@@ -424,7 +415,6 @@ func (s *TxTestSuite) TestTxsOnlyFromAddress() {
 		Amount:            decimal.Zero,
 		Type:              types.TxTypeLegacy,
 		Input:             pkgTypes.Hex{},
-		ContractId:        nil,
 		CumulativeGasUsed: decimal.NewFromInt(192000),
 		EffectiveGasPrice: decimal.NewFromInt(1000000),
 		FromAddressId:     1,
@@ -435,7 +425,6 @@ func (s *TxTestSuite) TestTxsOnlyFromAddress() {
 		LogsBloom:         pkgTypes.Hex{0x00},
 		FromAddress:       testFromAddress,
 		ToAddress:         nil,
-		Contract:          nil,
 	}
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -459,6 +448,5 @@ func (s *TxTestSuite) TestTxsOnlyFromAddress() {
 	s.Require().Len(txs, 1)
 	s.Require().Equal("0x1234567890123456789012345678901234567890", txs[0].FromAddress)
 	s.Require().Nil(txs[0].ToAddress)
-	s.Require().Nil(txs[0].Contract)
 	s.Require().Equal("TxStatusRevert", txs[0].Status)
 }

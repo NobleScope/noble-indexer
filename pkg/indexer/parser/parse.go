@@ -7,6 +7,7 @@ import (
 	storageType "github.com/baking-bad/noble-indexer/internal/storage/types"
 	dCtx "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
 	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/shopspring/decimal"
 )
 
 func (p *Module) parse(b types.BlockData) error {
@@ -179,36 +180,6 @@ func (p *Module) parse(b types.BlockData) error {
 			Balance:      storage.EmptyBalance(),
 		}
 
-		if b.Receipts[i].ContractAddress != nil {
-			contractAddress := storage.Address{
-				Address:    b.Receipts[i].ContractAddress.String(),
-				Height:     decodeCtx.Block.Height,
-				LastHeight: decodeCtx.Block.Height,
-				Balance:    storage.EmptyBalance(),
-				IsContract: true,
-			}
-
-			contract := &storage.Contract{
-				Height:  decodeCtx.Block.Height,
-				Address: b.Receipts[i].ContractAddress.String(),
-				Code:    decodeCtx.Block.Txs[i].Input,
-				Tx: &storage.Tx{
-					Hash: b.Receipts[i].TransactionHash,
-				},
-			}
-
-			err = ParseEvmContractMetadata(contract)
-			if err != nil {
-				return err
-			}
-
-			decodeCtx.Block.Txs[i].Contract = contract
-			decodeCtx.Block.Txs[i].FromAddress.ContractsCount = 1
-
-			decodeCtx.AddAddress(&contractAddress)
-			decodeCtx.AddContract(decodeCtx.Block.Txs[i].Contract)
-		}
-
 		decodeCtx.AddAddress(&decodeCtx.Block.Txs[i].FromAddress)
 
 		if b.Transactions[i].To != nil {
@@ -258,6 +229,8 @@ func (p *Module) parse(b types.BlockData) error {
 
 			decodeCtx.AddAddress(&decodeCtx.Block.Txs[i].Logs[j].Address)
 		}
+
+		p.parseEIP1967Proxy(decodeCtx, decodeCtx.Block.Txs[i].Logs)
 	}
 
 	for i, trace := range b.Traces {
@@ -271,9 +244,12 @@ func (p *Module) parse(b types.BlockData) error {
 			return err
 		}
 
-		value, err := trace.Action.Value.Decimal()
-		if err != nil {
-			return err
+		var value decimal.Decimal
+		if trace.Action.Value != nil {
+			value, err = trace.Action.Value.Decimal()
+			if err != nil {
+				return err
+			}
 		}
 
 		typ, err := storageType.ParseTraceType(trace.Type)
@@ -305,16 +281,8 @@ func (p *Module) parse(b types.BlockData) error {
 			CreationMethod: trace.Action.CreationMethod,
 
 			GasUsed: gu,
-			Code:    trace.Result.Code,
 
 			Subtraces: trace.Subtraces,
-		}
-
-		if trace.Result.Address != nil {
-			newTrace.Tx.Contract = &storage.Contract{
-				Height:  decodeCtx.Block.Height,
-				Address: trace.Result.Address.String(),
-			}
 		}
 
 		decodeCtx.AddAddress(&newTrace.FromAddress)
@@ -342,17 +310,51 @@ func (p *Module) parse(b types.BlockData) error {
 			newTrace.Output = trace.Result.Output.Bytes()
 		}
 
+		if trace.Result.Address != nil && trace.Result.Code != nil && len(*trace.Result.Code) > 0 {
+			deployerAddress := storage.Address{
+				Address:        b.Transactions[trace.TxPosition].From.String(),
+				LastHeight:     decodeCtx.Block.Height,
+				Balance:        storage.EmptyBalance(),
+				ContractsCount: 1,
+			}
+			contractAddress := storage.Address{
+				Address:    trace.Result.Address.String(),
+				Height:     decodeCtx.Block.Height,
+				LastHeight: decodeCtx.Block.Height,
+				Balance:    storage.EmptyBalance(),
+				IsContract: true,
+			}
+
+			contract := &storage.Contract{
+				Height:  decodeCtx.Block.Height,
+				Address: contractAddress,
+				Code:    *trace.Result.Code,
+				Tx: &storage.Tx{
+					Hash: trace.TxHash,
+				},
+			}
+			if err = ParseEvmContractMetadata(contract); err != nil {
+				return err
+			}
+
+			newTrace.Contract = contract
+			decodeCtx.AddAddress(&deployerAddress)
+			decodeCtx.AddAddress(&contractAddress)
+			decodeCtx.AddContract(contract)
+			if err = p.parseProxyContract(decodeCtx, contract); err != nil {
+				return err
+			}
+		}
+
 		decodeCtx.Block.Traces[i] = newTrace
 		decodeCtx.AddTrace(newTrace)
 	}
 
-	err = p.parseTxs(decodeCtx)
-	if err != nil {
+	if err = p.parseTxs(decodeCtx); err != nil {
 		return err
 	}
 
-	err = p.parseTransfers(decodeCtx)
-	if err != nil {
+	if err = p.parseTransfers(decodeCtx); err != nil {
 		return err
 	}
 

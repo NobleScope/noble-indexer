@@ -36,7 +36,6 @@ type Tx struct {
 	Type     types.TxType    `bun:",type:tx_type"          comment:"Transaction type"`
 	Input    []byte          `bun:"input"                  comment:"Transaction input"`
 
-	ContractId        *uint64         `bun:"contract_id"                      comment:"Contract address id"`
 	CumulativeGasUsed decimal.Decimal `bun:"cumulative_gas_used,type:numeric" comment:"Cumulative gas used"`
 	EffectiveGasPrice decimal.Decimal `bun:"effective_gas_price,type:numeric" comment:"Effective gas price"`
 	FromAddressId     uint64          `bun:"from_address_id"                  comment:"From address id"`
@@ -49,7 +48,6 @@ type Tx struct {
 	LogsCount   int `bun:"logs_count"   comment:"Logs count"`
 	TracesCount int `bun:"traces_count" comment:"Traces count"`
 
-	Contract    *Contract   `bun:"rel:belongs-to,join:contract_id=id"`
 	FromAddress Address     `bun:"rel:belongs-to,join:from_address_id=id"`
 	ToAddress   *Address    `bun:"rel:belongs-to,join:to_address_id=id"`
 	Logs        []*Log      `bun:"rel:has-many"`

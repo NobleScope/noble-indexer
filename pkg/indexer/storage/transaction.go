@@ -23,11 +23,6 @@ func saveTransactions(
 			id := addresses[t.ToAddress.Address]
 			t.ToAddressId = &id
 		}
-
-		if t.Contract != nil {
-			id := addresses[t.Contract.Address]
-			t.ContractId = &id
-		}
 	}
 
 	err := tx.SaveTransactions(ctx, txs...)

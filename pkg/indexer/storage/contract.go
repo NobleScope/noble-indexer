@@ -19,9 +19,9 @@ func saveContracts(
 	}
 
 	for _, contract := range contracts {
-		id, ok := addresses[contract.Address]
+		id, ok := addresses[contract.Address.Address]
 		if !ok {
-			return errors.Errorf("can't find contract key: %s", contract.Address)
+			return errors.Errorf("can't find contract key: %s", contract.Address.Address)
 		}
 		contract.Id = id
 		if contract.Tx == nil {

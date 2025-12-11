@@ -57,7 +57,6 @@ type Trace struct {
 	GasUsed    decimal.Decimal `bun:"gas_used,type:numeric" comment:"Gas used"`
 	Output     []byte          `bun:"output"                comment:"Output data"`
 	ContractId *uint64         `bun:"contract_id"           comment:"Address identity of the new contract"`
-	Code       *pkgTypes.Hex   `bun:"code,type:bytea"       comment:"New contract code"`
 
 	Subtraces uint64 `bun:"subtraces" comment:"Amount of subtraces"`
 

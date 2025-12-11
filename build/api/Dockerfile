@@ -27,9 +27,11 @@ FROM scratch
 WORKDIR /app
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /go/bin/api /app/api
-COPY configs/dipdup.yml /app/config.yml
+COPY --from=builder /go/bin/api ./api
+COPY configs/dipdup.yml ./config.yml
+COPY assets ./assets
+COPY database ./database
 
 EXPOSE 9876
 
-ENTRYPOINT ["/app/api", "-c", "/app/config.yml"]
+ENTRYPOINT ["./api", "-c", "./config.yml"]
