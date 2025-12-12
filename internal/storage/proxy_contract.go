@@ -6,14 +6,13 @@ import (
 	"github.com/baking-bad/noble-indexer/internal/storage/types"
 	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage"
-	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/uptrace/bun"
 )
 
 type ListProxyFilters struct {
 	Limit            int
 	Offset           int
-	Sort             sdk.SortOrder
+	Sort             storage.SortOrder
 	Height           pkgTypes.Level
 	ImplementationId uint64
 	Type             []types.ProxyType
