@@ -6,14 +6,26 @@ import (
 	"github.com/baking-bad/noble-indexer/internal/storage/types"
 	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage"
+	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/uptrace/bun"
 )
+
+type ListProxyFilters struct {
+	Limit            int
+	Offset           int
+	Sort             sdk.SortOrder
+	Height           pkgTypes.Level
+	ImplementationId uint64
+	Type             []types.ProxyType
+	Status           []types.ProxyStatus
+}
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
 type IProxyContract interface {
 	storage.Table[*ProxyContract]
 
 	NotResolved(ctx context.Context) (contracts []ProxyContract, err error)
+	FilteredList(ctx context.Context, filters ListProxyFilters) ([]ProxyContract, error)
 }
 
 // ProxyContract -
@@ -27,7 +39,7 @@ type ProxyContract struct {
 	ResolvingAttempts uint              `bun:"resolving_attempts" comment:"Count of resolving attempts"`
 	ImplementationID  *uint64           `bun:"implementation_id"  comment:"Internal implementation contract ID"`
 
-	Contract       Contract  `bun:"rel:belongs-to,join:id=id"`
+	Contract       Contract  `bun:"rel:has-one,join:id=id"`
 	Implementation *Contract `bun:"rel:belongs-to,join:implementation_id=id"`
 }
 

@@ -28,12 +28,12 @@ func (p *Module) listen(ctx context.Context) {
 				continue
 			}
 
-			if err := p.parse(block); err != nil {
+			if parseErr := p.parse(block); parseErr != nil {
 				height, err := block.Number.Uint64()
 				if err != nil {
 					p.Log.Warn().Err(err).Str("num", block.Number.String()).Msg("can't parse block number")
 				}
-				p.Log.Err(err).
+				p.Log.Err(parseErr).
 					Uint64("height", height).
 					Msg("block parsing error")
 				p.MustOutput(StopOutput).Push(struct{}{})

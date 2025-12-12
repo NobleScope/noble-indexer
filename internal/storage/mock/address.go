@@ -42,6 +42,45 @@ func (m *MockIAddress) EXPECT() *MockIAddressMockRecorder {
 	return m.recorder
 }
 
+// ByHash mocks base method.
+func (m *MockIAddress) ByHash(arg0 context.Context, hash string) (storage.Address, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ByHash", arg0, hash)
+	ret0, _ := ret[0].(storage.Address)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ByHash indicates an expected call of ByHash.
+func (mr *MockIAddressMockRecorder) ByHash(arg0, hash any) *MockIAddressByHashCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ByHash", reflect.TypeOf((*MockIAddress)(nil).ByHash), arg0, hash)
+	return &MockIAddressByHashCall{Call: call}
+}
+
+// MockIAddressByHashCall wrap *gomock.Call
+type MockIAddressByHashCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockIAddressByHashCall) Return(arg0 storage.Address, arg1 error) *MockIAddressByHashCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockIAddressByHashCall) Do(f func(context.Context, string) (storage.Address, error)) *MockIAddressByHashCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockIAddressByHashCall) DoAndReturn(f func(context.Context, string) (storage.Address, error)) *MockIAddressByHashCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CursorList mocks base method.
 func (m *MockIAddress) CursorList(ctx context.Context, id, limit uint64, order storage0.SortOrder, cmp storage0.Comparator) ([]*storage.Address, error) {
 	m.ctrl.T.Helper()
