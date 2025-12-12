@@ -29,7 +29,7 @@ type Transaction interface {
 	sdk.Transaction
 
 	SaveTransactions(ctx context.Context, txs ...*Tx) error
-	SaveLogs(ctx context.Context, logs ...Log) error
+	SaveLogs(ctx context.Context, logs ...*Log) error
 	SaveTraces(ctx context.Context, traces ...*Trace) error
 	SaveAddresses(ctx context.Context, addresses ...*Address) (int64, error)
 	SaveBalances(ctx context.Context, balances ...*Balance) error

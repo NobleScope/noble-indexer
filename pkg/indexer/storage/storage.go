@@ -168,24 +168,9 @@ func (module *Module) processBlockInTransaction(
 		return state, err
 	}
 
-	logs := make([]storage.Log, 0, 10000)
-	for i := range block.Txs {
-		for j := range block.Txs[i].Logs {
-			block.Txs[i].Logs[j].TxId = block.Txs[i].Id
-		}
-
-		logs = append(logs, block.Txs[i].Logs...)
-		if len(logs) >= 10000 {
-			if err := tx.SaveLogs(ctx, logs...); err != nil {
-				return state, err
-			}
-			logs = make([]storage.Log, 0, 10000)
-		}
-	}
-	if len(logs) > 0 {
-		if err := tx.SaveLogs(ctx, logs...); err != nil {
-			return state, err
-		}
+	err = saveLogs(ctx, tx, block.Txs, addrToId)
+	if err != nil {
+		return state, err
 	}
 
 	err = saveTransfers(ctx, tx, transfers, addrToId)

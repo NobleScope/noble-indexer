@@ -11,11 +11,22 @@ import (
 	"github.com/uptrace/bun"
 )
 
+type ContractListFilter struct {
+	Limit      int
+	Offset     int
+	Sort       storage.SortOrder
+	SortField  string
+	IsVerified bool
+	TxId       *uint64
+}
+
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
 type IContract interface {
 	storage.Table[*Contract]
 
-	PendingMetadata(ctx context.Context, delay time.Duration, limit int) (contracts []*Contract, err error)
+	ByTxId(ctx context.Context, id uint64) (Contract, error)
+	ListWithTx(ctx context.Context, filters ContractListFilter) ([]Contract, error)
+	PendingMetadata(ctx context.Context, delay time.Duration, limit int) ([]*Contract, error)
 }
 
 // Contract -

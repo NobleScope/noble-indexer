@@ -167,7 +167,7 @@ func (p *Module) parse(b types.BlockData) error {
 			GasUsed:           txGasUsed,
 			Status:            status,
 			LogsBloom:         b.Receipts[i].LogsBloom,
-			Logs:              make([]storage.Log, len(b.Receipts[i].Logs)),
+			Logs:              make([]*storage.Log, len(b.Receipts[i].Logs)),
 			LogsCount:         len(b.Receipts[i].Logs),
 		}
 
@@ -209,16 +209,25 @@ func (p *Module) parse(b types.BlockData) error {
 				name = log.Topics[0].String()
 			}
 
-			decodeCtx.Block.Txs[i].Logs[j] = storage.Log{
+			decodeCtx.Block.Txs[i].Logs[j] = &storage.Log{
 				Height:  types.Level(height),
 				Time:    blockTime,
 				Index:   logIndex,
 				Name:    name,
 				Data:    log.Data,
 				Topics:  log.Topics,
-				Address: log.Address,
 				Removed: log.Removed,
 			}
+
+			decodeCtx.Block.Txs[i].Logs[j].Address = storage.Address{
+				Address:      b.Receipts[i].To.String(),
+				Height:       decodeCtx.Block.Height,
+				LastHeight:   decodeCtx.Block.Height,
+				Interactions: 1,
+				Balance:      storage.EmptyBalance(),
+			}
+
+			decodeCtx.AddAddress(&decodeCtx.Block.Txs[i].Logs[j].Address)
 		}
 
 		p.parseEIP1967Proxy(decodeCtx, decodeCtx.Block.Txs[i].Logs)

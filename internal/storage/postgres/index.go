@@ -89,6 +89,14 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			Exec(ctx); err != nil {
 			return err
 		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Log)(nil)).
+			Index("log_address_id_idx").
+			Column("address_id").
+			Exec(ctx); err != nil {
+			return err
+		}
 
 		// Contract
 		if _, err := tx.NewCreateIndex().
@@ -132,6 +140,30 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			Model((*storage.Trace)(nil)).
 			Index("trace_tx_id_idx").
 			Column("tx_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Trace)(nil)).
+			Index("trace_from_address_id_idx").
+			Column("from_address_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Trace)(nil)).
+			Index("trace_to_address_id_idx").
+			Column("to_address_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Trace)(nil)).
+			Index("trace_contract_id_idx").
+			Column("contract_id").
 			Exec(ctx); err != nil {
 			return err
 		}
@@ -181,6 +213,16 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			Index("token_symbol_idx").
 			ColumnExpr("symbol gin_trgm_ops").
 			Using("GIN").
+			Exec(ctx); err != nil {
+			return err
+		}
+
+		// Source
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Source)(nil)).
+			Index("source_contract_id_idx").
+			Column("contract_id").
 			Exec(ctx); err != nil {
 			return err
 		}

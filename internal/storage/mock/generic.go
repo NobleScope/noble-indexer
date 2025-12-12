@@ -948,7 +948,7 @@ func (c *MockTransactionSaveContractsCall) DoAndReturn(f func(context.Context, .
 }
 
 // SaveLogs mocks base method.
-func (m *MockTransaction) SaveLogs(ctx context.Context, logs ...storage.Log) error {
+func (m *MockTransaction) SaveLogs(ctx context.Context, logs ...*storage.Log) error {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range logs {
@@ -979,13 +979,13 @@ func (c *MockTransactionSaveLogsCall) Return(arg0 error) *MockTransactionSaveLog
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionSaveLogsCall) Do(f func(context.Context, ...storage.Log) error) *MockTransactionSaveLogsCall {
+func (c *MockTransactionSaveLogsCall) Do(f func(context.Context, ...*storage.Log) error) *MockTransactionSaveLogsCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionSaveLogsCall) DoAndReturn(f func(context.Context, ...storage.Log) error) *MockTransactionSaveLogsCall {
+func (c *MockTransactionSaveLogsCall) DoAndReturn(f func(context.Context, ...*storage.Log) error) *MockTransactionSaveLogsCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
