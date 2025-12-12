@@ -26,7 +26,7 @@ type Token struct {
 func NewToken(token storage.Token) Token {
 	t := Token{
 		Id:             token.Id,
-		Contract:       token.Contract.Address,
+		Contract:       token.Contract.Address.String(),
 		Type:           token.Type.String(),
 		Name:           token.Name,
 		Symbol:         token.Symbol,
@@ -61,7 +61,7 @@ func NewTransfer(transfer storage.Transfer) Transfer {
 		Height:   uint64(transfer.Height),
 		Time:     transfer.Time,
 		TokenId:  transfer.TokenID.String(),
-		Contract: transfer.Contract.Address,
+		Contract: transfer.Contract.Address.String(),
 		Amount:   transfer.Amount.String(),
 		Type:     transfer.Type.String(),
 		TxHash:   transfer.Tx.Hash.String(),
@@ -90,7 +90,7 @@ type TokenBalance struct {
 func NewTokenBalance(tb storage.TokenBalance) TokenBalance {
 	t := TokenBalance{
 		TokenId:  tb.TokenID.String(),
-		Contract: tb.Contract.Address,
+		Contract: tb.Contract.Address.String(),
 		Address:  tb.Address.String(),
 		Value:    tb.Balance.String(),
 	}

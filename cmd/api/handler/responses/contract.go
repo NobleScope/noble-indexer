@@ -28,7 +28,7 @@ type Contract struct {
 func NewContract(contract storage.Contract) Contract {
 	c := Contract{
 		Id:               contract.Id,
-		Address:          contract.Address,
+		Address:          contract.Address.String(),
 		Verified:         contract.Verified,
 		CompilerVersion:  contract.CompilerVersion,
 		MetadataLink:     contract.MetadataLink,
