@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"regexp"
 
+	"github.com/baking-bad/noble-indexer/internal/storage/types"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
@@ -20,7 +21,13 @@ func NewApiValidator() *ApiValidator {
 	if err := v.RegisterValidation("address", addressValidator()); err != nil {
 		panic(err)
 	}
-	if err := v.RegisterValidation("txHash", txHashValidator()); err != nil {
+	if err := v.RegisterValidation("tx_hash", txHashValidator()); err != nil {
+		panic(err)
+	}
+	if err := v.RegisterValidation("proxy_contract_type", proxyContractTypeValidator()); err != nil {
+		panic(err)
+	}
+	if err := v.RegisterValidation("proxy_contract_status", proxyContractStatusValidator()); err != nil {
 		panic(err)
 	}
 	return &ApiValidator{validator: v}
@@ -44,5 +51,19 @@ func txHashValidator() validator.Func {
 	return func(fl validator.FieldLevel) bool {
 		txHash := fl.Field().String()
 		return evmTransactionHashRegex.MatchString(txHash)
+	}
+}
+
+func proxyContractTypeValidator() validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		_, err := types.ParseProxyType(fl.Field().String())
+		return err == nil
+	}
+}
+
+func proxyContractStatusValidator() validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		_, err := types.ParseProxyStatus(fl.Field().String())
+		return err == nil
 	}
 }

@@ -22,6 +22,8 @@ services:
       options:
         max-size: 10m
         max-file: "5"
+    networks:
+      - noble-network
 
   indexer:
     image: ghcr.io/noble-indexer/indexer:${TAG:-master}
@@ -36,9 +38,11 @@ services:
     depends_on:
       - db
     logging: *indexer-logging
+    networks:
+      - noble-network
     
   contract_metadata_resolver:
-    image: ghcr.io/noble-indexer/contract_metadata_resolver:${TAG:-master}
+    image: ghcr.io/noblescope/noble-indexer/contract-metadata:master
     build:
       dockerfile: build/contract_metadata_resolver/Dockerfile
       context: .
@@ -50,9 +54,11 @@ services:
     depends_on:
       - db
     logging: *indexer-logging
+    networks:
+      - noble-network
     
   token_metadata_resolver:
-    image: ghcr.io/noble-indexer/token_metadata_resolver:${TAG:-master}
+    image: ghcr.io/noblescope/noble-indexer/token-metadata:master
     build:
       dockerfile: build/token_metadata_resolver/Dockerfile
       context: .
@@ -61,9 +67,14 @@ services:
     restart: always
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - NOBLE_NODE_URL=${NOBLE_NODE_URL}
+      - NOBLE_NODE_RPS=${NOBLE_NODE_RPS:-5}
+      - NOBLE_NODE_TIMEOUT=${NOBLE_NODE_TIMEOUT:-10}
     depends_on:
       - db
     logging: *indexer-logging
+    networks:
+      - noble-network
 
   api:
     image: ghcr.io/noble-indexer/api:${TAG:-master}
@@ -80,6 +91,11 @@ services:
     depends_on:
       - db
     logging: *indexer-logging
+    networks:
+      - noble-network
 
 volumes:
   db:
+
+networks:
+  noble-network:

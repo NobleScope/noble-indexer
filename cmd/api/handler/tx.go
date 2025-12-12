@@ -28,7 +28,7 @@ func NewTxHandler(
 }
 
 type getTxRequest struct {
-	Hash string `param:"hash" validate:"required,txHash"`
+	Hash string `param:"hash" validate:"required,tx_hash"`
 }
 
 // Get godoc
@@ -64,7 +64,7 @@ func (handler *TxHandler) Get(c echo.Context) error {
 }
 
 type getTxTraces struct {
-	Hash   string `param:"hash"   validate:"required,txHash"`
+	Hash   string `param:"hash"   validate:"required,tx_hash"`
 	Limit  int    `query:"limit"  validate:"omitempty,min=1,max=100"`
 	Offset int    `query:"offset" validate:"omitempty,min=0"`
 	Sort   string `query:"sort"   validate:"omitempty,oneof=asc desc"`
