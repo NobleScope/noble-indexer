@@ -54,7 +54,7 @@ func (req *logListRequest) SetDefault() {
 //	@Description	List logs
 //	@Tags			transactions
 //	@ID				list-transaction-log
-//	@Param			tx_hash			query	string	true	"Transaction hash in hexadecimal with 0x prefix"	minlength(66)	maxlength(66)
+//	@Param			tx_hash			query	string	false	"Transaction hash in hexadecimal with 0x prefix"	minlength(66)	maxlength(66)
 //	@Param			limit			query	integer	false	"Count of requested entities"						minimum(1)	maximum(100)
 //	@Param			offset			query	integer	false	"Offset"											minimum(0)
 //	@Param			address			query	string	false	"Address whose invocation generated this log"		minlength(42)	maxlength(42)
@@ -77,6 +77,7 @@ func (handler *LogHandler) List(c echo.Context) error {
 		Offset: req.Offset,
 		Sort:   pgSort(req.Sort),
 	}
+
 	if req.TxHash != "" {
 		hash, err := types.HexFromString(req.TxHash)
 		if err != nil {

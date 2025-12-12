@@ -68,7 +68,7 @@ func (handler *TxHandler) Get(c echo.Context) error {
 }
 
 type getTxTraces struct {
-	TxHash      string      `query:"tx_hash"      validate:"required,tx_hash"`
+	TxHash      string      `query:"tx_hash"      validate:"omitempty,tx_hash"`
 	Limit       int         `query:"limit"        validate:"omitempty,min=1,max=100"`
 	Offset      int         `query:"offset"       validate:"omitempty,min=0"`
 	AddressFrom string      `query:"address_from" validate:"omitempty,address"`
@@ -94,14 +94,14 @@ func (req *getTxTraces) SetDefault() {
 //	@Description	List transaction traces
 //	@Tags			transactions
 //	@ID				list-transaction-traces
-//	@Param			tx_hash			query	string	true	"Transaction hash in hexadecimal with 0x prefix"	minlength(66)	maxlength(66)
-//	@Param			limit			query	integer	false	"Count of requested entities"						minimum(1)	maximum(100)
+//	@Param			tx_hash			query	string	false	"Transaction hash in hexadecimal with 0x prefix"	minlength(66)	maxlength(66)
+//	@Param			limit			query	integer	false	"Count of requested entities"						minimum(1)		maximum(100)
 //	@Param			offset			query	integer	false	"Offset"											minimum(0)
 //	@Param			address_from	query	string	false	"Address which initiate trace"						minlength(42)	maxlength(42)
 //	@Param			address_to		query	string	false	"Address which receiving trace result"				minlength(42)	maxlength(42)
 //	@Param			contract		query	string	false	"Called contract"									minlength(42)	maxlength(42)
 //	@Param			height			query	integer	false	"Block height"										minimum(1)
-//	@Param			type			query	string	false	"Comma-separated list of trace types"				Enums(call, delegatecall, staticcall, create, create2, selfdestruct, reward)
+//	@Param			type			query	string	false	"Comma-separated list of trace types"				Enums(call, delegatecall, staticcall, create, create2, selfdestruct, reward, suicide)
 //	@Param			sort			query	string	false	"Sort order. Default: desc"							Enums(asc, desc)
 //	@Produce		json
 //	@Success		200	{array}		responses.Trace
@@ -126,20 +126,23 @@ func (handler *TxHandler) Traces(c echo.Context) error {
 		Sort:   pgSort(req.Sort),
 		Type:   traceTypes,
 	}
-	hash, err := types.HexFromString(req.TxHash)
-	if err != nil {
-		return badRequestError(c, err)
-	}
 
-	tx, err := handler.tx.ByHash(c.Request().Context(), hash)
-	if err != nil {
-		return handleError(c, err, handler.tx)
-	}
+	if req.TxHash != "" {
+		hash, err := types.HexFromString(req.TxHash)
+		if err != nil {
+			return badRequestError(c, err)
+		}
 
-	filters.TxId = &tx.Id
+		tx, err := handler.tx.ByHash(c.Request().Context(), hash)
+		if err != nil {
+			return handleError(c, err, handler.tx)
+		}
+
+		filters.TxId = &tx.Id
+	}
 
 	if req.AddressFrom != "" {
-		hash, err = types.HexFromString(req.AddressFrom)
+		hash, err := types.HexFromString(req.AddressFrom)
 		if err != nil {
 			return badRequestError(c, err)
 		}
@@ -153,7 +156,7 @@ func (handler *TxHandler) Traces(c echo.Context) error {
 	}
 
 	if req.AddressTo != "" {
-		hash, err = types.HexFromString(req.AddressTo)
+		hash, err := types.HexFromString(req.AddressTo)
 		if err != nil {
 			return badRequestError(c, err)
 		}
@@ -167,7 +170,7 @@ func (handler *TxHandler) Traces(c echo.Context) error {
 	}
 
 	if req.Contract != "" {
-		hash, err = types.HexFromString(req.Contract)
+		hash, err := types.HexFromString(req.Contract)
 		if err != nil {
 			return badRequestError(c, err)
 		}
