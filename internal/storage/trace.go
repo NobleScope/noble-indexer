@@ -11,11 +11,24 @@ import (
 	"github.com/uptrace/bun"
 )
 
+type TraceListFilter struct {
+	Limit         int
+	Offset        int
+	Sort          storage.SortOrder
+	Height        *uint64
+	TxId          *uint64
+	AddressFromId *uint64
+	AddressToId   *uint64
+	ContractId    *uint64
+	Type          []types.TraceType
+}
+
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
 type ITrace interface {
 	storage.Table[*Trace]
 
 	ByTxHash(ctx context.Context, hash pkgTypes.Hex, limit, offset int, order storage.SortOrder) (traces []*Trace, err error)
+	Filter(ctx context.Context, filter TraceListFilter) (traces []*Trace, err error)
 }
 
 // Trace -

@@ -50,7 +50,7 @@ type Tx struct {
 
 	FromAddress Address     `bun:"rel:belongs-to,join:from_address_id=id"`
 	ToAddress   *Address    `bun:"rel:belongs-to,join:to_address_id=id"`
-	Logs        []Log       `bun:"rel:has-many"`
+	Logs        []*Log      `bun:"rel:has-many"`
 	Transfers   []*Transfer `bun:"rel:has-many"`
 }
 

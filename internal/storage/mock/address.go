@@ -14,6 +14,7 @@ import (
 	reflect "reflect"
 
 	storage "github.com/baking-bad/noble-indexer/internal/storage"
+	types "github.com/baking-bad/noble-indexer/pkg/types"
 	storage0 "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -43,18 +44,18 @@ func (m *MockIAddress) EXPECT() *MockIAddressMockRecorder {
 }
 
 // ByHash mocks base method.
-func (m *MockIAddress) ByHash(arg0 context.Context, hash string) (storage.Address, error) {
+func (m *MockIAddress) ByHash(ctx context.Context, hash types.Hex) (storage.Address, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ByHash", arg0, hash)
+	ret := m.ctrl.Call(m, "ByHash", ctx, hash)
 	ret0, _ := ret[0].(storage.Address)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ByHash indicates an expected call of ByHash.
-func (mr *MockIAddressMockRecorder) ByHash(arg0, hash any) *MockIAddressByHashCall {
+func (mr *MockIAddressMockRecorder) ByHash(ctx, hash any) *MockIAddressByHashCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ByHash", reflect.TypeOf((*MockIAddress)(nil).ByHash), arg0, hash)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ByHash", reflect.TypeOf((*MockIAddress)(nil).ByHash), ctx, hash)
 	return &MockIAddressByHashCall{Call: call}
 }
 
@@ -70,13 +71,13 @@ func (c *MockIAddressByHashCall) Return(arg0 storage.Address, arg1 error) *MockI
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockIAddressByHashCall) Do(f func(context.Context, string) (storage.Address, error)) *MockIAddressByHashCall {
+func (c *MockIAddressByHashCall) Do(f func(context.Context, types.Hex) (storage.Address, error)) *MockIAddressByHashCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockIAddressByHashCall) DoAndReturn(f func(context.Context, string) (storage.Address, error)) *MockIAddressByHashCall {
+func (c *MockIAddressByHashCall) DoAndReturn(f func(context.Context, types.Hex) (storage.Address, error)) *MockIAddressByHashCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -271,6 +272,45 @@ func (c *MockIAddressListCall) Do(f func(context.Context, uint64, uint64, storag
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockIAddressListCall) DoAndReturn(f func(context.Context, uint64, uint64, storage0.SortOrder) ([]*storage.Address, error)) *MockIAddressListCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// ListWithBalance mocks base method.
+func (m *MockIAddress) ListWithBalance(ctx context.Context, filters storage.AddressListFilter) ([]storage.Address, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListWithBalance", ctx, filters)
+	ret0, _ := ret[0].([]storage.Address)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListWithBalance indicates an expected call of ListWithBalance.
+func (mr *MockIAddressMockRecorder) ListWithBalance(ctx, filters any) *MockIAddressListWithBalanceCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListWithBalance", reflect.TypeOf((*MockIAddress)(nil).ListWithBalance), ctx, filters)
+	return &MockIAddressListWithBalanceCall{Call: call}
+}
+
+// MockIAddressListWithBalanceCall wrap *gomock.Call
+type MockIAddressListWithBalanceCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockIAddressListWithBalanceCall) Return(arg0 []storage.Address, arg1 error) *MockIAddressListWithBalanceCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockIAddressListWithBalanceCall) Do(f func(context.Context, storage.AddressListFilter) ([]storage.Address, error)) *MockIAddressListWithBalanceCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockIAddressListWithBalanceCall) DoAndReturn(f func(context.Context, storage.AddressListFilter) ([]storage.Address, error)) *MockIAddressListWithBalanceCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

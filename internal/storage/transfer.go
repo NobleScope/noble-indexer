@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -11,9 +12,27 @@ import (
 	"github.com/uptrace/bun"
 )
 
+type TransferListFilter struct {
+	Limit         int
+	Offset        int
+	Sort          storage.SortOrder
+	Height        *uint64
+	TxId          *uint64
+	Type          []types.TransferType
+	AddressFromId *uint64
+	AddressToId   *uint64
+	ContractId    *uint64
+	TokenId       *decimal.Decimal
+	TimeFrom      time.Time
+	TimeTo        time.Time
+}
+
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
 type ITransfer interface {
 	storage.Table[*Transfer]
+
+	Get(ctx context.Context, id uint64) (Transfer, error)
+	Filter(ctx context.Context, filter TransferListFilter) ([]Transfer, error)
 }
 
 // Transfer -

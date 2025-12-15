@@ -49,15 +49,15 @@ func NewTrace(t *storage.Trace) Trace {
 		result.ToAddress = &toAddr
 	}
 	if t.InitHash != nil {
-		initHash := t.InitHash.String()
+		initHash := t.InitHash.Hex()
 		result.InitHash = &initHash
 	}
 	if t.Input != nil {
-		input := types.Hex(t.Input).String()
+		input := types.Hex(t.Input).Hex()
 		result.Input = &input
 	}
 	if t.Output != nil {
-		output := types.Hex(t.Output).String()
+		output := types.Hex(t.Output).Hex()
 		result.Output = &output
 	}
 	if t.Contract != nil {

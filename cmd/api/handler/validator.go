@@ -24,6 +24,15 @@ func NewApiValidator() *ApiValidator {
 	if err := v.RegisterValidation("tx_hash", txHashValidator()); err != nil {
 		panic(err)
 	}
+	if err := v.RegisterValidation("trace_type", traceTypeValidator()); err != nil {
+		panic(err)
+	}
+	if err := v.RegisterValidation("token_type", tokenTypeValidator()); err != nil {
+		panic(err)
+	}
+	if err := v.RegisterValidation("transfer_type", transferTypeValidator()); err != nil {
+		panic(err)
+	}
 	if err := v.RegisterValidation("proxy_contract_type", proxyContractTypeValidator()); err != nil {
 		panic(err)
 	}
@@ -51,6 +60,26 @@ func txHashValidator() validator.Func {
 	return func(fl validator.FieldLevel) bool {
 		txHash := fl.Field().String()
 		return evmTransactionHashRegex.MatchString(txHash)
+	}
+}
+
+func traceTypeValidator() validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		_, err := types.ParseTraceType(fl.Field().String())
+		return err == nil
+	}
+}
+
+func tokenTypeValidator() validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		_, err := types.ParseTokenType(fl.Field().String())
+		return err == nil
+	}
+}
+func transferTypeValidator() validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		_, err := types.ParseTransferType(fl.Field().String())
+		return err == nil
 	}
 }
 

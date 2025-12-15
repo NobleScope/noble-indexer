@@ -43,6 +43,45 @@ func (m *MockIContract) EXPECT() *MockIContractMockRecorder {
 	return m.recorder
 }
 
+// ByTxId mocks base method.
+func (m *MockIContract) ByTxId(ctx context.Context, id uint64) (storage.Contract, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ByTxId", ctx, id)
+	ret0, _ := ret[0].(storage.Contract)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ByTxId indicates an expected call of ByTxId.
+func (mr *MockIContractMockRecorder) ByTxId(ctx, id any) *MockIContractByTxIdCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ByTxId", reflect.TypeOf((*MockIContract)(nil).ByTxId), ctx, id)
+	return &MockIContractByTxIdCall{Call: call}
+}
+
+// MockIContractByTxIdCall wrap *gomock.Call
+type MockIContractByTxIdCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockIContractByTxIdCall) Return(arg0 storage.Contract, arg1 error) *MockIContractByTxIdCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockIContractByTxIdCall) Do(f func(context.Context, uint64) (storage.Contract, error)) *MockIContractByTxIdCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockIContractByTxIdCall) DoAndReturn(f func(context.Context, uint64) (storage.Contract, error)) *MockIContractByTxIdCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CursorList mocks base method.
 func (m *MockIContract) CursorList(ctx context.Context, id, limit uint64, order storage0.SortOrder, cmp storage0.Comparator) ([]*storage.Contract, error) {
 	m.ctrl.T.Helper()
@@ -237,6 +276,45 @@ func (c *MockIContractListCall) DoAndReturn(f func(context.Context, uint64, uint
 	return c
 }
 
+// ListWithTx mocks base method.
+func (m *MockIContract) ListWithTx(ctx context.Context, filters storage.ContractListFilter) ([]storage.Contract, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListWithTx", ctx, filters)
+	ret0, _ := ret[0].([]storage.Contract)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListWithTx indicates an expected call of ListWithTx.
+func (mr *MockIContractMockRecorder) ListWithTx(ctx, filters any) *MockIContractListWithTxCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListWithTx", reflect.TypeOf((*MockIContract)(nil).ListWithTx), ctx, filters)
+	return &MockIContractListWithTxCall{Call: call}
+}
+
+// MockIContractListWithTxCall wrap *gomock.Call
+type MockIContractListWithTxCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockIContractListWithTxCall) Return(arg0 []storage.Contract, arg1 error) *MockIContractListWithTxCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockIContractListWithTxCall) Do(f func(context.Context, storage.ContractListFilter) ([]storage.Contract, error)) *MockIContractListWithTxCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockIContractListWithTxCall) DoAndReturn(f func(context.Context, storage.ContractListFilter) ([]storage.Contract, error)) *MockIContractListWithTxCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // PendingMetadata mocks base method.
 func (m *MockIContract) PendingMetadata(ctx context.Context, delay time.Duration, limit int) ([]*storage.Contract, error) {
 	m.ctrl.T.Helper()
@@ -259,8 +337,8 @@ type MockIContractPendingMetadataCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockIContractPendingMetadataCall) Return(contracts []*storage.Contract, err error) *MockIContractPendingMetadataCall {
-	c.Call = c.Call.Return(contracts, err)
+func (c *MockIContractPendingMetadataCall) Return(arg0 []*storage.Contract, arg1 error) *MockIContractPendingMetadataCall {
+	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 

@@ -2,11 +2,11 @@ package rpc
 
 import (
 	"context"
-	"github.com/opus-domini/fast-shot/constant/header"
 	"net/url"
 
 	"github.com/baking-bad/noble-indexer/pkg/node/types"
 	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/opus-domini/fast-shot/constant/header"
 	"github.com/pkg/errors"
 )
 

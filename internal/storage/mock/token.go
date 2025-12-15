@@ -16,6 +16,7 @@ import (
 
 	storage "github.com/baking-bad/noble-indexer/internal/storage"
 	storage0 "github.com/dipdup-net/indexer-sdk/pkg/storage"
+	decimal "github.com/shopspring/decimal"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -78,6 +79,84 @@ func (c *MockITokenCursorListCall) Do(f func(context.Context, uint64, uint64, st
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockITokenCursorListCall) DoAndReturn(f func(context.Context, uint64, uint64, storage0.SortOrder, storage0.Comparator) ([]*storage.Token, error)) *MockITokenCursorListCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// Filter mocks base method.
+func (m *MockIToken) Filter(ctx context.Context, filter storage.TokenListFilter) ([]storage.Token, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Filter", ctx, filter)
+	ret0, _ := ret[0].([]storage.Token)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Filter indicates an expected call of Filter.
+func (mr *MockITokenMockRecorder) Filter(ctx, filter any) *MockITokenFilterCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Filter", reflect.TypeOf((*MockIToken)(nil).Filter), ctx, filter)
+	return &MockITokenFilterCall{Call: call}
+}
+
+// MockITokenFilterCall wrap *gomock.Call
+type MockITokenFilterCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockITokenFilterCall) Return(arg0 []storage.Token, arg1 error) *MockITokenFilterCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockITokenFilterCall) Do(f func(context.Context, storage.TokenListFilter) ([]storage.Token, error)) *MockITokenFilterCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockITokenFilterCall) DoAndReturn(f func(context.Context, storage.TokenListFilter) ([]storage.Token, error)) *MockITokenFilterCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// Get mocks base method.
+func (m *MockIToken) Get(ctx context.Context, contractId uint64, tokenId decimal.Decimal) (storage.Token, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", ctx, contractId, tokenId)
+	ret0, _ := ret[0].(storage.Token)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockITokenMockRecorder) Get(ctx, contractId, tokenId any) *MockITokenGetCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockIToken)(nil).Get), ctx, contractId, tokenId)
+	return &MockITokenGetCall{Call: call}
+}
+
+// MockITokenGetCall wrap *gomock.Call
+type MockITokenGetCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockITokenGetCall) Return(arg0 storage.Token, arg1 error) *MockITokenGetCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockITokenGetCall) Do(f func(context.Context, uint64, decimal.Decimal) (storage.Token, error)) *MockITokenGetCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockITokenGetCall) DoAndReturn(f func(context.Context, uint64, decimal.Decimal) (storage.Token, error)) *MockITokenGetCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

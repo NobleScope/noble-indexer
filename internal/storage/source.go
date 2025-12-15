@@ -1,6 +1,8 @@
 package storage
 
 import (
+	"context"
+
 	"github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/uptrace/bun"
 )
@@ -8,6 +10,8 @@ import (
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
 type ISource interface {
 	storage.Table[*Source]
+
+	ByContractId(ctx context.Context, id uint64, limit, offset int) ([]Source, error)
 }
 
 // Source -
