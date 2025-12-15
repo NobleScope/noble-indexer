@@ -37,7 +37,7 @@ type tokenListRequest struct {
 	Contract string      `query:"contract" validate:"omitempty,address"`
 	Limit    int         `query:"limit"    validate:"omitempty,min=1,max=100"`
 	Offset   int         `query:"offset"   validate:"omitempty,min=0"`
-	Type     StringArray `query:"type"     validate:"omitempty,dive,trace_type"`
+	Type     StringArray `query:"type"     validate:"omitempty,dive,token_type"`
 	Sort     string      `query:"sort"     validate:"omitempty,oneof=asc desc"`
 }
 
@@ -112,8 +112,8 @@ func (handler *TokenHandler) List(c echo.Context) error {
 }
 
 type tokenRequest struct {
-	Contract string `path:"contract" validate:"required,address"`
-	TokenId  string `path:"token_id" validate:"required"`
+	Contract string `param:"contract" validate:"address"`
+	TokenId  string `param:"token_id" validate:"min=0"`
 }
 
 // Get godoc
@@ -293,7 +293,7 @@ func (handler *TokenHandler) TransferList(c echo.Context) error {
 }
 
 type tokenTransferRequest struct {
-	Id uint64 `path:"id" validate:"required,min=1"`
+	Id uint64 `param:"id" validate:"required,min=1"`
 }
 
 // GetTransfer godoc

@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2025 Bb Strategy Pte. Ltd. <celenium@baking-bad.org>
-// SPDX-License-Identifier: MIT
-
 package handler
 
 import (
@@ -15,9 +12,11 @@ import (
 	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/internal/storage/mock"
+	"github.com/baking-bad/noble-indexer/internal/storage/types"
 	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/labstack/echo/v4"
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/mock/gomock"
 )
@@ -541,6 +540,387 @@ func (s *TxHandlerTestSuite) TestListNegativeOffset() {
 	c.SetPath("/tx")
 
 	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusBadRequest, rec.Code)
+
+	var e Error
+	err := json.NewDecoder(rec.Body).Decode(&e)
+	s.Require().NoError(err)
+	s.Require().NotEmpty(e.Message)
+}
+
+// ====================================
+// Traces Tests
+// ====================================
+
+var (
+	testTrace1 = storage.Trace{
+		Id:           1,
+		Height:       100,
+		Time:         testTxWithToAddress.Time,
+		TxId:         1,
+		From:         1,
+		To:           uint64Ptr(2),
+		GasLimit:     decimal.NewFromInt(21000),
+		Amount:       &testTxWithToAddress.Amount,
+		Input:        []byte{},
+		TxPosition:   0,
+		TraceAddress: []uint64{},
+		Type:         types.Call,
+		GasUsed:      decimal.NewFromInt(21000),
+		Output:       []byte{},
+		Subtraces:    0,
+		FromAddress:  testFromAddress,
+		ToAddress:    &testToAddress,
+		Tx:           testTxWithToAddress,
+	}
+
+	testTrace2 = storage.Trace{
+		Id:             2,
+		Height:         100,
+		Time:           testTxContractCreation.Time,
+		TxId:           2,
+		From:           1,
+		To:             nil,
+		GasLimit:       decimal.NewFromInt(100000),
+		Amount:         nil,
+		Input:          []byte{0x60, 0x60, 0x60},
+		TxPosition:     1,
+		TraceAddress:   []uint64{},
+		Type:           types.Create,
+		GasUsed:        decimal.NewFromInt(100000),
+		Output:         []byte{0x60, 0x60, 0x60},
+		Subtraces:      0,
+		FromAddress:    testFromAddress,
+		ToAddress:      nil,
+		Tx:             testTxContractCreation,
+		CreationMethod: stringPtr("create"),
+	}
+
+	testTrace3 = storage.Trace{
+		Id:           3,
+		Height:       100,
+		Time:         testTxContractCall.Time,
+		TxId:         3,
+		From:         1,
+		To:           uint64Ptr(2),
+		GasLimit:     decimal.NewFromInt(50000),
+		Amount:       &testTxContractCall.Amount,
+		Input:        []byte{0xa9, 0x05, 0x9c, 0xbb},
+		TxPosition:   2,
+		TraceAddress: []uint64{},
+		Type:         types.Call,
+		GasUsed:      decimal.NewFromInt(50000),
+		Output:       []byte{0x00, 0x01},
+		Subtraces:    0,
+		FromAddress:  testFromAddress,
+		ToAddress:    &testToAddress,
+		Tx:           testTxContractCall,
+	}
+)
+
+func stringPtr(s string) *string {
+	return &s
+}
+
+// TestTracesSuccess tests successful retrieval of traces with default parameters
+func (s *TxHandlerTestSuite) TestTracesSuccess() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/traces")
+
+	s.trace.EXPECT().
+		Filter(gomock.Any(), storage.TraceListFilter{
+			Limit:  10,
+			Offset: 0,
+			Sort:   sdk.SortOrderDesc,
+			Type:   []types.TraceType{},
+		}).
+		Return([]*storage.Trace{&testTrace1, &testTrace2, &testTrace3}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.Traces(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var traces []responses.Trace
+	err := json.NewDecoder(rec.Body).Decode(&traces)
+	s.Require().NoError(err)
+	s.Require().Len(traces, 3)
+
+	s.Require().EqualValues(100, traces[0].Height)
+	s.Require().Equal("0x010203", traces[0].TxHash)
+	s.Require().Equal("call", traces[0].Type)
+}
+
+// TestTracesWithTxHash tests traces filtered by transaction hash
+func (s *TxHandlerTestSuite) TestTracesWithTxHash() {
+	q := make(url.Values)
+	q.Set("tx_hash", testTxHash)
+
+	hashBytes, err := pkgTypes.HexFromString(testTxHash)
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/traces")
+
+	s.tx.EXPECT().
+		ByHash(gomock.Any(), hashBytes).
+		Return(testTxWithToAddress, nil).
+		Times(1)
+
+	txId := testTxWithToAddress.Id
+	s.trace.EXPECT().
+		Filter(gomock.Any(), storage.TraceListFilter{
+			Limit:  10,
+			Offset: 0,
+			Sort:   sdk.SortOrderDesc,
+			Type:   []types.TraceType{},
+			TxId:   &txId,
+		}).
+		Return([]*storage.Trace{&testTrace1}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.Traces(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var traces []responses.Trace
+	err = json.NewDecoder(rec.Body).Decode(&traces)
+	s.Require().NoError(err)
+	s.Require().Len(traces, 1)
+	s.Require().Equal("0x010203", traces[0].TxHash)
+}
+
+// TestTracesWithAddressFrom tests traces filtered by from address
+func (s *TxHandlerTestSuite) TestTracesWithAddressFrom() {
+	q := make(url.Values)
+	q.Set("address_from", testFromAddress.Address)
+
+	hashBytes, err := pkgTypes.HexFromString(testFromAddress.Address)
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/traces")
+
+	s.address.EXPECT().
+		ByHash(gomock.Any(), hashBytes).
+		Return(testFromAddress, nil).
+		Times(1)
+
+	fromId := testFromAddress.Id
+	s.trace.EXPECT().
+		Filter(gomock.Any(), storage.TraceListFilter{
+			Limit:         10,
+			Offset:        0,
+			Sort:          sdk.SortOrderDesc,
+			Type:          []types.TraceType{},
+			AddressFromId: &fromId,
+		}).
+		Return([]*storage.Trace{&testTrace1, &testTrace2, &testTrace3}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.Traces(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var traces []responses.Trace
+	err = json.NewDecoder(rec.Body).Decode(&traces)
+	s.Require().NoError(err)
+	s.Require().Len(traces, 3)
+}
+
+// TestTracesWithAddressTo tests traces filtered by to address
+func (s *TxHandlerTestSuite) TestTracesWithAddressTo() {
+	q := make(url.Values)
+	q.Set("address_to", testToAddress.Address)
+
+	hashBytes, err := pkgTypes.HexFromString(testToAddress.Address)
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/traces")
+
+	s.address.EXPECT().
+		ByHash(gomock.Any(), hashBytes).
+		Return(testToAddress, nil).
+		Times(1)
+
+	toId := testToAddress.Id
+	s.trace.EXPECT().
+		Filter(gomock.Any(), storage.TraceListFilter{
+			Limit:       10,
+			Offset:      0,
+			Sort:        sdk.SortOrderDesc,
+			Type:        []types.TraceType{},
+			AddressToId: &toId,
+		}).
+		Return([]*storage.Trace{&testTrace1, &testTrace3}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.Traces(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var traces []responses.Trace
+	err = json.NewDecoder(rec.Body).Decode(&traces)
+	s.Require().NoError(err)
+	s.Require().Len(traces, 2)
+}
+
+// TestTracesWithType tests traces filtered by type
+func (s *TxHandlerTestSuite) TestTracesWithType() {
+	q := make(url.Values)
+	q.Set("type", "call,create")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/traces")
+
+	s.trace.EXPECT().
+		Filter(gomock.Any(), storage.TraceListFilter{
+			Limit:  10,
+			Offset: 0,
+			Sort:   sdk.SortOrderDesc,
+			Type:   []types.TraceType{types.Call, types.Create},
+		}).
+		Return([]*storage.Trace{&testTrace1, &testTrace2, &testTrace3}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.Traces(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var traces []responses.Trace
+	err := json.NewDecoder(rec.Body).Decode(&traces)
+	s.Require().NoError(err)
+	s.Require().Len(traces, 3)
+}
+
+// TestTracesWithHeight tests traces filtered by block height
+func (s *TxHandlerTestSuite) TestTracesWithHeight() {
+	q := make(url.Values)
+	q.Set("height", "100")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/traces")
+
+	height := uint64(100)
+	s.trace.EXPECT().
+		Filter(gomock.Any(), storage.TraceListFilter{
+			Limit:  10,
+			Offset: 0,
+			Sort:   sdk.SortOrderDesc,
+			Type:   []types.TraceType{},
+			Height: &height,
+		}).
+		Return([]*storage.Trace{&testTrace1, &testTrace2, &testTrace3}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.Traces(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var traces []responses.Trace
+	err := json.NewDecoder(rec.Body).Decode(&traces)
+	s.Require().NoError(err)
+	s.Require().Len(traces, 3)
+}
+
+// TestTracesWithLimitAndOffset tests traces with custom limit and offset
+func (s *TxHandlerTestSuite) TestTracesWithLimitAndOffset() {
+	q := make(url.Values)
+	q.Set("limit", "5")
+	q.Set("offset", "2")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/traces")
+
+	s.trace.EXPECT().
+		Filter(gomock.Any(), storage.TraceListFilter{
+			Limit:  5,
+			Offset: 2,
+			Sort:   sdk.SortOrderDesc,
+			Type:   []types.TraceType{},
+		}).
+		Return([]*storage.Trace{&testTrace3}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.Traces(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var traces []responses.Trace
+	err := json.NewDecoder(rec.Body).Decode(&traces)
+	s.Require().NoError(err)
+	s.Require().Len(traces, 1)
+}
+
+// TestTracesWithSortAsc tests traces with ascending sort order
+func (s *TxHandlerTestSuite) TestTracesWithSortAsc() {
+	q := make(url.Values)
+	q.Set("sort", "asc")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/traces")
+
+	s.trace.EXPECT().
+		Filter(gomock.Any(), storage.TraceListFilter{
+			Limit:  10,
+			Offset: 0,
+			Sort:   sdk.SortOrderAsc,
+			Type:   []types.TraceType{},
+		}).
+		Return([]*storage.Trace{&testTrace1, &testTrace2, &testTrace3}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.Traces(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var traces []responses.Trace
+	err := json.NewDecoder(rec.Body).Decode(&traces)
+	s.Require().NoError(err)
+	s.Require().Len(traces, 3)
+}
+
+// TestTracesEmptyResult tests when no traces are found
+func (s *TxHandlerTestSuite) TestTracesEmptyResult() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/traces")
+
+	s.trace.EXPECT().
+		Filter(gomock.Any(), gomock.Any()).
+		Return([]*storage.Trace{}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.Traces(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var traces []responses.Trace
+	err := json.NewDecoder(rec.Body).Decode(&traces)
+	s.Require().NoError(err)
+	s.Require().Len(traces, 0)
+}
+
+// TestTracesInvalidLimit tests traces with invalid limit parameter
+func (s *TxHandlerTestSuite) TestTracesInvalidLimit() {
+	q := make(url.Values)
+	q.Set("limit", "101")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/traces")
+
+	s.Require().NoError(s.handler.Traces(c))
 	s.Require().Equal(http.StatusBadRequest, rec.Code)
 
 	var e Error
