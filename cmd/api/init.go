@@ -91,6 +91,9 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 	}
 	v1.GET("/token_balance", tokenHandlers.TokenBalanceList)
 
+	searchHandler := handler.NewSearchHandler(db.Search, db.Addresses, db.Blocks, db.Tx, db.Token)
+	v1.GET("/search", searchHandler.Search)
+
 	log.Info().Msg("API routes:")
 	for _, route := range e.Routes() {
 		log.Info().Msgf("[%s] %s -> %s", route.Method, route.Path, route.Name)
