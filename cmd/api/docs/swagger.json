@@ -745,6 +745,157 @@
                 }
             }
         },
+        "/proxy-contracts": {
+            "get": {
+                "description": "List of all indexed proxy contracts",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "proxy-contracts"
+                ],
+                "summary": "Proxy contracts list",
+                "operationId": "list-proxy-contracts",
+                "parameters": [
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Count of requested entities",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "description": "Sort order. Default: desc",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Proxy contract deploy height",
+                        "name": "height",
+                        "in": "query"
+                    },
+                    {
+                        "maxLength": 42,
+                        "minLength": 42,
+                        "type": "string",
+                        "description": "Proxy contract implementation address",
+                        "name": "implementation",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "EIP1167",
+                            "EIP7760",
+                            "EIP7702",
+                            "EIP1967",
+                            "custom",
+                            "clone_with_immutable_args"
+                        ],
+                        "type": "string",
+                        "description": "Comma-separated proxy contracts type",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "new",
+                            "resolved",
+                            "error"
+                        ],
+                        "type": "string",
+                        "description": "Comma-separated proxy contracts status",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/responses.ProxyContract"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/search": {
+            "get": {
+                "description": "search",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "search"
+                ],
+                "summary": "Search by hash",
+                "operationId": "search",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search string",
+                        "name": "query",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/responses.SearchItem"
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/token": {
             "get": {
                 "description": "List token transfers",
@@ -1545,6 +1696,57 @@
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "responses.ProxyContract": {
+            "type": "object",
+            "properties": {
+                "contract": {
+                    "type": "string",
+                    "example": "0x0000000000000000000000000000000000000000"
+                },
+                "height": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "implementation": {
+                    "type": "string",
+                    "example": "0x0000000000000000000000000000000000000001"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "new",
+                        "resolved",
+                        "error"
+                    ],
+                    "example": "resolved"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "EIP1167",
+                        "EIP7760",
+                        "EIP7702",
+                        "EIP1967",
+                        "custom",
+                        "clone_with_immutable_args"
+                    ],
+                    "example": "EIP1967"
+                }
+            }
+        },
+        "responses.SearchItem": {
+            "type": "object",
+            "properties": {
+                "result": {
+                    "description": "Search result. Can be one of folowwing types: Address, Block, Tx, Token",
+                    "type": "object"
+                },
+                "type": {
+                    "description": "Result type which is in the result. Can be 'address', 'block', 'tx', 'token'",
+                    "type": "string"
                 }
             }
         },
