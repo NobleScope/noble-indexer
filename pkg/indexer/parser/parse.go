@@ -333,16 +333,20 @@ func (p *Module) parse(b types.BlockData) error {
 					Hash: trace.TxHash,
 				},
 			}
-			if err = ParseEvmContractMetadata(contract); err != nil {
-				return err
-			}
 
 			newTrace.Contract = contract
 			decodeCtx.AddAddress(&deployerAddress)
 			decodeCtx.AddAddress(&contractAddress)
 			decodeCtx.AddContract(contract)
-			if err = p.parseProxyContract(decodeCtx, contract); err != nil {
-				return err
+			if parseErr := p.parseProxyContract(decodeCtx, contract); parseErr != nil {
+				return parseErr
+			}
+
+			if parseErr := ParseEvmContractMetadata(contract); parseErr != nil {
+				p.Log.Err(parseErr).
+					Str("contract", contract.Address.Address).
+					Uint64("height", uint64(contract.Height)).
+					Msg("parsing contract metadata")
 			}
 		}
 

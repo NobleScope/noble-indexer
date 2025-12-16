@@ -37,6 +37,6 @@ func bindAndValidate[T any](c echo.Context) (*T, error) {
 type StringArray []string
 
 func (s *StringArray) UnmarshalParam(param string) error {
-	*s = StringArray(strings.Split(param, ","))
+	*s = strings.Split(param, ",")
 	return nil
 }

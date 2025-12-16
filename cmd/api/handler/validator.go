@@ -33,6 +33,12 @@ func NewApiValidator() *ApiValidator {
 	if err := v.RegisterValidation("transfer_type", transferTypeValidator()); err != nil {
 		panic(err)
 	}
+	if err := v.RegisterValidation("proxy_contract_type", proxyContractTypeValidator()); err != nil {
+		panic(err)
+	}
+	if err := v.RegisterValidation("proxy_contract_status", proxyContractStatusValidator()); err != nil {
+		panic(err)
+	}
 	return &ApiValidator{validator: v}
 }
 
@@ -73,6 +79,20 @@ func tokenTypeValidator() validator.Func {
 func transferTypeValidator() validator.Func {
 	return func(fl validator.FieldLevel) bool {
 		_, err := types.ParseTransferType(fl.Field().String())
+		return err == nil
+	}
+}
+
+func proxyContractTypeValidator() validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		_, err := types.ParseProxyType(fl.Field().String())
+		return err == nil
+	}
+}
+
+func proxyContractStatusValidator() validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		_, err := types.ParseProxyStatus(fl.Field().String())
 		return err == nil
 	}
 }

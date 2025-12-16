@@ -94,6 +94,12 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 	searchHandler := handler.NewSearchHandler(db.Search, db.Addresses, db.Blocks, db.Tx, db.Token)
 	v1.GET("/search", searchHandler.Search)
 
+	proxyHandlers := handler.NewProxyContractHandler(db.ProxyContracts, db.Addresses, cfg.Indexer.Name)
+	proxyGroup := v1.Group("/proxy")
+	{
+		proxyGroup.GET("", proxyHandlers.List)
+	}
+
 	log.Info().Msg("API routes:")
 	for _, route := range e.Routes() {
 		log.Info().Msgf("[%s] %s -> %s", route.Method, route.Path, route.Name)

@@ -42,7 +42,7 @@ type searchRequest struct {
 // Search godoc
 //
 //	@Summary				Search by hash
-//	@Description.markdown	search
+//	@Description			search
 //	@Tags					search
 //	@ID						search
 //	@Param					query	query	string	true	"Search string"
