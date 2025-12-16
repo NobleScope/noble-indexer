@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
 	"net/http"
 
+	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
 	"github.com/labstack/echo/v4"
 )
 

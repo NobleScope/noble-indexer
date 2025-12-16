@@ -216,6 +216,15 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			Exec(ctx); err != nil {
 			return err
 		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Token)(nil)).
+			Index("token_name_idx").
+			ColumnExpr("name gin_trgm_ops").
+			Using("GIN").
+			Exec(ctx); err != nil {
+			return err
+		}
 
 		// Source
 		if _, err := tx.NewCreateIndex().

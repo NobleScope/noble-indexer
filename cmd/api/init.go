@@ -91,6 +91,9 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 	}
 	v1.GET("/token_balance", tokenHandlers.TokenBalanceList)
 
+	searchHandler := handler.NewSearchHandler(db.Search, db.Addresses, db.Blocks, db.Tx, db.Token)
+	v1.GET("/search", searchHandler.Search)
+
 	proxyHandlers := handler.NewProxyContractHandler(db.ProxyContracts, db.Addresses, cfg.Indexer.Name)
 	proxyGroup := v1.Group("/proxy")
 	{

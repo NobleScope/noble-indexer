@@ -5,6 +5,46 @@ definitions:
       message:
         type: string
     type: object
+  responses.Address:
+    description: Noble address information
+    properties:
+      balance:
+        $ref: '#/definitions/responses.Balance'
+      deployed_contracts:
+        example: 7
+        type: integer
+      first_height:
+        example: 100
+        type: integer
+      hash:
+        example: 0xd90d69b7cf347b5bfe0719baf7eef310c085e46b
+        type: string
+      id:
+        example: 321
+        type: integer
+      interactions:
+        example: 890
+        type: integer
+      is_contract:
+        example: false
+        type: boolean
+      last_height:
+        example: 100
+        type: integer
+      txs_count:
+        example: 23456
+        type: integer
+    type: object
+  responses.Balance:
+    description: Balance of address information
+    properties:
+      currency:
+        example: noble
+        type: string
+      value:
+        example: "10000000000"
+        type: string
+    type: object
   responses.Block:
     properties:
       difficulty:
@@ -79,34 +119,70 @@ definitions:
         example: 12
         type: integer
     type: object
-  responses.ProxyContract:
+  responses.Contract:
+    description: Noble contract information
     properties:
-      contract:
-        example: "0x0000000000000000000000000000000000000000"
-        type: string
-      height:
-        example: 100
-        type: integer
-      implementation:
+      abi:
+        items:
+          type: integer
+        type: array
+      address:
         example: "0x0000000000000000000000000000000000000001"
         type: string
-      status:
-        enum:
-        - new
-        - resolved
-        - error
-        example: resolved
+      code:
+        example: 0x01234567890123456789012345678901234567890123456789
         type: string
-      type:
-        enum:
-        - EIP1167
-        - EIP7760
-        - EIP7702
-        - EIP1967
-        - custom
-        - clone_with_immutable_args
-        example: EIP1967
+      compiler_version:
+        example: 0.1.1
         type: string
+      error:
+        example: Error string
+        type: string
+      id:
+        example: 321
+        type: integer
+      language:
+        example: Solidity
+        type: string
+      metadata_link:
+        example: https://ipfs.io/ipfs/QmWYtNwHxXxzhrWj7TUcB5tC3m1bSGFXAtEqwegMbk1sjt
+        type: string
+      optimizer_enabled:
+        example: true
+        type: boolean
+      tags:
+        items:
+          type: string
+        type: array
+      tx_hash:
+        example: "0x0000000000000000000000000000000000000002"
+        type: string
+      verified:
+        example: false
+        type: boolean
+    type: object
+  responses.Enums:
+    properties:
+      token_type:
+        items:
+          type: string
+        type: array
+      trace_type:
+        items:
+          type: string
+        type: array
+      transfer_type:
+        items:
+          type: string
+        type: array
+      tx_status:
+        items:
+          type: string
+        type: array
+      tx_type:
+        items:
+          type: string
+        type: array
     type: object
   responses.State:
     properties:
@@ -138,6 +214,54 @@ definitions:
         example: 23456
         format: int64
         type: integer
+    type: object
+  responses.Token:
+    description: Noble token information
+    properties:
+      contract:
+        example: 0xdAC17F958D2ee523a2206206994597C13D831ec7
+        type: string
+      decimals:
+        example: 6
+        type: integer
+      id:
+        example: 0
+        type: integer
+      metadata:
+        items:
+          type: integer
+        type: array
+      name:
+        example: Tether USD
+        type: string
+      supply:
+        example: "123456789"
+        type: string
+      symbol:
+        example: USD
+        type: string
+      transfers_count:
+        example: 123
+        type: integer
+      type:
+        example: ERC20
+        type: string
+    type: object
+  responses.TokenBalance:
+    description: Token balance information
+    properties:
+      address:
+        example: "0x0000000000000000000000000000000000000001"
+        type: string
+      contract:
+        example: 0xdAC17F958D2ee523a2206206994597C13D831ec7
+        type: string
+      token_id:
+        example: "0"
+        type: string
+      value:
+        example: "123456789"
+        type: string
     type: object
   responses.Trace:
     properties:
@@ -268,6 +392,41 @@ definitions:
         example: TxTypeDynamicFee
         type: string
     type: object
+  responses.Transfer:
+    description: Token transfer information
+    properties:
+      amount:
+        example: "123456789"
+        type: string
+      contract:
+        example: 0xdAC17F958D2ee523a2206206994597C13D831ec7
+        type: string
+      from:
+        example: "0x0000000000000000000000000000000000000001"
+        type: string
+      height:
+        example: 100
+        type: integer
+      id:
+        example: 0
+        type: integer
+      time:
+        example: "2026-01-01T01:01:01+00:00"
+        format: date-time
+        type: string
+      to:
+        example: "0x0000000000000000000000000000000000000002"
+        type: string
+      token_id:
+        example: "0"
+        type: string
+      tx_hash:
+        example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d
+        type: string
+      type:
+        example: transfer
+        type: string
+    type: object
 host: noble.dipdup.net
 info:
   contact:
@@ -282,6 +441,92 @@ info:
   title: Noble Indexer API
   version: "1.0"
 paths:
+  /address:
+    get:
+      description: List address info
+      operationId: list-address
+      parameters:
+      - description: Count of requested entities
+        in: query
+        maximum: 100
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: Sort order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Sort field
+        enum:
+        - id
+        - value
+        - first_height
+        - last_height
+        in: query
+        name: sort_by
+        type: string
+      - description: Show only contract addresses
+        in: query
+        name: only_contracts
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/responses.Address'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: List address info
+      tags:
+      - address
+  /address/{hash}:
+    get:
+      description: Get address info
+      operationId: get-address
+      parameters:
+      - description: Hash
+        in: path
+        maxLength: 42
+        minLength: 42
+        name: hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Address'
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Get address info
+      tags:
+      - address
   /block:
     get:
       description: List blocks info
@@ -460,6 +705,151 @@ paths:
       summary: Get count of blocks in network
       tags:
       - block
+  /contract:
+    get:
+      description: List contract info
+      operationId: list-contract
+      parameters:
+      - description: Count of requested entities
+        in: query
+        maximum: 100
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: Sort order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Sort field
+        enum:
+        - id
+        - height
+        in: query
+        name: sort_by
+        type: string
+      - description: Show only verified contracts
+        in: query
+        name: is_verified
+        type: boolean
+      - description: Transaction hash in hexadecimal with 0x prefix
+        in: query
+        maxLength: 66
+        minLength: 66
+        name: tx_hash
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/responses.Contract'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: List contract info
+      tags:
+      - contract
+  /contract/{hash}:
+    get:
+      description: Get contract info
+      operationId: get-contract
+      parameters:
+      - description: Hash
+        in: path
+        maxLength: 66
+        minLength: 66
+        name: hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Contract'
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Get contract info
+      tags:
+      - contract
+  /contract/{hash}/sources:
+    get:
+      description: Get contract sources
+      operationId: get-contract-sources
+      parameters:
+      - description: Hash
+        in: path
+        maxLength: 66
+        minLength: 66
+        name: hash
+        required: true
+        type: string
+      - description: Count of requested entities
+        in: query
+        maximum: 100
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Contract'
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Get contract sources
+      tags:
+      - contract
+  /enums:
+    get:
+      description: Get noble enumerators
+      operationId: get-enums
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Enums'
+      summary: Get noble enumerators
+      tags:
+      - general
   /head:
     get:
       description: Get current indexer head
@@ -484,10 +874,70 @@ paths:
       summary: Get current indexer head
       tags:
       - general
-  /proxy-contracts:
+  /log:
     get:
-      description: List of all indexed proxy contracts
-      operationId: list-proxy-contracts
+      description: List logs
+      operationId: list-transaction-log
+      parameters:
+      - description: Transaction hash in hexadecimal with 0x prefix
+        in: query
+        maxLength: 66
+        minLength: 66
+        name: tx_hash
+        type: string
+      - description: Count of requested entities
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        minimum: 0
+        name: offset
+        type: integer
+      - description: Address whose invocation generated this log
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: address
+        type: string
+      - description: Block height
+        in: query
+        minimum: 1
+        name: height
+        type: integer
+      - description: 'Sort order. Default: desc'
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/responses.Trace'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: List logs
+      tags:
+      - transactions
+  /token:
+    get:
+      description: List token transfers
+      operationId: list-token-transfers
       parameters:
       - description: Count of requested entities
         in: query
@@ -507,35 +957,55 @@ paths:
         in: query
         name: sort
         type: string
-      - description: Proxy contract deploy height
+      - description: Block height
         in: query
-        minimum: 1
+        minimum: 0
         name: height
         type: integer
-      - description: Proxy contract implementation address
+      - description: Time from in unix timestamp
         in: query
-        maxLength: 42
-        minLength: 42
-        name: implementation
-        type: string
-      - description: Comma-separated proxy contracts type
+        name: time_from
+        type: integer
+      - description: Time to in unix timestamp
+        in: query
+        name: time_to
+        type: integer
+      - description: Comma-separated list of token types
         enum:
-        - EIP1167
-        - EIP7760
-        - EIP7702
-        - EIP1967
-        - custom
-        - clone_with_immutable_args
+        - burn
+        - mint
+        - transfer
+        - unknown
         in: query
         name: type
         type: string
-      - description: Comma-separated proxy contracts status
-        enum:
-        - new
-        - resolved
-        - error
+      - description: Transaction hash in hexadecimal with 0x prefix
         in: query
-        name: status
+        maxLength: 66
+        minLength: 66
+        name: tx_hash
+        type: string
+      - description: Address from
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: address_from
+        type: string
+      - description: Address to
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: address_to
+        type: string
+      - description: Contract address
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: contract
+        type: string
+      - description: Token ID
+        in: query
+        name: token_id
         type: string
       produces:
       - application/json
@@ -544,7 +1014,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/responses.ProxyContract'
+              $ref: '#/definitions/responses.Transfer'
             type: array
         "400":
           description: Bad Request
@@ -554,9 +1024,220 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/handler.Error'
-      summary: Proxy contracts list
+      summary: List token transfers
       tags:
-      - proxy-contracts
+      - token
+  /token/{contract}/{token_id}:
+    get:
+      description: Get token info
+      operationId: get-token
+      parameters:
+      - description: Contract address
+        in: path
+        maxLength: 42
+        minLength: 42
+        name: contract
+        required: true
+        type: string
+      - description: Token ID
+        in: path
+        name: token_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Token'
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Get token info
+      tags:
+      - token
+  /token_balance:
+    get:
+      description: List token balances
+      operationId: list-token-balances
+      parameters:
+      - description: Count of requested entities
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        minimum: 0
+        name: offset
+        type: integer
+      - description: 'Sort order. Default: desc'
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Address
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: address
+        type: string
+      - description: Contract address
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: contract
+        type: string
+      - description: Token ID
+        in: query
+        name: token_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/responses.TokenBalance'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: List token balances
+      tags:
+      - token
+  /traces:
+    get:
+      description: List transaction traces
+      operationId: list-transaction-traces
+      parameters:
+      - description: Transaction hash in hexadecimal with 0x prefix
+        in: query
+        maxLength: 66
+        minLength: 66
+        name: tx_hash
+        type: string
+      - description: Count of requested entities
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        minimum: 0
+        name: offset
+        type: integer
+      - description: Address which initiate trace
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: address_from
+        type: string
+      - description: Address which receiving trace result
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: address_to
+        type: string
+      - description: Called contract
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: contract
+        type: string
+      - description: Block height
+        in: query
+        minimum: 1
+        name: height
+        type: integer
+      - description: Comma-separated list of trace types
+        enum:
+        - call
+        - delegatecall
+        - staticcall
+        - create
+        - create2
+        - selfdestruct
+        - reward
+        - suicide
+        in: query
+        name: type
+        type: string
+      - description: 'Sort order. Default: desc'
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/responses.Trace'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: List transaction traces
+      tags:
+      - transactions
+  /transfer/{id}:
+    get:
+      description: Get token transfer info
+      operationId: get-token-transfer
+      parameters:
+      - description: Internal id
+        in: path
+        name: contract
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Transfer'
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Get token transfer info
+      tags:
+      - token
   /tx:
     get:
       description: List all of indexed transactions
@@ -630,56 +1311,6 @@ paths:
           schema:
             $ref: '#/definitions/handler.Error'
       summary: Get transaction by hash
-      tags:
-      - transactions
-  /tx/{hash}/traces:
-    get:
-      description: List transaction traces
-      operationId: list-transaction-traces
-      parameters:
-      - description: Transaction hash in hexadecimal with 0x prefix
-        in: path
-        maxLength: 66
-        minLength: 66
-        name: hash
-        required: true
-        type: string
-      - description: Count of requested entities
-        in: query
-        maximum: 100
-        minimum: 1
-        name: limit
-        type: integer
-      - description: Offset
-        in: query
-        minimum: 0
-        name: offset
-        type: integer
-      - description: 'Sort order. Default: desc'
-        enum:
-        - asc
-        - desc
-        in: query
-        name: sort
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/responses.Trace'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/handler.Error'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/handler.Error'
-      summary: List transaction traces
       tags:
       - transactions
 schemes:
