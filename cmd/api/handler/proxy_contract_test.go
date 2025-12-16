@@ -327,7 +327,7 @@ func (s *ProxyContractHandlerTestSuite) TestListWithImplementationFilter() {
 	c.SetPath("/proxy-contracts")
 
 	s.addresses.EXPECT().
-		ByHash(gomock.Any(), "2222222222222222222222222222222222222222").
+		ByHash(gomock.Any(), pkgTypes.MustDecodeHex("2222222222222222222222222222222222222222")).
 		Return(testImplementationAddress, nil).
 		Times(1)
 

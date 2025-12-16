@@ -64,7 +64,7 @@ func (req *listProxyContracts) ToFilters(
 		if err != nil {
 			return filters, errors.Wrapf(err, "decoding proxy implementation address: %s", req.Implementation)
 		}
-		implementationAddress, err := address.ByHash(ctx, implementationHex.String())
+		implementationAddress, err := address.ByHash(ctx, implementationHex)
 		if err != nil {
 			return filters, errors.Wrapf(err, "fetching implementation address by hash: %x", implementationAddress)
 		}

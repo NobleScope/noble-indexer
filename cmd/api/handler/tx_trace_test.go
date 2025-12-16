@@ -117,20 +117,37 @@ func (s *TxTraceHandlerTestSuite) TestTracesSuccess() {
 	hashBytes, err := pkgTypes.HexFromString(testTxHash)
 	s.Require().NoError(err)
 
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequest(http.MethodGet, "/?tx_hash="+testTxHash, nil)
 	rec := httptest.NewRecorder()
 	c := s.echo.NewContext(req, rec)
-	c.SetPath("/tx/:hash/traces")
-	c.SetParamNames("hash")
-	c.SetParamValues(testTxHash)
+	c.SetPath("/traces")
 
 	testTraces := []*storage.Trace{
 		testTrace1,
 		testTrace2,
 	}
 
+	testTx := storage.Tx{
+		Id:   1,
+		Hash: hashBytes,
+	}
+
+	txId := uint64(1)
+	expectedFilter := storage.TraceListFilter{
+		Limit:  10,
+		Offset: 0,
+		Sort:   sdk.SortOrderDesc,
+		TxId:   &txId,
+		Type:   []types.TraceType{},
+	}
+
+	s.tx.EXPECT().
+		ByHash(gomock.Any(), hashBytes).
+		Return(testTx, nil).
+		Times(1)
+
 	s.trace.EXPECT().
-		ByTxHash(gomock.Any(), hashBytes, 10, 0, sdk.SortOrderDesc).
+		Filter(gomock.Any(), expectedFilter).
 		Return(testTraces, nil).
 		Times(1)
 
@@ -164,15 +181,32 @@ func (s *TxTraceHandlerTestSuite) TestTracesWithLimit() {
 	hashBytes, err := pkgTypes.HexFromString(testTxHash)
 	s.Require().NoError(err)
 
-	req := httptest.NewRequest(http.MethodGet, "/?limit=5", nil)
+	req := httptest.NewRequest(http.MethodGet, "/?tx_hash="+testTxHash+"&limit=5", nil)
 	rec := httptest.NewRecorder()
 	c := s.echo.NewContext(req, rec)
-	c.SetPath("/tx/:hash/traces")
-	c.SetParamNames("hash")
-	c.SetParamValues(testTxHash)
+	c.SetPath("/traces")
+
+	testTx := storage.Tx{
+		Id:   1,
+		Hash: hashBytes,
+	}
+
+	txId := uint64(1)
+	expectedFilter := storage.TraceListFilter{
+		Limit:  5,
+		Offset: 0,
+		Sort:   sdk.SortOrderDesc,
+		TxId:   &txId,
+		Type:   []types.TraceType{},
+	}
+
+	s.tx.EXPECT().
+		ByHash(gomock.Any(), hashBytes).
+		Return(testTx, nil).
+		Times(1)
 
 	s.trace.EXPECT().
-		ByTxHash(gomock.Any(), hashBytes, 5, 0, sdk.SortOrderDesc).
+		Filter(gomock.Any(), expectedFilter).
 		Return([]*storage.Trace{testTrace1}, nil).
 		Times(1)
 
@@ -190,15 +224,32 @@ func (s *TxTraceHandlerTestSuite) TestTracesWithOffset() {
 	hashBytes, err := pkgTypes.HexFromString(testTxHash)
 	s.Require().NoError(err)
 
-	req := httptest.NewRequest(http.MethodGet, "/?offset=2", nil)
+	req := httptest.NewRequest(http.MethodGet, "/?tx_hash="+testTxHash+"&offset=2", nil)
 	rec := httptest.NewRecorder()
 	c := s.echo.NewContext(req, rec)
-	c.SetPath("/tx/:hash/traces")
-	c.SetParamNames("hash")
-	c.SetParamValues(testTxHash)
+	c.SetPath("/traces")
+
+	testTx := storage.Tx{
+		Id:   1,
+		Hash: hashBytes,
+	}
+
+	txId := uint64(1)
+	expectedFilter := storage.TraceListFilter{
+		Limit:  10,
+		Offset: 2,
+		Sort:   sdk.SortOrderDesc,
+		TxId:   &txId,
+		Type:   []types.TraceType{},
+	}
+
+	s.tx.EXPECT().
+		ByHash(gomock.Any(), hashBytes).
+		Return(testTx, nil).
+		Times(1)
 
 	s.trace.EXPECT().
-		ByTxHash(gomock.Any(), hashBytes, 10, 2, sdk.SortOrderDesc).
+		Filter(gomock.Any(), expectedFilter).
 		Return([]*storage.Trace{testTrace2}, nil).
 		Times(1)
 
@@ -216,15 +267,32 @@ func (s *TxTraceHandlerTestSuite) TestTracesWithSortAsc() {
 	hashBytes, err := pkgTypes.HexFromString(testTxHash)
 	s.Require().NoError(err)
 
-	req := httptest.NewRequest(http.MethodGet, "/?sort=asc", nil)
+	req := httptest.NewRequest(http.MethodGet, "/?tx_hash="+testTxHash+"&sort=asc", nil)
 	rec := httptest.NewRecorder()
 	c := s.echo.NewContext(req, rec)
-	c.SetPath("/tx/:hash/traces")
-	c.SetParamNames("hash")
-	c.SetParamValues(testTxHash)
+	c.SetPath("/traces")
+
+	testTx := storage.Tx{
+		Id:   1,
+		Hash: hashBytes,
+	}
+
+	txId := uint64(1)
+	expectedFilter := storage.TraceListFilter{
+		Limit:  10,
+		Offset: 0,
+		Sort:   sdk.SortOrderAsc,
+		TxId:   &txId,
+		Type:   []types.TraceType{},
+	}
+
+	s.tx.EXPECT().
+		ByHash(gomock.Any(), hashBytes).
+		Return(testTx, nil).
+		Times(1)
 
 	s.trace.EXPECT().
-		ByTxHash(gomock.Any(), hashBytes, 10, 0, sdk.SortOrderAsc).
+		Filter(gomock.Any(), expectedFilter).
 		Return([]*storage.Trace{testTrace1, testTrace2}, nil).
 		Times(1)
 
@@ -242,15 +310,32 @@ func (s *TxTraceHandlerTestSuite) TestTracesEmptyResult() {
 	hashBytes, err := pkgTypes.HexFromString(testTxHash)
 	s.Require().NoError(err)
 
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequest(http.MethodGet, "/?tx_hash="+testTxHash, nil)
 	rec := httptest.NewRecorder()
 	c := s.echo.NewContext(req, rec)
-	c.SetPath("/tx/:hash/traces")
-	c.SetParamNames("hash")
-	c.SetParamValues(testTxHash)
+	c.SetPath("/traces")
+
+	testTx := storage.Tx{
+		Id:   1,
+		Hash: hashBytes,
+	}
+
+	txId := uint64(1)
+	expectedFilter := storage.TraceListFilter{
+		Limit:  10,
+		Offset: 0,
+		Sort:   sdk.SortOrderDesc,
+		TxId:   &txId,
+		Type:   []types.TraceType{},
+	}
+
+	s.tx.EXPECT().
+		ByHash(gomock.Any(), hashBytes).
+		Return(testTx, nil).
+		Times(1)
 
 	s.trace.EXPECT().
-		ByTxHash(gomock.Any(), hashBytes, 10, 0, sdk.SortOrderDesc).
+		Filter(gomock.Any(), expectedFilter).
 		Return([]*storage.Trace{}, nil).
 		Times(1)
 
@@ -265,30 +350,10 @@ func (s *TxTraceHandlerTestSuite) TestTracesEmptyResult() {
 
 // TestTracesInvalidHash tests handling of invalid transaction hash
 func (s *TxTraceHandlerTestSuite) TestTracesInvalidHash() {
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequest(http.MethodGet, "/?tx_hash=invalid_hash", nil)
 	rec := httptest.NewRecorder()
 	c := s.echo.NewContext(req, rec)
-	c.SetPath("/tx/:hash/traces")
-	c.SetParamNames("hash")
-	c.SetParamValues("invalid_hash")
-
-	s.Require().NoError(s.handler.Traces(c))
-	s.Require().Equal(http.StatusBadRequest, rec.Code)
-
-	var e Error
-	err := json.NewDecoder(rec.Body).Decode(&e)
-	s.Require().NoError(err)
-	s.Require().NotEmpty(e.Message)
-}
-
-// TestTracesMissingHash tests handling of missing hash parameter
-func (s *TxTraceHandlerTestSuite) TestTracesMissingHash() {
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	rec := httptest.NewRecorder()
-	c := s.echo.NewContext(req, rec)
-	c.SetPath("/tx/:hash/traces")
-	c.SetParamNames("hash")
-	c.SetParamValues("")
+	c.SetPath("/traces")
 
 	s.Require().NoError(s.handler.Traces(c))
 	s.Require().Equal(http.StatusBadRequest, rec.Code)
@@ -304,9 +369,7 @@ func (s *TxTraceHandlerTestSuite) TestTracesInvalidLimit() {
 	req := httptest.NewRequest(http.MethodGet, "/?limit=101", nil)
 	rec := httptest.NewRecorder()
 	c := s.echo.NewContext(req, rec)
-	c.SetPath("/tx/:hash/traces")
-	c.SetParamNames("hash")
-	c.SetParamValues(testTxHash)
+	c.SetPath("/traces")
 
 	s.Require().NoError(s.handler.Traces(c))
 	s.Require().Equal(http.StatusBadRequest, rec.Code)
@@ -322,9 +385,7 @@ func (s *TxTraceHandlerTestSuite) TestTracesInvalidSort() {
 	req := httptest.NewRequest(http.MethodGet, "/?sort=invalid", nil)
 	rec := httptest.NewRecorder()
 	c := s.echo.NewContext(req, rec)
-	c.SetPath("/tx/:hash/traces")
-	c.SetParamNames("hash")
-	c.SetParamValues(testTxHash)
+	c.SetPath("/traces")
 
 	s.Require().NoError(s.handler.Traces(c))
 	s.Require().Equal(http.StatusBadRequest, rec.Code)
