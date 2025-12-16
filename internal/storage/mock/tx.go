@@ -104,8 +104,8 @@ type MockITxByHeightCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockITxByHeightCall) Return(txs []*storage.Tx, err error) *MockITxByHeightCall {
-	c.Call = c.Call.Return(txs, err)
+func (c *MockITxByHeightCall) Return(arg0 []*storage.Tx, arg1 error) *MockITxByHeightCall {
+	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
@@ -156,6 +156,45 @@ func (c *MockITxCursorListCall) Do(f func(context.Context, uint64, uint64, stora
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockITxCursorListCall) DoAndReturn(f func(context.Context, uint64, uint64, storage0.SortOrder, storage0.Comparator) ([]*storage.Tx, error)) *MockITxCursorListCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// Filter mocks base method.
+func (m *MockITx) Filter(ctx context.Context, filter storage.TxListFilter) ([]storage.Tx, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Filter", ctx, filter)
+	ret0, _ := ret[0].([]storage.Tx)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Filter indicates an expected call of Filter.
+func (mr *MockITxMockRecorder) Filter(ctx, filter any) *MockITxFilterCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Filter", reflect.TypeOf((*MockITx)(nil).Filter), ctx, filter)
+	return &MockITxFilterCall{Call: call}
+}
+
+// MockITxFilterCall wrap *gomock.Call
+type MockITxFilterCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockITxFilterCall) Return(arg0 []storage.Tx, arg1 error) *MockITxFilterCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockITxFilterCall) Do(f func(context.Context, storage.TxListFilter) ([]storage.Tx, error)) *MockITxFilterCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockITxFilterCall) DoAndReturn(f func(context.Context, storage.TxListFilter) ([]storage.Tx, error)) *MockITxFilterCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

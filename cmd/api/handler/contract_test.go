@@ -12,6 +12,7 @@ import (
 	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/internal/storage/mock"
+	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
@@ -181,17 +182,16 @@ func (s *ContractTestSuite) TestContractGet() {
 	c := s.echo.NewContext(req, rec)
 	c.SetPath("/contract/:hash")
 	c.SetParamNames("hash")
-	c.SetParamValues(testTxHash)
+	c.SetParamValues(testAddressHash)
 
-	s.tx.EXPECT().
-		ByHash(gomock.Any(), gomock.Any()).
-		Return(storage.Tx{Id: 10}, nil)
+	hash, err := pkgTypes.HexFromString(testAddressHash)
+	s.Require().NoError(err)
 
 	s.contract.EXPECT().
-		ByTxId(gomock.Any(), uint64(10)).
+		ByHash(gomock.Any(), hash).
 		Return(testContract, nil)
 
-	err := s.handler.Get(c)
+	err = s.handler.Get(c)
 	s.Require().NoError(err)
 	s.Require().Equal(http.StatusOK, rec.Code)
 }
@@ -214,13 +214,13 @@ func (s *ContractTestSuite) TestContractGet_NotFoundTx() {
 	c := s.echo.NewContext(req, rec)
 	c.SetPath("/contract/:hash")
 	c.SetParamNames("hash")
-	c.SetParamValues(testTxHash)
+	c.SetParamValues(testAddressHash)
 
-	s.tx.EXPECT().
+	s.contract.EXPECT().
 		ByHash(gomock.Any(), gomock.Any()).
-		Return(storage.Tx{}, sql.ErrNoRows)
+		Return(storage.Contract{}, sql.ErrNoRows)
 
-	s.tx.EXPECT().
+	s.contract.EXPECT().
 		IsNoRows(gomock.Any()).
 		Return(true)
 
@@ -235,14 +235,13 @@ func (s *ContractTestSuite) TestContractSources() {
 	c := s.echo.NewContext(req, rec)
 	c.SetPath("/contract/:hash/sources")
 	c.SetParamNames("hash")
-	c.SetParamValues(testTxHash)
+	c.SetParamValues(testAddressHash)
 
-	s.tx.EXPECT().
-		ByHash(gomock.Any(), gomock.Any()).
-		Return(storage.Tx{Id: 3}, nil)
+	hash, err := pkgTypes.HexFromString(testAddressHash)
+	s.Require().NoError(err)
 
 	s.contract.EXPECT().
-		ByTxId(gomock.Any(), uint64(3)).
+		ByHash(gomock.Any(), hash).
 		Return(testContract, nil)
 
 	s.source.EXPECT().
@@ -254,7 +253,7 @@ func (s *ContractTestSuite) TestContractSources() {
 			},
 		}, nil)
 
-	err := s.handler.ContractSources(c)
+	err = s.handler.ContractSources(c)
 	s.Require().NoError(err)
 	s.Require().Equal(http.StatusOK, rec.Code)
 
@@ -275,49 +274,26 @@ func (s *ContractTestSuite) TestContractSources_InvalidHash() {
 	s.Require().Equal(http.StatusBadRequest, rec.Code)
 }
 
-func (s *ContractTestSuite) TestContractSources_NotFoundTx() {
-
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	rec := httptest.NewRecorder()
-	c := s.echo.NewContext(req, rec)
-	c.SetPath("/contract/:hash/sources")
-	c.SetParamNames("hash")
-	c.SetParamValues(testTxHash)
-
-	s.tx.EXPECT().
-		ByHash(gomock.Any(), gomock.Any()).
-		Return(storage.Tx{}, sql.ErrNoRows)
-
-	s.tx.EXPECT().
-		IsNoRows(gomock.Any()).
-		Return(true)
-
-	err := s.handler.ContractSources(c)
-	s.Require().NoError(err)
-	s.Require().Equal(http.StatusNoContent, rec.Code)
-}
-
 func (s *ContractTestSuite) TestContractSources_Empty() {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 	c := s.echo.NewContext(req, rec)
 	c.SetPath("/contract/:hash/sources")
 	c.SetParamNames("hash")
-	c.SetParamValues(testTxHash)
+	c.SetParamValues(testAddressHash)
 
-	s.tx.EXPECT().
-		ByHash(gomock.Any(), gomock.Any()).
-		Return(storage.Tx{Id: 5}, nil)
+	hash, err := pkgTypes.HexFromString(testAddressHash)
+	s.Require().NoError(err)
 
 	s.contract.EXPECT().
-		ByTxId(gomock.Any(), uint64(5)).
+		ByHash(gomock.Any(), hash).
 		Return(testContract, nil)
 
 	s.source.EXPECT().
 		ByContractId(gomock.Any(), testContract.Id, 0, 0).
 		Return([]storage.Source{}, nil)
 
-	err := s.handler.ContractSources(c)
+	err = s.handler.ContractSources(c)
 	s.Require().NoError(err)
 	s.Require().Equal(http.StatusOK, rec.Code)
 

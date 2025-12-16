@@ -104,8 +104,8 @@ func (handler *ContractHandler) List(c echo.Context) error {
 	return returnArray(c, response)
 }
 
-type getByTxHashRequest struct {
-	Hash string `param:"hash" validate:"required,tx_hash"`
+type getByHashRequest struct {
+	Hash string `param:"hash" validate:"required,address"`
 }
 
 // Get godoc
@@ -114,7 +114,7 @@ type getByTxHashRequest struct {
 //	@Description	Get contract info
 //	@Tags			contract
 //	@ID				get-contract
-//	@Param			hash	path	string	true	"Hash"	minlength(66)	maxlength(66)
+//	@Param			hash	path	string	true	"Hash"	minlength(42)	maxlength(42)
 //	@Produce		json
 //	@Success		200	{object}	responses.Contract
 //	@Success		204
@@ -122,7 +122,7 @@ type getByTxHashRequest struct {
 //	@Failure		500	{object}	Error
 //	@Router			/contract/{hash} [get]
 func (handler *ContractHandler) Get(c echo.Context) error {
-	req, err := bindAndValidate[getByTxHashRequest](c)
+	req, err := bindAndValidate[getByHashRequest](c)
 	if err != nil {
 		return badRequestError(c, err)
 	}
@@ -132,12 +132,7 @@ func (handler *ContractHandler) Get(c echo.Context) error {
 		return badRequestError(c, err)
 	}
 
-	tx, err := handler.tx.ByHash(c.Request().Context(), hash)
-	if err != nil {
-		return handleError(c, err, handler.tx)
-	}
-
-	contract, err := handler.contract.ByTxId(c.Request().Context(), tx.Id)
+	contract, err := handler.contract.ByHash(c.Request().Context(), hash)
 	if err != nil {
 		return handleError(c, err, handler.contract)
 	}
@@ -146,7 +141,7 @@ func (handler *ContractHandler) Get(c echo.Context) error {
 }
 
 type getSourcesRequest struct {
-	Hash   string `param:"hash"   validate:"required,tx_hash"`
+	Hash   string `param:"hash"   validate:"required,address"`
 	Limit  int    `query:"limit"  validate:"omitempty,min=1,max=100"`
 	Offset int    `query:"offset" validate:"omitempty,min=0"`
 }
@@ -157,7 +152,7 @@ type getSourcesRequest struct {
 //	@Description	Get contract sources
 //	@Tags			contract
 //	@ID				get-contract-sources
-//	@Param			hash	path	string	true	"Hash"	minlength(66)	maxlength(66)
+//	@Param			hash	path	string	true	"Hash"							minlength(42)	maxlength(42)
 //	@Param			limit	query	integer	false	"Count of requested entities"	mininum(1)	maximum(100)
 //	@Param			offset	query	integer	false	"Offset"						mininum(1)
 //	@Produce		json
@@ -177,12 +172,7 @@ func (handler *ContractHandler) ContractSources(c echo.Context) error {
 		return badRequestError(c, err)
 	}
 
-	tx, err := handler.tx.ByHash(c.Request().Context(), hash)
-	if err != nil {
-		return handleError(c, err, handler.tx)
-	}
-
-	contract, err := handler.contract.ByTxId(c.Request().Context(), tx.Id)
+	contract, err := handler.contract.ByHash(c.Request().Context(), hash)
 	if err != nil {
 		return handleError(c, err, handler.contract)
 	}

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
 	"github.com/baking-bad/noble-indexer/internal/storage"
@@ -142,44 +143,26 @@ func (handler *TxHandler) Traces(c echo.Context) error {
 	}
 
 	if req.AddressFrom != "" {
-		hash, err := types.HexFromString(req.AddressFrom)
+		address, err := handler.getAddressByHash(c, req.AddressFrom)
 		if err != nil {
-			return badRequestError(c, err)
+			return err
 		}
-
-		address, err := handler.address.ByHash(c.Request().Context(), hash)
-		if err != nil {
-			return handleError(c, err, handler.address)
-		}
-
 		filters.AddressFromId = &address.Id
 	}
 
 	if req.AddressTo != "" {
-		hash, err := types.HexFromString(req.AddressTo)
+		address, err := handler.getAddressByHash(c, req.AddressTo)
 		if err != nil {
-			return badRequestError(c, err)
+			return err
 		}
-
-		address, err := handler.address.ByHash(c.Request().Context(), hash)
-		if err != nil {
-			return handleError(c, err, handler.address)
-		}
-
 		filters.AddressToId = &address.Id
 	}
 
 	if req.Contract != "" {
-		hash, err := types.HexFromString(req.Contract)
+		address, err := handler.getAddressByHash(c, req.Contract)
 		if err != nil {
-			return badRequestError(c, err)
+			return err
 		}
-
-		address, err := handler.address.ByHash(c.Request().Context(), hash)
-		if err != nil {
-			return handleError(c, err, handler.address)
-		}
-
 		filters.ContractId = &address.Id
 	}
 
@@ -201,9 +184,18 @@ func (handler *TxHandler) Traces(c echo.Context) error {
 }
 
 type listTxs struct {
-	Limit  int    `query:"limit"  validate:"omitempty,min=1,max=100"`
-	Offset int    `query:"offset" validate:"omitempty,min=0"`
-	Sort   string `query:"sort"   validate:"omitempty,oneof=asc desc"`
+	Limit       int         `query:"limit"        validate:"omitempty,min=1,max=100"`
+	Offset      int         `query:"offset"       validate:"omitempty,min=0"`
+	Sort        string      `query:"sort"         validate:"omitempty,oneof=asc desc"`
+	AddressFrom string      `query:"address_from" validate:"omitempty,address"`
+	AddressTo   string      `query:"address_to"   validate:"omitempty,address"`
+	Contract    string      `query:"contract"     validate:"omitempty,address"`
+	Height      *uint64     `query:"height"       validate:"omitempty,min=0"`
+	Type        StringArray `query:"type"         validate:"omitempty,dive,tx_type"`
+	Status      StringArray `query:"status"       validate:"omitempty,dive,tx_status"`
+
+	From int64 `example:"1692892095" query:"from" swaggertype:"integer" validate:"omitempty,min=1,max=16725214800"`
+	To   int64 `example:"1692892095" query:"to"   swaggertype:"integer" validate:"omitempty,min=1,max=16725214800"`
 }
 
 func (req *listTxs) SetDefault() {
@@ -221,9 +213,15 @@ func (req *listTxs) SetDefault() {
 //	@Description	List all of indexed transactions
 //	@Tags			transactions
 //	@ID				list-transactions
-//	@Param			limit	query	integer	false	"Count of requested entities"	minimum(1)	maximum(100)
-//	@Param			offset	query	integer	false	"Offset"						minimum(0)
-//	@Param			sort	query	string	false	"Sort order. Default: desc"		Enums(asc, desc)
+//	@Param			limit			query	integer	false	"Count of requested entities"						minimum(1)	maximum(100)
+//	@Param			offset			query	integer	false	"Offset"											minimum(0)
+//	@Param			address_from	query	string	false	"Address which used for sending tx"					minlength(42)	maxlength(42)
+//	@Param			address_to		query	string	false	"Address which used for receiving tx"				minlength(42)	maxlength(42)
+//	@Param			contract		query	string	false	"Contract address which was called"					minlength(42)	maxlength(42)
+//	@Param			height			query	integer	false	"Block height"										minimum(1)
+//	@Param			type			query	string	false	"Comma-separated list of transaction types"			Enums(TxTypeUnknown, TxTypeLegacy, TxTypeDynamicFee, TxTypeBlob, TxTypeSetCode)
+//	@Param			status			query	string	false	"Comma-separated list of transaction statuses"		Enums(TxStatusSuccess, TxStatusRevert)
+//	@Param			sort			query	string	false	"Sort order. Default: desc"							Enums(asc, desc)
 //	@Produce		json
 //	@Success		200	{array}		responses.Transaction
 //	@Failure		400	{object}	Error
@@ -236,15 +234,82 @@ func (handler *TxHandler) List(c echo.Context) error {
 	}
 	req.SetDefault()
 
-	txs, err := handler.tx.List(c.Request().Context(), uint64(req.Limit), uint64(req.Offset), pgSort(req.Sort))
+	txTypes := make([]internalTypes.TxType, len(req.Type))
+	for i := range txTypes {
+		txTypes[i] = internalTypes.TxType(req.Type[i])
+	}
+
+	txStatus := make([]internalTypes.TxStatus, len(req.Status))
+	for i := range txStatus {
+		txStatus[i] = internalTypes.TxStatus(req.Status[i])
+	}
+
+	filters := storage.TxListFilter{
+		Limit:  req.Limit,
+		Offset: req.Offset,
+		Sort:   pgSort(req.Sort),
+		Type:   txTypes,
+		Status: txStatus,
+	}
+
+	if req.AddressFrom != "" {
+		address, err := handler.getAddressByHash(c, req.AddressFrom)
+		if err != nil {
+			return err
+		}
+		filters.AddressFromId = &address.Id
+	}
+
+	if req.AddressTo != "" {
+		address, err := handler.getAddressByHash(c, req.AddressTo)
+		if err != nil {
+			return err
+		}
+		filters.AddressToId = &address.Id
+	}
+
+	if req.Contract != "" {
+		address, err := handler.getAddressByHash(c, req.Contract)
+		if err != nil {
+			return err
+		}
+		filters.ContractId = &address.Id
+	}
+
+	if req.Height != nil {
+		filters.Height = req.Height
+	}
+
+	if req.From > 0 {
+		filters.TimeFrom = time.Unix(req.From, 0).UTC()
+	}
+	if req.To > 0 {
+		filters.TimeTo = time.Unix(req.To, 0).UTC()
+	}
+
+	txs, err := handler.tx.Filter(c.Request().Context(), filters)
 	if err != nil {
-		return handleError(c, err, handler.trace)
+		return handleError(c, err, handler.tx)
 	}
 
 	response := make([]responses.Transaction, len(txs))
 	for i := range txs {
-		response[i] = responses.NewTransaction(*txs[i])
+		response[i] = responses.NewTransaction(txs[i])
 	}
 
 	return returnArray(c, response)
+}
+
+func (handler *TxHandler) getAddressByHash(c echo.Context, h string) (storage.Address, error) {
+	hash, err := types.HexFromString(h)
+	if err != nil {
+		return storage.Address{}, badRequestError(c, err)
+	}
+
+	address, err := handler.address.ByHash(c.Request().Context(), hash)
+	if err != nil {
+		return address, handleError(c, err, handler.address)
+	}
+
+	return address, nil
 }

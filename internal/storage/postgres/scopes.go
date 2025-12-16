@@ -184,3 +184,38 @@ func logListFilter(query *bun.SelectQuery, fltrs storage.LogListFilter) *bun.Sel
 
 	return query
 }
+
+func txListFilter(query *bun.SelectQuery, fltrs storage.TxListFilter) *bun.SelectQuery {
+	if fltrs.AddressFromId != nil {
+		query = query.Where("from_address_id = ?", *fltrs.AddressFromId)
+	}
+	if fltrs.AddressToId != nil {
+		query = query.Where("to_address_id = ?", *fltrs.AddressToId)
+	}
+	if fltrs.ContractId != nil {
+		query = query.Where("from_address_id = ?", *fltrs.ContractId).
+			WhereOr("to_address_id = ?", *fltrs.ContractId)
+	}
+	if fltrs.Height != nil {
+		query = query.Where("height = ?", *fltrs.Height)
+	}
+	if !fltrs.TimeFrom.IsZero() {
+		query = query.Where("time >= ?", fltrs.TimeFrom)
+	}
+	if !fltrs.TimeTo.IsZero() {
+		query = query.Where("time < ?", fltrs.TimeTo)
+	}
+
+	if len(fltrs.Type) > 0 {
+		query = query.Where("type IN (?)", bun.In(fltrs.Type))
+	}
+	if len(fltrs.Status) > 0 {
+		query = query.Where("status IN (?)", bun.In(fltrs.Status))
+	}
+
+	query = limitScope(query, fltrs.Limit)
+	query = query.Offset(fltrs.Offset)
+	query = sortScope(query, "id", fltrs.Sort)
+
+	return query
+}

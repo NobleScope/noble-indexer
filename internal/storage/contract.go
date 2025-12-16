@@ -24,7 +24,7 @@ type ContractListFilter struct {
 type IContract interface {
 	storage.Table[*Contract]
 
-	ByTxId(ctx context.Context, id uint64) (Contract, error)
+	ByHash(ctx context.Context, hash pkgTypes.Hex) (Contract, error)
 	ListWithTx(ctx context.Context, filters ContractListFilter) ([]Contract, error)
 	PendingMetadata(ctx context.Context, delay time.Duration, limit int) ([]*Contract, error)
 }
@@ -47,7 +47,7 @@ type Contract struct {
 	Status           types.MetadataStatus `bun:",type:metadata_status,nullzero"   comment:"Contract metadata status"`
 	RetryCount       uint64               `bun:"retry_count"                      comment:"Retry count to resolve metadata"`
 	Error            string               `bun:"error"                            comment:"Error"`
-	UpdatedAt        time.Time            `bun:"updated_at,notnull,default:now()" comment:"last update time"`
+	UpdatedAt        time.Time            `bun:"updated_at,notnull,default:now()" comment:"Last update time"`
 
 	Address Address `bun:"rel:belongs-to,join:id=id"`
 	Tx      *Tx     `bun:"-"`

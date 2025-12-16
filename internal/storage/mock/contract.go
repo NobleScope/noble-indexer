@@ -15,6 +15,7 @@ import (
 	time "time"
 
 	storage "github.com/baking-bad/noble-indexer/internal/storage"
+	types "github.com/baking-bad/noble-indexer/pkg/types"
 	storage0 "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -41,6 +42,45 @@ func NewMockIContract(ctrl *gomock.Controller) *MockIContract {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockIContract) EXPECT() *MockIContractMockRecorder {
 	return m.recorder
+}
+
+// ByHash mocks base method.
+func (m *MockIContract) ByHash(ctx context.Context, hash types.Hex) (storage.Contract, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ByHash", ctx, hash)
+	ret0, _ := ret[0].(storage.Contract)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ByHash indicates an expected call of ByHash.
+func (mr *MockIContractMockRecorder) ByHash(ctx, hash any) *MockIContractByHashCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ByHash", reflect.TypeOf((*MockIContract)(nil).ByHash), ctx, hash)
+	return &MockIContractByHashCall{Call: call}
+}
+
+// MockIContractByHashCall wrap *gomock.Call
+type MockIContractByHashCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockIContractByHashCall) Return(arg0 storage.Contract, arg1 error) *MockIContractByHashCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockIContractByHashCall) Do(f func(context.Context, types.Hex) (storage.Contract, error)) *MockIContractByHashCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockIContractByHashCall) DoAndReturn(f func(context.Context, types.Hex) (storage.Contract, error)) *MockIContractByHashCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
 }
 
 // ByTxId mocks base method.

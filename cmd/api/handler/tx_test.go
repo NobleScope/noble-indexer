@@ -271,11 +271,17 @@ func (s *TxHandlerTestSuite) TestListSuccess() {
 	c.SetPath("/tx")
 
 	s.tx.EXPECT().
-		List(gomock.Any(), uint64(10), uint64(0), sdk.SortOrderDesc).
-		Return([]*storage.Tx{
-			&testTxWithToAddress,
-			&testTxContractCreation,
-			&testTxContractCall,
+		Filter(gomock.Any(), storage.TxListFilter{
+			Limit:  10,
+			Offset: 0,
+			Sort:   sdk.SortOrderDesc,
+			Type:   []types.TxType{},
+			Status: []types.TxStatus{},
+		}).
+		Return([]storage.Tx{
+			testTxWithToAddress,
+			testTxContractCreation,
+			testTxContractCall,
 		}, nil).
 		Times(1)
 
@@ -316,9 +322,15 @@ func (s *TxHandlerTestSuite) TestListWithLimit() {
 	c.SetPath("/tx")
 
 	s.tx.EXPECT().
-		List(gomock.Any(), uint64(5), uint64(0), sdk.SortOrderDesc).
-		Return([]*storage.Tx{
-			&testTxWithToAddress,
+		Filter(gomock.Any(), storage.TxListFilter{
+			Limit:  5,
+			Offset: 0,
+			Sort:   sdk.SortOrderDesc,
+			Type:   []types.TxType{},
+			Status: []types.TxStatus{},
+		}).
+		Return([]storage.Tx{
+			testTxWithToAddress,
 		}, nil).
 		Times(1)
 
@@ -343,9 +355,15 @@ func (s *TxHandlerTestSuite) TestListWithOffset() {
 	c.SetPath("/tx")
 
 	s.tx.EXPECT().
-		List(gomock.Any(), uint64(10), uint64(5), sdk.SortOrderDesc).
-		Return([]*storage.Tx{
-			&testTxContractCall,
+		Filter(gomock.Any(), storage.TxListFilter{
+			Limit:  10,
+			Offset: 5,
+			Sort:   sdk.SortOrderDesc,
+			Type:   []types.TxType{},
+			Status: []types.TxStatus{},
+		}).
+		Return([]storage.Tx{
+			testTxContractCall,
 		}, nil).
 		Times(1)
 
@@ -371,10 +389,16 @@ func (s *TxHandlerTestSuite) TestListWithLimitAndOffset() {
 	c.SetPath("/tx")
 
 	s.tx.EXPECT().
-		List(gomock.Any(), uint64(2), uint64(1), sdk.SortOrderDesc).
-		Return([]*storage.Tx{
-			&testTxContractCreation,
-			&testTxContractCall,
+		Filter(gomock.Any(), storage.TxListFilter{
+			Limit:  2,
+			Offset: 1,
+			Sort:   sdk.SortOrderDesc,
+			Type:   []types.TxType{},
+			Status: []types.TxStatus{},
+		}).
+		Return([]storage.Tx{
+			testTxContractCreation,
+			testTxContractCall,
 		}, nil).
 		Times(1)
 
@@ -400,11 +424,17 @@ func (s *TxHandlerTestSuite) TestListAscOrder() {
 	c.SetPath("/tx")
 
 	s.tx.EXPECT().
-		List(gomock.Any(), uint64(10), uint64(0), sdk.SortOrderAsc).
-		Return([]*storage.Tx{
-			&testTxWithToAddress,
-			&testTxContractCreation,
-			&testTxContractCall,
+		Filter(gomock.Any(), storage.TxListFilter{
+			Limit:  10,
+			Offset: 0,
+			Sort:   sdk.SortOrderAsc,
+			Type:   []types.TxType{},
+			Status: []types.TxStatus{},
+		}).
+		Return([]storage.Tx{
+			testTxWithToAddress,
+			testTxContractCreation,
+			testTxContractCall,
 		}, nil).
 		Times(1)
 
@@ -431,11 +461,17 @@ func (s *TxHandlerTestSuite) TestListDescOrder() {
 	c.SetPath("/tx")
 
 	s.tx.EXPECT().
-		List(gomock.Any(), uint64(10), uint64(0), sdk.SortOrderDesc).
-		Return([]*storage.Tx{
-			&testTxContractCall,
-			&testTxContractCreation,
-			&testTxWithToAddress,
+		Filter(gomock.Any(), storage.TxListFilter{
+			Limit:  10,
+			Offset: 0,
+			Sort:   sdk.SortOrderDesc,
+			Type:   []types.TxType{},
+			Status: []types.TxStatus{},
+		}).
+		Return([]storage.Tx{
+			testTxContractCall,
+			testTxContractCreation,
+			testTxWithToAddress,
 		}, nil).
 		Times(1)
 
@@ -459,8 +495,14 @@ func (s *TxHandlerTestSuite) TestListEmptyResult() {
 	c.SetPath("/tx")
 
 	s.tx.EXPECT().
-		List(gomock.Any(), uint64(10), uint64(0), sdk.SortOrderDesc).
-		Return([]*storage.Tx{}, nil).
+		Filter(gomock.Any(), storage.TxListFilter{
+			Limit:  10,
+			Offset: 0,
+			Sort:   sdk.SortOrderDesc,
+			Type:   []types.TxType{},
+			Status: []types.TxStatus{},
+		}).
+		Return([]storage.Tx{}, nil).
 		Times(1)
 
 	s.Require().NoError(s.handler.List(c))
@@ -483,8 +525,14 @@ func (s *TxHandlerTestSuite) TestListInvalidLimit() {
 	c.SetPath("/tx")
 
 	s.tx.EXPECT().
-		List(gomock.Any(), uint64(10), uint64(0), sdk.SortOrderDesc).
-		Return([]*storage.Tx{}, nil).
+		Filter(gomock.Any(), storage.TxListFilter{
+			Limit:  10,
+			Offset: 0,
+			Sort:   sdk.SortOrderDesc,
+			Type:   []types.TxType{},
+			Status: []types.TxStatus{},
+		}).
+		Return([]storage.Tx{}, nil).
 		Times(1)
 
 	s.Require().NoError(s.handler.List(c))

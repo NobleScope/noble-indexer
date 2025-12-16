@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
+	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/dipdup-net/go-lib/database"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage/postgres"
 )
@@ -50,15 +51,16 @@ func (c *Contract) ListWithTx(ctx context.Context, filters storage.ContractListF
 	return
 }
 
-func (c *Contract) ByTxId(ctx context.Context, id uint64) (contract storage.Contract, err error) {
-	contractQuery := c.DB().NewSelect().
-		Model((*storage.Contract)(nil)).
-		Where("tx_id = ?", id)
+func (c *Contract) ByHash(ctx context.Context, hash pkgTypes.Hex) (contract storage.Contract, err error) {
+	query := c.DB().NewSelect().
+		Model((*storage.Contract)(nil))
 
-	err = c.DB().NewSelect().TableExpr("(?) AS contract", contractQuery).
+	err = c.DB().NewSelect().
+		TableExpr("(?) AS contract", query).
 		ColumnExpr("contract.*").
-		ColumnExpr("tx.hash AS tx__hash").
-		Join("LEFT JOIN tx ON tx.id = contract.tx_id").
+		ColumnExpr("address.address AS address__address").
+		Join("JOIN address ON address.id = contract.id").
+		Where("address.address = ?", hash).
 		Scan(ctx, &contract)
 
 	return

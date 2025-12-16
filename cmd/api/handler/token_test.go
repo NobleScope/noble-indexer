@@ -423,33 +423,6 @@ func (s *TokenHandlerTestSuite) TestListInvalidContract() {
 	s.Require().NotEmpty(e.Message)
 }
 
-// TestListContractNotFound tests when contract is not found
-func (s *TokenHandlerTestSuite) TestListContractNotFound() {
-	q := make(url.Values)
-	q.Set("contract", testContract.Address.Address)
-
-	hashBytes, err := pkgTypes.HexFromString(testContract.Address.Address)
-	s.Require().NoError(err)
-
-	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
-	rec := httptest.NewRecorder()
-	c := s.echo.NewContext(req, rec)
-	c.SetPath("/token")
-
-	s.address.EXPECT().
-		ByHash(gomock.Any(), hashBytes).
-		Return(storage.Address{}, sql.ErrNoRows).
-		Times(1)
-
-	s.address.EXPECT().
-		IsNoRows(sql.ErrNoRows).
-		Return(true).
-		Times(1)
-
-	s.Require().NoError(s.handler.List(c))
-	s.Require().Equal(http.StatusNoContent, rec.Code)
-}
-
 // ====================================
 // Token Get Tests
 // ====================================

@@ -85,16 +85,10 @@ func (handler *TokenHandler) List(c echo.Context) error {
 		Type:   tokenTypes,
 	}
 	if req.Contract != "" {
-		hash, err := types.HexFromString(req.Contract)
+		address, err := handler.getAddressByHash(c, req.Contract)
 		if err != nil {
-			return badRequestError(c, err)
+			return err
 		}
-
-		address, err := handler.address.ByHash(c.Request().Context(), hash)
-		if err != nil {
-			return handleError(c, err, handler.address)
-		}
-
 		filters.ContractId = &address.Id
 	}
 
@@ -146,7 +140,10 @@ func (handler *TokenHandler) Get(c echo.Context) error {
 		return handleError(c, err, handler.address)
 	}
 
-	tokenId := decimal.RequireFromString(req.TokenId)
+	tokenId, err := decimal.NewFromString(req.TokenId)
+	if err != nil {
+		return badRequestError(c, err)
+	}
 	token, err := handler.token.Get(c.Request().Context(), address.Id, tokenId)
 	if err != nil {
 		return handleError(c, err, handler.token)
@@ -215,7 +212,10 @@ func (handler *TokenHandler) TransferList(c echo.Context) error {
 		transferTypes[i] = internalTypes.TransferType(req.Type[i])
 	}
 
-	tokenId := decimal.RequireFromString(req.TokenId)
+	tokenId, err := decimal.NewFromString(req.TokenId)
+	if err != nil {
+		return badRequestError(c, err)
+	}
 	filters := storage.TransferListFilter{
 		Limit:   req.Limit,
 		Offset:  req.Offset,
@@ -234,44 +234,26 @@ func (handler *TokenHandler) TransferList(c echo.Context) error {
 	}
 
 	if req.AddressFrom != "" {
-		hash, err := types.HexFromString(req.AddressFrom)
+		address, err := handler.getAddressByHash(c, req.AddressFrom)
 		if err != nil {
-			return badRequestError(c, err)
+			return err
 		}
-
-		address, err := handler.address.ByHash(c.Request().Context(), hash)
-		if err != nil {
-			return handleError(c, err, handler.address)
-		}
-
 		filters.AddressFromId = &address.Id
 	}
 
 	if req.AddressTo != "" {
-		hash, err := types.HexFromString(req.AddressTo)
+		address, err := handler.getAddressByHash(c, req.AddressTo)
 		if err != nil {
-			return badRequestError(c, err)
+			return err
 		}
-
-		address, err := handler.address.ByHash(c.Request().Context(), hash)
-		if err != nil {
-			return handleError(c, err, handler.address)
-		}
-
 		filters.AddressToId = &address.Id
 	}
 
 	if req.Contract != "" {
-		hash, err := types.HexFromString(req.Contract)
+		address, err := handler.getAddressByHash(c, req.Contract)
 		if err != nil {
-			return badRequestError(c, err)
+			return err
 		}
-
-		address, err := handler.address.ByHash(c.Request().Context(), hash)
-		if err != nil {
-			return handleError(c, err, handler.address)
-		}
-
 		filters.ContractId = &address.Id
 	}
 
@@ -365,7 +347,11 @@ func (handler *TokenHandler) TokenBalanceList(c echo.Context) error {
 	}
 	req.SetDefault()
 
-	tokenId := decimal.RequireFromString(req.TokenId)
+	tokenId, err := decimal.NewFromString(req.TokenId)
+	if err != nil {
+		return badRequestError(c, err)
+	}
+
 	filters := storage.TokenBalanceListFilter{
 		Limit:   req.Limit,
 		Offset:  req.Offset,
@@ -374,30 +360,18 @@ func (handler *TokenHandler) TokenBalanceList(c echo.Context) error {
 	}
 
 	if req.Contract != "" {
-		hash, err := types.HexFromString(req.Contract)
+		address, err := handler.getAddressByHash(c, req.Contract)
 		if err != nil {
-			return badRequestError(c, err)
+			return err
 		}
-
-		address, err := handler.address.ByHash(c.Request().Context(), hash)
-		if err != nil {
-			return handleError(c, err, handler.address)
-		}
-
 		filters.ContractId = &address.Id
 	}
 
 	if req.Address != "" {
-		hash, err := types.HexFromString(req.Address)
+		address, err := handler.getAddressByHash(c, req.Address)
 		if err != nil {
-			return badRequestError(c, err)
+			return err
 		}
-
-		address, err := handler.address.ByHash(c.Request().Context(), hash)
-		if err != nil {
-			return handleError(c, err, handler.address)
-		}
-
 		filters.AddressId = &address.Id
 	}
 
@@ -412,4 +386,18 @@ func (handler *TokenHandler) TokenBalanceList(c echo.Context) error {
 	}
 
 	return returnArray(c, response)
+}
+
+func (handler *TokenHandler) getAddressByHash(c echo.Context, h string) (storage.Address, error) {
+	hash, err := types.HexFromString(h)
+	if err != nil {
+		return storage.Address{}, badRequestError(c, err)
+	}
+
+	address, err := handler.address.ByHash(c.Request().Context(), hash)
+	if err != nil {
+		return address, handleError(c, err, handler.address)
+	}
+
+	return address, nil
 }
