@@ -510,8 +510,8 @@ const docTemplate = `{
                 "operationId": "get-contract",
                 "parameters": [
                     {
-                        "maxLength": 66,
-                        "minLength": 66,
+                        "maxLength": 42,
+                        "minLength": 42,
                         "type": "string",
                         "description": "Hash",
                         "name": "hash",
@@ -557,8 +557,8 @@ const docTemplate = `{
                 "operationId": "get-contract-sources",
                 "parameters": [
                     {
-                        "maxLength": 66,
-                        "minLength": 66,
+                        "maxLength": 42,
+                        "minLength": 42,
                         "type": "string",
                         "description": "Hash",
                         "name": "hash",
@@ -1360,6 +1360,60 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "maxLength": 42,
+                        "minLength": 42,
+                        "type": "string",
+                        "description": "Address which used for sending tx",
+                        "name": "address_from",
+                        "in": "query"
+                    },
+                    {
+                        "maxLength": 42,
+                        "minLength": 42,
+                        "type": "string",
+                        "description": "Address which used for receiving tx",
+                        "name": "address_to",
+                        "in": "query"
+                    },
+                    {
+                        "maxLength": 42,
+                        "minLength": 42,
+                        "type": "string",
+                        "description": "Contract address which was called",
+                        "name": "contract",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Block height",
+                        "name": "height",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "TxTypeUnknown",
+                            "TxTypeLegacy",
+                            "TxTypeDynamicFee",
+                            "TxTypeBlob",
+                            "TxTypeSetCode"
+                        ],
+                        "type": "string",
+                        "description": "Comma-separated list of transaction types",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "TxStatusSuccess",
+                            "TxStatusRevert"
+                        ],
+                        "type": "string",
+                        "description": "Comma-separated list of transaction statuses",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
                         "enum": [
                             "asc",
                             "desc"
@@ -1576,10 +1630,6 @@ const docTemplate = `{
                 "time": {
                     "type": "string",
                     "example": "2023-07-04T03:10:57+00:00"
-                },
-                "total_difficulty_hash": {
-                    "type": "string",
-                    "example": "0x0"
                 },
                 "transactions_root_hash": {
                     "type": "string",
@@ -2025,7 +2075,9 @@ const docTemplate = `{
                     "enum": [
                         "TxTypeUnknown",
                         "TxTypeLegacy",
-                        "TxTypeDynamicFee"
+                        "TxTypeDynamicFee",
+                        "TxTypeBlob",
+                        "TxTypeSetCode"
                     ],
                     "example": "TxTypeDynamicFee"
                 }

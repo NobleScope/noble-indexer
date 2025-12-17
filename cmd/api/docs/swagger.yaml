@@ -97,9 +97,6 @@ definitions:
       time:
         example: "2023-07-04T03:10:57+00:00"
         type: string
-      total_difficulty_hash:
-        example: "0x0"
-        type: string
       transactions_root_hash:
         example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d
         type: string
@@ -429,6 +426,8 @@ definitions:
         - TxTypeUnknown
         - TxTypeLegacy
         - TxTypeDynamicFee
+        - TxTypeBlob
+        - TxTypeSetCode
         example: TxTypeDynamicFee
         type: string
     type: object
@@ -810,8 +809,8 @@ paths:
       parameters:
       - description: Hash
         in: path
-        maxLength: 66
-        minLength: 66
+        maxLength: 42
+        minLength: 42
         name: hash
         required: true
         type: string
@@ -842,8 +841,8 @@ paths:
       parameters:
       - description: Hash
         in: path
-        maxLength: 66
-        minLength: 66
+        maxLength: 42
+        minLength: 42
         name: hash
         required: true
         type: string
@@ -1399,6 +1398,46 @@ paths:
         minimum: 0
         name: offset
         type: integer
+      - description: Address which used for sending tx
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: address_from
+        type: string
+      - description: Address which used for receiving tx
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: address_to
+        type: string
+      - description: Contract address which was called
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: contract
+        type: string
+      - description: Block height
+        in: query
+        minimum: 1
+        name: height
+        type: integer
+      - description: Comma-separated list of transaction types
+        enum:
+        - TxTypeUnknown
+        - TxTypeLegacy
+        - TxTypeDynamicFee
+        - TxTypeBlob
+        - TxTypeSetCode
+        in: query
+        name: type
+        type: string
+      - description: Comma-separated list of transaction statuses
+        enum:
+        - TxStatusSuccess
+        - TxStatusRevert
+        in: query
+        name: status
+        type: string
       - description: 'Sort order. Default: desc'
         enum:
         - asc
