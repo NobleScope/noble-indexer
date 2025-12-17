@@ -138,6 +138,9 @@ definitions:
       id:
         example: 321
         type: integer
+      implementation:
+        example: "0x0000000000000000000000000000000000000001"
+        type: string
       language:
         example: Solidity
         type: string

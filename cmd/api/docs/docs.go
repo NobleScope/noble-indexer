@@ -1688,6 +1688,10 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 321
                 },
+                "implementation": {
+                    "type": "string",
+                    "example": "0x0000000000000000000000000000000000000001"
+                },
                 "language": {
                     "type": "string",
                     "example": "Solidity"
