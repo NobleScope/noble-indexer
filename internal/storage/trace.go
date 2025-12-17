@@ -11,11 +11,23 @@ import (
 	"github.com/uptrace/bun"
 )
 
+type TraceListFilter struct {
+	Limit         int
+	Offset        int
+	Sort          storage.SortOrder
+	Height        *uint64
+	TxId          *uint64
+	AddressFromId *uint64
+	AddressToId   *uint64
+	ContractId    *uint64
+	Type          []types.TraceType
+}
+
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
 type ITrace interface {
 	storage.Table[*Trace]
 
-	ByTxHash(ctx context.Context, hash pkgTypes.Hex, limit, offset int, order storage.SortOrder) (traces []*Trace, err error)
+	Filter(ctx context.Context, filter TraceListFilter) (traces []*Trace, err error)
 }
 
 // Trace -
@@ -30,7 +42,6 @@ type Trace struct {
 	From uint64  `bun:"from_address_id" comment:"From address identity"`
 	To   *uint64 `bun:"to_address_id"   comment:"To address identity"`
 
-	// init
 	GasLimit       decimal.Decimal  `bun:"gas_limit,type:numeric" comment:"Gas limit"`
 	Amount         *decimal.Decimal `bun:"amount,type:numeric"    comment:"Value in Wei"`
 	Input          []byte           `bun:"input"                  comment:"Input data"`
@@ -40,7 +51,6 @@ type Trace struct {
 	InitHash       *pkgTypes.Hex    `bun:"init_hash,type:bytea"   comment:"Code of the contract being created"`
 	CreationMethod *string          `bun:"creation_method"        comment:"Creation method"`
 
-	// result
 	GasUsed    decimal.Decimal `bun:"gas_used,type:numeric" comment:"Gas used"`
 	Output     []byte          `bun:"output"                comment:"Output data"`
 	ContractId *uint64         `bun:"contract_id"           comment:"Address identity of the new contract"`

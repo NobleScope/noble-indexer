@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
+	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/dipdup-net/go-lib/database"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage/postgres"
 )
@@ -32,6 +33,42 @@ func (c *Contract) PendingMetadata(ctx context.Context, retryDelay time.Duration
 		Order("id ASC").
 		Limit(limit).
 		Scan(ctx)
+
+	return
+}
+
+// ListWithTx -
+func (c *Contract) ListWithTx(ctx context.Context, filters storage.ContractListFilter) (contracts []storage.Contract, err error) {
+	query := c.DB().NewSelect().
+		Model(&contracts)
+
+	query = contractListFilter(query, filters)
+	err = c.DB().NewSelect().TableExpr("(?) AS contract", query).
+		ColumnExpr("contract.*").
+		ColumnExpr("tx.hash AS tx__hash").
+		Join("LEFT JOIN tx ON tx.id = contract.tx_id").
+		Scan(ctx, &contracts)
+
+	return
+}
+
+// ByHash -
+func (c *Contract) ByHash(ctx context.Context, hash pkgTypes.Hex) (contract storage.Contract, err error) {
+	query := c.DB().NewSelect().
+		Model((*storage.Contract)(nil))
+
+	err = c.DB().NewSelect().
+		TableExpr("(?) AS contract", query).
+		ColumnExpr("contract.*").
+		ColumnExpr("address.address AS address__address").
+		ColumnExpr("tx.hash AS tx__hash").
+		ColumnExpr("implementation_address.address AS implementation").
+		Join("JOIN address ON address.id = contract.id").
+		Join("LEFT JOIN proxy_contract ON proxy_contract.id = contract.id").
+		Join("LEFT JOIN address AS implementation_address ON implementation_address.id = proxy_contract.implementation_id").
+		Join("LEFT JOIN tx ON contract.tx_id = tx.id").
+		Where("address.address = ?", hash.String()).
+		Scan(ctx, &contract)
 
 	return
 }

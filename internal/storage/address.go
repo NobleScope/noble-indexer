@@ -1,14 +1,27 @@
 package storage
 
 import (
+	"context"
+
 	"github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/uptrace/bun"
 )
 
+type AddressListFilter struct {
+	Limit         int
+	Offset        int
+	Sort          storage.SortOrder
+	SortField     string
+	OnlyContracts bool
+}
+
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
 type IAddress interface {
 	storage.Table[*Address]
+
+	ListWithBalance(ctx context.Context, filters AddressListFilter) ([]Address, error)
+	ByHash(ctx context.Context, hash types.Hex) (Address, error)
 }
 
 // Address -

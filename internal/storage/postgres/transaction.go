@@ -34,16 +34,16 @@ func (tx Transaction) SaveTransactions(ctx context.Context, txs ...*models.Tx) e
 	}
 }
 
-func (tx Transaction) SaveLogs(ctx context.Context, logs ...models.Log) error {
+func (tx Transaction) SaveLogs(ctx context.Context, logs ...*models.Log) error {
 	switch len(logs) {
 	case 0:
 		return nil
 	case 1:
-		return tx.Add(ctx, &logs[0])
+		return tx.Add(ctx, logs[0])
 	default:
 		arr := make([]any, len(logs))
 		for i := range logs {
-			arr[i] = &logs[i]
+			arr[i] = logs[i]
 		}
 		return tx.BulkSave(ctx, arr)
 	}

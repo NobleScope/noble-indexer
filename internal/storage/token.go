@@ -12,10 +12,20 @@ import (
 	"github.com/uptrace/bun"
 )
 
+type TokenListFilter struct {
+	Limit      int
+	Offset     int
+	Sort       storage.SortOrder
+	ContractId *uint64
+	Type       []types.TokenType
+}
+
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
 type IToken interface {
 	storage.Table[*Token]
 
+	Get(ctx context.Context, contractId uint64, tokenId decimal.Decimal) (Token, error)
+	Filter(ctx context.Context, filter TokenListFilter) ([]Token, error)
 	PendingMetadata(ctx context.Context, delay time.Duration, limit int) ([]*Token, error)
 }
 

@@ -1,16 +1,28 @@
 package storage
 
 import (
-	"fmt"
+	"context"
 
+	"fmt"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
 )
 
+type TokenBalanceListFilter struct {
+	Limit      int
+	Offset     int
+	Sort       storage.SortOrder
+	AddressId  *uint64
+	ContractId *uint64
+	TokenId    *decimal.Decimal
+}
+
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
 type ITokenBalance interface {
 	storage.Table[*TokenBalance]
+
+	Filter(ctx context.Context, filter TokenBalanceListFilter) ([]TokenBalance, error)
 }
 
 // TokenBalance -

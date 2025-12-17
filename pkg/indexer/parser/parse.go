@@ -71,7 +71,6 @@ func (p *Module) parse(b types.BlockData) error {
 		Sha3UnclesHash:       b.Sha3Uncles,
 		StateRootHash:        b.StateRoot,
 		SizeHash:             b.Size,
-		TotalDifficultyHash:  b.TotalDifficulty,
 		TransactionsRootHash: b.TransactionsRoot,
 		Txs:                  make([]*storage.Tx, len(b.Transactions)),
 		Traces:               make([]*storage.Trace, len(b.Traces)),
@@ -167,7 +166,7 @@ func (p *Module) parse(b types.BlockData) error {
 			GasUsed:           txGasUsed,
 			Status:            status,
 			LogsBloom:         b.Receipts[i].LogsBloom,
-			Logs:              make([]storage.Log, len(b.Receipts[i].Logs)),
+			Logs:              make([]*storage.Log, len(b.Receipts[i].Logs)),
 			LogsCount:         len(b.Receipts[i].Logs),
 		}
 
@@ -209,16 +208,25 @@ func (p *Module) parse(b types.BlockData) error {
 				name = log.Topics[0].String()
 			}
 
-			decodeCtx.Block.Txs[i].Logs[j] = storage.Log{
+			decodeCtx.Block.Txs[i].Logs[j] = &storage.Log{
 				Height:  types.Level(height),
 				Time:    blockTime,
 				Index:   logIndex,
 				Name:    name,
 				Data:    log.Data,
 				Topics:  log.Topics,
-				Address: log.Address,
 				Removed: log.Removed,
 			}
+
+			decodeCtx.Block.Txs[i].Logs[j].Address = storage.Address{
+				Address:      b.Receipts[i].To.String(),
+				Height:       decodeCtx.Block.Height,
+				LastHeight:   decodeCtx.Block.Height,
+				Interactions: 1,
+				Balance:      storage.EmptyBalance(),
+			}
+
+			decodeCtx.AddAddress(&decodeCtx.Block.Txs[i].Logs[j].Address)
 		}
 
 		p.parseEIP1967Proxy(decodeCtx, decodeCtx.Block.Txs[i].Logs)
@@ -324,16 +332,20 @@ func (p *Module) parse(b types.BlockData) error {
 					Hash: trace.TxHash,
 				},
 			}
-			if err = ParseEvmContractMetadata(contract); err != nil {
-				return err
-			}
 
 			newTrace.Contract = contract
 			decodeCtx.AddAddress(&deployerAddress)
 			decodeCtx.AddAddress(&contractAddress)
 			decodeCtx.AddContract(contract)
-			if err = p.parseProxyContract(decodeCtx, contract); err != nil {
-				return err
+			if parseErr := p.parseProxyContract(decodeCtx, contract); parseErr != nil {
+				return parseErr
+			}
+
+			if parseErr := ParseEvmContractMetadata(contract); parseErr != nil {
+				p.Log.Err(parseErr).
+					Str("contract", contract.Address.Address).
+					Uint64("height", uint64(contract.Height)).
+					Msg("parsing contract metadata")
 			}
 		}
 

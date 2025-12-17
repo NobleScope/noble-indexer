@@ -25,7 +25,6 @@ type Block struct {
 	Sha3Uncles           string          `example:"0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347" json:"sha3_uncles_hash"       swaggertype:"string"`
 	Size                 uint64          `example:"0"                                                                  json:"size"                   swaggertype:"integer"`
 	StateRoot            string          `example:"0x9b6e76e8263c5060b61e396c65baf15dd187386d5607250be0dcc5308f0b49ef" json:"state_root"             swaggertype:"string"`
-	TotalDifficultyHash  string          `example:"0x0"                                                                json:"total_difficulty_hash"  swaggertype:"string"`
 	TransactionsRootHash string          `example:"0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d" json:"transactions_root_hash" swaggertype:"string"`
 	Stats                *BlockStats     `json:"stats,omitempty"`
 }
@@ -46,7 +45,6 @@ func NewBlock(block storage.Block) Block {
 		ReceiptsRoot:         block.ReceiptsRootHash.Hex(),
 		Sha3Uncles:           block.Sha3UnclesHash.Hex(),
 		StateRoot:            block.StateRootHash.Hex(),
-		TotalDifficultyHash:  block.TotalDifficultyHash.Hex(),
 		TransactionsRootHash: block.TransactionsRootHash.Hex(),
 	}
 

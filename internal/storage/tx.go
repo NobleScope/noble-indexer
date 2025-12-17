@@ -11,12 +11,27 @@ import (
 	"github.com/uptrace/bun"
 )
 
+type TxListFilter struct {
+	Limit         int
+	Offset        int
+	Sort          storage.SortOrder
+	Height        *uint64
+	Type          []types.TxType
+	Status        []types.TxStatus
+	AddressFromId *uint64
+	AddressToId   *uint64
+	ContractId    *uint64
+	TimeFrom      time.Time
+	TimeTo        time.Time
+}
+
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
 type ITx interface {
 	storage.Table[*Tx]
 
-	ByHeight(ctx context.Context, height pkgTypes.Level, limit, offset int, order storage.SortOrder) (txs []*Tx, err error)
-	ByHash(ctx context.Context, hash pkgTypes.Hex) (tx Tx, err error)
+	ByHeight(ctx context.Context, height pkgTypes.Level, limit, offset int, order storage.SortOrder) ([]*Tx, error)
+	ByHash(ctx context.Context, hash pkgTypes.Hex) (Tx, error)
+	Filter(ctx context.Context, filter TxListFilter) ([]Tx, error)
 }
 
 // Tx -
@@ -50,7 +65,7 @@ type Tx struct {
 
 	FromAddress Address     `bun:"rel:belongs-to,join:from_address_id=id"`
 	ToAddress   *Address    `bun:"rel:belongs-to,join:to_address_id=id"`
-	Logs        []Log       `bun:"rel:has-many"`
+	Logs        []*Log      `bun:"rel:has-many"`
 	Transfers   []*Transfer `bun:"rel:has-many"`
 }
 

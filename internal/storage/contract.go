@@ -11,11 +11,22 @@ import (
 	"github.com/uptrace/bun"
 )
 
+type ContractListFilter struct {
+	Limit      int
+	Offset     int
+	Sort       storage.SortOrder
+	SortField  string
+	IsVerified bool
+	TxId       *uint64
+}
+
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
 type IContract interface {
 	storage.Table[*Contract]
 
-	PendingMetadata(ctx context.Context, delay time.Duration, limit int) (contracts []*Contract, err error)
+	ByHash(ctx context.Context, hash pkgTypes.Hex) (Contract, error)
+	ListWithTx(ctx context.Context, filters ContractListFilter) ([]Contract, error)
+	PendingMetadata(ctx context.Context, delay time.Duration, limit int) ([]*Contract, error)
 }
 
 // Contract -
@@ -36,10 +47,11 @@ type Contract struct {
 	Status           types.MetadataStatus `bun:",type:metadata_status,nullzero"   comment:"Contract metadata status"`
 	RetryCount       uint64               `bun:"retry_count"                      comment:"Retry count to resolve metadata"`
 	Error            string               `bun:"error"                            comment:"Error"`
-	UpdatedAt        time.Time            `bun:"updated_at,notnull,default:now()" comment:"last update time"`
+	UpdatedAt        time.Time            `bun:"updated_at,notnull,default:now()" comment:"Last update time"`
 
-	Address Address `bun:"rel:belongs-to,join:id=id"`
-	Tx      *Tx     `bun:"-"`
+	Address        Address `bun:"rel:belongs-to,join:id=id"`
+	Tx             *Tx     `bun:"tx,scanonly"`
+	Implementation *string `bun:"implementation,scanonly"`
 }
 
 // TableName -

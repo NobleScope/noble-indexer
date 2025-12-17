@@ -14,7 +14,7 @@ type Transaction struct {
 	Hash              string          `example:"0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d" json:"hash"                swaggertype:"string"`
 	Index             int64           `example:"0"                                                                  json:"index"               swaggertype:"integer"`
 	Nonce             int64           `example:"1"                                                                  json:"nonce"               swaggertype:"integer"`
-	Type              string          `enums:"TxTypeUnknown,TxTypeLegacy,TxTypeDynamicFee"                          example:"TxTypeDynamicFee" json:"type"           swaggertype:"string"`
+	Type              string          `enums:"TxTypeUnknown,TxTypeLegacy,TxTypeDynamicFee,TxTypeBlob,TxTypeSetCode" example:"TxTypeDynamicFee" json:"type"           swaggertype:"string"`
 	Status            string          `enums:"TxStatusSuccess,TxStatusRevert"                                       example:"TxStatusSuccess"  json:"status"         swaggertype:"string"`
 	Gas               decimal.Decimal `example:"21000"                                                              json:"gas"                 swaggertype:"integer"`
 	GasPrice          decimal.Decimal `example:"1000000"                                                            json:"gas_price"           swaggertype:"integer"`

@@ -32,6 +32,7 @@ type Storage struct {
 	ProxyContracts models.IProxyContract
 	Sources        models.ISource
 	State          models.IState
+	Search         models.ISearch
 }
 
 // Create -
@@ -60,6 +61,7 @@ func Create(ctx context.Context, cfg config.Database, scriptsDir string) (Storag
 		ProxyContracts: NewProxyContract(strg.Connection()),
 		Sources:        NewSource(strg.Connection()),
 		State:          NewState(strg.Connection()),
+		Search:         NewSearch(strg.Connection()),
 	}
 
 	if err := s.createScripts(ctx, "functions", false); err != nil {

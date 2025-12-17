@@ -81,6 +81,45 @@ func (c *MockIProxyContractCursorListCall) DoAndReturn(f func(context.Context, u
 	return c
 }
 
+// FilteredList mocks base method.
+func (m *MockIProxyContract) FilteredList(ctx context.Context, filters storage.ListProxyFilters) ([]storage.ProxyContract, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FilteredList", ctx, filters)
+	ret0, _ := ret[0].([]storage.ProxyContract)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FilteredList indicates an expected call of FilteredList.
+func (mr *MockIProxyContractMockRecorder) FilteredList(ctx, filters any) *MockIProxyContractFilteredListCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FilteredList", reflect.TypeOf((*MockIProxyContract)(nil).FilteredList), ctx, filters)
+	return &MockIProxyContractFilteredListCall{Call: call}
+}
+
+// MockIProxyContractFilteredListCall wrap *gomock.Call
+type MockIProxyContractFilteredListCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockIProxyContractFilteredListCall) Return(arg0 []storage.ProxyContract, arg1 error) *MockIProxyContractFilteredListCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockIProxyContractFilteredListCall) Do(f func(context.Context, storage.ListProxyFilters) ([]storage.ProxyContract, error)) *MockIProxyContractFilteredListCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockIProxyContractFilteredListCall) DoAndReturn(f func(context.Context, storage.ListProxyFilters) ([]storage.ProxyContract, error)) *MockIProxyContractFilteredListCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetByID mocks base method.
 func (m *MockIProxyContract) GetByID(ctx context.Context, id uint64) (*storage.ProxyContract, error) {
 	m.ctrl.T.Helper()

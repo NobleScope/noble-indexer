@@ -29,7 +29,7 @@ type Transaction interface {
 	sdk.Transaction
 
 	SaveTransactions(ctx context.Context, txs ...*Tx) error
-	SaveLogs(ctx context.Context, logs ...Log) error
+	SaveLogs(ctx context.Context, logs ...*Log) error
 	SaveTraces(ctx context.Context, traces ...*Trace) error
 	SaveAddresses(ctx context.Context, addresses ...*Address) (int64, error)
 	SaveBalances(ctx context.Context, balances ...*Balance) error
@@ -55,4 +55,16 @@ type Transaction interface {
 
 	State(ctx context.Context, name string) (state State, err error)
 	LastBlock(ctx context.Context) (block Block, err error)
+}
+
+type SearchResult struct {
+	Id    uint64 `bun:"id"`
+	Value string `bun:"value"`
+	Type  string `bun:"type"`
+}
+
+//go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
+type ISearch interface {
+	Search(ctx context.Context, query []byte) ([]SearchResult, error)
+	SearchText(ctx context.Context, text string) ([]SearchResult, error)
 }
