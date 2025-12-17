@@ -19,6 +19,7 @@ func NewTransfer(db *database.Bun) *Transfer {
 	}
 }
 
+// Filter -
 func (t *Transfer) Filter(ctx context.Context, filter storage.TransferListFilter) (transfers []storage.Transfer, err error) {
 	query := t.DB().NewSelect().
 		Model(&transfers)
@@ -40,6 +41,7 @@ func (t *Transfer) Filter(ctx context.Context, filter storage.TransferListFilter
 	return
 }
 
+// Get -
 func (t *Transfer) Get(ctx context.Context, id uint64) (transfer storage.Transfer, err error) {
 	query := t.DB().NewSelect().
 		Model(&transfer).

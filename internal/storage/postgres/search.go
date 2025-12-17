@@ -21,6 +21,7 @@ func NewSearch(db *database.Bun) *Search {
 	}
 }
 
+// Search -
 func (s *Search) Search(ctx context.Context, query []byte) (results []storage.SearchResult, err error) {
 	blockQuery := s.db.DB().NewSelect().
 		Model((*storage.Block)(nil)).
@@ -42,6 +43,7 @@ func (s *Search) Search(ctx context.Context, query []byte) (results []storage.Se
 	return
 }
 
+// SearchText -
 func (s *Search) SearchText(ctx context.Context, text string) (results []storage.SearchResult, err error) {
 	text = strings.ToUpper(text)
 	text = "%" + text + "%"

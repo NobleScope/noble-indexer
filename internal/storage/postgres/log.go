@@ -19,6 +19,7 @@ func NewLog(db *database.Bun) *Log {
 	}
 }
 
+// Filter -
 func (l *Log) Filter(ctx context.Context, filter storage.LogListFilter) (logs []storage.Log, err error) {
 	query := l.DB().NewSelect().
 		Model(&logs)

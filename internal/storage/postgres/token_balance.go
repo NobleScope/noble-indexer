@@ -19,6 +19,7 @@ func NewTokenBalance(db *database.Bun) *TokenBalance {
 	}
 }
 
+// Filter -
 func (t *TokenBalance) Filter(ctx context.Context, filter storage.TokenBalanceListFilter) (tb []storage.TokenBalance, err error) {
 	query := t.DB().NewSelect().
 		Model(&tb)

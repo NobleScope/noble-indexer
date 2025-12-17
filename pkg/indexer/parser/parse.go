@@ -71,7 +71,6 @@ func (p *Module) parse(b types.BlockData) error {
 		Sha3UnclesHash:       b.Sha3Uncles,
 		StateRootHash:        b.StateRoot,
 		SizeHash:             b.Size,
-		TotalDifficultyHash:  b.TotalDifficulty,
 		TransactionsRootHash: b.TransactionsRoot,
 		Txs:                  make([]*storage.Tx, len(b.Transactions)),
 		Traces:               make([]*storage.Trace, len(b.Traces)),

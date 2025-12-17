@@ -20,6 +20,7 @@ func NewSource(db *database.Bun) *Source {
 	}
 }
 
+// ByContractId -
 func (s *Source) ByContractId(ctx context.Context, id uint64, limit, offset int) (sources []storage.Source, err error) {
 	err = s.DB().NewSelect().
 		Model((*storage.Source)(nil)).

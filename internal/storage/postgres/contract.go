@@ -37,6 +37,7 @@ func (c *Contract) PendingMetadata(ctx context.Context, retryDelay time.Duration
 	return
 }
 
+// ListWithTx -
 func (c *Contract) ListWithTx(ctx context.Context, filters storage.ContractListFilter) (contracts []storage.Contract, err error) {
 	query := c.DB().NewSelect().
 		Model(&contracts)
@@ -51,6 +52,7 @@ func (c *Contract) ListWithTx(ctx context.Context, filters storage.ContractListF
 	return
 }
 
+// ByHash -
 func (c *Contract) ByHash(ctx context.Context, hash pkgTypes.Hex) (contract storage.Contract, err error) {
 	query := c.DB().NewSelect().
 		Model((*storage.Contract)(nil))

@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/dipdup-net/go-lib/database"

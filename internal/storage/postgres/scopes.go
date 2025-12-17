@@ -20,6 +20,15 @@ func sortScope(q *bun.SelectQuery, field string, sort sdk.SortOrder) *bun.Select
 	return q.OrderExpr("? ?", bun.Ident(field), bun.Safe(sort))
 }
 
+func sortTimeIDScope(q *bun.SelectQuery, sort sdk.SortOrder) *bun.SelectQuery {
+
+	if sort != sdk.SortOrderAsc && sort != sdk.SortOrderDesc {
+		sort = sdk.SortOrderAsc
+	}
+
+	return q.OrderExpr("time ?0, id ?0", bun.Safe(sort))
+}
+
 func addressListFilter(query *bun.SelectQuery, fltrs storage.AddressListFilter) *bun.SelectQuery {
 	if fltrs.OnlyContracts {
 		query = query.Where("is_contract = ?", true)
@@ -84,7 +93,7 @@ func traceListFilter(query *bun.SelectQuery, fltrs storage.TraceListFilter) *bun
 	}
 	query = limitScope(query, fltrs.Limit)
 	query = query.Offset(fltrs.Offset)
-	query = sortScope(query, "id", fltrs.Sort)
+	query = sortTimeIDScope(query, fltrs.Sort)
 
 	return query
 }
@@ -137,7 +146,7 @@ func transferListFilter(query *bun.SelectQuery, fltrs storage.TransferListFilter
 
 	query = limitScope(query, fltrs.Limit)
 	query = query.Offset(fltrs.Offset)
-	query = sortScope(query, "id", fltrs.Sort)
+	query = sortTimeIDScope(query, fltrs.Sort)
 
 	return query
 }
@@ -180,7 +189,7 @@ func logListFilter(query *bun.SelectQuery, fltrs storage.LogListFilter) *bun.Sel
 
 	query = limitScope(query, fltrs.Limit)
 	query = query.Offset(fltrs.Offset)
-	query = sortScope(query, "id", fltrs.Sort)
+	query = sortTimeIDScope(query, fltrs.Sort)
 
 	return query
 }
@@ -215,7 +224,7 @@ func txListFilter(query *bun.SelectQuery, fltrs storage.TxListFilter) *bun.Selec
 
 	query = limitScope(query, fltrs.Limit)
 	query = query.Offset(fltrs.Offset)
-	query = sortScope(query, "id", fltrs.Sort)
+	query = sortTimeIDScope(query, fltrs.Sort)
 
 	return query
 }

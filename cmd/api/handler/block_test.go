@@ -42,7 +42,6 @@ func init() {
 		Sha3UnclesHash:       pkgTypes.Hex{0x1d, 0xcc, 0x4d, 0xe8, 0xde, 0xc7, 0x5d, 0x7a, 0xab, 0x85, 0xb5, 0x67, 0xb6, 0xcc, 0xd4, 0x1a, 0xd3, 0x12, 0x45, 0x1b, 0x94, 0x8a, 0x74, 0x13, 0xf0, 0xa1, 0x42, 0xfd, 0x40, 0xd4, 0x93, 0x47},
 		SizeHash:             pkgTypes.Hex{0x58, 0x80},
 		StateRootHash:        pkgTypes.Hex{0x9b, 0x6e, 0x76, 0xe8, 0x26, 0x3c, 0x50, 0x60, 0xb6, 0x1e, 0x39, 0x6c, 0x65, 0xba, 0xf1, 0x5d, 0xd1, 0x87, 0x38, 0x6d, 0x56, 0x07, 0x25, 0x0b, 0xe0, 0xdc, 0xc5, 0x30, 0x8f, 0x0b, 0x49, 0xef},
-		TotalDifficultyHash:  pkgTypes.Hex{0x00},
 		TransactionsRootHash: pkgTypes.Hex{0x07, 0x64, 0x01, 0x22, 0x70, 0xaf, 0xac, 0xd3, 0xb1, 0x01, 0xbc, 0xfa, 0xda, 0xaa, 0x9f, 0xc3, 0x19, 0x0d, 0x04, 0xed, 0x90, 0xff, 0x22, 0xc0, 0xee, 0x59, 0x78, 0x1e, 0x54, 0x85, 0x8a, 0x7d},
 	}
 
@@ -123,7 +122,6 @@ func (s *BlockTestSuite) TestGet() {
 	s.Require().Equal("0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347", block.Sha3Uncles)
 	s.Require().Equal(uint64(22656), block.Size)
 	s.Require().Equal("0x9b6e76e8263c5060b61e396c65baf15dd187386d5607250be0dcc5308f0b49ef", block.StateRoot)
-	s.Require().Equal("0x00", block.TotalDifficultyHash)
 	s.Require().Equal("0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d", block.TransactionsRootHash)
 	s.Require().Nil(block.Stats)
 }
@@ -161,7 +159,6 @@ func (s *BlockTestSuite) TestGetWithStats() {
 	s.Require().Equal("0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347", block.Sha3Uncles)
 	s.Require().Equal(uint64(22656), block.Size)
 	s.Require().Equal("0x9b6e76e8263c5060b61e396c65baf15dd187386d5607250be0dcc5308f0b49ef", block.StateRoot)
-	s.Require().Equal("0x00", block.TotalDifficultyHash)
 	s.Require().Equal("0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d", block.TransactionsRootHash)
 	s.Require().NotNil(block.Stats)
 	s.Require().EqualValues(100, block.Stats.Height)
@@ -242,7 +239,6 @@ func (s *BlockTestSuite) TestList() {
 	s.Require().Equal("0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347", blocks[0].Sha3Uncles)
 	s.Require().Equal(uint64(22656), blocks[0].Size)
 	s.Require().Equal("0x9b6e76e8263c5060b61e396c65baf15dd187386d5607250be0dcc5308f0b49ef", blocks[0].StateRoot)
-	s.Require().Equal("0x00", blocks[0].TotalDifficultyHash)
 	s.Require().Equal("0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d", blocks[0].TransactionsRootHash)
 }
 
@@ -284,7 +280,6 @@ func (s *BlockTestSuite) TestListWithStats() {
 	s.Require().Equal("0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347", blocks[0].Sha3Uncles)
 	s.Require().Equal(uint64(22656), blocks[0].Size)
 	s.Require().Equal("0x9b6e76e8263c5060b61e396c65baf15dd187386d5607250be0dcc5308f0b49ef", blocks[0].StateRoot)
-	s.Require().Equal("0x00", blocks[0].TotalDifficultyHash)
 	s.Require().Equal("0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d", blocks[0].TransactionsRootHash)
 	s.Require().NotNil(blocks[0].Stats)
 	s.Require().EqualValues(100, blocks[0].Stats.Height)

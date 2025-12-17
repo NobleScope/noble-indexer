@@ -51,6 +51,7 @@ func (t *Tx) ByHeight(
 	return
 }
 
+// ByHash -
 func (t *Tx) ByHash(ctx context.Context, hash pkgTypes.Hex) (tx storage.Tx, err error) {
 	subQuery := t.DB().NewSelect().
 		Model(&tx).
@@ -68,6 +69,7 @@ func (t *Tx) ByHash(ctx context.Context, hash pkgTypes.Hex) (tx storage.Tx, err 
 	return
 }
 
+// Filter -
 func (t *Tx) Filter(ctx context.Context, filter storage.TxListFilter) (txs []storage.Tx, err error) {
 	query := t.DB().NewSelect().
 		Model(&txs)

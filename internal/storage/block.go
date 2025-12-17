@@ -42,7 +42,6 @@ type Block struct {
 	Sha3UnclesHash       pkgTypes.Hex `bun:"sha3_uncles_hash,type:bytea"       comment:"Sha3 hash"`
 	SizeHash             pkgTypes.Hex `bun:"size_hash,type:bytea"              comment:"Size of block in bytes"`
 	StateRootHash        pkgTypes.Hex `bun:"state_root_hash,type:bytea"        comment:"Hash of state root"`
-	TotalDifficultyHash  pkgTypes.Hex `bun:"total_difficulty_hash,type:bytea"  comment:"Total difficulty hash"`
 	TransactionsRootHash pkgTypes.Hex `bun:"transactions_root_hash,type:bytea" comment:"Hash of transactions root"`
 
 	Txs    []*Tx       `bun:"rel:has-many"                    json:"-"`

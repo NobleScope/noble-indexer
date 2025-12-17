@@ -35,6 +35,7 @@ func (t *Token) PendingMetadata(ctx context.Context, retryDelay time.Duration, l
 	return
 }
 
+// Filter -
 func (t *Token) Filter(ctx context.Context, filter storage.TokenListFilter) (tokens []storage.Token, err error) {
 	query := t.DB().NewSelect().
 		Model(&tokens)
@@ -49,6 +50,7 @@ func (t *Token) Filter(ctx context.Context, filter storage.TokenListFilter) (tok
 	return
 }
 
+// Get -
 func (t *Token) Get(ctx context.Context, contractId uint64, tokenId decimal.Decimal) (token storage.Token, err error) {
 	query := t.DB().NewSelect().
 		Model(&token).
