@@ -308,7 +308,7 @@ func (p *Module) parse(b types.BlockData) error {
 		}
 
 		if trace.Action.From != nil {
-			newTrace.ToAddress = &storage.Address{
+			newTrace.FromAddress = &storage.Address{
 				Hash:         *trace.Action.From,
 				Height:       decodeCtx.Block.Height,
 				LastHeight:   decodeCtx.Block.Height,
