@@ -18,9 +18,9 @@ func saveTokens(
 	}
 
 	for i := range tokens {
-		id, ok := addresses[tokens[i].Contract.Address.Address]
+		id, ok := addresses[tokens[i].Contract.Address.String()]
 		if !ok {
-			return errors.Errorf("can't find contract key: %s", tokens[i].Contract.Address)
+			return errors.Errorf("can't find contract key: %s", tokens[i].Contract.Address.String())
 		}
 		tokens[i].ContractId = id
 	}

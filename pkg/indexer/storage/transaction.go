@@ -17,10 +17,10 @@ func saveTransactions(
 	}
 
 	for _, t := range txs {
-		t.FromAddressId = addresses[t.FromAddress.Address]
+		t.FromAddressId = addresses[t.FromAddress.String()]
 
 		if t.ToAddress != nil {
-			id := addresses[t.ToAddress.Address]
+			id := addresses[t.ToAddress.String()]
 			t.ToAddressId = &id
 		}
 	}

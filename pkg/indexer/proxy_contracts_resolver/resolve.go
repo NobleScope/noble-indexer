@@ -15,13 +15,9 @@ func (p *Module) resolveProxyContracts(ctx context.Context, contracts []*storage
 	resolved := 0
 
 	for i := range contracts {
-		hexAddress, err := pkgTypes.HexFromString(contracts[i].Contract.Address.Address)
-		if err != nil {
-			return resolved, errors.Wrapf(err, "conversing proxy contract address")
-		}
 		storageRequest[i].BlockNumber = contracts[i].Height
 		storageRequest[i].StorageSlot = getStorageSlot(contracts[i].Type)
-		storageRequest[i].ContractAddress = hexAddress.Hex()
+		storageRequest[i].ContractAddress = contracts[i].Contract.Address.Hash.Hex()
 	}
 
 	storageValues, err := p.api.Storage(ctx, storageRequest)
@@ -51,7 +47,7 @@ func (p *Module) resolveProxyContracts(ctx context.Context, contracts []*storage
 		}
 		contracts[i].Status = types.Resolved
 		contracts[i].Implementation = &storage.Contract{
-			Address: storage.Address{Address: implementationAddress.String()},
+			Address: storage.Address{Hash: implementationAddress},
 		}
 		resolved += 1
 	}

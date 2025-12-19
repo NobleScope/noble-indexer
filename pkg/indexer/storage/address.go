@@ -23,7 +23,7 @@ func saveAddresses(
 	addrToId := make(map[string]uint64)
 	balances := make([]*storage.Balance, 0)
 	for i := range addresses {
-		addrToId[addresses[i].Address] = addresses[i].Id
+		addrToId[addresses[i].Hash.String()] = addresses[i].Id
 		addresses[i].Balance.Id = addresses[i].Id
 		balances = append(balances, addresses[i].Balance)
 	}

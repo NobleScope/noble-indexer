@@ -28,14 +28,14 @@ type IAddress interface {
 type Address struct {
 	bun.BaseModel `bun:"address" comment:"Table with addresses."`
 
-	Id             uint64      `bun:"id,pk,notnull,autoincrement"       comment:"Unique internal identity"`
-	Height         types.Level `bun:"height"                            comment:"Block number of the first address occurrence."`
-	LastHeight     types.Level `bun:"last_height"                       comment:"Block number of the last address occurrence."`
-	Address        string      `bun:"address,unique:address_idx"        comment:"Human-readable address."`
-	IsContract     bool        `bun:"is_contract,default:false,notnull" comment:"Address is a contract or not."`
-	TxsCount       int         `bun:"txs_count"                         comment:"Txs count (excluding traces) where the address is specified as from"`
-	ContractsCount int         `bun:"contracts_count"                   comment:"Deployed contracts count"`
-	Interactions   int         `bun:"interactions"                      comment:"Txs count with traces count where the address is specified as from or to"`
+	Id             uint64      `bun:"id,pk,notnull,autoincrement"          comment:"Unique internal identity"`
+	Height         types.Level `bun:"height"                               comment:"Block number of the first address occurrence."`
+	LastHeight     types.Level `bun:"last_height"                          comment:"Block number of the last address occurrence."`
+	Hash           types.Hex   `bun:"hash,notnull,unique:address_hash_idx" comment:"Address hash."`
+	IsContract     bool        `bun:"is_contract,default:false,notnull"    comment:"Address is a contract or not."`
+	TxsCount       int         `bun:"txs_count"                            comment:"Txs count (excluding traces) where the address is specified as from"`
+	ContractsCount int         `bun:"contracts_count"                      comment:"Deployed contracts count"`
+	Interactions   int         `bun:"interactions"                         comment:"Txs count with traces count where the address is specified as from or to"`
 
 	Balance *Balance `bun:"rel:has-one,join:id=id"`
 }
@@ -46,5 +46,5 @@ func (Address) TableName() string {
 }
 
 func (address Address) String() string {
-	return address.Address
+	return address.Hash.String()
 }

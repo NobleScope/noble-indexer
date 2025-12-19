@@ -31,7 +31,7 @@ func (p *Module) parseTxs(context *dCtx.Context) error {
 			continue
 		}
 
-		updateBalances(&trace.FromAddress, enum.Sub, *trace.Amount)
+		updateBalances(trace.FromAddress, enum.Sub, *trace.Amount)
 		updateBalances(trace.ToAddress, enum.Add, *trace.Amount)
 	}
 

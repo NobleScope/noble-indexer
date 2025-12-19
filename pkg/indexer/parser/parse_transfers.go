@@ -3,7 +3,6 @@ package parser
 import (
 	"bytes"
 	"math/big"
-	"strings"
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/internal/storage/types"
@@ -40,7 +39,7 @@ func (p *Module) parseTransfers(ctx *dCtx.Context) error {
 				Time:   ctx.Block.Time,
 				Contract: storage.Contract{
 					Address: storage.Address{
-						Address: log.Address.String(),
+						Hash: log.Address.Hash,
 					},
 				},
 			}
@@ -62,9 +61,9 @@ func (p *Module) parseTransfers(ctx *dCtx.Context) error {
 					ctx,
 					transferType,
 					transfer,
-					transferEvent.From.String(),
-					transferEvent.To.String(),
-					log.Address.String(),
+					transferEvent.From.Bytes(),
+					transferEvent.To.Bytes(),
+					log.Address.Hash,
 				)
 			case types.ERC721:
 				transferEvent, err := parseLogs[erc721.EventTransfer](p.abi[tokenType], log.Data, log.Topics)
@@ -78,9 +77,9 @@ func (p *Module) parseTransfers(ctx *dCtx.Context) error {
 					ctx,
 					transferType,
 					transfer,
-					transferEvent.From.String(),
-					transferEvent.To.String(),
-					log.Address.String(),
+					transferEvent.From.Bytes(),
+					transferEvent.To.Bytes(),
+					log.Address.Hash,
 				)
 			case types.ERC1155:
 				if log.Topics[0].Hex() == ERC1155TransferSingleFirstTopic {
@@ -97,9 +96,9 @@ func (p *Module) parseTransfers(ctx *dCtx.Context) error {
 						ctx,
 						transferType,
 						transfer,
-						transferEvent.From.String(),
-						transferEvent.To.String(),
-						log.Address.String(),
+						transferEvent.From.Bytes(),
+						transferEvent.To.Bytes(),
+						log.Address.Hash,
 					)
 				}
 
@@ -117,7 +116,7 @@ func (p *Module) parseTransfers(ctx *dCtx.Context) error {
 							Time:   ctx.Block.Time,
 							Contract: storage.Contract{
 								Address: storage.Address{
-									Address: log.Address.String(),
+									Hash: log.Address.Hash,
 								},
 							},
 							TokenID: decimal.NewFromBigInt(transferEvent.Ids[id], 0),
@@ -128,9 +127,9 @@ func (p *Module) parseTransfers(ctx *dCtx.Context) error {
 							ctx,
 							transferType,
 							batchTransfer,
-							transferEvent.From.String(),
-							transferEvent.To.String(),
-							log.Address.String(),
+							transferEvent.From.Bytes(),
+							transferEvent.To.Bytes(),
+							log.Address.Hash,
 						)
 						ctx.Block.Txs[i].Transfers = append(ctx.Block.Txs[i].Transfers, batchTransfer)
 						ctx.AddToken(&storage.Token{
@@ -285,21 +284,21 @@ func getTransferType(from, to pkgTypes.Hex) types.TransferType {
 	return types.Unknown
 }
 
-func setAddresses(ctx *dCtx.Context, transferType types.TransferType, transfer *storage.Transfer, from, to, contract string) {
+func setAddresses(ctx *dCtx.Context, transferType types.TransferType, transfer *storage.Transfer, from, to, contract pkgTypes.Hex) {
 	fromAddress := &storage.Address{
-		Address:    strings.ToLower(from),
+		Hash:       from,
 		Height:     ctx.Block.Height,
 		LastHeight: ctx.Block.Height,
 		Balance:    storage.EmptyBalance(),
 	}
 	toAddress := &storage.Address{
-		Address:    strings.ToLower(to),
+		Hash:       to,
 		Height:     ctx.Block.Height,
 		LastHeight: ctx.Block.Height,
 		Balance:    storage.EmptyBalance(),
 	}
 	contractAddress := &storage.Address{
-		Address:    strings.ToLower(contract),
+		Hash:       contract,
 		Height:     ctx.Block.Height,
 		LastHeight: ctx.Block.Height,
 		IsContract: true,
@@ -307,7 +306,7 @@ func setAddresses(ctx *dCtx.Context, transferType types.TransferType, transfer *
 
 	storageContract := &storage.Contract{
 		Address: storage.Address{
-			Address: contractAddress.Address,
+			Hash: contractAddress.Hash,
 		},
 		Height: ctx.Block.Height,
 	}
