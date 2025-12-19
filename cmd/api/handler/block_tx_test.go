@@ -443,7 +443,7 @@ func (s *TxTestSuite) TestTxsOnlyFromAddress() {
 	err := json.NewDecoder(rec.Body).Decode(&txs)
 	s.Require().NoError(err)
 	s.Require().Len(txs, 1)
-	s.Require().Equal("0x1234567890123456789012345678901234567890", txs[0].FromAddress)
+	s.Require().Equal(testAddressHex1.Hex(), txs[0].FromAddress)
 	s.Require().Nil(txs[0].ToAddress)
 	s.Require().Equal("TxStatusRevert", txs[0].Status)
 }

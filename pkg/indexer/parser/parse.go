@@ -7,6 +7,7 @@ import (
 	storageType "github.com/baking-bad/noble-indexer/internal/storage/types"
 	dCtx "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
 	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 )
 
@@ -308,7 +309,7 @@ func (p *Module) parse(b types.BlockData) error {
 		}
 
 		if trace.Action.From != nil {
-			newTrace.ToAddress = &storage.Address{
+			newTrace.FromAddress = &storage.Address{
 				Hash:         *trace.Action.From,
 				Height:       decodeCtx.Block.Height,
 				LastHeight:   decodeCtx.Block.Height,
@@ -327,7 +328,7 @@ func (p *Module) parse(b types.BlockData) error {
 				Interactions: 1,
 				Balance:      storage.EmptyBalance(),
 			}
-			if trace.Action.From.String() != trace.Action.To.String() {
+			if trace.Action.From != nil && trace.Action.From.String() != trace.Action.To.String() {
 				newTrace.ToAddress.Interactions = 0
 			}
 
@@ -343,6 +344,13 @@ func (p *Module) parse(b types.BlockData) error {
 		}
 
 		if trace.Result.Address != nil && trace.Result.Code != nil && len(*trace.Result.Code) > 0 {
+			if trace.TxPosition == nil {
+				return errors.New("trace.TxPosition is nil for contract creation")
+			}
+			if *trace.TxPosition >= uint64(len(b.Transactions)) {
+				return errors.Errorf("TxPosition %d out of range, transactions count: %d", *trace.TxPosition, len(b.Transactions))
+			}
+
 			deployerAddress := storage.Address{
 				Hash:           b.Transactions[*trace.TxPosition].From,
 				LastHeight:     decodeCtx.Block.Height,
@@ -357,12 +365,17 @@ func (p *Module) parse(b types.BlockData) error {
 				IsContract: true,
 			}
 
+			var txHash types.Hex
+			if trace.TxHash != nil {
+				txHash = *trace.TxHash
+			}
+
 			contract := &storage.Contract{
 				Height:  decodeCtx.Block.Height,
 				Address: contractAddress,
 				Code:    *trace.Result.Code,
 				Tx: &storage.Tx{
-					Hash: *trace.TxHash,
+					Hash: txHash,
 				},
 			}
 

@@ -153,22 +153,22 @@ func (s *ProxyContractHandlerTestSuite) TestListSuccess() {
 
 	// Check first contract
 	s.Require().EqualValues(100, contracts[0].Height)
-	s.Require().Equal("0x1111111111111111111111111111111111111111", contracts[0].Contract)
+	s.Require().Equal(testAddressHex1.Hex(), contracts[0].Contract)
 	s.Require().Equal("EIP1967", contracts[0].Type)
 	s.Require().Equal("resolved", contracts[0].Status)
 	s.Require().NotNil(contracts[0].Implementation)
-	s.Require().Equal("0x2222222222222222222222222222222222222222", *contracts[0].Implementation)
+	s.Require().Equal(testAddressHex2.Hex(), *contracts[0].Implementation)
 
 	// Check second contract (no implementation)
 	s.Require().EqualValues(101, contracts[1].Height)
-	s.Require().Equal("0x3333333333333333333333333333333333333333", contracts[1].Contract)
+	s.Require().Equal(testAddressHex2.Hex(), contracts[1].Contract)
 	s.Require().Equal("EIP1967", contracts[1].Type)
 	s.Require().Equal("new", contracts[1].Status)
 	s.Require().Nil(contracts[1].Implementation)
 
 	// Check third contract
 	s.Require().EqualValues(102, contracts[2].Height)
-	s.Require().Equal("0x4444444444444444444444444444444444444444", contracts[2].Contract)
+	s.Require().Equal(testAddressHex3.Hex(), contracts[2].Contract)
 	s.Require().Equal("EIP7702", contracts[2].Type)
 	s.Require().Equal("error", contracts[2].Status)
 	s.Require().Nil(contracts[2].Implementation)
