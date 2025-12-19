@@ -36,7 +36,6 @@ func NewTrace(t *storage.Trace) Trace {
 		FromAddress:    t.FromAddress.String(),
 		GasLimit:       t.GasLimit,
 		Amount:         t.Amount,
-		TxPosition:     t.TxPosition,
 		TraceAddress:   t.TraceAddress,
 		Type:           string(t.Type),
 		CreationMethod: t.CreationMethod,
@@ -45,7 +44,7 @@ func NewTrace(t *storage.Trace) Trace {
 	}
 
 	if t.ToAddress != nil {
-		toAddr := t.ToAddress.String()
+		toAddr := t.ToAddress.Hash.Hex()
 		result.ToAddress = &toAddr
 	}
 	if t.InitHash != nil {
@@ -61,8 +60,11 @@ func NewTrace(t *storage.Trace) Trace {
 		result.Output = &output
 	}
 	if t.Contract != nil {
-		contract := t.Contract.String()
+		contract := t.Contract.Address.Hash.Hex()
 		result.Contract = &contract
+	}
+	if t.TxPosition != nil {
+		result.TxPosition = *t.TxPosition
 	}
 
 	return result

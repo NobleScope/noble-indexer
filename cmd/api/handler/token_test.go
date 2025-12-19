@@ -298,10 +298,7 @@ func (s *TokenHandlerTestSuite) TestListAscOrder() {
 // TestListWithContract tests filtering tokens by contract
 func (s *TokenHandlerTestSuite) TestListWithContract() {
 	q := make(url.Values)
-	q.Set("contract", testContract.Address.Address)
-
-	hashBytes, err := pkgTypes.HexFromString(testContract.Address.Address)
-	s.Require().NoError(err)
+	q.Set("contract", testAddressHex1.Hex())
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
 	rec := httptest.NewRecorder()
@@ -309,7 +306,7 @@ func (s *TokenHandlerTestSuite) TestListWithContract() {
 	c.SetPath("/token")
 
 	s.address.EXPECT().
-		ByHash(gomock.Any(), hashBytes).
+		ByHash(gomock.Any(), testAddressHex1).
 		Return(storage.Address{Id: 1}, nil).
 		Times(1)
 
@@ -329,7 +326,7 @@ func (s *TokenHandlerTestSuite) TestListWithContract() {
 	s.Require().Equal(http.StatusOK, rec.Code)
 
 	var tokens []responses.Token
-	err = json.NewDecoder(rec.Body).Decode(&tokens)
+	err := json.NewDecoder(rec.Body).Decode(&tokens)
 	s.Require().NoError(err)
 	s.Require().Len(tokens, 2)
 }
@@ -469,13 +466,10 @@ func (s *TokenHandlerTestSuite) TestGetNoContent() {
 	c := s.echo.NewContext(req, rec)
 	c.SetPath("/token/:contract/:token_id")
 	c.SetParamNames("contract", "token_id")
-	c.SetParamValues(testContract.Address.Address, "999")
-
-	hashBytes, err := pkgTypes.HexFromString(testContract.Address.Address)
-	s.Require().NoError(err)
+	c.SetParamValues(testAddressHex1.Hex(), "999")
 
 	s.address.EXPECT().
-		ByHash(gomock.Any(), hashBytes).
+		ByHash(gomock.Any(), testAddressHex1).
 		Return(storage.Address{Id: 1}, nil).
 		Times(1)
 
@@ -518,13 +512,10 @@ func (s *TokenHandlerTestSuite) TestGetAddressNotFound() {
 	c := s.echo.NewContext(req, rec)
 	c.SetPath("/token/:contract/:token_id")
 	c.SetParamNames("contract", "token_id")
-	c.SetParamValues(testContract.Address.Address, "0")
-
-	hashBytes, err := pkgTypes.HexFromString(testContract.Address.Address)
-	s.Require().NoError(err)
+	c.SetParamValues(testAddressHex1.Hex(), "0")
 
 	s.address.EXPECT().
-		ByHash(gomock.Any(), hashBytes).
+		ByHash(gomock.Any(), testAddressHex1).
 		Return(storage.Address{}, sql.ErrNoRows).
 		Times(1)
 
@@ -607,15 +598,9 @@ func (s *TokenHandlerTestSuite) TestTransferListWithFilters() {
 // TestTransferListWithAddresses tests filtering by from/to addresses
 func (s *TokenHandlerTestSuite) TestTransferListWithAddresses() {
 	q := make(url.Values)
-	q.Set("address_from", testFromAddress.Address)
-	q.Set("address_to", testToAddress.Address)
+	q.Set("address_from", testAddressHex1.Hex())
+	q.Set("address_to", testAddressHex2.Hex())
 	q.Set("token_id", "0")
-
-	fromHashBytes, err := pkgTypes.HexFromString(testFromAddress.Address)
-	s.Require().NoError(err)
-
-	toHashBytes, err := pkgTypes.HexFromString(testToAddress.Address)
-	s.Require().NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
 	rec := httptest.NewRecorder()
@@ -623,12 +608,12 @@ func (s *TokenHandlerTestSuite) TestTransferListWithAddresses() {
 	c.SetPath("/transfer")
 
 	s.address.EXPECT().
-		ByHash(gomock.Any(), fromHashBytes).
+		ByHash(gomock.Any(), testAddressHex1).
 		Return(storage.Address{Id: 1}, nil).
 		Times(1)
 
 	s.address.EXPECT().
-		ByHash(gomock.Any(), toHashBytes).
+		ByHash(gomock.Any(), testAddressHex2).
 		Return(storage.Address{Id: 2}, nil).
 		Times(1)
 
@@ -650,11 +635,8 @@ func (s *TokenHandlerTestSuite) TestTransferListWithAddresses() {
 // TestTransferListWithContract tests filtering by contract
 func (s *TokenHandlerTestSuite) TestTransferListWithContract() {
 	q := make(url.Values)
-	q.Set("contract", testContract.Address.Address)
+	q.Set("contract", testAddressHex1.Hex())
 	q.Set("token_id", "0")
-
-	hashBytes, err := pkgTypes.HexFromString(testContract.Address.Address)
-	s.Require().NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
 	rec := httptest.NewRecorder()
@@ -662,7 +644,7 @@ func (s *TokenHandlerTestSuite) TestTransferListWithContract() {
 	c.SetPath("/transfer")
 
 	s.address.EXPECT().
-		ByHash(gomock.Any(), hashBytes).
+		ByHash(gomock.Any(), testAddressHex1).
 		Return(storage.Address{Id: 1}, nil).
 		Times(1)
 
@@ -831,11 +813,8 @@ func (s *TokenHandlerTestSuite) TestTokenBalanceListSuccess() {
 // TestTokenBalanceListWithAddress tests filtering by address
 func (s *TokenHandlerTestSuite) TestTokenBalanceListWithAddress() {
 	q := make(url.Values)
-	q.Set("address", testFromAddress.Address)
+	q.Set("address", testAddressHex1.Hex())
 	q.Set("token_id", "0")
-
-	hashBytes, err := pkgTypes.HexFromString(testFromAddress.Address)
-	s.Require().NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
 	rec := httptest.NewRecorder()
@@ -843,7 +822,7 @@ func (s *TokenHandlerTestSuite) TestTokenBalanceListWithAddress() {
 	c.SetPath("/token_balance")
 
 	s.address.EXPECT().
-		ByHash(gomock.Any(), hashBytes).
+		ByHash(gomock.Any(), testAddressHex1).
 		Return(storage.Address{Id: 1}, nil).
 		Times(1)
 
@@ -860,7 +839,7 @@ func (s *TokenHandlerTestSuite) TestTokenBalanceListWithAddress() {
 	s.Require().Equal(http.StatusOK, rec.Code)
 
 	var balances []responses.TokenBalance
-	err = json.NewDecoder(rec.Body).Decode(&balances)
+	err := json.NewDecoder(rec.Body).Decode(&balances)
 	s.Require().NoError(err)
 	s.Require().Len(balances, 2)
 }
@@ -868,11 +847,8 @@ func (s *TokenHandlerTestSuite) TestTokenBalanceListWithAddress() {
 // TestTokenBalanceListWithContract tests filtering by contract
 func (s *TokenHandlerTestSuite) TestTokenBalanceListWithContract() {
 	q := make(url.Values)
-	q.Set("contract", testContract.Address.Address)
+	q.Set("contract", testAddressHex1.Hex())
 	q.Set("token_id", "0")
-
-	hashBytes, err := pkgTypes.HexFromString(testContract.Address.Address)
-	s.Require().NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
 	rec := httptest.NewRecorder()
@@ -880,7 +856,7 @@ func (s *TokenHandlerTestSuite) TestTokenBalanceListWithContract() {
 	c.SetPath("/token_balance")
 
 	s.address.EXPECT().
-		ByHash(gomock.Any(), hashBytes).
+		ByHash(gomock.Any(), testAddressHex1).
 		Return(storage.Address{Id: 1}, nil).
 		Times(1)
 
@@ -897,7 +873,7 @@ func (s *TokenHandlerTestSuite) TestTokenBalanceListWithContract() {
 	s.Require().Equal(http.StatusOK, rec.Code)
 
 	var balances []responses.TokenBalance
-	err = json.NewDecoder(rec.Body).Decode(&balances)
+	err := json.NewDecoder(rec.Body).Decode(&balances)
 	s.Require().NoError(err)
 	s.Require().Len(balances, 2)
 }

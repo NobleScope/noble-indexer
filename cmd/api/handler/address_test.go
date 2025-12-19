@@ -20,14 +20,16 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-const testAddressStr = "0x1234567890123456789012345678901234567890"
-
 var (
+	testAddressHex1 = pkgTypes.Hex{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13}
+	testAddressHex2 = pkgTypes.Hex{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x14}
+	testAddressHex3 = pkgTypes.Hex{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x15}
+
 	testAddress1 = storage.Address{
 		Id:             1,
 		Height:         100,
 		LastHeight:     200,
-		Address:        testAddressStr,
+		Hash:           testAddressHex1,
 		IsContract:     false,
 		TxsCount:       50,
 		ContractsCount: 0,
@@ -43,7 +45,7 @@ var (
 		Id:             2,
 		Height:         101,
 		LastHeight:     201,
-		Address:        "0x0987654321098765432109876543210987654321",
+		Hash:           testAddressHex2,
 		IsContract:     true,
 		TxsCount:       100,
 		ContractsCount: 5,
@@ -59,7 +61,7 @@ var (
 		Id:             3,
 		Height:         102,
 		LastHeight:     202,
-		Address:        "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+		Hash:           testAddressHex3,
 		IsContract:     true,
 		TxsCount:       25,
 		ContractsCount: 2,
@@ -131,7 +133,7 @@ func (s *AddressHandlerTestSuite) TestListSuccess() {
 	s.Require().Len(addresses, 3)
 
 	s.Require().EqualValues(1, addresses[0].Id)
-	s.Require().Equal(testAddressStr, addresses[0].Hash)
+	s.Require().Equal(testAddress1.Hash.Hex(), addresses[0].Hash)
 	s.Require().False(addresses[0].IsContract)
 	s.Require().EqualValues(50, addresses[0].TxCount)
 }
@@ -275,18 +277,15 @@ func (s *AddressHandlerTestSuite) TestListEmptyResult() {
 
 // TestGetSuccess tests successful retrieval of an address
 func (s *AddressHandlerTestSuite) TestGetSuccess() {
-	hashBytes, err := pkgTypes.HexFromString(testAddressStr)
-	s.Require().NoError(err)
-
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 	c := s.echo.NewContext(req, rec)
 	c.SetPath("/address/:hash")
 	c.SetParamNames("hash")
-	c.SetParamValues(testAddressStr)
+	c.SetParamValues(testAddressHex1.Hex())
 
 	s.address.EXPECT().
-		ByHash(gomock.Any(), hashBytes).
+		ByHash(gomock.Any(), testAddressHex1).
 		Return(testAddress1, nil).
 		Times(1)
 
@@ -294,10 +293,10 @@ func (s *AddressHandlerTestSuite) TestGetSuccess() {
 	s.Require().Equal(http.StatusOK, rec.Code)
 
 	var address responses.Address
-	err = json.NewDecoder(rec.Body).Decode(&address)
+	err := json.NewDecoder(rec.Body).Decode(&address)
 	s.Require().NoError(err)
 	s.Require().EqualValues(1, address.Id)
-	s.Require().Equal(testAddressStr, address.Hash)
+	s.Require().Equal(testAddress1.Hash.Hex(), address.Hash)
 	s.Require().False(address.IsContract)
 	s.Require().EqualValues(50, address.TxCount)
 }

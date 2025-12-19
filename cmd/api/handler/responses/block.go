@@ -40,7 +40,7 @@ func NewBlock(block storage.Block) Block {
 		Difficulty:           block.DifficultyHash.Hex(),
 		ExtraData:            block.ExtraDataHash.Hex(),
 		LogsBloom:            block.LogsBloomHash.Hex(),
-		Miner:                block.Miner.String(),
+		Miner:                block.Miner.Hash.Hex(),
 		MixHash:              block.MixHash.Hex(),
 		ReceiptsRoot:         block.ReceiptsRootHash.Hex(),
 		Sha3Uncles:           block.Sha3UnclesHash.Hex(),

@@ -12,7 +12,6 @@ import (
 	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/internal/storage/mock"
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
@@ -104,7 +103,7 @@ func (s *ContractTestSuite) TestContractList_WithParams() {
 
 func (s *ContractTestSuite) TestContractList_FilterByTxHash() {
 	q := make(url.Values)
-	q.Set("tx_hash", testTxHash)
+	q.Set("tx_hash", testTxHash.Hex())
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
 	rec := httptest.NewRecorder()
@@ -182,16 +181,13 @@ func (s *ContractTestSuite) TestContractGet() {
 	c := s.echo.NewContext(req, rec)
 	c.SetPath("/contract/:hash")
 	c.SetParamNames("hash")
-	c.SetParamValues(testAddressHash)
-
-	hash, err := pkgTypes.HexFromString(testAddressHash)
-	s.Require().NoError(err)
+	c.SetParamValues(testAddressHex1.Hex())
 
 	s.contract.EXPECT().
-		ByHash(gomock.Any(), hash).
+		ByHash(gomock.Any(), testAddressHex1).
 		Return(testContract, nil)
 
-	err = s.handler.Get(c)
+	err := s.handler.Get(c)
 	s.Require().NoError(err)
 	s.Require().Equal(http.StatusOK, rec.Code)
 }
@@ -214,7 +210,7 @@ func (s *ContractTestSuite) TestContractGet_NotFoundTx() {
 	c := s.echo.NewContext(req, rec)
 	c.SetPath("/contract/:hash")
 	c.SetParamNames("hash")
-	c.SetParamValues(testAddressHash)
+	c.SetParamValues(testAddressHex1.Hex())
 
 	s.contract.EXPECT().
 		ByHash(gomock.Any(), gomock.Any()).
@@ -235,13 +231,10 @@ func (s *ContractTestSuite) TestContractSources() {
 	c := s.echo.NewContext(req, rec)
 	c.SetPath("/contract/:hash/sources")
 	c.SetParamNames("hash")
-	c.SetParamValues(testAddressHash)
-
-	hash, err := pkgTypes.HexFromString(testAddressHash)
-	s.Require().NoError(err)
+	c.SetParamValues(testAddressHex1.Hex())
 
 	s.contract.EXPECT().
-		ByHash(gomock.Any(), hash).
+		ByHash(gomock.Any(), testAddressHex1).
 		Return(testContract, nil)
 
 	s.source.EXPECT().
@@ -253,7 +246,7 @@ func (s *ContractTestSuite) TestContractSources() {
 			},
 		}, nil)
 
-	err = s.handler.ContractSources(c)
+	err := s.handler.ContractSources(c)
 	s.Require().NoError(err)
 	s.Require().Equal(http.StatusOK, rec.Code)
 
@@ -280,20 +273,17 @@ func (s *ContractTestSuite) TestContractSources_Empty() {
 	c := s.echo.NewContext(req, rec)
 	c.SetPath("/contract/:hash/sources")
 	c.SetParamNames("hash")
-	c.SetParamValues(testAddressHash)
-
-	hash, err := pkgTypes.HexFromString(testAddressHash)
-	s.Require().NoError(err)
+	c.SetParamValues(testAddressHex1.Hex())
 
 	s.contract.EXPECT().
-		ByHash(gomock.Any(), hash).
+		ByHash(gomock.Any(), testAddressHex1).
 		Return(testContract, nil)
 
 	s.source.EXPECT().
 		ByContractId(gomock.Any(), testContract.Id, 0, 0).
 		Return([]storage.Source{}, nil)
 
-	err = s.handler.ContractSources(c)
+	err := s.handler.ContractSources(c)
 	s.Require().NoError(err)
 	s.Require().Equal(http.StatusOK, rec.Code)
 

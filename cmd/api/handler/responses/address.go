@@ -25,7 +25,7 @@ func NewAddress(addr storage.Address) Address {
 		Id:                addr.Id,
 		Height:            addr.Height,
 		LastHeight:        addr.LastHeight,
-		Hash:              addr.Address,
+		Hash:              addr.Hash.Hex(),
 		IsContract:        addr.IsContract,
 		TxCount:           addr.TxsCount,
 		DeployedContracts: addr.ContractsCount,

@@ -24,7 +24,7 @@ type Log struct {
 func NewLog(log storage.Log) Log {
 	l := Log{
 		Id:      log.Id,
-		Address: log.Address.String(),
+		Address: log.Address.Hash.Hex(),
 		Height:  uint64(log.Height),
 		Time:    log.Time,
 		TxHash:  log.Tx.Hash.Hex(),

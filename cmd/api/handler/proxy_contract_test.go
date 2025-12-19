@@ -23,7 +23,7 @@ var (
 		Id:         10,
 		Height:     100,
 		LastHeight: 100,
-		Address:    "0x1111111111111111111111111111111111111111",
+		Hash:       testAddressHex1,
 		IsContract: true,
 	}
 
@@ -31,7 +31,7 @@ var (
 		Id:         11,
 		Height:     100,
 		LastHeight: 100,
-		Address:    "0x2222222222222222222222222222222222222222",
+		Hash:       testAddressHex2,
 		IsContract: true,
 	}
 
@@ -68,7 +68,7 @@ var (
 				Id:         12,
 				Height:     101,
 				LastHeight: 101,
-				Address:    "0x3333333333333333333333333333333333333333",
+				Hash:       testAddressHex2,
 				IsContract: true,
 			},
 		},
@@ -89,7 +89,7 @@ var (
 				Id:         13,
 				Height:     102,
 				LastHeight: 102,
-				Address:    "0x4444444444444444444444444444444444444444",
+				Hash:       testAddressHex3,
 				IsContract: true,
 			},
 		},
