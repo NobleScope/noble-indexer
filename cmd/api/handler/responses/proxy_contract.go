@@ -15,13 +15,13 @@ type ProxyContract struct {
 func NewProxyContract(pc storage.ProxyContract) ProxyContract {
 	result := ProxyContract{
 		Height:   uint64(pc.Height),
-		Contract: pc.Contract.Address.Hash.String(),
+		Contract: pc.Contract.Address.Hash.Hex(),
 		Type:     string(pc.Type),
 		Status:   string(pc.Status),
 	}
 
 	if pc.Implementation != nil {
-		impl := pc.Implementation.Address.Hash.String()
+		impl := pc.Implementation.Address.Hash.Hex()
 		result.Implementation = &impl
 	}
 
