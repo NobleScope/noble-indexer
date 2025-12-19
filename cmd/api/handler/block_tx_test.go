@@ -25,19 +25,19 @@ func uint64Ptr(v uint64) *uint64 {
 
 var (
 	testFromAddress = storage.Address{
-		Id:         1,
-		Height:     100,
-		LastHeight: 100,
-		Hash:       testAddressHex1,
-		IsContract: false,
+		Id:          1,
+		FirstHeight: 100,
+		LastHeight:  100,
+		Hash:        testAddressHex1,
+		IsContract:  false,
 	}
 
 	testToAddress = storage.Address{
-		Id:         2,
-		Height:     100,
-		LastHeight: 100,
-		Hash:       testAddressHex2,
-		IsContract: false,
+		Id:          2,
+		FirstHeight: 100,
+		LastHeight:  100,
+		Hash:        testAddressHex2,
+		IsContract:  false,
 	}
 
 	testContract = storage.Contract{

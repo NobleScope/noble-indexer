@@ -47,10 +47,10 @@ func (p *Module) parse(b types.BlockData) error {
 	}
 
 	miner := storage.Address{
-		Hash:       block.Miner,
-		Height:     types.Level(height),
-		LastHeight: types.Level(height),
-		Balance:    storage.EmptyBalance(),
+		Hash:        block.Miner,
+		FirstHeight: types.Level(height),
+		LastHeight:  types.Level(height),
+		Balance:     storage.EmptyBalance(),
 	}
 	decodeCtx.AddAddress(&miner)
 
@@ -173,7 +173,7 @@ func (p *Module) parse(b types.BlockData) error {
 
 		decodeCtx.Block.Txs[i].FromAddress = storage.Address{
 			Hash:         b.Receipts[i].From,
-			Height:       decodeCtx.Block.Height,
+			FirstHeight:  decodeCtx.Block.Height,
 			LastHeight:   decodeCtx.Block.Height,
 			Interactions: 1,
 			TxsCount:     1,
@@ -185,7 +185,7 @@ func (p *Module) parse(b types.BlockData) error {
 		if b.Transactions[i].To != nil {
 			decodeCtx.Block.Txs[i].ToAddress = &storage.Address{
 				Hash:         b.Receipts[i].To,
-				Height:       decodeCtx.Block.Height,
+				FirstHeight:  decodeCtx.Block.Height,
 				LastHeight:   decodeCtx.Block.Height,
 				Interactions: 1,
 				Balance:      storage.EmptyBalance(),
@@ -221,7 +221,7 @@ func (p *Module) parse(b types.BlockData) error {
 
 			decodeCtx.Block.Txs[i].Logs[j].Address = storage.Address{
 				Hash:         b.Receipts[i].Logs[j].Address,
-				Height:       decodeCtx.Block.Height,
+				FirstHeight:  decodeCtx.Block.Height,
 				LastHeight:   decodeCtx.Block.Height,
 				Interactions: 1,
 				Balance:      storage.EmptyBalance(),
@@ -260,10 +260,10 @@ func (p *Module) parse(b types.BlockData) error {
 
 		if typ == storageType.Reward {
 			newTrace.ToAddress = &storage.Address{
-				Hash:       *trace.Action.Author,
-				Height:     decodeCtx.Block.Height,
-				LastHeight: decodeCtx.Block.Height,
-				Balance:    storage.EmptyBalance(),
+				Hash:        *trace.Action.Author,
+				FirstHeight: decodeCtx.Block.Height,
+				LastHeight:  decodeCtx.Block.Height,
+				Balance:     storage.EmptyBalance(),
 			}
 			newTrace.Tx = &storage.Tx{
 				Hash: nil,
@@ -311,7 +311,7 @@ func (p *Module) parse(b types.BlockData) error {
 		if trace.Action.From != nil {
 			newTrace.FromAddress = &storage.Address{
 				Hash:         *trace.Action.From,
-				Height:       decodeCtx.Block.Height,
+				FirstHeight:  decodeCtx.Block.Height,
 				LastHeight:   decodeCtx.Block.Height,
 				Interactions: 1,
 				Balance:      storage.EmptyBalance(),
@@ -323,7 +323,7 @@ func (p *Module) parse(b types.BlockData) error {
 		if trace.Action.To != nil {
 			newTrace.ToAddress = &storage.Address{
 				Hash:         *trace.Action.To,
-				Height:       decodeCtx.Block.Height,
+				FirstHeight:  decodeCtx.Block.Height,
 				LastHeight:   decodeCtx.Block.Height,
 				Interactions: 1,
 				Balance:      storage.EmptyBalance(),
@@ -358,11 +358,11 @@ func (p *Module) parse(b types.BlockData) error {
 				ContractsCount: 1,
 			}
 			contractAddress := storage.Address{
-				Hash:       *trace.Result.Address,
-				Height:     decodeCtx.Block.Height,
-				LastHeight: decodeCtx.Block.Height,
-				Balance:    storage.EmptyBalance(),
-				IsContract: true,
+				Hash:        *trace.Result.Address,
+				FirstHeight: decodeCtx.Block.Height,
+				LastHeight:  decodeCtx.Block.Height,
+				Balance:     storage.EmptyBalance(),
+				IsContract:  true,
 			}
 
 			var txHash types.Hex

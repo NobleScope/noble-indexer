@@ -286,22 +286,22 @@ func getTransferType(from, to pkgTypes.Hex) types.TransferType {
 
 func setAddresses(ctx *dCtx.Context, transferType types.TransferType, transfer *storage.Transfer, from, to, contract pkgTypes.Hex) {
 	fromAddress := &storage.Address{
-		Hash:       from,
-		Height:     ctx.Block.Height,
-		LastHeight: ctx.Block.Height,
-		Balance:    storage.EmptyBalance(),
+		Hash:        from,
+		FirstHeight: ctx.Block.Height,
+		LastHeight:  ctx.Block.Height,
+		Balance:     storage.EmptyBalance(),
 	}
 	toAddress := &storage.Address{
-		Hash:       to,
-		Height:     ctx.Block.Height,
-		LastHeight: ctx.Block.Height,
-		Balance:    storage.EmptyBalance(),
+		Hash:        to,
+		FirstHeight: ctx.Block.Height,
+		LastHeight:  ctx.Block.Height,
+		Balance:     storage.EmptyBalance(),
 	}
 	contractAddress := &storage.Address{
-		Hash:       contract,
-		Height:     ctx.Block.Height,
-		LastHeight: ctx.Block.Height,
-		IsContract: true,
+		Hash:        contract,
+		FirstHeight: ctx.Block.Height,
+		LastHeight:  ctx.Block.Height,
+		IsContract:  true,
 	}
 
 	storageContract := &storage.Contract{

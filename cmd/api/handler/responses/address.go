@@ -23,7 +23,7 @@ type Address struct {
 func NewAddress(addr storage.Address) Address {
 	address := Address{
 		Id:                addr.Id,
-		Height:            addr.Height,
+		Height:            addr.FirstHeight,
 		LastHeight:        addr.LastHeight,
 		Hash:              addr.Hash.Hex(),
 		IsContract:        addr.IsContract,

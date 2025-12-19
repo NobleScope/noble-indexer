@@ -1,0 +1,7 @@
+- id: 1
+  currency: 'noble'
+  value: '1000000'
+
+- id: 3
+  currency: 'noble'
+  value: '5000000'

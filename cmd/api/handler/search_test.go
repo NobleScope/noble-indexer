@@ -29,7 +29,7 @@ const (
 var (
 	testSearchAddress1 = storage.Address{
 		Id:             1,
-		Height:         100,
+		FirstHeight:    100,
 		LastHeight:     200,
 		Hash:           pkgTypes.MustDecodeHex(testSearchTxHash),
 		IsContract:     false,
