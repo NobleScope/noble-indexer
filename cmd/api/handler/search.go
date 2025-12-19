@@ -41,17 +41,17 @@ type searchRequest struct {
 
 // Search godoc
 //
-//	@Summary				Search by hash
-//	@Description			search
-//	@Tags					search
-//	@ID						search
-//	@Param					query	query	string	true	"Search string"
-//	@Produce				json
-//	@Success				200	{array}	responses.SearchItem
-//	@Success				204
-//	@Failure				400	{object}	Error
-//	@Failure				500	{object}	Error
-//	@Router					/search [get]
+//	@Summary		Universal search
+//	@Description	Performs a universal search across the blockchain. Supports searching by: block height (numeric), transaction hash (0x prefixed hex), address (0x prefixed hex), or token name/symbol (text). Returns matching blocks, transactions, addresses, and tokens.
+//	@Tags			search
+//	@ID				search
+//	@Param			query	query	string	true	"Search query: block height (e.g., 12345), transaction/block hash (e.g., 0x1234...), address (e.g., 0x742d...), or token name/symbol (e.g., USDC)"	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
+//	@Produce		json
+//	@Success		200	{array}		responses.SearchItem	"Search results (can include blocks, transactions, addresses, tokens)"
+//	@Success		204							"No results found"
+//	@Failure		400	{object}	Error				"Invalid search query"
+//	@Failure		500	{object}	Error				"Internal server error"
+//	@Router			/search [get]
 func (handler SearchHandler) Search(c echo.Context) error {
 	req, err := bindAndValidate[searchRequest](c)
 	if err != nil {

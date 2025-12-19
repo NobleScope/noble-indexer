@@ -39,15 +39,15 @@ type getTxRequest struct {
 // Get godoc
 //
 //	@Summary		Get transaction by hash
-//	@Description	Get transaction by hash
+//	@Description	Returns detailed information about a specific transaction including status, gas used, value transferred, and associated traces
 //	@Tags			transactions
 //	@ID				get-transaction
-//	@Param			hash	path	string	true	"Transaction hash in hexadecimal with 0x prefix"	minlength(66)	maxlength(66)
+//	@Param			hash	path	string	true	"Transaction hash in hexadecimal with 0x prefix"	minlength(66)	maxlength(66)	example(0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef)
 //	@Produce		json
-//	@Success		200	{object}	responses.Transaction
-//	@Success		204
-//	@Failure		400	{object}	Error
-//	@Failure		500	{object}	Error
+//	@Success		200	{object}	responses.Transaction	"Transaction information"
+//	@Success		204						"Transaction not found"
+//	@Failure		400	{object}	Error				"Invalid transaction hash format"
+//	@Failure		500	{object}	Error				"Internal server error"
 //	@Router			/tx/{hash} [get]
 func (handler *TxHandler) Get(c echo.Context) error {
 	req, err := bindAndValidate[getTxRequest](c)
@@ -91,23 +91,23 @@ func (req *getTxTraces) SetDefault() {
 
 // Traces godoc
 //
-//	@Summary		List transaction traces
-//	@Description	List transaction traces
+//	@Summary		List execution traces
+//	@Description	Returns a paginated list of execution traces showing internal calls, contract creations, and other EVM operations. Traces provide detailed insight into transaction execution. Can be filtered by transaction, addresses, contract, block height, or trace type.
 //	@Tags			transactions
 //	@ID				list-transaction-traces
-//	@Param			tx_hash			query	string	false	"Transaction hash in hexadecimal with 0x prefix"	minlength(66)	maxlength(66)
-//	@Param			limit			query	integer	false	"Count of requested entities"						minimum(1)		maximum(100)
-//	@Param			offset			query	integer	false	"Offset"											minimum(0)
-//	@Param			address_from	query	string	false	"Address which initiate trace"						minlength(42)	maxlength(42)
-//	@Param			address_to		query	string	false	"Address which receiving trace result"				minlength(42)	maxlength(42)
-//	@Param			contract		query	string	false	"Called contract"									minlength(42)	maxlength(42)
-//	@Param			height			query	integer	false	"Block height"										minimum(1)
-//	@Param			type			query	string	false	"Comma-separated list of trace types"				Enums(call, delegatecall, staticcall, create, create2, selfdestruct, reward, suicide)
-//	@Param			sort			query	string	false	"Sort order. Default: desc"							Enums(asc, desc)
+//	@Param			tx_hash			query	string	false	"Filter by transaction hash (hexadecimal with 0x prefix)"						minlength(66)	maxlength(66)	example(0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef)
+//	@Param			limit			query	integer	false	"Number of traces to return (default: 10)"										minimum(1)	maximum(100)	default(10)
+//	@Param			offset			query	integer	false	"Number of traces to skip (default: 0)"											minimum(0)	default(0)
+//	@Param			address_from	query	string	false	"Filter by initiator address"													minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
+//	@Param			address_to		query	string	false	"Filter by target address"														minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
+//	@Param			contract		query	string	false	"Filter by called contract address"												minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
+//	@Param			height			query	integer	false	"Filter by block height"														minimum(1)	example(12345)
+//	@Param			type			query	string	false	"Filter by trace type (comma-separated list)"									Enums(call, delegatecall, staticcall, create, create2, selfdestruct, reward, suicide)
+//	@Param			sort			query	string	false	"Sort order (default: desc)"													Enums(asc, desc)	default(desc)
 //	@Produce		json
-//	@Success		200	{array}		responses.Trace
-//	@Failure		400	{object}	Error
-//	@Failure		500	{object}	Error
+//	@Success		200	{array}		responses.Trace	"List of execution traces"
+//	@Failure		400	{object}	Error			"Invalid request parameters"
+//	@Failure		500	{object}	Error			"Internal server error"
 //	@Router			/traces [get]
 func (handler *TxHandler) Traces(c echo.Context) error {
 	req, err := bindAndValidate[getTxTraces](c)
@@ -209,23 +209,25 @@ func (req *listTxs) SetDefault() {
 
 // List godoc
 //
-//	@Summary		Transactions list
-//	@Description	List all of indexed transactions
+//	@Summary		List transactions
+//	@Description	Returns a paginated list of blockchain transactions. Can be filtered by addresses, contract, block height, transaction type, status, or time range. Supports various transaction types including legacy, EIP-1559 (dynamic fee), EIP-4844 (blob), and EIP-7702 (set code).
 //	@Tags			transactions
 //	@ID				list-transactions
-//	@Param			limit			query	integer	false	"Count of requested entities"						minimum(1)	maximum(100)
-//	@Param			offset			query	integer	false	"Offset"											minimum(0)
-//	@Param			address_from	query	string	false	"Address which used for sending tx"					minlength(42)	maxlength(42)
-//	@Param			address_to		query	string	false	"Address which used for receiving tx"				minlength(42)	maxlength(42)
-//	@Param			contract		query	string	false	"Contract address which was called"					minlength(42)	maxlength(42)
-//	@Param			height			query	integer	false	"Block height"										minimum(1)
-//	@Param			type			query	string	false	"Comma-separated list of transaction types"			Enums(TxTypeUnknown, TxTypeLegacy, TxTypeDynamicFee, TxTypeBlob, TxTypeSetCode)
-//	@Param			status			query	string	false	"Comma-separated list of transaction statuses"		Enums(TxStatusSuccess, TxStatusRevert)
-//	@Param			sort			query	string	false	"Sort order. Default: desc"							Enums(asc, desc)
+//	@Param			limit			query	integer	false	"Number of transactions to return (default: 10)"							minimum(1)	maximum(100)	default(10)
+//	@Param			offset			query	integer	false	"Number of transactions to skip (default: 0)"								minimum(0)	default(0)
+//	@Param			address_from	query	string	false	"Filter by sender address"													minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
+//	@Param			address_to		query	string	false	"Filter by recipient address"												minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
+//	@Param			contract		query	string	false	"Filter by called contract address"										minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
+//	@Param			height			query	integer	false	"Filter by block height"													minimum(1)	example(12345)
+//	@Param			type			query	string	false	"Filter by transaction type (comma-separated list)"						Enums(TxTypeUnknown, TxTypeLegacy, TxTypeDynamicFee, TxTypeBlob, TxTypeSetCode)
+//	@Param			status			query	string	false	"Filter by execution status (comma-separated list)"						Enums(TxStatusSuccess, TxStatusRevert)
+//	@Param			from			query	integer	false	"Filter by timestamp from (Unix timestamp)"								minimum(1)	example(1692892095)
+//	@Param			to				query	integer	false	"Filter by timestamp to (Unix timestamp)"									minimum(1)	example(1692892095)
+//	@Param			sort			query	string	false	"Sort order by timestamp (default: desc)"									Enums(asc, desc)	default(desc)
 //	@Produce		json
-//	@Success		200	{array}		responses.Transaction
-//	@Failure		400	{object}	Error
-//	@Failure		500	{object}	Error
+//	@Success		200	{array}		responses.Transaction	"List of transactions"
+//	@Failure		400	{object}	Error					"Invalid request parameters"
+//	@Failure		500	{object}	Error					"Internal server error"
 //	@Router			/tx [get]
 func (handler *TxHandler) List(c echo.Context) error {
 	req, err := bindAndValidate[listTxs](c)

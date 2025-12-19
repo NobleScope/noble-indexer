@@ -4,6 +4,9 @@ import (
 	"github.com/baking-bad/noble-indexer/internal/storage"
 )
 
+// ProxyContract model info
+//
+//	@Description	Proxy contract information
 type ProxyContract struct {
 	Height         uint64  `example:"100"                                                            json:"height"         swaggertype:"integer"`
 	Contract       string  `example:"0x0000000000000000000000000000000000000000"                     json:"contract"       swaggertype:"string"`

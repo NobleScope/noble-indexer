@@ -50,20 +50,22 @@ func (req *logListRequest) SetDefault() {
 
 // List godoc
 //
-//	@Summary		List logs
-//	@Description	List logs
+//	@Summary		List event logs
+//	@Description	Returns a paginated list of event logs emitted by smart contracts. Can be filtered by transaction, address, block height, or time range.
 //	@Tags			transactions
 //	@ID				list-transaction-log
-//	@Param			tx_hash			query	string	false	"Transaction hash in hexadecimal with 0x prefix"	minlength(66)	maxlength(66)
-//	@Param			limit			query	integer	false	"Count of requested entities"						minimum(1)	maximum(100)
-//	@Param			offset			query	integer	false	"Offset"											minimum(0)
-//	@Param			address			query	string	false	"Address whose invocation generated this log"		minlength(42)	maxlength(42)
-//	@Param			height			query	integer	false	"Block height"										minimum(1)
-//	@Param			sort			query	string	false	"Sort order. Default: desc"							Enums(asc, desc)
+//	@Param			tx_hash			query	string	false	"Filter by transaction hash (hexadecimal with 0x prefix)"					minlength(66)	maxlength(66)	example(0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef)
+//	@Param			limit			query	integer	false	"Number of logs to return (default: 10)"									minimum(1)	maximum(100)	default(10)
+//	@Param			offset			query	integer	false	"Number of logs to skip (default: 0)"										minimum(0)	default(0)
+//	@Param			address			query	string	false	"Filter by contract address that emitted the log"							minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
+//	@Param			height			query	integer	false	"Filter by block height"													minimum(1)	example(12345)
+//	@Param			from			query	integer	false	"Filter by timestamp from (Unix timestamp)"								minimum(1)	example(1692892095)
+//	@Param			to				query	integer	false	"Filter by timestamp to (Unix timestamp)"									minimum(1)	example(1692892095)
+//	@Param			sort			query	string	false	"Sort order by timestamp (default: desc)"									Enums(asc, desc)	default(desc)
 //	@Produce		json
-//	@Success		200	{array}		responses.Trace
-//	@Failure		400	{object}	Error
-//	@Failure		500	{object}	Error
+//	@Success		200	{array}		responses.Log	"List of event logs"
+//	@Failure		400	{object}	Error			"Invalid request parameters"
+//	@Failure		500	{object}	Error			"Internal server error"
 //	@Router			/log [get]
 func (handler *LogHandler) List(c echo.Context) error {
 	req, err := bindAndValidate[logListRequest](c)
