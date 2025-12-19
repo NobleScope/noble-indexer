@@ -31,7 +31,7 @@ var (
 		Id:             1,
 		Height:         100,
 		LastHeight:     200,
-		Address:        testSearchAddress,
+		Hash:           pkgTypes.MustDecodeHex(testSearchTxHash),
 		IsContract:     false,
 		TxsCount:       50,
 		ContractsCount: 0,

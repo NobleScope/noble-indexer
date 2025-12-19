@@ -38,14 +38,14 @@ type Trace struct {
 	Height pkgTypes.Level `bun:"height"                    comment:"The number (height) of block"`
 	Time   time.Time      `bun:"time,pk,notnull"           comment:"The time of block"`
 
-	TxId uint64  `bun:"tx_id"           comment:"Transaction identity"`
-	From uint64  `bun:"from_address_id" comment:"From address identity"`
+	TxId *uint64 `bun:"tx_id"           comment:"Transaction identity"`
+	From *uint64 `bun:"from_address_id" comment:"From address identity"`
 	To   *uint64 `bun:"to_address_id"   comment:"To address identity"`
 
 	GasLimit       decimal.Decimal  `bun:"gas_limit,type:numeric" comment:"Gas limit"`
 	Amount         *decimal.Decimal `bun:"amount,type:numeric"    comment:"Value in Wei"`
 	Input          []byte           `bun:"input"                  comment:"Input data"`
-	TxPosition     uint64           `bun:"tx_position"            comment:"Transaction position"`
+	TxPosition     *uint64          `bun:"tx_position"            comment:"Transaction position"`
 	TraceAddress   []uint64         `bun:"trace_address"          comment:"Trace position in the call tree"`
 	Type           types.TraceType  `bun:"type"                   comment:"Trace type"`
 	InitHash       *pkgTypes.Hex    `bun:"init_hash,type:bytea"   comment:"Code of the contract being created"`
@@ -57,10 +57,10 @@ type Trace struct {
 
 	Subtraces uint64 `bun:"subtraces" comment:"Amount of subtraces"`
 
-	FromAddress Address   `bun:"rel:belongs-to,join:from_address_id=id"`
+	FromAddress *Address  `bun:"rel:belongs-to,join:from_address_id=id"`
 	ToAddress   *Address  `bun:"rel:belongs-to,join:to_address_id=id"`
 	Contract    *Contract `bun:"rel:belongs-to,join:contract_id=id"`
-	Tx          Tx        `bun:"rel:belongs-to,join:tx_id=id"`
+	Tx          *Tx       `bun:"rel:belongs-to,join:tx_id=id"`
 }
 
 // TableName -

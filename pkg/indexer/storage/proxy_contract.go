@@ -50,9 +50,9 @@ func saveProxyContracts(
 	}
 
 	for i := range proxyContracts {
-		contractID, ok := addresses[proxyContracts[i].Contract.Address.Address]
+		contractID, ok := addresses[proxyContracts[i].Contract.Address.String()]
 		if !ok {
-			return errors.Errorf("can't find contract key: %s", proxyContracts[i].Contract.Address)
+			return errors.Errorf("can't find contract key: %s", proxyContracts[i].Contract.Address.String())
 		}
 		proxyContracts[i].Id = contractID
 
@@ -60,9 +60,9 @@ func saveProxyContracts(
 			continue
 		}
 
-		implementationID, ok := addresses[proxyContracts[i].Implementation.Address.Address]
+		implementationID, ok := addresses[proxyContracts[i].Implementation.Address.String()]
 		if !ok {
-			return errors.Errorf("can't find contract implementation key: %s", proxyContracts[i].Implementation.Address)
+			return errors.Errorf("can't find contract implementation key: %s", proxyContracts[i].Implementation.Address.String())
 		}
 		proxyContracts[i].ImplementationID = &implementationID
 	}
@@ -83,10 +83,10 @@ func (module *Module) updateProxyContracts(ctx context.Context, proxyContracts [
 
 	addressesMap := make(map[string]*storage.Address, len(proxyContracts))
 	for i := range proxyContracts {
-		proxyAddress := proxyContracts[i].Contract.Address.Address
-		if _, ok := addressesMap[proxyAddress]; !ok {
-			addressesMap[proxyAddress] = &storage.Address{
-				Address:    proxyAddress,
+		proxyAddress := proxyContracts[i].Contract.Address
+		if _, ok := addressesMap[proxyAddress.String()]; !ok {
+			addressesMap[proxyAddress.String()] = &storage.Address{
+				Hash:       proxyAddress.Hash,
 				IsContract: true,
 				Balance:    storage.EmptyBalance(),
 			}
@@ -94,10 +94,10 @@ func (module *Module) updateProxyContracts(ctx context.Context, proxyContracts [
 		if proxyContracts[i].Implementation == nil {
 			continue
 		}
-		implementationAddress := proxyContracts[i].Implementation.Address.Address
-		if _, ok := addressesMap[implementationAddress]; !ok {
-			addressesMap[implementationAddress] = &storage.Address{
-				Address:    implementationAddress,
+		implementationAddress := proxyContracts[i].Implementation.Address
+		if _, ok := addressesMap[implementationAddress.String()]; !ok {
+			addressesMap[implementationAddress.String()] = &storage.Address{
+				Hash:       implementationAddress.Hash,
 				IsContract: true,
 				Balance:    storage.EmptyBalance(),
 			}

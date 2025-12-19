@@ -45,13 +45,13 @@ func NewTransaction(tx storage.Tx) Transaction {
 		EffectiveGasPrice: tx.EffectiveGasPrice,
 		Fee:               tx.Fee,
 		Amount:            tx.Amount,
-		FromAddress:       tx.FromAddress.String(),
+		FromAddress:       tx.FromAddress.Hash.Hex(),
 		Input:             types.Hex(tx.Input).Hex(),
 		LogsBloom:         types.Hex(tx.LogsBloom).Hex(),
 	}
 
 	if tx.ToAddress != nil {
-		toAddr := tx.ToAddress.String()
+		toAddr := tx.ToAddress.Hash.Hex()
 		result.ToAddress = &toAddr
 	}
 

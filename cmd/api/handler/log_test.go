@@ -20,8 +20,6 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-const testAddressHash = "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd"
-
 var (
 	testLog1 = storage.Log{
 		Id:        1,
@@ -35,8 +33,8 @@ var (
 		AddressId: 1,
 		Removed:   false,
 		Address: storage.Address{
-			Id:      1,
-			Address: testAddressHash,
+			Id:   1,
+			Hash: testAddressHex1,
 		},
 		Tx: storage.Tx{
 			Id:   1,
@@ -56,8 +54,8 @@ var (
 		AddressId: 2,
 		Removed:   false,
 		Address: storage.Address{
-			Id:      2,
-			Address: "0x1234567890123456789012345678901234567890",
+			Id:   2,
+			Hash: testAddressHex2,
 		},
 		Tx: storage.Tx{
 			Id:   2,
@@ -77,8 +75,8 @@ var (
 		AddressId: 1,
 		Removed:   false,
 		Address: storage.Address{
-			Id:      1,
-			Address: testAddressHash,
+			Id:   1,
+			Hash: testAddressHex3,
 		},
 		Tx: storage.Tx{
 			Id:   3,
@@ -304,10 +302,7 @@ func (s *LogHandlerTestSuite) TestListDescOrder() {
 // TestListWithTxHash tests filtering logs by transaction hash
 func (s *LogHandlerTestSuite) TestListWithTxHash() {
 	q := make(url.Values)
-	q.Set("tx_hash", testTxHash)
-
-	hashBytes, err := pkgTypes.HexFromString(testTxHash)
-	s.Require().NoError(err)
+	q.Set("tx_hash", testTxHash.Hex())
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
 	rec := httptest.NewRecorder()
@@ -315,7 +310,7 @@ func (s *LogHandlerTestSuite) TestListWithTxHash() {
 	c.SetPath("/log")
 
 	s.tx.EXPECT().
-		ByHash(gomock.Any(), hashBytes).
+		ByHash(gomock.Any(), testTxHash).
 		Return(storage.Tx{Id: 1}, nil).
 		Times(1)
 
@@ -334,7 +329,7 @@ func (s *LogHandlerTestSuite) TestListWithTxHash() {
 	s.Require().Equal(http.StatusOK, rec.Code)
 
 	var logs []responses.Log
-	err = json.NewDecoder(rec.Body).Decode(&logs)
+	err := json.NewDecoder(rec.Body).Decode(&logs)
 	s.Require().NoError(err)
 	s.Require().Len(logs, 1)
 	s.Require().EqualValues(1, logs[0].Id)
@@ -343,10 +338,7 @@ func (s *LogHandlerTestSuite) TestListWithTxHash() {
 // TestListWithAddress tests filtering logs by address
 func (s *LogHandlerTestSuite) TestListWithAddress() {
 	q := make(url.Values)
-	q.Set("address", testAddressHash)
-
-	hashBytes, err := pkgTypes.HexFromString(testAddressHash)
-	s.Require().NoError(err)
+	q.Set("address", testAddressHex1.Hex())
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
 	rec := httptest.NewRecorder()
@@ -354,7 +346,7 @@ func (s *LogHandlerTestSuite) TestListWithAddress() {
 	c.SetPath("/log")
 
 	s.address.EXPECT().
-		ByHash(gomock.Any(), hashBytes).
+		ByHash(gomock.Any(), testAddressHex1).
 		Return(storage.Address{Id: 1}, nil).
 		Times(1)
 
@@ -373,7 +365,7 @@ func (s *LogHandlerTestSuite) TestListWithAddress() {
 	s.Require().Equal(http.StatusOK, rec.Code)
 
 	var logs []responses.Log
-	err = json.NewDecoder(rec.Body).Decode(&logs)
+	err := json.NewDecoder(rec.Body).Decode(&logs)
 	s.Require().NoError(err)
 	s.Require().Len(logs, 2)
 	s.Require().EqualValues(1, logs[0].Id)
@@ -589,10 +581,7 @@ func (s *LogHandlerTestSuite) TestListInvalidAddress() {
 // TestListTxNotFound tests when transaction is not found
 func (s *LogHandlerTestSuite) TestListTxNotFound() {
 	q := make(url.Values)
-	q.Set("tx_hash", testTxHash)
-
-	hashBytes, err := pkgTypes.HexFromString(testTxHash)
-	s.Require().NoError(err)
+	q.Set("tx_hash", testTxHash.Hex())
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
 	rec := httptest.NewRecorder()
@@ -600,7 +589,7 @@ func (s *LogHandlerTestSuite) TestListTxNotFound() {
 	c.SetPath("/log")
 
 	s.tx.EXPECT().
-		ByHash(gomock.Any(), hashBytes).
+		ByHash(gomock.Any(), testTxHash).
 		Return(storage.Tx{}, sql.ErrNoRows).
 		Times(1)
 
@@ -616,10 +605,7 @@ func (s *LogHandlerTestSuite) TestListTxNotFound() {
 // TestListAddressNotFound tests when address is not found
 func (s *LogHandlerTestSuite) TestListAddressNotFound() {
 	q := make(url.Values)
-	q.Set("address", testAddressHash)
-
-	hashBytes, err := pkgTypes.HexFromString(testAddressHash)
-	s.Require().NoError(err)
+	q.Set("address", testAddressHex1.Hex())
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
 	rec := httptest.NewRecorder()
@@ -627,7 +613,7 @@ func (s *LogHandlerTestSuite) TestListAddressNotFound() {
 	c.SetPath("/log")
 
 	s.address.EXPECT().
-		ByHash(gomock.Any(), hashBytes).
+		ByHash(gomock.Any(), testAddressHex1).
 		Return(storage.Address{}, sql.ErrNoRows).
 		Times(1)
 

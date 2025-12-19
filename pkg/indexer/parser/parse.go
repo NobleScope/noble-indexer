@@ -7,6 +7,7 @@ import (
 	storageType "github.com/baking-bad/noble-indexer/internal/storage/types"
 	dCtx "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
 	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 )
 
@@ -46,7 +47,7 @@ func (p *Module) parse(b types.BlockData) error {
 	}
 
 	miner := storage.Address{
-		Address:    block.Miner.String(),
+		Hash:       block.Miner,
 		Height:     types.Level(height),
 		LastHeight: types.Level(height),
 		Balance:    storage.EmptyBalance(),
@@ -171,7 +172,7 @@ func (p *Module) parse(b types.BlockData) error {
 		}
 
 		decodeCtx.Block.Txs[i].FromAddress = storage.Address{
-			Address:      b.Receipts[i].From.String(),
+			Hash:         b.Receipts[i].From,
 			Height:       decodeCtx.Block.Height,
 			LastHeight:   decodeCtx.Block.Height,
 			Interactions: 1,
@@ -183,7 +184,7 @@ func (p *Module) parse(b types.BlockData) error {
 
 		if b.Transactions[i].To != nil {
 			decodeCtx.Block.Txs[i].ToAddress = &storage.Address{
-				Address:      b.Receipts[i].To.String(),
+				Hash:         b.Receipts[i].To,
 				Height:       decodeCtx.Block.Height,
 				LastHeight:   decodeCtx.Block.Height,
 				Interactions: 1,
@@ -219,7 +220,7 @@ func (p *Module) parse(b types.BlockData) error {
 			}
 
 			decodeCtx.Block.Txs[i].Logs[j].Address = storage.Address{
-				Address:      b.Receipts[i].To.String(),
+				Hash:         b.Receipts[i].Logs[j].Address,
 				Height:       decodeCtx.Block.Height,
 				LastHeight:   decodeCtx.Block.Height,
 				Interactions: 1,
@@ -233,12 +234,7 @@ func (p *Module) parse(b types.BlockData) error {
 	}
 
 	for i, trace := range b.Traces {
-		gl, err := trace.Action.Gas.Decimal()
-		if err != nil {
-			return err
-		}
-
-		gu, err := trace.Result.GasUsed.Decimal()
+		typ, err := storageType.ParseTraceType(trace.Type)
 		if err != nil {
 			return err
 		}
@@ -251,50 +247,88 @@ func (p *Module) parse(b types.BlockData) error {
 			}
 		}
 
-		typ, err := storageType.ParseTraceType(trace.Type)
-		if err != nil {
-			return err
-		}
-
 		newTrace := &storage.Trace{
-			Height: types.Level(height),
-			Time:   blockTime,
-
-			FromAddress: storage.Address{
-				Address:      trace.Action.From.String(),
-				Height:       decodeCtx.Block.Height,
-				LastHeight:   decodeCtx.Block.Height,
-				Interactions: 1,
-				Balance:      storage.EmptyBalance(),
-			},
-			Tx: storage.Tx{
-				Hash: trace.TxHash,
-			},
-
-			TraceAddress:   trace.TraceAddress,
-			TxPosition:     trace.TxPosition,
-			GasLimit:       gl,
+			Height:         types.Level(height),
+			Time:           blockTime,
 			Amount:         &value,
+			TraceAddress:   trace.TraceAddress,
 			Type:           typ,
+			Subtraces:      trace.Subtraces,
 			InitHash:       trace.Action.Init,
 			CreationMethod: trace.Action.CreationMethod,
-
-			GasUsed: gu,
-
-			Subtraces: trace.Subtraces,
 		}
 
-		decodeCtx.AddAddress(&newTrace.FromAddress)
-
-		if trace.Action.To != nil {
+		if typ == storageType.Reward {
 			newTrace.ToAddress = &storage.Address{
-				Address:      trace.Action.To.String(),
+				Hash:       *trace.Action.Author,
+				Height:     decodeCtx.Block.Height,
+				LastHeight: decodeCtx.Block.Height,
+				Balance:    storage.EmptyBalance(),
+			}
+			newTrace.Tx = &storage.Tx{
+				Hash: nil,
+			}
+
+			decodeCtx.AddAddress(newTrace.ToAddress)
+
+			decodeCtx.Block.Traces[i] = newTrace
+			decodeCtx.AddTrace(newTrace)
+			continue
+		}
+
+		var (
+			gl, gu decimal.Decimal
+		)
+
+		if trace.Action.Gas != nil {
+			gl, err = trace.Action.Gas.Decimal()
+			if err != nil {
+				return err
+			}
+
+			newTrace.GasLimit = gl
+		}
+
+		if trace.Result.GasUsed != nil {
+			gu, err = trace.Result.GasUsed.Decimal()
+			if err != nil {
+				return err
+			}
+
+			newTrace.GasUsed = gu
+		}
+
+		if trace.TxPosition != nil {
+			newTrace.TxPosition = trace.TxPosition
+		}
+
+		if trace.TxHash != nil {
+			newTrace.Tx = &storage.Tx{
+				Hash: *trace.TxHash,
+			}
+		}
+
+		if trace.Action.From != nil {
+			newTrace.FromAddress = &storage.Address{
+				Hash:         *trace.Action.From,
 				Height:       decodeCtx.Block.Height,
 				LastHeight:   decodeCtx.Block.Height,
 				Interactions: 1,
 				Balance:      storage.EmptyBalance(),
 			}
-			if trace.Action.From.String() != trace.Action.To.String() {
+
+			decodeCtx.AddAddress(newTrace.FromAddress)
+		}
+
+		if trace.Action.To != nil {
+			newTrace.ToAddress = &storage.Address{
+				Hash:         *trace.Action.To,
+				Height:       decodeCtx.Block.Height,
+				LastHeight:   decodeCtx.Block.Height,
+				Interactions: 1,
+				Balance:      storage.EmptyBalance(),
+			}
+			if trace.Action.From != nil && trace.Action.From.String() != trace.Action.To.String() {
 				newTrace.ToAddress.Interactions = 0
 			}
 
@@ -310,18 +344,30 @@ func (p *Module) parse(b types.BlockData) error {
 		}
 
 		if trace.Result.Address != nil && trace.Result.Code != nil && len(*trace.Result.Code) > 0 {
+			if trace.TxPosition == nil {
+				return errors.New("trace.TxPosition is nil for contract creation")
+			}
+			if *trace.TxPosition >= uint64(len(b.Transactions)) {
+				return errors.Errorf("TxPosition %d out of range, transactions count: %d", *trace.TxPosition, len(b.Transactions))
+			}
+
 			deployerAddress := storage.Address{
-				Address:        b.Transactions[trace.TxPosition].From.String(),
+				Hash:           b.Transactions[*trace.TxPosition].From,
 				LastHeight:     decodeCtx.Block.Height,
 				Balance:        storage.EmptyBalance(),
 				ContractsCount: 1,
 			}
 			contractAddress := storage.Address{
-				Address:    trace.Result.Address.String(),
+				Hash:       *trace.Result.Address,
 				Height:     decodeCtx.Block.Height,
 				LastHeight: decodeCtx.Block.Height,
 				Balance:    storage.EmptyBalance(),
 				IsContract: true,
+			}
+
+			var txHash types.Hex
+			if trace.TxHash != nil {
+				txHash = *trace.TxHash
 			}
 
 			contract := &storage.Contract{
@@ -329,7 +375,7 @@ func (p *Module) parse(b types.BlockData) error {
 				Address: contractAddress,
 				Code:    *trace.Result.Code,
 				Tx: &storage.Tx{
-					Hash: trace.TxHash,
+					Hash: txHash,
 				},
 			}
 
@@ -343,7 +389,7 @@ func (p *Module) parse(b types.BlockData) error {
 
 			if parseErr := ParseEvmContractMetadata(contract); parseErr != nil {
 				p.Log.Err(parseErr).
-					Str("contract", contract.Address.Address).
+					Str("contract", contract.Address.Hash.String()).
 					Uint64("height", uint64(contract.Height)).
 					Msg("parsing contract metadata")
 			}

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/pkg/errors"
 )
 
 func saveTraces(
@@ -17,16 +18,36 @@ func saveTraces(
 		return nil
 	}
 	for i := range traces {
-		traces[i].TxId = txHashes[traces[i].Tx.Hash.String()]
-		traces[i].From = addresses[traces[i].FromAddress.Address]
+		if traces[i].Tx != nil {
+			id, ok := txHashes[traces[i].Tx.Hash.String()]
+			if !ok {
+				traces[i].TxId = nil
+			} else {
+				traces[i].TxId = &id
+			}
+		}
+
+		if traces[i].FromAddress != nil {
+			id, ok := addresses[traces[i].FromAddress.String()]
+			if !ok {
+				return errors.Errorf("can't find address key: %s", traces[i].FromAddress.String())
+			}
+			traces[i].From = &id
+		}
 
 		if traces[i].ToAddress != nil {
-			id := addresses[traces[i].ToAddress.Address]
+			id, ok := addresses[traces[i].ToAddress.String()]
+			if !ok {
+				return errors.Errorf("can't find address key: %s", traces[i].ToAddress.String())
+			}
 			traces[i].To = &id
 		}
 
 		if traces[i].Contract != nil {
-			id := addresses[traces[i].Contract.Address.Address]
+			id, ok := addresses[traces[i].Contract.Address.String()]
+			if !ok {
+				return errors.Errorf("can't find address key: %s", traces[i].Contract.Address.String())
+			}
 			traces[i].ContractId = &id
 		}
 	}

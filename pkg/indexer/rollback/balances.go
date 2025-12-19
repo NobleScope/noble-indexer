@@ -111,9 +111,10 @@ func getBalanceUpdates(
 		if len(trace.TraceAddress) == 0 || trace.Amount == nil || trace.Amount.IsZero() {
 			continue
 		}
-
-		if _, ok := deletedAddressIds[trace.From]; !ok {
-			updates[trace.From] = *trace.Amount
+		if trace.FromAddress != nil {
+			if _, ok := deletedAddressIds[*trace.From]; !ok {
+				updates[*trace.From] = *trace.Amount
+			}
 		}
 		if trace.ToAddress != nil {
 			if _, ok := deletedAddressIds[*trace.To]; !ok {

@@ -18,15 +18,15 @@ func saveTokenBalances(
 	}
 
 	for i := range tokenBalances {
-		contractID, ok := addresses[tokenBalances[i].Contract.Address.Address]
+		contractID, ok := addresses[tokenBalances[i].Contract.Address.String()]
 		if !ok {
-			return errors.Errorf("can't find contract key: %s", tokenBalances[i].Contract.Address.Address)
+			return errors.Errorf("can't find contract key: %s", tokenBalances[i].Contract.Address.String())
 		}
 		tokenBalances[i].ContractID = contractID
 
-		addressID, ok := addresses[tokenBalances[i].Address.Address]
+		addressID, ok := addresses[tokenBalances[i].Address.String()]
 		if !ok {
-			return errors.Errorf("can't find address key: %s", tokenBalances[i].Address.Address)
+			return errors.Errorf("can't find address key: %s", tokenBalances[i].Address.String())
 		}
 		tokenBalances[i].AddressID = addressID
 	}

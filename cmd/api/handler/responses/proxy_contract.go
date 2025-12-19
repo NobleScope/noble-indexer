@@ -2,7 +2,6 @@ package responses
 
 import (
 	"github.com/baking-bad/noble-indexer/internal/storage"
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 )
 
 type ProxyContract struct {
@@ -14,23 +13,15 @@ type ProxyContract struct {
 }
 
 func NewProxyContract(pc storage.ProxyContract) ProxyContract {
-	contractAddress, err := pkgTypes.HexFromString(pc.Contract.Address.Address)
-	if err != nil {
-		panic(err)
-	}
 	result := ProxyContract{
 		Height:   uint64(pc.Height),
-		Contract: contractAddress.Hex(),
+		Contract: pc.Contract.Address.Hash.Hex(),
 		Type:     string(pc.Type),
 		Status:   string(pc.Status),
 	}
 
 	if pc.Implementation != nil {
-		implAddress, err := pkgTypes.HexFromString(pc.Implementation.Address.Address)
-		if err != nil {
-			panic(err)
-		}
-		impl := implAddress.Hex()
+		impl := pc.Implementation.Address.Hash.Hex()
 		result.Implementation = &impl
 	}
 

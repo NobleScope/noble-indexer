@@ -24,6 +24,7 @@ import (
 	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/eip7760_beacon_I"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/eip7760_uups"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/eip7760_uups_I"
+	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 )
 
 func (p *Module) parseProxyContract(ctx *dCtx.Context, contract *storage.Contract) error {
@@ -32,7 +33,7 @@ func (p *Module) parseProxyContract(ctx *dCtx.Context, contract *storage.Contrac
 	switch proxyType {
 	case types.EIP1167:
 		implementationAddress := storage.Address{
-			Address:    contract.Code[len(eip1167.Prefix) : len(eip1167.Prefix)+AddressBytesLength].String(),
+			Hash:       contract.Code[len(eip1167.Prefix) : len(eip1167.Prefix)+AddressBytesLength],
 			LastHeight: ctx.Block.Height,
 			IsContract: true,
 			Balance:    storage.EmptyBalance(),
@@ -69,7 +70,7 @@ func (p *Module) parseProxyContract(ctx *dCtx.Context, contract *storage.Contrac
 		})
 	case types.CloneWithImmutableArgs:
 		implementationAddress := storage.Address{
-			Address:    contract.Code[clone.FifthEnd : clone.FifthEnd+AddressBytesLength].String(),
+			Hash:       contract.Code[clone.FifthEnd : clone.FifthEnd+AddressBytesLength],
 			LastHeight: ctx.Block.Height,
 			IsContract: true,
 			Balance:    storage.EmptyBalance(),
@@ -94,7 +95,7 @@ func (p *Module) parseEIP1967Proxy(ctx *dCtx.Context, logs []*storage.Log) {
 	eip1967Contracts := getEIP1967Proxy(logs)
 	for proxyAddress, implementationAddress := range eip1967Contracts {
 		storageImplementationAddress := storage.Address{
-			Address:    implementationAddress,
+			Hash:       implementationAddress,
 			LastHeight: ctx.Block.Height,
 			IsContract: true,
 			Balance:    storage.EmptyBalance(),
@@ -106,7 +107,7 @@ func (p *Module) parseEIP1967Proxy(ctx *dCtx.Context, logs []*storage.Log) {
 			Status: types.Resolved,
 			Contract: storage.Contract{
 				Address: storage.Address{
-					Address: proxyAddress,
+					Hash: pkgTypes.MustDecodeHex(proxyAddress),
 				},
 			},
 			Implementation: &storage.Contract{
@@ -237,8 +238,8 @@ func isCloneWithImmutableArgs(contract *storage.Contract) bool {
 		bytes.Equal(contract.Code[clone.FifthStart:clone.FifthEnd], clone.Fifth)
 }
 
-func getEIP1967Proxy(logs []*storage.Log) map[string]string {
-	result := make(map[string]string)
+func getEIP1967Proxy(logs []*storage.Log) map[string]pkgTypes.Hex {
+	result := make(map[string]pkgTypes.Hex)
 	if len(logs) == 0 {
 		return result
 	}
@@ -255,7 +256,7 @@ func getEIP1967Proxy(logs []*storage.Log) map[string]string {
 				if len(implementationAddress) > AddressBytesLength {
 					implementationAddress = implementationAddress[len(implementationAddress)-AddressBytesLength:]
 				}
-				result[logs[i].Address.String()] = implementationAddress.String()
+				result[logs[i].Address.String()] = implementationAddress
 			}
 		}
 	}

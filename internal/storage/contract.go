@@ -60,5 +60,5 @@ func (Contract) TableName() string {
 }
 
 func (contract Contract) String() string {
-	return contract.Address.Address
+	return contract.Address.String()
 }

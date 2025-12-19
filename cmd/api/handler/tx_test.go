@@ -21,7 +21,9 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-const testTxHash = "0x0102030000000000000000000000000000000000000000000000000000000000"
+var (
+	testTxHash = pkgTypes.Hex{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F}
+)
 
 // TxHandlerTestSuite -
 type TxHandlerTestSuite struct {
@@ -57,18 +59,15 @@ func TestSuiteTxHandler_Run(t *testing.T) {
 
 // TestGetSuccess tests successful retrieval of a transaction with to address
 func (s *TxHandlerTestSuite) TestGetSuccess() {
-	hashBytes, err := pkgTypes.HexFromString(testTxHash)
-	s.Require().NoError(err)
-
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 	c := s.echo.NewContext(req, rec)
 	c.SetPath("/tx/:hash")
 	c.SetParamNames("hash")
-	c.SetParamValues(testTxHash)
+	c.SetParamValues(testTxHash.Hex())
 
 	s.tx.EXPECT().
-		ByHash(gomock.Any(), hashBytes).
+		ByHash(gomock.Any(), testTxHash).
 		Return(testTxWithToAddress, nil).
 		Times(1)
 
@@ -76,14 +75,14 @@ func (s *TxHandlerTestSuite) TestGetSuccess() {
 	s.Require().Equal(http.StatusOK, rec.Code)
 
 	var tx responses.Transaction
-	err = json.NewDecoder(rec.Body).Decode(&tx)
+	err := json.NewDecoder(rec.Body).Decode(&tx)
 	s.Require().NoError(err)
 	s.Require().EqualValues(100, tx.Height)
 	s.Require().Equal("0x010203", tx.Hash)
 	s.Require().EqualValues(0, tx.Index)
-	s.Require().Equal("0x1234567890123456789012345678901234567890", tx.FromAddress)
+	s.Require().Equal(testAddressHex1.Hex(), tx.FromAddress)
 	s.Require().NotNil(tx.ToAddress)
-	s.Require().Equal("0x0987654321098765432109876543210987654321", *tx.ToAddress)
+	s.Require().Equal(testAddressHex2.Hex(), *tx.ToAddress)
 	s.Require().Equal("1000000000000000000", tx.Amount.String())
 	s.Require().Equal("21000", tx.Gas.String())
 	s.Require().Equal("1000000", tx.GasPrice.String())
@@ -118,7 +117,7 @@ func (s *TxHandlerTestSuite) TestGetContractCreation() {
 	s.Require().EqualValues(100, tx.Height)
 	s.Require().Equal("0x040506", tx.Hash)
 	s.Require().EqualValues(1, tx.Index)
-	s.Require().Equal("0x1234567890123456789012345678901234567890", tx.FromAddress)
+	s.Require().Equal(testAddressHex1.Hex(), tx.FromAddress)
 	s.Require().Nil(tx.ToAddress)
 	s.Require().Equal("0", tx.Amount.String())
 	s.Require().Equal("100000", tx.Gas.String())
@@ -154,9 +153,9 @@ func (s *TxHandlerTestSuite) TestGetContractCall() {
 	s.Require().EqualValues(100, tx.Height)
 	s.Require().Equal("0x070809", tx.Hash)
 	s.Require().EqualValues(2, tx.Index)
-	s.Require().Equal("0x1234567890123456789012345678901234567890", tx.FromAddress)
+	s.Require().Equal(testAddressHex1.Hex(), tx.FromAddress)
 	s.Require().NotNil(tx.ToAddress)
-	s.Require().Equal("0x0987654321098765432109876543210987654321", *tx.ToAddress)
+	s.Require().Equal(testAddressHex2.Hex(), *tx.ToAddress)
 	s.Require().Equal("100000000", tx.Amount.String())
 	s.Require().Equal("50000", tx.Gas.String())
 	s.Require().Equal("1500000", tx.GasPrice.String())
@@ -296,9 +295,9 @@ func (s *TxHandlerTestSuite) TestListSuccess() {
 	s.Require().EqualValues(100, txs[0].Height)
 	s.Require().Equal("0x010203", txs[0].Hash)
 	s.Require().EqualValues(0, txs[0].Index)
-	s.Require().Equal("0x1234567890123456789012345678901234567890", txs[0].FromAddress)
+	s.Require().Equal(testAddressHex1.Hex(), txs[0].FromAddress)
 	s.Require().NotNil(txs[0].ToAddress)
-	s.Require().Equal("0x0987654321098765432109876543210987654321", *txs[0].ToAddress)
+	s.Require().Equal(testAddressHex2.Hex(), *txs[0].ToAddress)
 
 	s.Require().EqualValues(100, txs[1].Height)
 	s.Require().Equal("0x040506", txs[1].Hash)
@@ -605,42 +604,42 @@ var (
 		Id:           1,
 		Height:       100,
 		Time:         testTxWithToAddress.Time,
-		TxId:         1,
-		From:         1,
+		TxId:         uint64Ptr(1),
+		From:         uint64Ptr(1),
 		To:           uint64Ptr(2),
 		GasLimit:     decimal.NewFromInt(21000),
 		Amount:       &testTxWithToAddress.Amount,
 		Input:        []byte{},
-		TxPosition:   0,
+		TxPosition:   uint64Ptr(0),
 		TraceAddress: []uint64{},
 		Type:         types.Call,
 		GasUsed:      decimal.NewFromInt(21000),
 		Output:       []byte{},
 		Subtraces:    0,
-		FromAddress:  testFromAddress,
+		FromAddress:  &testFromAddress,
 		ToAddress:    &testToAddress,
-		Tx:           testTxWithToAddress,
+		Tx:           &testTxWithToAddress,
 	}
 
 	testTrace2 = storage.Trace{
 		Id:             2,
 		Height:         100,
 		Time:           testTxContractCreation.Time,
-		TxId:           2,
-		From:           1,
+		TxId:           uint64Ptr(2),
+		From:           uint64Ptr(1),
 		To:             nil,
 		GasLimit:       decimal.NewFromInt(100000),
 		Amount:         nil,
 		Input:          []byte{0x60, 0x60, 0x60},
-		TxPosition:     1,
+		TxPosition:     uint64Ptr(1),
 		TraceAddress:   []uint64{},
 		Type:           types.Create,
 		GasUsed:        decimal.NewFromInt(100000),
 		Output:         []byte{0x60, 0x60, 0x60},
 		Subtraces:      0,
-		FromAddress:    testFromAddress,
+		FromAddress:    &testFromAddress,
 		ToAddress:      nil,
-		Tx:             testTxContractCreation,
+		Tx:             &testTxContractCreation,
 		CreationMethod: stringPtr("create"),
 	}
 
@@ -648,21 +647,21 @@ var (
 		Id:           3,
 		Height:       100,
 		Time:         testTxContractCall.Time,
-		TxId:         3,
-		From:         1,
+		TxId:         uint64Ptr(3),
+		From:         uint64Ptr(1),
 		To:           uint64Ptr(2),
 		GasLimit:     decimal.NewFromInt(50000),
 		Amount:       &testTxContractCall.Amount,
 		Input:        []byte{0xa9, 0x05, 0x9c, 0xbb},
-		TxPosition:   2,
+		TxPosition:   uint64Ptr(2),
 		TraceAddress: []uint64{},
 		Type:         types.Call,
 		GasUsed:      decimal.NewFromInt(50000),
 		Output:       []byte{0x00, 0x01},
 		Subtraces:    0,
-		FromAddress:  testFromAddress,
+		FromAddress:  &testFromAddress,
 		ToAddress:    &testToAddress,
-		Tx:           testTxContractCall,
+		Tx:           &testTxContractCall,
 	}
 )
 
@@ -703,10 +702,7 @@ func (s *TxHandlerTestSuite) TestTracesSuccess() {
 // TestTracesWithTxHash tests traces filtered by transaction hash
 func (s *TxHandlerTestSuite) TestTracesWithTxHash() {
 	q := make(url.Values)
-	q.Set("tx_hash", testTxHash)
-
-	hashBytes, err := pkgTypes.HexFromString(testTxHash)
-	s.Require().NoError(err)
+	q.Set("tx_hash", testTxHash.Hex())
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
 	rec := httptest.NewRecorder()
@@ -714,7 +710,7 @@ func (s *TxHandlerTestSuite) TestTracesWithTxHash() {
 	c.SetPath("/traces")
 
 	s.tx.EXPECT().
-		ByHash(gomock.Any(), hashBytes).
+		ByHash(gomock.Any(), testTxHash).
 		Return(testTxWithToAddress, nil).
 		Times(1)
 
@@ -734,7 +730,7 @@ func (s *TxHandlerTestSuite) TestTracesWithTxHash() {
 	s.Require().Equal(http.StatusOK, rec.Code)
 
 	var traces []responses.Trace
-	err = json.NewDecoder(rec.Body).Decode(&traces)
+	err := json.NewDecoder(rec.Body).Decode(&traces)
 	s.Require().NoError(err)
 	s.Require().Len(traces, 1)
 	s.Require().Equal("0x010203", traces[0].TxHash)
@@ -743,10 +739,7 @@ func (s *TxHandlerTestSuite) TestTracesWithTxHash() {
 // TestTracesWithAddressFrom tests traces filtered by from address
 func (s *TxHandlerTestSuite) TestTracesWithAddressFrom() {
 	q := make(url.Values)
-	q.Set("address_from", testFromAddress.Address)
-
-	hashBytes, err := pkgTypes.HexFromString(testFromAddress.Address)
-	s.Require().NoError(err)
+	q.Set("address_from", testFromAddress.Hash.Hex())
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
 	rec := httptest.NewRecorder()
@@ -754,7 +747,7 @@ func (s *TxHandlerTestSuite) TestTracesWithAddressFrom() {
 	c.SetPath("/traces")
 
 	s.address.EXPECT().
-		ByHash(gomock.Any(), hashBytes).
+		ByHash(gomock.Any(), testFromAddress.Hash).
 		Return(testFromAddress, nil).
 		Times(1)
 
@@ -774,7 +767,7 @@ func (s *TxHandlerTestSuite) TestTracesWithAddressFrom() {
 	s.Require().Equal(http.StatusOK, rec.Code)
 
 	var traces []responses.Trace
-	err = json.NewDecoder(rec.Body).Decode(&traces)
+	err := json.NewDecoder(rec.Body).Decode(&traces)
 	s.Require().NoError(err)
 	s.Require().Len(traces, 3)
 }
@@ -782,10 +775,7 @@ func (s *TxHandlerTestSuite) TestTracesWithAddressFrom() {
 // TestTracesWithAddressTo tests traces filtered by to address
 func (s *TxHandlerTestSuite) TestTracesWithAddressTo() {
 	q := make(url.Values)
-	q.Set("address_to", testToAddress.Address)
-
-	hashBytes, err := pkgTypes.HexFromString(testToAddress.Address)
-	s.Require().NoError(err)
+	q.Set("address_to", testToAddress.Hash.Hex())
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
 	rec := httptest.NewRecorder()
@@ -793,7 +783,7 @@ func (s *TxHandlerTestSuite) TestTracesWithAddressTo() {
 	c.SetPath("/traces")
 
 	s.address.EXPECT().
-		ByHash(gomock.Any(), hashBytes).
+		ByHash(gomock.Any(), testToAddress.Hash).
 		Return(testToAddress, nil).
 		Times(1)
 
@@ -813,7 +803,7 @@ func (s *TxHandlerTestSuite) TestTracesWithAddressTo() {
 	s.Require().Equal(http.StatusOK, rec.Code)
 
 	var traces []responses.Trace
-	err = json.NewDecoder(rec.Body).Decode(&traces)
+	err := json.NewDecoder(rec.Body).Decode(&traces)
 	s.Require().NoError(err)
 	s.Require().Len(traces, 2)
 }

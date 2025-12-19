@@ -29,7 +29,7 @@ func (module *Module) parse(genesis pkgTypes.Genesis) (parsedData, error) {
 	decodeCtx := dCtx.NewContext()
 
 	coinbase := &storage.Address{
-		Address:    genesis.Coinbase.String(),
+		Hash:       genesis.Coinbase,
 		Height:     0,
 		LastHeight: 0,
 		Balance:    storage.EmptyBalance(),
@@ -42,8 +42,13 @@ func (module *Module) parse(genesis pkgTypes.Genesis) (parsedData, error) {
 			return data, err
 		}
 
+		hash, err := pkgTypes.HexFromString(k)
+		if err != nil {
+			return data, err
+		}
+
 		address := &storage.Address{
-			Address:    k,
+			Hash:       hash,
 			Height:     0,
 			LastHeight: 0,
 			Balance: &storage.Balance{
@@ -58,7 +63,7 @@ func (module *Module) parse(genesis pkgTypes.Genesis) (parsedData, error) {
 			contract := &storage.Contract{
 				Height: 0,
 				Address: storage.Address{
-					Address: k,
+					Hash: hash,
 				},
 				Code: v.Code,
 				TxId: nil,
@@ -78,7 +83,7 @@ func (module *Module) parse(genesis pkgTypes.Genesis) (parsedData, error) {
 	}
 
 	for _, c := range decodeCtx.GetContracts() {
-		data.contracts[c.Address.Address] = c
+		data.contracts[c.Address.String()] = c
 	}
 	data.chainId = genesis.Config.ChainID
 	genesisTime, err := genesis.Timestamp.Time()

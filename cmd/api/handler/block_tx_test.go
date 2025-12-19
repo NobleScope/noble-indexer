@@ -28,7 +28,7 @@ var (
 		Id:         1,
 		Height:     100,
 		LastHeight: 100,
-		Address:    "0x1234567890123456789012345678901234567890",
+		Hash:       testAddressHex1,
 		IsContract: false,
 	}
 
@@ -36,14 +36,14 @@ var (
 		Id:         2,
 		Height:     100,
 		LastHeight: 100,
-		Address:    "0x0987654321098765432109876543210987654321",
+		Hash:       testAddressHex2,
 		IsContract: false,
 	}
 
 	testContract = storage.Contract{
 		Id: 1,
 		Address: storage.Address{
-			Address: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+			Hash: testAddressHex3,
 		},
 		Code:     []byte{0x60, 0x60, 0x60},
 		Verified: true,
@@ -179,22 +179,22 @@ func (s *TxTestSuite) TestTxsList() {
 	s.Require().EqualValues(100, txs[0].Height)
 	s.Require().Equal("0x010203", txs[0].Hash)
 	s.Require().EqualValues(0, txs[0].Index)
-	s.Require().Equal("0x1234567890123456789012345678901234567890", txs[0].FromAddress)
+	s.Require().Equal(testAddressHex1.Hex(), txs[0].FromAddress)
 	s.Require().NotNil(txs[0].ToAddress)
-	s.Require().Equal("0x0987654321098765432109876543210987654321", *txs[0].ToAddress)
+	s.Require().Equal(testAddressHex2.Hex(), *txs[0].ToAddress)
 
 	s.Require().EqualValues(100, txs[1].Height)
 	s.Require().Equal("0x040506", txs[1].Hash)
 	s.Require().EqualValues(1, txs[1].Index)
-	s.Require().Equal("0x1234567890123456789012345678901234567890", txs[1].FromAddress)
+	s.Require().Equal(testAddressHex1.Hex(), txs[1].FromAddress)
 	s.Require().Nil(txs[1].ToAddress)
 
 	s.Require().EqualValues(100, txs[2].Height)
 	s.Require().Equal("0x070809", txs[2].Hash)
 	s.Require().EqualValues(2, txs[2].Index)
-	s.Require().Equal("0x1234567890123456789012345678901234567890", txs[2].FromAddress)
+	s.Require().Equal(testAddressHex1.Hex(), txs[2].FromAddress)
 	s.Require().NotNil(txs[2].ToAddress)
-	s.Require().Equal("0x0987654321098765432109876543210987654321", *txs[2].ToAddress)
+	s.Require().Equal(testAddressHex2.Hex(), *txs[2].ToAddress)
 }
 
 // TestTxsListWithLimit
@@ -443,7 +443,7 @@ func (s *TxTestSuite) TestTxsOnlyFromAddress() {
 	err := json.NewDecoder(rec.Body).Decode(&txs)
 	s.Require().NoError(err)
 	s.Require().Len(txs, 1)
-	s.Require().Equal("0x1234567890123456789012345678901234567890", txs[0].FromAddress)
+	s.Require().Equal(testAddressHex1.Hex(), txs[0].FromAddress)
 	s.Require().Nil(txs[0].ToAddress)
 	s.Require().Equal("TxStatusRevert", txs[0].Status)
 }

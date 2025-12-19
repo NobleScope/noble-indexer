@@ -18,24 +18,24 @@ func saveTransfers(
 	}
 
 	for i := range transfers {
-		contractID, ok := addresses[transfers[i].Contract.Address.Address]
+		contractID, ok := addresses[transfers[i].Contract.Address.String()]
 		if !ok {
-			return errors.Errorf("can't find contract key: %s", transfers[i].Contract.Address.Address)
+			return errors.Errorf("can't find contract key: %s", transfers[i].Contract.Address.String())
 		}
 		transfers[i].ContractId = contractID
 
 		if transfers[i].FromAddress != nil {
-			id, ok := addresses[transfers[i].FromAddress.Address]
+			id, ok := addresses[transfers[i].FromAddress.String()]
 			if !ok {
-				return errors.Errorf("can't find from address key: %s", transfers[i].FromAddress.Address)
+				return errors.Errorf("can't find from address key: %s", transfers[i].FromAddress.String())
 			}
 			transfers[i].FromAddressId = &id
 		}
 
 		if transfers[i].ToAddress != nil {
-			id, ok := addresses[transfers[i].ToAddress.Address]
+			id, ok := addresses[transfers[i].ToAddress.String()]
 			if !ok {
-				return errors.Errorf("can't find to address key: %s", transfers[i].ToAddress.Address)
+				return errors.Errorf("can't find to address key: %s", transfers[i].ToAddress.String())
 			}
 			transfers[i].ToAddressId = &id
 		}

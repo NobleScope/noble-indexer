@@ -213,8 +213,8 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 		if _, err := tx.NewCreateIndex().
 			IfNotExists().
 			Model((*storage.Address)(nil)).
-			Index("address_address_idx").
-			Column("address").
+			Index("address_hash_idx").
+			Column("hash").
 			Exec(ctx); err != nil {
 			return err
 		}
