@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
+	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 )
 
 // Contract model info
@@ -12,6 +13,7 @@ import (
 type Contract struct {
 	Id               uint64 `example:"321"                                                                 json:"id"                          swaggertype:"integer"`
 	Address          string `example:"0x0000000000000000000000000000000000000001"                          json:"address"                     swaggertype:"string"`
+	Implementation   string `example:"0x0000000000000000000000000000000000000001"                          json:"implementation,omitempty"    swaggertype:"string"`
 	Code             string `example:"0x01234567890123456789012345678901234567890123456789"                json:"code,omitempty"              swaggertype:"string"`
 	Verified         bool   `example:"false"                                                               json:"verified"                    swaggertype:"boolean"`
 	TxHash           string `example:"0x0000000000000000000000000000000000000002"                          json:"tx_hash"                     swaggertype:"string"`
@@ -26,9 +28,14 @@ type Contract struct {
 }
 
 func NewContract(contract storage.Contract) Contract {
+	addressBytes, err := pkgTypes.HexFromString(contract.Address.String())
+	if err != nil {
+		panic(err)
+	}
 	c := Contract{
 		Id:               contract.Id,
-		Address:          contract.Address.String(),
+		Address:          addressBytes.Hex(),
+		Code:             contract.Code.Hex(),
 		Verified:         contract.Verified,
 		CompilerVersion:  contract.CompilerVersion,
 		MetadataLink:     contract.MetadataLink,
@@ -41,6 +48,14 @@ func NewContract(contract storage.Contract) Contract {
 
 	if contract.Tx != nil {
 		c.TxHash = contract.Tx.Hash.Hex()
+	}
+
+	if contract.Implementation != nil {
+		implementationBytes, err := pkgTypes.HexFromString(*contract.Implementation)
+		if err != nil {
+			panic(err)
+		}
+		c.Implementation = implementationBytes.Hex()
 	}
 
 	return c
