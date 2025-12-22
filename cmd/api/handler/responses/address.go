@@ -10,7 +10,7 @@ import (
 //	@Description	Noble address information
 type Address struct {
 	Id                uint64         `example:"321"                                        json:"id"                 swaggertype:"integer"`
-	Height            pkgTypes.Level `example:"100"                                        json:"first_height"       swaggertype:"integer"`
+	FirstHeight       pkgTypes.Level `example:"100"                                        json:"first_first_height" swaggertype:"integer"`
 	LastHeight        pkgTypes.Level `example:"100"                                        json:"last_height"        swaggertype:"integer"`
 	Hash              string         `example:"0xd90d69b7cf347b5bfe0719baf7eef310c085e46b" json:"hash"               swaggertype:"string"`
 	IsContract        bool           `example:"false"                                      json:"is_contract"        swaggertype:"boolean"`
@@ -23,7 +23,7 @@ type Address struct {
 func NewAddress(addr storage.Address) Address {
 	address := Address{
 		Id:                addr.Id,
-		Height:            addr.FirstHeight,
+		FirstHeight:       addr.FirstHeight,
 		LastHeight:        addr.LastHeight,
 		Hash:              addr.Hash.Hex(),
 		IsContract:        addr.IsContract,

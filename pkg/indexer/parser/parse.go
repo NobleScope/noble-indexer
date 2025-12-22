@@ -348,7 +348,11 @@ func (p *Module) parse(b types.BlockData) error {
 				return errors.New("trace.TxPosition is nil for contract creation")
 			}
 			if *trace.TxPosition >= uint64(len(b.Transactions)) {
-				return errors.Errorf("TxPosition %d out of range, transactions count: %d", *trace.TxPosition, len(b.Transactions))
+				return errors.Errorf(
+					"TxPosition %d out of range, transactions count: %d",
+					*trace.TxPosition,
+					len(b.Transactions),
+				)
 			}
 
 			deployerAddress := storage.Address{

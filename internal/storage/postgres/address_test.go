@@ -264,7 +264,6 @@ func (s *StorageTestSuite) TestListWithBalanceSortByValue() {
 	})
 	s.Require().NoError(err)
 	s.Require().Len(addresses, 2)
-	
 	s.Require().EqualValues(1, addresses[0].Id)
 	s.Require().NotNil(addresses[0].Balance)
 	s.Require().EqualValues("1000000", addresses[0].Balance.Value.String())
@@ -287,7 +286,7 @@ func (s *StorageTestSuite) TestListWithBalanceSortByValueDesc() {
 	})
 	s.Require().NoError(err)
 	s.Require().Len(addresses, 2)
-	
+
 	s.Require().EqualValues(3, addresses[0].Id)
 	s.Require().NotNil(addresses[0].Balance)
 	s.Require().EqualValues("5000000", addresses[0].Balance.Value.String())
