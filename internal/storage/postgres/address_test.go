@@ -295,3 +295,90 @@ func (s *StorageTestSuite) TestListWithBalanceSortByValueDesc() {
 	s.Require().NotNil(addresses[1].Balance)
 	s.Require().EqualValues("1000000", addresses[1].Balance.Value.String())
 }
+
+func (s *StorageTestSuite) TestListWithBalanceUnknownSortField() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	addresses, err := s.storage.Addresses.ListWithBalance(ctx, storage.AddressListFilter{
+		Limit:         10,
+		Offset:        0,
+		Sort:          sdk.SortOrderAsc,
+		SortField:     "unknown_field",
+		OnlyContracts: false,
+	})
+	s.Require().NoError(err)
+	s.Require().Len(addresses, 3)
+
+	// Should fallback to sorting by ID ascending
+	s.Require().EqualValues(1, addresses[0].Id)
+	s.Require().EqualValues(2, addresses[1].Id)
+	s.Require().EqualValues(3, addresses[2].Id)
+}
+
+func (s *StorageTestSuite) TestListWithBalanceOnlyContractsWithValueSort() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	addresses, err := s.storage.Addresses.ListWithBalance(ctx, storage.AddressListFilter{
+		Limit:         10,
+		Offset:        0,
+		Sort:          sdk.SortOrderDesc,
+		SortField:     "value",
+		OnlyContracts: true,
+	})
+	s.Require().NoError(err)
+	s.Require().Len(addresses, 1)
+
+	// Only contract address with balance should be returned
+	s.Require().EqualValues(3, addresses[0].Id)
+	s.Require().True(addresses[0].IsContract)
+	s.Require().NotNil(addresses[0].Balance)
+	s.Require().EqualValues("5000000", addresses[0].Balance.Value.String())
+}
+
+func (s *StorageTestSuite) TestListWithBalanceEmptyResult() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	addresses, err := s.storage.Addresses.ListWithBalance(ctx, storage.AddressListFilter{
+		Limit:         10,
+		Offset:        100,
+		Sort:          sdk.SortOrderAsc,
+		SortField:     "id",
+		OnlyContracts: false,
+	})
+	s.Require().NoError(err)
+	s.Require().Len(addresses, 0)
+}
+
+func (s *StorageTestSuite) TestListWithBalanceOnlyContractsWithPagination() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	addresses, err := s.storage.Addresses.ListWithBalance(ctx, storage.AddressListFilter{
+		Limit:         1,
+		Offset:        0,
+		Sort:          sdk.SortOrderAsc,
+		SortField:     "id",
+		OnlyContracts: true,
+	})
+	s.Require().NoError(err)
+	s.Require().Len(addresses, 1)
+
+	// Should return the only contract
+	s.Require().EqualValues(3, addresses[0].Id)
+	s.Require().True(addresses[0].IsContract)
+	s.Require().NotNil(addresses[0].Balance)
+
+	// Test with offset beyond available contracts
+	addresses, err = s.storage.Addresses.ListWithBalance(ctx, storage.AddressListFilter{
+		Limit:         1,
+		Offset:        1,
+		Sort:          sdk.SortOrderAsc,
+		SortField:     "id",
+		OnlyContracts: true,
+	})
+	s.Require().NoError(err)
+	s.Require().Len(addresses, 0)
+}

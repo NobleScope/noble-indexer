@@ -47,6 +47,13 @@ func addressListFilter(query *bun.SelectQuery, fltrs storage.AddressListFilter) 
 	return query
 }
 
+func balanceListFilter(query *bun.SelectQuery, fltrs storage.AddressListFilter) *bun.SelectQuery {
+	query = limitScope(query, fltrs.Limit)
+	query = query.Offset(fltrs.Offset)
+	query = sortScope(query, "value", fltrs.Sort)
+	return query
+}
+
 func contractListFilter(query *bun.SelectQuery, fltrs storage.ContractListFilter) *bun.SelectQuery {
 	if fltrs.TxId != nil {
 		query = query.Where("tx_id = ?", fltrs.TxId)

@@ -24,16 +24,21 @@ func NewAddress(db *database.Bun) *Address {
 // ListWithBalance -
 func (a *Address) ListWithBalance(ctx context.Context, filters storage.AddressListFilter) (result []storage.Address, err error) {
 	if filters.SortField == "value" {
-		addressQuery := a.DB().NewSelect().
+		balanceQuery := a.DB().NewSelect().
 			Model((*storage.Balance)(nil))
 
-		addressQuery = addressListFilter(addressQuery, filters)
-		err = a.DB().NewSelect().
-			TableExpr("(?) as balance", addressQuery).
+		balanceQuery = balanceListFilter(balanceQuery, filters)
+		query := a.DB().NewSelect().
+			TableExpr("(?) as balance", balanceQuery).
 			ColumnExpr("address.*").
 			ColumnExpr("balance.id AS balance__id, balance.currency AS balance__currency, balance.value AS balance__value").
-			Join("LEFT JOIN address ON address.id = balance.id").
-			Scan(ctx, &result)
+			Join("LEFT JOIN address ON address.id = balance.id")
+
+		if filters.OnlyContracts {
+			query = query.Where("address.is_contract = ?", true)
+		}
+
+		err = query.Scan(ctx, &result)
 	} else {
 		addressQuery := a.DB().NewSelect().
 			Model((*storage.Address)(nil))
