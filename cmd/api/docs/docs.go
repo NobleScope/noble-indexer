@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/address": {
+        "/addresses": {
             "get": {
                 "description": "List address info",
                 "produces": [
@@ -103,7 +103,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/address/{hash}": {
+        "/addresses/{hash}": {
             "get": {
                 "description": "Get address info",
                 "produces": [
@@ -150,7 +150,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/block": {
+        "/blocks": {
             "get": {
                 "description": "List blocks info",
                 "produces": [
@@ -219,7 +219,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/block/count": {
+        "/blocks/count": {
             "get": {
                 "description": "Get count of blocks in network",
                 "produces": [
@@ -246,7 +246,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/block/{height}": {
+        "/blocks/{height}": {
             "get": {
                 "description": "Get block info",
                 "produces": [
@@ -298,7 +298,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/block/{height}/stats": {
+        "/blocks/{height}/stats": {
             "get": {
                 "description": "Get block stats by height",
                 "produces": [
@@ -341,7 +341,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/block/{height}/transactions": {
+        "/blocks/{height}/transactions": {
             "get": {
                 "description": "List block transactions",
                 "produces": [
@@ -412,7 +412,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/contract": {
+        "/contracts": {
             "get": {
                 "description": "List contract info",
                 "produces": [
@@ -497,7 +497,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/contract/{hash}": {
+        "/contracts/{hash}": {
             "get": {
                 "description": "Get contract info",
                 "produces": [
@@ -544,7 +544,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/contract/{hash}/sources": {
+        "/contracts/{hash}/sources": {
             "get": {
                 "description": "Get contract sources",
                 "produces": [
@@ -661,7 +661,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/log": {
+        "/logs": {
             "get": {
                 "description": "List logs",
                 "produces": [
@@ -747,7 +747,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/proxy-contracts": {
+        "/proxy": {
             "get": {
                 "description": "List of all indexed proxy contracts",
                 "produces": [
@@ -898,193 +898,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/token": {
-            "get": {
-                "description": "List token transfers",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "token"
-                ],
-                "summary": "List token transfers",
-                "operationId": "list-token-transfers",
-                "parameters": [
-                    {
-                        "maximum": 100,
-                        "minimum": 1,
-                        "type": "integer",
-                        "description": "Count of requested entities",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "minimum": 0,
-                        "type": "integer",
-                        "description": "Offset",
-                        "name": "offset",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "asc",
-                            "desc"
-                        ],
-                        "type": "string",
-                        "description": "Sort order. Default: desc",
-                        "name": "sort",
-                        "in": "query"
-                    },
-                    {
-                        "minimum": 0,
-                        "type": "integer",
-                        "description": "Block height",
-                        "name": "height",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Time from in unix timestamp",
-                        "name": "time_from",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Time to in unix timestamp",
-                        "name": "time_to",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "burn",
-                            "mint",
-                            "transfer",
-                            "unknown"
-                        ],
-                        "type": "string",
-                        "description": "Comma-separated list of token types",
-                        "name": "type",
-                        "in": "query"
-                    },
-                    {
-                        "maxLength": 66,
-                        "minLength": 66,
-                        "type": "string",
-                        "description": "Transaction hash in hexadecimal with 0x prefix",
-                        "name": "tx_hash",
-                        "in": "query"
-                    },
-                    {
-                        "maxLength": 42,
-                        "minLength": 42,
-                        "type": "string",
-                        "description": "Address from",
-                        "name": "address_from",
-                        "in": "query"
-                    },
-                    {
-                        "maxLength": 42,
-                        "minLength": 42,
-                        "type": "string",
-                        "description": "Address to",
-                        "name": "address_to",
-                        "in": "query"
-                    },
-                    {
-                        "maxLength": 42,
-                        "minLength": 42,
-                        "type": "string",
-                        "description": "Contract address",
-                        "name": "contract",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Token ID",
-                        "name": "token_id",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/responses.Transfer"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/token/{contract}/{token_id}": {
-            "get": {
-                "description": "Get token info",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "token"
-                ],
-                "summary": "Get token info",
-                "operationId": "get-token",
-                "parameters": [
-                    {
-                        "maxLength": 42,
-                        "minLength": 42,
-                        "type": "string",
-                        "description": "Contract address",
-                        "name": "contract",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Token ID",
-                        "name": "token_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/responses.Token"
-                        }
-                    },
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/token_balance": {
+        "/token_balances": {
             "get": {
                 "description": "List token balances",
                 "produces": [
@@ -1153,6 +967,142 @@ const docTemplate = `{
                                 "$ref": "#/definitions/responses.TokenBalance"
                             }
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/tokens": {
+            "get": {
+                "description": "List tokens",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "token"
+                ],
+                "summary": "List tokens",
+                "operationId": "list-tokens",
+                "parameters": [
+                    {
+                        "maxLength": 42,
+                        "minLength": 42,
+                        "type": "string",
+                        "description": "Contract address which issued the token",
+                        "name": "contract",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Count of requested entities",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "ERC20",
+                            "ERC721",
+                            "ERC1155"
+                        ],
+                        "type": "string",
+                        "description": "Comma-separated list of token types",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "description": "Sort order. Default: desc",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/responses.Token"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/tokens/{contract}/{token_id}": {
+            "get": {
+                "description": "Get token info",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "token"
+                ],
+                "summary": "Get token info",
+                "operationId": "get-token",
+                "parameters": [
+                    {
+                        "maxLength": 42,
+                        "minLength": 42,
+                        "type": "string",
+                        "description": "Contract address",
+                        "name": "contract",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token ID",
+                        "name": "token_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/responses.Token"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -1287,7 +1237,139 @@ const docTemplate = `{
                 }
             }
         },
-        "/transfer/{id}": {
+        "/transfers": {
+            "get": {
+                "description": "List token transfers",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "token"
+                ],
+                "summary": "List token transfers",
+                "operationId": "list-token-transfers",
+                "parameters": [
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Count of requested entities",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "description": "Sort order. Default: desc",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "description": "Block height",
+                        "name": "height",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Time from in unix timestamp",
+                        "name": "time_from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Time to in unix timestamp",
+                        "name": "time_to",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "burn",
+                            "mint",
+                            "transfer",
+                            "unknown"
+                        ],
+                        "type": "string",
+                        "description": "Comma-separated list of token types",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "maxLength": 66,
+                        "minLength": 66,
+                        "type": "string",
+                        "description": "Transaction hash in hexadecimal with 0x prefix",
+                        "name": "tx_hash",
+                        "in": "query"
+                    },
+                    {
+                        "maxLength": 42,
+                        "minLength": 42,
+                        "type": "string",
+                        "description": "Address from",
+                        "name": "address_from",
+                        "in": "query"
+                    },
+                    {
+                        "maxLength": 42,
+                        "minLength": 42,
+                        "type": "string",
+                        "description": "Address to",
+                        "name": "address_to",
+                        "in": "query"
+                    },
+                    {
+                        "maxLength": 42,
+                        "minLength": 42,
+                        "type": "string",
+                        "description": "Contract address",
+                        "name": "contract",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token ID",
+                        "name": "token_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/responses.Transfer"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/transfers/{id}": {
             "get": {
                 "description": "Get token transfer info",
                 "produces": [
@@ -1332,7 +1414,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/tx": {
+        "/txs": {
             "get": {
                 "description": "List all of indexed transactions",
                 "produces": [
@@ -1449,7 +1531,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/tx/{hash}": {
+        "/txs/{hash}": {
             "get": {
                 "description": "Get transaction by hash",
                 "produces": [
@@ -1993,7 +2075,8 @@ const docTemplate = `{
                         "staticcall",
                         "create",
                         "create2",
-                        "selfdestruct"
+                        "selfdestruct",
+                        "reward"
                     ],
                     "example": "call"
                 }
@@ -2142,7 +2225,7 @@ var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "noble.dipdup.net",
 	BasePath:         "/v1",
-	Schemes:          []string{"http", "https"},
+	Schemes:          []string{"https", "http"},
 	Title:            "Noble Indexer API",
 	Description:      "API for Noble blockchain indexer",
 	InfoInstanceName: "swagger",
