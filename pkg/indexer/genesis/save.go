@@ -34,7 +34,7 @@ func (module *Module) save(ctx context.Context, data parsedData) error {
 		return tx.HandleError(ctx, err)
 	}
 
-	balances := make([]*storage.Balance, 0)
+	balances := make([]*storage.Balance, len(data.addresses))
 	for i := range addresses {
 		addrToId[addresses[i].Hash.String()] = addresses[i].Id
 		addresses[i].Balance.Id = addresses[i].Id
