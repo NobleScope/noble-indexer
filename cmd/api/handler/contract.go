@@ -61,7 +61,7 @@ func (p *contractListRequest) SetDefault() {
 //	@Success		200	{array}		responses.Contract
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
-//	@Router			/contract [get]
+//	@Router			/contracts [get]
 func (handler *ContractHandler) List(c echo.Context) error {
 	req, err := bindAndValidate[contractListRequest](c)
 	if err != nil {
@@ -120,7 +120,7 @@ type getByHashRequest struct {
 //	@Success		204
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
-//	@Router			/contract/{hash} [get]
+//	@Router			/contracts/{hash} [get]
 func (handler *ContractHandler) Get(c echo.Context) error {
 	req, err := bindAndValidate[getByHashRequest](c)
 	if err != nil {
@@ -160,7 +160,7 @@ type getSourcesRequest struct {
 //	@Success		204
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
-//	@Router			/contract/{hash}/sources [get]
+//	@Router			/contracts/{hash}/sources [get]
 func (handler *ContractHandler) ContractSources(c echo.Context) error {
 	req, err := bindAndValidate[getSourcesRequest](c)
 	if err != nil {

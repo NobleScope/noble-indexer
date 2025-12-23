@@ -62,8 +62,8 @@ func (p *ProxyContract) FilteredList(
 
 	err = p.DB().NewSelect().TableExpr("(?) AS proxy", query).
 		ColumnExpr("proxy.*").
-		ColumnExpr("impl_addr.address AS implementation__address__address").
-		ColumnExpr("contract_addr.address AS contract__address__address").
+		ColumnExpr("impl_addr.hash AS implementation__address__hash").
+		ColumnExpr("contract_addr.hash AS contract__address__hash").
 		Join("LEFT JOIN address AS impl_addr ON impl_addr.id = proxy.implementation_id").
 		Join("LEFT JOIN address AS contract_addr ON contract_addr.id = proxy.id").
 		Scan(ctx, &contracts)

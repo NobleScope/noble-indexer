@@ -35,7 +35,7 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 	v1.GET("/enums", constantsHandler.Enums)
 
 	blockHandlers := handler.NewBlockHandler(db.Blocks, db.BlockStats, db.Tx, db.State, cfg.Indexer.Name)
-	blockGroup := v1.Group("/block")
+	blockGroup := v1.Group("/blocks")
 	{
 		blockGroup.GET("", blockHandlers.List)
 		blockGroup.GET("/count", blockHandlers.Count)
@@ -47,7 +47,7 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 		}
 	}
 	txHandlers := handler.NewTxHandler(db.Tx, db.Trace, db.Addresses, cfg.Indexer.Name)
-	txGroup := v1.Group("/tx")
+	txGroup := v1.Group("/txs")
 	{
 		txGroup.GET("", txHandlers.List)
 		txGroup.GET("/:hash", txHandlers.Get)
@@ -55,10 +55,10 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 	v1.GET("/traces", txHandlers.Traces)
 
 	logHandlers := handler.NewLogHandler(db.Logs, db.Tx, db.Addresses)
-	v1.GET("/log", logHandlers.List)
+	v1.GET("/logs", logHandlers.List)
 
 	addressHandlers := handler.NewAddressHandler(db.Addresses)
-	addressesGroup := v1.Group("/address")
+	addressesGroup := v1.Group("/addresses")
 	{
 		addressesGroup.GET("", addressHandlers.List)
 		addressGroup := addressesGroup.Group("/:hash")
@@ -68,7 +68,7 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 	}
 
 	contractHandlers := handler.NewContractHandler(db.Contracts, db.Tx, db.Sources)
-	contractsGroup := v1.Group("/contract")
+	contractsGroup := v1.Group("/contracts")
 	{
 		contractsGroup.GET("", contractHandlers.List)
 		hashGroup := contractsGroup.Group("/:hash")
@@ -79,17 +79,17 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 	}
 
 	tokenHandlers := handler.NewTokenHandler(db.Token, db.Transfer, db.TokenBalance, db.Addresses)
-	tokensGroup := v1.Group("/token")
+	tokensGroup := v1.Group("/tokens")
 	{
 		tokensGroup.GET("", tokenHandlers.List)
-		tokensGroup.GET("/:contract/:token_id", tokenHandlers.Get)
+		tokensGroup.GET("/:contracts/:token_id", tokenHandlers.Get)
 	}
 	tokenTransfersGroup := v1.Group("/transfers")
 	{
 		tokenTransfersGroup.GET("", tokenHandlers.TransferList)
 		tokenTransfersGroup.GET("/:id", tokenHandlers.GetTransfer)
 	}
-	v1.GET("/token_balance", tokenHandlers.TokenBalanceList)
+	v1.GET("/token_balances", tokenHandlers.TokenBalanceList)
 
 	searchHandler := handler.NewSearchHandler(db.Search, db.Addresses, db.Blocks, db.Tx, db.Token)
 	v1.GET("/search", searchHandler.Search)

@@ -53,7 +53,7 @@ func (p *addressListRequest) SetDefault() {
 //	@Success		200	{array}		responses.Address
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
-//	@Router			/address [get]
+//	@Router			/addresses [get]
 func (handler *AddressHandler) List(c echo.Context) error {
 	req, err := bindAndValidate[addressListRequest](c)
 	if err != nil {
@@ -98,7 +98,7 @@ type getAddressRequest struct {
 //	@Success		204
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
-//	@Router			/address/{hash} [get]
+//	@Router			/addresses/{hash} [get]
 func (handler *AddressHandler) Get(c echo.Context) error {
 	req, err := bindAndValidate[getAddressRequest](c)
 	if err != nil {

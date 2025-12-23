@@ -45,8 +45,10 @@ func (c *Contract) ListWithTx(ctx context.Context, filters storage.ContractListF
 	query = contractListFilter(query, filters)
 	err = c.DB().NewSelect().TableExpr("(?) AS contract", query).
 		ColumnExpr("contract.*").
+		ColumnExpr("address.hash AS address__hash").
 		ColumnExpr("tx.hash AS tx__hash").
-		Join("LEFT JOIN tx ON tx.id = contract.tx_id").
+		Join("LEFT JOIN address ON address.id = contract.id").
+		Join("LEFT JOIN tx ON contract.tx_id = tx.id").
 		Scan(ctx, &contracts)
 
 	return
@@ -60,14 +62,14 @@ func (c *Contract) ByHash(ctx context.Context, hash pkgTypes.Hex) (contract stor
 	err = c.DB().NewSelect().
 		TableExpr("(?) AS contract", query).
 		ColumnExpr("contract.*").
-		ColumnExpr("address.address AS address__address").
+		ColumnExpr("address.hash AS address__hash").
 		ColumnExpr("tx.hash AS tx__hash").
-		ColumnExpr("implementation_address.address AS implementation").
+		ColumnExpr("implementation_address.hash AS implementation").
 		Join("JOIN address ON address.id = contract.id").
 		Join("LEFT JOIN proxy_contract ON proxy_contract.id = contract.id").
 		Join("LEFT JOIN address AS implementation_address ON implementation_address.id = proxy_contract.implementation_id").
 		Join("LEFT JOIN tx ON contract.tx_id = tx.id").
-		Where("address.address = ?", hash.String()).
+		Where("address.hash = ?", hash).
 		Scan(ctx, &contract)
 
 	return

@@ -104,7 +104,7 @@ func (req *listProxyContracts) ToFilters(
 //	@Success		200	{array}		responses.ProxyContract
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
-//	@Router			/proxy-contracts [get]
+//	@Router			/proxy [get]
 func (handler *ProxyContractHandler) List(c echo.Context) error {
 	req, err := bindAndValidate[listProxyContracts](c)
 	if err != nil {

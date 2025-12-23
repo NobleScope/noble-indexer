@@ -32,7 +32,7 @@ import (
 //	@host		noble.dipdup.net
 //	@BasePath	/v1
 
-//	@schemes	http https
+//	@schemes	https http
 
 var rootCmd = &cobra.Command{
 	Use:   "api",
