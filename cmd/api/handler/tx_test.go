@@ -695,7 +695,8 @@ func (s *TxHandlerTestSuite) TestTracesSuccess() {
 	s.Require().Len(traces, 3)
 
 	s.Require().EqualValues(100, traces[0].Height)
-	s.Require().Equal("0x010203", traces[0].TxHash)
+	s.Require().NotNil(traces[0].TxHash)
+	s.Require().Equal("0x010203", *traces[0].TxHash)
 	s.Require().Equal("call", traces[0].Type)
 }
 
@@ -733,7 +734,8 @@ func (s *TxHandlerTestSuite) TestTracesWithTxHash() {
 	err := json.NewDecoder(rec.Body).Decode(&traces)
 	s.Require().NoError(err)
 	s.Require().Len(traces, 1)
-	s.Require().Equal("0x010203", traces[0].TxHash)
+	s.Require().NotNil(traces[0].TxHash)
+	s.Require().Equal("0x010203", *traces[0].TxHash)
 }
 
 // TestTracesWithAddressFrom tests traces filtered by from address
