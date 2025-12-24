@@ -35,5 +35,8 @@ jobs:
           go-version: '1.25'
           cache: true
 
+      - name: Pull Docker image
+        run: docker pull timescale/timescaledb-ha:pg17.6-ts2.22.1-all
+
       - name: Golang tests
-        run: go test -p 8 ./...
+        run: go test -p 1 -timeout 10m ./...

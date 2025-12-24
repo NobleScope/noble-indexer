@@ -38,14 +38,19 @@ func addressListFilter(query *bun.SelectQuery, fltrs storage.AddressListFilter) 
 	query = query.Offset(fltrs.Offset)
 
 	switch fltrs.SortField {
-	case "id", "value", "last_height":
+	case "id", "value", "first_height", "last_height":
 		query = sortScope(query, fltrs.SortField, fltrs.Sort)
-	case "first_height":
-		query = sortScope(query, "height", fltrs.Sort)
 	default:
 		query = sortScope(query, "id", fltrs.Sort)
 	}
 
+	return query
+}
+
+func balanceListFilter(query *bun.SelectQuery, fltrs storage.AddressListFilter) *bun.SelectQuery {
+	query = limitScope(query, fltrs.Limit)
+	query = query.Offset(fltrs.Offset)
+	query = sortScope(query, "value", fltrs.Sort)
 	return query
 }
 

@@ -27,7 +27,7 @@ var (
 
 	testAddress1 = storage.Address{
 		Id:             1,
-		Height:         100,
+		FirstHeight:    100,
 		LastHeight:     200,
 		Hash:           testAddressHex1,
 		IsContract:     false,
@@ -43,7 +43,7 @@ var (
 
 	testAddress2 = storage.Address{
 		Id:             2,
-		Height:         101,
+		FirstHeight:    101,
 		LastHeight:     201,
 		Hash:           testAddressHex2,
 		IsContract:     true,
@@ -59,7 +59,7 @@ var (
 
 	testAddress3 = storage.Address{
 		Id:             3,
-		Height:         102,
+		FirstHeight:    102,
 		LastHeight:     202,
 		Hash:           testAddressHex3,
 		IsContract:     true,

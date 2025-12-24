@@ -20,19 +20,19 @@ import (
 
 var (
 	testProxyContractAddress = storage.Address{
-		Id:         10,
-		Height:     100,
-		LastHeight: 100,
-		Hash:       testAddressHex1,
-		IsContract: true,
+		Id:          10,
+		FirstHeight: 100,
+		LastHeight:  100,
+		Hash:        testAddressHex1,
+		IsContract:  true,
 	}
 
 	testImplementationAddress = storage.Address{
-		Id:         11,
-		Height:     100,
-		LastHeight: 100,
-		Hash:       testAddressHex2,
-		IsContract: true,
+		Id:          11,
+		FirstHeight: 100,
+		LastHeight:  100,
+		Hash:        testAddressHex2,
+		IsContract:  true,
 	}
 
 	testProxyContract1 = storage.ProxyContract{
@@ -65,11 +65,11 @@ var (
 			Id:     12,
 			Height: 101,
 			Address: storage.Address{
-				Id:         12,
-				Height:     101,
-				LastHeight: 101,
-				Hash:       testAddressHex2,
-				IsContract: true,
+				Id:          12,
+				FirstHeight: 101,
+				LastHeight:  101,
+				Hash:        testAddressHex2,
+				IsContract:  true,
 			},
 		},
 		Implementation: nil,
@@ -86,11 +86,11 @@ var (
 			Id:     13,
 			Height: 102,
 			Address: storage.Address{
-				Id:         13,
-				Height:     102,
-				LastHeight: 102,
-				Hash:       testAddressHex3,
-				IsContract: true,
+				Id:          13,
+				FirstHeight: 102,
+				LastHeight:  102,
+				Hash:        testAddressHex3,
+				IsContract:  true,
 			},
 		},
 		Implementation: nil,
