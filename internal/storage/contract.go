@@ -49,9 +49,9 @@ type Contract struct {
 	Error            string               `bun:"error"                            comment:"Error"`
 	UpdatedAt        time.Time            `bun:"updated_at,notnull,default:now()" comment:"Last update time"`
 
-	Address        Address `bun:"rel:belongs-to,join:id=id"`
-	Tx             *Tx     `bun:"tx,scanonly"`
-	Implementation *string `bun:"implementation,scanonly"`
+	Address        Address       `bun:"rel:belongs-to,join:id=id"`
+	Tx             *Tx           `bun:"tx,scanonly"`
+	Implementation *pkgTypes.Hex `bun:"implementation,scanonly"`
 }
 
 // TableName -

@@ -65,7 +65,7 @@ func (req *tokenListRequest) SetDefault() {
 //	@Success		200	{array}		responses.Token
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
-//	@Router			/token [get]
+//	@Router			/tokens [get]
 func (handler *TokenHandler) List(c echo.Context) error {
 	req, err := bindAndValidate[tokenListRequest](c)
 	if err != nil {
@@ -106,8 +106,8 @@ func (handler *TokenHandler) List(c echo.Context) error {
 }
 
 type tokenRequest struct {
-	Contract string `param:"contract" validate:"address"`
-	TokenId  string `param:"token_id" validate:"min=0"`
+	Contract string `param:"contract" validate:"required,address"`
+	TokenId  string `param:"token_id" validate:"required,min=0"`
 }
 
 // Get godoc
@@ -123,7 +123,7 @@ type tokenRequest struct {
 //	@Success		204
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
-//	@Router			/token/{contract}/{token_id} [get]
+//	@Router			/tokens/{contract}/{token_id} [get]
 func (handler *TokenHandler) Get(c echo.Context) error {
 	req, err := bindAndValidate[tokenRequest](c)
 	if err != nil {
@@ -162,7 +162,7 @@ type transferListRequest struct {
 	AddressFrom string      `query:"address_from" validate:"omitempty,address"`
 	AddressTo   string      `query:"address_to"   validate:"omitempty,address"`
 	Contract    string      `query:"contract"     validate:"omitempty,address"`
-	TokenId     string      `query:"token_id"     validate:"omitempty"`
+	TokenId     *string     `query:"token_id"     validate:"omitempty"`
 
 	From int64 `example:"1692892095" query:"from" swaggertype:"integer" validate:"omitempty,min=1,max=16725214800"`
 	To   int64 `example:"1692892095" query:"to"   swaggertype:"integer" validate:"omitempty,min=1,max=16725214800"`
@@ -199,7 +199,7 @@ func (p *transferListRequest) SetDefault() {
 //	@Success		200	{array}		responses.Transfer
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
-//	@Router			/token [get]
+//	@Router			/transfers [get]
 func (handler *TokenHandler) TransferList(c echo.Context) error {
 	req, err := bindAndValidate[transferListRequest](c)
 	if err != nil {
@@ -212,25 +212,20 @@ func (handler *TokenHandler) TransferList(c echo.Context) error {
 		transferTypes[i] = internalTypes.TransferType(req.Type[i])
 	}
 
-	tokenId, err := decimal.NewFromString(req.TokenId)
-	if err != nil {
-		return badRequestError(c, err)
-	}
 	filters := storage.TransferListFilter{
-		Limit:   req.Limit,
-		Offset:  req.Offset,
-		Sort:    pgSort(req.Sort),
-		Height:  req.Height,
-		Type:    transferTypes,
-		TokenId: &tokenId,
+		Limit:  req.Limit,
+		Offset: req.Offset,
+		Sort:   pgSort(req.Sort),
+		Height: req.Height,
+		Type:   transferTypes,
 	}
 
-	if req.From > 0 {
-		filters.TimeFrom = time.Unix(req.From, 0).UTC()
-	}
-
-	if req.To > 0 {
-		filters.TimeTo = time.Unix(req.To, 0).UTC()
+	if req.TokenId != nil {
+		tokenId, err := decimal.NewFromString(*req.TokenId)
+		if err != nil {
+			return badRequestError(c, err)
+		}
+		filters.TokenId = &tokenId
 	}
 
 	if req.AddressFrom != "" {
@@ -259,6 +254,14 @@ func (handler *TokenHandler) TransferList(c echo.Context) error {
 
 	if req.Height != nil {
 		filters.Height = req.Height
+	}
+
+	if req.From > 0 {
+		filters.TimeFrom = time.Unix(req.From, 0).UTC()
+	}
+
+	if req.To > 0 {
+		filters.TimeTo = time.Unix(req.To, 0).UTC()
 	}
 
 	transfers, err := handler.transfer.Filter(c.Request().Context(), filters)
@@ -290,7 +293,7 @@ type tokenTransferRequest struct {
 //	@Success		204
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
-//	@Router			/transfer/{id} [get]
+//	@Router			/transfers/{id} [get]
 func (handler *TokenHandler) GetTransfer(c echo.Context) error {
 	req, err := bindAndValidate[tokenTransferRequest](c)
 	if err != nil {
@@ -306,12 +309,12 @@ func (handler *TokenHandler) GetTransfer(c echo.Context) error {
 }
 
 type tokenBalanceListRequest struct {
-	Limit    int    `query:"limit"    validate:"omitempty,min=1,max=100"`
-	Offset   int    `query:"offset"   validate:"omitempty,min=0"`
-	Sort     string `query:"sort"     validate:"omitempty,oneof=asc desc"`
-	Address  string `query:"address"  validate:"omitempty,address"`
-	Contract string `query:"contract" validate:"omitempty,address"`
-	TokenId  string `query:"token_id" validate:"omitempty"`
+	Limit    int     `query:"limit"    validate:"omitempty,min=1,max=100"`
+	Offset   int     `query:"offset"   validate:"omitempty,min=0"`
+	Sort     string  `query:"sort"     validate:"omitempty,oneof=asc desc"`
+	Address  string  `query:"address"  validate:"omitempty,address"`
+	Contract string  `query:"contract" validate:"omitempty,address"`
+	TokenId  *string `query:"token_id" validate:"omitempty"`
 }
 
 func (p *tokenBalanceListRequest) SetDefault() {
@@ -339,7 +342,7 @@ func (p *tokenBalanceListRequest) SetDefault() {
 //	@Success		200	{array}		responses.TokenBalance
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
-//	@Router			/token_balance [get]
+//	@Router			/token_balances [get]
 func (handler *TokenHandler) TokenBalanceList(c echo.Context) error {
 	req, err := bindAndValidate[tokenBalanceListRequest](c)
 	if err != nil {
@@ -347,16 +350,18 @@ func (handler *TokenHandler) TokenBalanceList(c echo.Context) error {
 	}
 	req.SetDefault()
 
-	tokenId, err := decimal.NewFromString(req.TokenId)
-	if err != nil {
-		return badRequestError(c, err)
+	filters := storage.TokenBalanceListFilter{
+		Limit:  req.Limit,
+		Offset: req.Offset,
+		Sort:   pgSort(req.Sort),
 	}
 
-	filters := storage.TokenBalanceListFilter{
-		Limit:   req.Limit,
-		Offset:  req.Offset,
-		Sort:    pgSort(req.Sort),
-		TokenId: &tokenId,
+	if req.TokenId != nil {
+		tokenId, err := decimal.NewFromString(*req.TokenId)
+		if err != nil {
+			return badRequestError(c, err)
+		}
+		filters.TokenId = &tokenId
 	}
 
 	if req.Contract != "" {

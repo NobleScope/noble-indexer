@@ -64,7 +64,7 @@ func (req *logListRequest) SetDefault() {
 //	@Success		200	{array}		responses.Trace
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
-//	@Router			/log [get]
+//	@Router			/logs [get]
 func (handler *LogHandler) List(c echo.Context) error {
 	req, err := bindAndValidate[logListRequest](c)
 	if err != nil {

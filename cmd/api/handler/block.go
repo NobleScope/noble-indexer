@@ -51,7 +51,7 @@ type getBlockByHeightRequest struct {
 //	@Success		204
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
-//	@Router			/block/{height} [get]
+//	@Router			/blocks/{height} [get]
 func (handler *BlockHandler) Get(c echo.Context) error {
 	req, err := bindAndValidate[getBlockByHeightRequest](c)
 	if err != nil {
@@ -96,7 +96,7 @@ func (p *blockListRequest) SetDefault() {
 //	@Success		200	{array}		responses.Block
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
-//	@Router			/block [get]
+//	@Router			/blocks [get]
 func (handler *BlockHandler) List(c echo.Context) error {
 	req, err := bindAndValidate[blockListRequest](c)
 	if err != nil {
@@ -132,7 +132,7 @@ func (handler *BlockHandler) List(c echo.Context) error {
 //	@Produce		json
 //	@Success		200	{integer}	uint64
 //	@Failure		500	{object}	Error
-//	@Router			/block/count [get]
+//	@Router			/blocks/count [get]
 func (handler *BlockHandler) Count(c echo.Context) error {
 	state, err := handler.state.ByName(c.Request().Context(), handler.indexerName)
 	if err != nil {
@@ -152,7 +152,7 @@ func (handler *BlockHandler) Count(c echo.Context) error {
 //	@Success		200	{object}	responses.BlockStats
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
-//	@Router			/block/{height}/stats [get]
+//	@Router			/blocks/{height}/stats [get]
 func (handler *BlockHandler) GetStats(c echo.Context) error {
 	req, err := bindAndValidate[getBlockByHeightRequest](c)
 	if err != nil {
@@ -196,7 +196,7 @@ func (p *transactionsListRequest) SetDefault() {
 //	@Success		200	{array}		responses.Transaction
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
-//	@Router			/block/{height}/transactions [get]
+//	@Router			/blocks/{height}/transactions [get]
 func (handler *BlockHandler) TransactionsList(c echo.Context) error {
 	req, err := bindAndValidate[transactionsListRequest](c)
 	if err != nil {

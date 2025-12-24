@@ -58,7 +58,7 @@ func (a *Address) ListWithBalance(ctx context.Context, filters storage.AddressLi
 func (a *Address) ByHash(ctx context.Context, hash pkgTypes.Hex) (address storage.Address, err error) {
 	addressQuery := a.DB().NewSelect().
 		Model((*storage.Address)(nil)).
-		Where("address = ?", hash.String())
+		Where("hash = ?", hash)
 
 	err = a.DB().NewSelect().TableExpr("(?) AS address", addressQuery).
 		ColumnExpr("address.*").

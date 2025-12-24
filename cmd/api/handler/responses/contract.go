@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 )
 
 // Contract model info
@@ -28,13 +27,9 @@ type Contract struct {
 }
 
 func NewContract(contract storage.Contract) Contract {
-	addressBytes, err := pkgTypes.HexFromString(contract.Address.String())
-	if err != nil {
-		panic(err)
-	}
 	c := Contract{
 		Id:               contract.Id,
-		Address:          addressBytes.Hex(),
+		Address:          contract.Address.Hash.Hex(),
 		Code:             contract.Code.Hex(),
 		Verified:         contract.Verified,
 		CompilerVersion:  contract.CompilerVersion,
@@ -51,11 +46,7 @@ func NewContract(contract storage.Contract) Contract {
 	}
 
 	if contract.Implementation != nil {
-		implementationBytes, err := pkgTypes.HexFromString(*contract.Implementation)
-		if err != nil {
-			panic(err)
-		}
-		c.Implementation = implementationBytes.Hex()
+		c.Implementation = contract.Implementation.Hex()
 	}
 
 	return c

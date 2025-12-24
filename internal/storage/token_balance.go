@@ -36,7 +36,7 @@ type TokenBalance struct {
 	Balance    decimal.Decimal `bun:"balance,type:numeric"                           comment:"Token balance"`
 
 	Token    Token    `bun:"rel:belongs-to,join:token_id=token_id,join:contract_id=contract_id"`
-	Contract Contract `bun:"-"`
+	Contract Contract `bun:"rel:belongs-to,join:contract_id=id"`
 	Address  Address  `bun:"rel:belongs-to,join:address_id=id"`
 }
 

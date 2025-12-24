@@ -48,7 +48,7 @@ type getTxRequest struct {
 //	@Success		204
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
-//	@Router			/tx/{hash} [get]
+//	@Router			/txs/{hash} [get]
 func (handler *TxHandler) Get(c echo.Context) error {
 	req, err := bindAndValidate[getTxRequest](c)
 	if err != nil {
@@ -226,7 +226,7 @@ func (req *listTxs) SetDefault() {
 //	@Success		200	{array}		responses.Transaction
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
-//	@Router			/tx [get]
+//	@Router			/txs [get]
 func (handler *TxHandler) List(c echo.Context) error {
 	req, err := bindAndValidate[listTxs](c)
 	if err != nil {
