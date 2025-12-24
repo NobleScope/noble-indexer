@@ -106,8 +106,8 @@ func (handler *TokenHandler) List(c echo.Context) error {
 }
 
 type tokenRequest struct {
-	Contract string `param:"contract" validate:"address"`
-	TokenId  string `param:"token_id" validate:"min=0"`
+	Contract string `param:"contract" validate:"required,address"`
+	TokenId  string `param:"token_id" validate:"required,min=0"`
 }
 
 // Get godoc

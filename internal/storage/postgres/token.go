@@ -43,8 +43,9 @@ func (t *Token) Filter(ctx context.Context, filter storage.TokenListFilter) (tok
 	query = tokenListFilter(query, filter)
 	err = t.DB().NewSelect().TableExpr("(?) AS token", query).
 		ColumnExpr("token.*").
-		ColumnExpr("tx.hash AS tx__hash").
+		ColumnExpr("contract_address.hash AS contract__address__hash").
 		Join("LEFT JOIN contract ON contract.id = token.contract_id").
+		Join("LEFT JOIN address AS contract_address ON contract_address.id = contract.id").
 		Scan(ctx, &tokens)
 
 	return
@@ -58,8 +59,9 @@ func (t *Token) Get(ctx context.Context, contractId uint64, tokenId decimal.Deci
 
 	err = t.DB().NewSelect().TableExpr("(?) AS token", query).
 		ColumnExpr("token.*").
-		ColumnExpr("tx.hash AS tx__hash").
+		ColumnExpr("contract_address.hash AS contract__address__hash").
 		Join("LEFT JOIN contract ON contract.id = token.contract_id").
+		Join("LEFT JOIN address AS contract_address ON contract_address.id = contract.id").
 		Scan(ctx, &token)
 
 	return

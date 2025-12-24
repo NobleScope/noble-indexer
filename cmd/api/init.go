@@ -82,7 +82,7 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 	tokensGroup := v1.Group("/tokens")
 	{
 		tokensGroup.GET("", tokenHandlers.List)
-		tokensGroup.GET("/:contracts/:token_id", tokenHandlers.Get)
+		tokensGroup.GET("/:contract/:token_id", tokenHandlers.Get)
 	}
 	tokenTransfersGroup := v1.Group("/transfers")
 	{
