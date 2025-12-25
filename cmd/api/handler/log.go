@@ -35,8 +35,8 @@ type logListRequest struct {
 	TxHash  string  `query:"tx_hash" validate:"omitempty,tx_hash"`
 	Address string  `query:"address" validate:"omitempty,address"`
 
-	From int64 `example:"1692892095" query:"from" swaggertype:"integer" validate:"omitempty,min=1,max=16725214800"`
-	To   int64 `example:"1692892095" query:"to"   swaggertype:"integer" validate:"omitempty,min=1,max=16725214800"`
+	From int64 `example:"1692892095" query:"time_from" swaggertype:"integer" validate:"omitempty,min=1,max=16725214800"`
+	To   int64 `example:"1692892095" query:"time_to"   swaggertype:"integer" validate:"omitempty,min=1,max=16725214800"`
 }
 
 func (req *logListRequest) SetDefault() {
@@ -60,6 +60,8 @@ func (req *logListRequest) SetDefault() {
 //	@Param			address			query	string	false	"Address whose invocation generated this log"		minlength(42)	maxlength(42)
 //	@Param			height			query	integer	false	"Block height"										minimum(1)
 //	@Param			sort			query	string	false	"Sort order. Default: desc"							Enums(asc, desc)
+//	@Param			time_from		query	integer	false	"Time from in unix timestamp"						mininum(1)  maximum(16725214800)
+//	@Param			time_to			query	integer	false	"Time to in unix timestamp"							mininum(1)  maximum(16725214800)
 //	@Produce		json
 //	@Success		200	{array}		responses.Trace
 //	@Failure		400	{object}	Error

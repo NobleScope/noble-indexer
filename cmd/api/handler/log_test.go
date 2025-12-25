@@ -406,8 +406,8 @@ func (s *LogHandlerTestSuite) TestListWithHeight() {
 // TestListWithTimeRange tests filtering logs by time range
 func (s *LogHandlerTestSuite) TestListWithTimeRange() {
 	q := make(url.Values)
-	q.Set("from", "1690855260")
-	q.Set("to", "1690941660")
+	q.Set("time_from", "1690855260")
+	q.Set("time_to", "1690941660")
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
 	rec := httptest.NewRecorder()

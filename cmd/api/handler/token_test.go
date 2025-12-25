@@ -151,6 +151,7 @@ type TokenHandlerTestSuite struct {
 	transfer *mock.MockITransfer
 	tbs      *mock.MockITokenBalance
 	address  *mock.MockIAddress
+	tx       *mock.MockITx
 	echo     *echo.Echo
 	handler  *TokenHandler
 	ctrl     *gomock.Controller
@@ -165,7 +166,8 @@ func (s *TokenHandlerTestSuite) SetupSuite() {
 	s.transfer = mock.NewMockITransfer(s.ctrl)
 	s.tbs = mock.NewMockITokenBalance(s.ctrl)
 	s.address = mock.NewMockIAddress(s.ctrl)
-	s.handler = NewTokenHandler(s.token, s.transfer, s.tbs, s.address)
+	s.tx = mock.NewMockITx(s.ctrl)
+	s.handler = NewTokenHandler(s.token, s.transfer, s.tbs, s.address, s.tx)
 }
 
 // TearDownSuite -
@@ -664,8 +666,8 @@ func (s *TokenHandlerTestSuite) TestTransferListWithContract() {
 // TestTransferListWithTimeRange tests filtering by time range
 func (s *TokenHandlerTestSuite) TestTransferListWithTimeRange() {
 	q := make(url.Values)
-	q.Set("from", "1690855260")
-	q.Set("to", "1690941660")
+	q.Set("time_from", "1690855260")
+	q.Set("time_to", "1690941660")
 	q.Set("token_id", "0")
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)

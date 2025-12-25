@@ -194,8 +194,8 @@ type listTxs struct {
 	Type        StringArray `query:"type"         validate:"omitempty,dive,tx_type"`
 	Status      StringArray `query:"status"       validate:"omitempty,dive,tx_status"`
 
-	From int64 `example:"1692892095" query:"from" swaggertype:"integer" validate:"omitempty,min=1,max=16725214800"`
-	To   int64 `example:"1692892095" query:"to"   swaggertype:"integer" validate:"omitempty,min=1,max=16725214800"`
+	From int64 `example:"1692892095" query:"time_from" swaggertype:"integer" validate:"omitempty,min=1,max=16725214800"`
+	To   int64 `example:"1692892095" query:"time_to"   swaggertype:"integer" validate:"omitempty,min=1,max=16725214800"`
 }
 
 func (req *listTxs) SetDefault() {
@@ -222,6 +222,8 @@ func (req *listTxs) SetDefault() {
 //	@Param			type			query	string	false	"Comma-separated list of transaction types"			Enums(TxTypeUnknown, TxTypeLegacy, TxTypeDynamicFee, TxTypeBlob, TxTypeSetCode)
 //	@Param			status			query	string	false	"Comma-separated list of transaction statuses"		Enums(TxStatusSuccess, TxStatusRevert)
 //	@Param			sort			query	string	false	"Sort order. Default: desc"							Enums(asc, desc)
+//	@Param			time_from		query	integer	false	"Time from in unix timestamp"						mininum(1)  maximum(16725214800)
+//	@Param			time_to			query	integer	false	"Time to in unix timestamp"							mininum(1)  maximum(16725214800)
 //	@Produce		json
 //	@Success		200	{array}		responses.Transaction
 //	@Failure		400	{object}	Error
