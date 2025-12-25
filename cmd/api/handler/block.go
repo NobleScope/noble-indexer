@@ -67,8 +67,8 @@ func (handler *BlockHandler) Get(c echo.Context) error {
 }
 
 type blockListRequest struct {
-	Limit  uint64 `query:"limit"  validate:"omitempty,min=1,max=100"`
-	Offset uint64 `query:"offset" validate:"omitempty,min=0"`
+	Limit  int    `query:"limit"  validate:"omitempty,min=1,max=100"`
+	Offset int    `query:"offset" validate:"omitempty,min=0"`
 	Sort   string `query:"sort"   validate:"omitempty,oneof=asc desc"`
 	Stats  bool   `query:"stats"  validate:"omitempty"`
 }
@@ -104,12 +104,15 @@ func (handler *BlockHandler) List(c echo.Context) error {
 	}
 	req.SetDefault()
 
-	var blocks []*storage.Block
-	if req.Stats {
-		blocks, err = handler.block.ListWithStats(c.Request().Context(), req.Limit, req.Offset, pgSort(req.Sort))
-	} else {
-		blocks, err = handler.block.List(c.Request().Context(), req.Limit, req.Offset, pgSort(req.Sort))
+	filters := storage.BlockListFilter{
+		Limit:     req.Limit,
+		Offset:    req.Offset,
+		Sort:      pgSort(req.Sort),
+		WithStats: req.Stats,
 	}
+
+	var blocks []storage.Block
+	blocks, err = handler.block.Filter(c.Request().Context(), filters)
 
 	if err != nil {
 		return handleError(c, err, handler.block)
@@ -117,7 +120,7 @@ func (handler *BlockHandler) List(c echo.Context) error {
 
 	response := make([]responses.Block, len(blocks))
 	for i := range blocks {
-		response[i] = responses.NewBlock(*blocks[i])
+		response[i] = responses.NewBlock(blocks[i])
 	}
 
 	return returnArray(c, response)
