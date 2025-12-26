@@ -78,7 +78,7 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 		}
 	}
 
-	tokenHandlers := handler.NewTokenHandler(db.Token, db.Transfer, db.TokenBalance, db.Addresses)
+	tokenHandlers := handler.NewTokenHandler(db.Token, db.Transfer, db.TokenBalance, db.Addresses, db.Tx)
 	tokensGroup := v1.Group("/tokens")
 	{
 		tokensGroup.GET("", tokenHandlers.List)

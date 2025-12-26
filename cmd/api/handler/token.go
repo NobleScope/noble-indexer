@@ -17,6 +17,7 @@ type TokenHandler struct {
 	transfer storage.ITransfer
 	tbs      storage.ITokenBalance
 	address  storage.IAddress
+	tx       storage.ITx
 }
 
 func NewTokenHandler(
@@ -24,12 +25,14 @@ func NewTokenHandler(
 	transfer storage.ITransfer,
 	tbs storage.ITokenBalance,
 	address storage.IAddress,
+	tx storage.ITx,
 ) *TokenHandler {
 	return &TokenHandler{
 		token:    token,
 		transfer: transfer,
 		tbs:      tbs,
 		address:  address,
+		tx:       tx,
 	}
 }
 
@@ -164,8 +167,8 @@ type transferListRequest struct {
 	Contract    string      `query:"contract"     validate:"omitempty,address"`
 	TokenId     *string     `query:"token_id"     validate:"omitempty"`
 
-	From int64 `example:"1692892095" query:"from" swaggertype:"integer" validate:"omitempty,min=1,max=16725214800"`
-	To   int64 `example:"1692892095" query:"to"   swaggertype:"integer" validate:"omitempty,min=1,max=16725214800"`
+	From int64 `example:"1692892095" query:"time_from" swaggertype:"integer" validate:"omitempty,min=1"`
+	To   int64 `example:"1692892095" query:"time_to"   swaggertype:"integer" validate:"omitempty,min=1"`
 }
 
 func (p *transferListRequest) SetDefault() {
@@ -250,6 +253,18 @@ func (handler *TokenHandler) TransferList(c echo.Context) error {
 			return err
 		}
 		filters.ContractId = &address.Id
+	}
+
+	if req.TxHash != "" {
+		hash, err := types.HexFromString(req.TxHash)
+		if err != nil {
+			return badRequestError(c, err)
+		}
+		tx, err := handler.tx.ByHash(c.Request().Context(), hash)
+		if err != nil {
+			return handleError(c, err, handler.tx)
+		}
+		filters.TxId = &tx.Id
 	}
 
 	if req.Height != nil {
