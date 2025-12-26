@@ -167,8 +167,8 @@ type transferListRequest struct {
 	Contract    string      `query:"contract"     validate:"omitempty,address"`
 	TokenId     *string     `query:"token_id"     validate:"omitempty"`
 
-	From int64 `example:"1692892095" query:"time_from" swaggertype:"integer" validate:"omitempty,min=1,max=16725214800"`
-	To   int64 `example:"1692892095" query:"time_to"   swaggertype:"integer" validate:"omitempty,min=1,max=16725214800"`
+	From int64 `example:"1692892095" query:"time_from" swaggertype:"integer" validate:"omitempty,min=1"`
+	To   int64 `example:"1692892095" query:"time_to"   swaggertype:"integer" validate:"omitempty,min=1"`
 }
 
 func (p *transferListRequest) SetDefault() {
@@ -190,8 +190,8 @@ func (p *transferListRequest) SetDefault() {
 //	@Param			offset			query	integer	false	"Offset"											minimum(0)
 //	@Param			sort			query	string	false	"Sort order. Default: desc"							Enums(asc, desc)
 //	@Param			height			query	integer	false	"Block height"										minimum(0)
-//	@Param			time_from		query	integer	false	"Time from in unix timestamp"						mininum(1)  maximum(2147483647)
-//	@Param			time_to			query	integer	false	"Time to in unix timestamp"							mininum(1)  maximum(2147483647)
+//	@Param			time_from		query	integer	false	"Time from in unix timestamp"						mininum(1)
+//	@Param			time_to			query	integer	false	"Time to in unix timestamp"							mininum(1)
 //	@Param			type			query	string	false	"Comma-separated list of token types"				Enums(burn, mint, transfer, unknown)
 //	@Param			tx_hash			query	string	false	"Transaction hash in hexadecimal with 0x prefix"	minlength(66)	maxlength(66)
 //	@Param			address_from	query	string	false	"Address from"										minlength(42)	maxlength(42)
