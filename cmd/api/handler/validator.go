@@ -9,8 +9,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var evmAddressRegex = regexp.MustCompile(`^0x[0-9a-fA-F]{40}$`)
-var evmTransactionHashRegex = regexp.MustCompile(`^0x[0-9a-fA-F]{64}$`)
+var evmAddressRegex = regexp.MustCompile(`^(0x)?[0-9a-fA-F]{40}$`)
+var evmTransactionHashRegex = regexp.MustCompile(`^(0x)?[0-9a-fA-F]{64}$`)
 
 type ApiValidator struct {
 	validator *validator.Validate

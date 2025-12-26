@@ -28,14 +28,15 @@ func (t *Transfer) Filter(ctx context.Context, filter storage.TransferListFilter
 	err = t.DB().NewSelect().
 		ColumnExpr("transfer.*").
 		ColumnExpr("tx.hash AS tx__hash").
-		ColumnExpr("from_addr.address AS from_address__address").
-		ColumnExpr("to_addr.address AS to_address__address").
-		ColumnExpr("contract.id AS contract__id, contract.address AS contract__address, contract.code AS contract__code, contract.verified as contract__verified").
+		ColumnExpr("from_addr.hash AS from_address__hash").
+		ColumnExpr("to_addr.hash AS to_address__hash").
+		ColumnExpr("contract.id AS contract__id, contract_addr.hash AS contract__address__hash, contract.code AS contract__code, contract.verified as contract__verified").
 		TableExpr("(?) AS transfer", query).
 		Join("LEFT JOIN tx ON tx.id = transfer.tx_id").
 		Join("LEFT JOIN address AS from_addr ON from_addr.id = transfer.from_address_id").
 		Join("LEFT JOIN address AS to_addr ON to_addr.id = transfer.to_address_id").
 		Join("LEFT JOIN contract ON contract.id = transfer.contract_id").
+		Join("LEFT JOIN address AS contract_addr ON contract_addr.id = contract.id").
 		Scan(ctx, &transfers)
 
 	return
@@ -51,14 +52,15 @@ func (t *Transfer) Get(ctx context.Context, id uint64) (transfer storage.Transfe
 	err = t.DB().NewSelect().
 		ColumnExpr("transfer.*").
 		ColumnExpr("tx.hash AS tx__hash").
-		ColumnExpr("from_addr.address AS from_address__address").
-		ColumnExpr("to_addr.address AS to_address__address").
-		ColumnExpr("contract.id AS contract__id, contract.address AS contract__address, contract.code AS contract__code, contract.verified as contract__verified").
+		ColumnExpr("from_addr.hash AS from_address__hash").
+		ColumnExpr("to_addr.hash AS to_address__hash").
+		ColumnExpr("contract.id AS contract__id, contract_addr.hash AS contract__address__hash, contract.code AS contract__code, contract.verified as contract__verified").
 		TableExpr("(?) AS transfer", query).
 		Join("LEFT JOIN tx ON tx.id = transfer.tx_id").
 		Join("LEFT JOIN address AS from_addr ON from_addr.id = transfer.from_address_id").
 		Join("LEFT JOIN address AS to_addr ON to_addr.id = transfer.to_address_id").
 		Join("LEFT JOIN contract ON contract.id = transfer.contract_id").
+		Join("LEFT JOIN address AS contract_addr ON contract_addr.id = contract.id").
 		Scan(ctx, &transfer)
 
 	return

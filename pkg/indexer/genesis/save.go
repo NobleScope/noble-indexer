@@ -6,6 +6,7 @@ import (
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/internal/storage/postgres"
+	"github.com/pkg/errors"
 )
 
 func (module *Module) save(ctx context.Context, data parsedData) error {
@@ -17,33 +18,45 @@ func (module *Module) save(ctx context.Context, data parsedData) error {
 	}
 	defer tx.Close(ctx)
 
+	if len(data.addresses) == 0 {
+		return nil
+	}
+
 	var totalAccounts int64
-	if len(data.addresses) > 0 {
-		entities := make([]*storage.Address, 0, len(data.addresses))
-		for key := range data.addresses {
-			entities = append(entities, data.addresses[key])
-		}
+	addresses := make([]*storage.Address, 0, len(data.addresses))
+	addrToId := make(map[string]uint64)
+	for key := range data.addresses {
+		addresses = append(addresses, data.addresses[key])
+	}
 
-		totalAccounts, err = tx.SaveAddresses(ctx, entities...)
-		if err != nil {
-			return tx.HandleError(ctx, err)
-		}
+	totalAccounts, err = tx.SaveAddresses(ctx, addresses...)
+	if err != nil {
+		return tx.HandleError(ctx, err)
+	}
 
-		balances := make([]*storage.Balance, 0)
-		for i := range entities {
-			entities[i].Balance.Id = entities[i].Id
-			balances = append(balances, entities[i].Balance)
-		}
+	balances := make([]*storage.Balance, 0, len(data.addresses))
+	for i := range addresses {
+		addrToId[addresses[i].Hash.String()] = addresses[i].Id
+		addresses[i].Balance.Id = addresses[i].Id
+		balances = append(balances, addresses[i].Balance)
+	}
 
-		if err := tx.SaveBalances(ctx, balances...); err != nil {
-			return tx.HandleError(ctx, err)
-		}
+	if err := tx.SaveBalances(ctx, balances...); err != nil {
+		return tx.HandleError(ctx, err)
 	}
 
 	if len(data.contracts) > 0 {
 		entities := make([]*storage.Contract, 0, len(data.contracts))
 		for key := range data.contracts {
 			entities = append(entities, data.contracts[key])
+		}
+
+		for _, contract := range entities {
+			id, ok := addrToId[contract.Address.Hash.String()]
+			if !ok {
+				return errors.Errorf("can't find contract key: %s", contract.Address.Hash.String())
+			}
+			contract.Id = id
 		}
 
 		err = tx.SaveContracts(ctx, entities...)

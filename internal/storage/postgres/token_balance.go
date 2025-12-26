@@ -27,9 +27,10 @@ func (t *TokenBalance) Filter(ctx context.Context, filter storage.TokenBalanceLi
 	query = tokenBalanceListFilter(query, filter)
 	err = t.DB().NewSelect().TableExpr("(?) AS token_balance", query).
 		ColumnExpr("token_balance.*").
-		ColumnExpr("contract.address AS contract__address").
-		ColumnExpr("address.address AS address__address").
+		ColumnExpr("contract_address.hash AS contract__address__hash").
+		ColumnExpr("address.hash AS address__hash").
 		Join("LEFT JOIN contract ON contract.id = token_balance.contract_id").
+		Join("LEFT JOIN address AS contract_address ON contract_address.id = contract.id").
 		Join("LEFT JOIN address ON address.id = token_balance.address_id").
 		Scan(ctx, &tb)
 

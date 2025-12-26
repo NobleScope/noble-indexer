@@ -10,13 +10,20 @@ import (
 	"github.com/uptrace/bun"
 )
 
+type BlockListFilter struct {
+	Limit     int
+	Offset    int
+	Sort      storage.SortOrder
+	WithStats bool
+}
+
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
 type IBlock interface {
 	storage.Table[*Block]
 
 	Last(ctx context.Context) (Block, error)
 	ByHeight(ctx context.Context, height pkgTypes.Level, withStats bool) (Block, error)
-	ListWithStats(ctx context.Context, limit, offset uint64, order storage.SortOrder) ([]*Block, error)
+	Filter(ctx context.Context, filters BlockListFilter) ([]Block, error)
 }
 
 // Block -

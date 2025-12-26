@@ -28,7 +28,7 @@ func (l *Log) Filter(ctx context.Context, filter storage.LogListFilter) (logs []
 	err = l.DB().NewSelect().
 		ColumnExpr("log.*").
 		ColumnExpr("tx.hash AS tx__hash").
-		ColumnExpr("address.address AS address__address").
+		ColumnExpr("address.hash AS address__hash").
 		TableExpr("(?) AS log", query).
 		Join("LEFT JOIN tx ON tx.id = log.tx_id").
 		Join("LEFT JOIN address ON address.id = log.address_id").

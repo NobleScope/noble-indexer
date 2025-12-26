@@ -7,6 +7,9 @@ import (
 	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 )
 
+// State model info
+//
+//	@Description	Blockchain indexer state information
 type State struct {
 	Id            uint64         `example:"321"                                                                format:"int64"     json:"id"             swaggertype:"integer"`
 	Name          string         `example:"indexer"                                                            format:"string"    json:"name"           swaggertype:"string"`

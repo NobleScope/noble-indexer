@@ -13,6 +13,7 @@ import (
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/internal/storage/mock"
 	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/labstack/echo/v4"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/suite"
@@ -211,11 +212,15 @@ func (s *BlockTestSuite) TestList() {
 	c.SetPath("/block")
 
 	s.block.EXPECT().
-		List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-		Return([]*storage.Block{
-			&testBlock,
-		}, nil).
-		MaxTimes(1)
+		Filter(gomock.Any(), storage.BlockListFilter{
+			Limit:     10,
+			Offset:    0,
+			Sort:      sdk.SortOrderAsc,
+			WithStats: false,
+		}).
+		Return([]storage.Block{
+			testBlock,
+		}, nil)
 
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
@@ -252,11 +257,15 @@ func (s *BlockTestSuite) TestListWithStats() {
 	c.SetPath("/block")
 
 	s.block.EXPECT().
-		ListWithStats(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-		Return([]*storage.Block{
-			&testBlockWithStats,
-		}, nil).
-		MaxTimes(1)
+		Filter(gomock.Any(), storage.BlockListFilter{
+			Limit:     10,
+			Offset:    0,
+			Sort:      sdk.SortOrderAsc,
+			WithStats: true,
+		}).
+		Return([]storage.Block{
+			testBlockWithStats,
+		}, nil)
 
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)

@@ -46,6 +46,7 @@ definitions:
         type: string
     type: object
   responses.Block:
+    description: Noble block information
     properties:
       difficulty:
         example: "0x0"
@@ -102,6 +103,7 @@ definitions:
         type: string
     type: object
   responses.BlockStats:
+    description: Block statistics information
     properties:
       block_time:
         example: 1000
@@ -162,29 +164,81 @@ definitions:
         type: boolean
     type: object
   responses.Enums:
+    description: Available enum values for various entity types
     properties:
       token_type:
+        example:
+        - ERC20
+        - ERC721
+        - ERC1155
         items:
           type: string
         type: array
       trace_type:
+        example:
+        - call
+        - create
         items:
           type: string
         type: array
       transfer_type:
+        example:
+        - transfer
+        - mint
+        - burn
         items:
           type: string
         type: array
       tx_status:
+        example:
+        - success
+        - revert
         items:
           type: string
         type: array
       tx_type:
+        example:
+        - legacy
+        - dynamic_fee
         items:
           type: string
         type: array
     type: object
+  responses.Log:
+    description: Token transfer information
+    properties:
+      address:
+        example: "0x0000000000000000000000000000000000000001"
+        type: string
+      data:
+        example: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        type: string
+      height:
+        example: 100
+        type: integer
+      id:
+        example: 0
+        type: integer
+      index:
+        example: 1
+        type: integer
+      name:
+        example: 0xff64905f73a67fb594e0f940a8075a860db489ad991e032f48c81123eb52d60b
+        type: string
+      time:
+        example: "2026-01-01T01:01:01+00:00"
+        format: date-time
+        type: string
+      topics:
+        items:
+          type: string
+        type: array
+      tx_hash:
+        example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d
+        type: string
+    type: object
   responses.ProxyContract:
+    description: Proxy contract information
     properties:
       contract:
         example: "0x0000000000000000000000000000000000000000"
@@ -214,6 +268,7 @@ definitions:
         type: string
     type: object
   responses.SearchItem:
+    description: Search result item
     properties:
       result:
         description: 'Search result. Can be one of folowwing types: Address, Block,
@@ -222,9 +277,36 @@ definitions:
       type:
         description: Result type which is in the result. Can be 'address', 'block',
           'tx', 'token'
+        enum:
+        - address
+        - block
+        - tx
+        - token
+        example: address
         type: string
     type: object
+  responses.Source:
+    description: Contract source information
+    properties:
+      content:
+        example: Source content
+        type: string
+      id:
+        example: 321
+        type: integer
+      license:
+        example: License
+        type: string
+      name:
+        example: Contract source name
+        type: string
+      urls:
+        items:
+          type: string
+        type: array
+    type: object
   responses.State:
+    description: Blockchain indexer state information
     properties:
       hash:
         example: 0x85480d3bbf5d757b63375ab9da566e7c330e2b6b9abe965fc7f41542d3edaeaa
@@ -304,6 +386,7 @@ definitions:
         type: string
     type: object
   responses.Trace:
+    description: Transaction execution trace information
     properties:
       amount:
         example: "1000000000000000000"
@@ -365,10 +448,12 @@ definitions:
         - create
         - create2
         - selfdestruct
+        - reward
         example: call
         type: string
     type: object
   responses.Transaction:
+    description: Noble transaction information
     properties:
       amount:
         example: 1000000000000000000
@@ -483,28 +568,34 @@ info:
   title: Noble Indexer API
   version: "1.0"
 paths:
-  /address:
+  /addresses:
     get:
-      description: List address info
+      description: Returns a paginated list of addresses with their balances. Can
+        be filtered to show only contract addresses.
       operationId: list-address
       parameters:
-      - description: Count of requested entities
+      - default: 10
+        description: 'Number of addresses to return (default: 10)'
         in: query
         maximum: 100
+        minimum: 1
         name: limit
         type: integer
-      - description: Offset
+      - default: 0
+        description: 'Number of addresses to skip (default: 0)'
         in: query
+        minimum: 0
         name: offset
         type: integer
-      - description: Sort order
+      - default: asc
+        description: 'Sort order (default: asc)'
         enum:
         - asc
         - desc
         in: query
         name: sort
         type: string
-      - description: Sort field
+      - description: 'Field to sort by (default: id)'
         enum:
         - id
         - value
@@ -513,7 +604,9 @@ paths:
         in: query
         name: sort_by
         type: string
-      - description: Show only contract addresses
+      - default: false
+        description: 'If true, return only addresses that are smart contracts (default:
+          false)'
         in: query
         name: only_contracts
         type: boolean
@@ -521,28 +614,29 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: List of addresses with their balances
           schema:
             items:
               $ref: '#/definitions/responses.Address'
             type: array
         "400":
-          description: Bad Request
+          description: Invalid request parameters
           schema:
             $ref: '#/definitions/handler.Error'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             $ref: '#/definitions/handler.Error'
-      summary: List address info
+      summary: List addresses
       tags:
       - address
-  /address/{hash}:
+  /addresses/{hash}:
     get:
-      description: Get address info
+      description: Returns detailed information about a specific address including
+        its balance, contract status, and activity history
       operationId: get-address
       parameters:
-      - description: Hash
+      - description: Address hash in hexadecimal format (e.g., 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
         in: path
         maxLength: 42
         minLength: 42
@@ -553,46 +647,52 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Address information with balance
           schema:
             $ref: '#/definitions/responses.Address'
         "204":
-          description: No Content
+          description: Address not found
         "400":
-          description: Bad Request
+          description: Invalid address hash format
           schema:
             $ref: '#/definitions/handler.Error'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             $ref: '#/definitions/handler.Error'
-      summary: Get address info
+      summary: Get address by hash
       tags:
       - address
-  /block:
+  /blocks:
     get:
-      description: List blocks info
+      description: Returns a paginated list of blocks. Blocks can be sorted by height
+        in ascending or descending order. Optionally includes statistics for each
+        block.
       operationId: list-block
       parameters:
-      - description: Count of requested blocks
+      - default: 10
+        description: 'Number of blocks to return (default: 10)'
         in: query
         maximum: 100
         minimum: 1
         name: limit
         type: integer
-      - description: Offset
+      - default: 0
+        description: 'Number of blocks to skip (default: 0)'
         in: query
         minimum: 0
         name: offset
         type: integer
-      - description: Sort order
+      - default: asc
+        description: 'Sort order by height (default: asc)'
         enum:
         - asc
         - desc
         in: query
         name: sort
         type: string
-      - description: Need join stats for block
+      - default: false
+        description: 'Include statistics for each block (default: false)'
         in: query
         name: stats
         type: boolean
@@ -600,34 +700,39 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: List of blocks
           schema:
             items:
               $ref: '#/definitions/responses.Block'
             type: array
         "400":
-          description: Bad Request
+          description: Invalid request parameters
           schema:
             $ref: '#/definitions/handler.Error'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             $ref: '#/definitions/handler.Error'
-      summary: List blocks info
+      summary: List blocks
       tags:
       - block
-  /block/{height}:
+  /blocks/{height}:
     get:
-      description: Get block info
+      description: Returns detailed information about a specific block at the given
+        height. Optionally includes statistical data such as transaction count, gas
+        usage, and fees.
       operationId: get-block
       parameters:
-      - description: Block height
+      - description: Block height (block number)
+        example: 12345
         in: path
         minimum: 1
         name: height
         required: true
         type: integer
-      - description: Need include stats for block
+      - default: false
+        description: 'Include block statistics (transaction count, gas usage, fees)
+          (default: false)'
         in: query
         name: stats
         type: boolean
@@ -635,28 +740,30 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Block information
           schema:
             $ref: '#/definitions/responses.Block'
         "204":
-          description: No Content
+          description: Block not found
         "400":
-          description: Bad Request
+          description: Invalid request parameters
           schema:
             $ref: '#/definitions/handler.Error'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             $ref: '#/definitions/handler.Error'
-      summary: Get block info
+      summary: Get block by height
       tags:
       - block
-  /block/{height}/stats:
+  /blocks/{height}/stats:
     get:
-      description: Get block stats by height
+      description: Returns statistical data for a specific block including transaction
+        count, gas used, gas limit, base fee, and total fees
       operationId: get-block-stats
       parameters:
-      - description: Block height
+      - description: Block height (block number)
+        example: 12345
         in: path
         minimum: 1
         name: height
@@ -666,43 +773,48 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Block statistics
           schema:
             $ref: '#/definitions/responses.BlockStats'
         "400":
-          description: Bad Request
+          description: Invalid block height
           schema:
             $ref: '#/definitions/handler.Error'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             $ref: '#/definitions/handler.Error'
-      summary: Get block stats by height
+      summary: Get block statistics
       tags:
       - block
-  /block/{height}/transactions:
+  /blocks/{height}/transactions:
     get:
-      description: List block transactions
+      description: Returns a paginated list of all transactions included in the specified
+        block
       operationId: list-block-transactions
       parameters:
-      - description: Block height
+      - description: Block height (block number)
+        example: 12345
         in: path
         minimum: 1
         name: height
         required: true
         type: integer
-      - description: Count of requested transactions
+      - default: 10
+        description: 'Number of transactions to return (default: 10)'
         in: query
         maximum: 100
         minimum: 1
         name: limit
         type: integer
-      - description: Offset
+      - default: 0
+        description: 'Number of transactions to skip (default: 0)'
         in: query
         minimum: 0
         name: offset
         type: integer
-      - description: Sort order
+      - default: asc
+        description: 'Sort order by index (default: asc)'
         enum:
         - asc
         - desc
@@ -713,73 +825,82 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: List of transactions in the block
           schema:
             items:
               $ref: '#/definitions/responses.Transaction'
             type: array
         "400":
-          description: Bad Request
+          description: Invalid block height
           schema:
             $ref: '#/definitions/handler.Error'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             $ref: '#/definitions/handler.Error'
-      summary: List block transactions
+      summary: List transactions in block
       tags:
       - block
-  /block/count:
+  /blocks/count:
     get:
-      description: Get count of blocks in network
+      description: Returns the total number of blocks indexed in the blockchain, including
+        the genesis block
       operationId: get-blocks-count
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Total number of blocks (including genesis)
           schema:
             type: integer
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             $ref: '#/definitions/handler.Error'
-      summary: Get count of blocks in network
+      summary: Get total block count
       tags:
       - block
-  /contract:
+  /contracts:
     get:
-      description: List contract info
+      description: Returns a paginated list of deployed smart contracts. Can be filtered
+        by verification status or deployment transaction.
       operationId: list-contract
       parameters:
-      - description: Count of requested entities
+      - default: 10
+        description: 'Number of contracts to return (default: 10)'
         in: query
         maximum: 100
+        minimum: 1
         name: limit
         type: integer
-      - description: Offset
+      - default: 0
+        description: 'Number of contracts to skip (default: 0)'
         in: query
+        minimum: 0
         name: offset
         type: integer
-      - description: Sort order
+      - default: asc
+        description: 'Sort order (default: asc)'
         enum:
         - asc
         - desc
         in: query
         name: sort
         type: string
-      - description: Sort field
+      - description: 'Field to sort by (default: id)'
         enum:
         - id
         - height
         in: query
         name: sort_by
         type: string
-      - description: Show only verified contracts
+      - default: false
+        description: 'Filter to show only verified contracts (default: false)'
         in: query
         name: is_verified
         type: boolean
-      - description: Transaction hash in hexadecimal with 0x prefix
+      - description: Filter by deployment transaction hash (hexadecimal with 0x prefix)
+        example: 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
         in: query
         maxLength: 66
         minLength: 66
@@ -789,28 +910,29 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: List of smart contracts
           schema:
             items:
               $ref: '#/definitions/responses.Contract'
             type: array
         "400":
-          description: Bad Request
+          description: Invalid request parameters
           schema:
             $ref: '#/definitions/handler.Error'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             $ref: '#/definitions/handler.Error'
-      summary: List contract info
+      summary: List smart contracts
       tags:
       - contract
-  /contract/{hash}:
+  /contracts/{hash}:
     get:
-      description: Get contract info
+      description: Returns detailed information about a specific smart contract including
+        deployment info, verification status, and metadata
       operationId: get-contract
       parameters:
-      - description: Hash
+      - description: Contract address in hexadecimal format (e.g., 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
         in: path
         maxLength: 42
         minLength: 42
@@ -821,135 +943,166 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Contract information
           schema:
             $ref: '#/definitions/responses.Contract'
         "204":
-          description: No Content
+          description: Contract not found
         "400":
-          description: Bad Request
+          description: Invalid contract address format
           schema:
             $ref: '#/definitions/handler.Error'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             $ref: '#/definitions/handler.Error'
-      summary: Get contract info
+      summary: Get contract by address
       tags:
       - contract
-  /contract/{hash}/sources:
+  /contracts/{hash}/sources:
     get:
-      description: Get contract sources
+      description: Returns the verified source code files for a specific smart contract.
+        Only available for verified contracts.
       operationId: get-contract-sources
       parameters:
-      - description: Hash
+      - description: Contract address in hexadecimal format (e.g., 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
         in: path
         maxLength: 42
         minLength: 42
         name: hash
         required: true
         type: string
-      - description: Count of requested entities
+      - default: 10
+        description: 'Number of source files to return (default: 10)'
         in: query
         maximum: 100
+        minimum: 1
         name: limit
         type: integer
-      - description: Offset
+      - default: 0
+        description: 'Number of source files to skip (default: 0)'
         in: query
+        minimum: 0
         name: offset
         type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: List of source code files
           schema:
-            $ref: '#/definitions/responses.Contract'
+            items:
+              $ref: '#/definitions/responses.Source'
+            type: array
         "204":
-          description: No Content
+          description: Contract not found or not verified
         "400":
-          description: Bad Request
+          description: Invalid contract address format
           schema:
             $ref: '#/definitions/handler.Error'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             $ref: '#/definitions/handler.Error'
-      summary: Get contract sources
+      summary: Get contract source code
       tags:
       - contract
   /enums:
     get:
-      description: Get noble enumerators
+      description: Returns all possible enumeration values used in the API including
+        transaction types, transaction statuses, trace types, token types, transfer
+        types, proxy contract types, and proxy contract statuses. Use these values
+        for filtering in other API endpoints.
       operationId: get-enums
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: All enumeration values available in the API
           schema:
             $ref: '#/definitions/responses.Enums'
-      summary: Get noble enumerators
+      summary: Get enumeration values
       tags:
       - general
   /head:
     get:
-      description: Get current indexer head
+      description: Returns the current state of the blockchain indexer including the
+        latest indexed block height and timestamp. Useful for checking indexer synchronization
+        status.
       operationId: head
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Current indexer state
           schema:
             $ref: '#/definitions/responses.State'
         "204":
-          description: No Content
+          description: State not available
         "400":
-          description: Bad Request
+          description: Invalid request
           schema:
             $ref: '#/definitions/handler.Error'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             $ref: '#/definitions/handler.Error'
-      summary: Get current indexer head
+      summary: Get indexer state
       tags:
       - general
-  /log:
+  /logs:
     get:
-      description: List logs
+      description: Returns a paginated list of event logs emitted by smart contracts.
+        Can be filtered by transaction, address, block height, or time range.
       operationId: list-transaction-log
       parameters:
-      - description: Transaction hash in hexadecimal with 0x prefix
+      - description: Filter by transaction hash (hexadecimal with 0x prefix)
+        example: 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
         in: query
         maxLength: 66
         minLength: 66
         name: tx_hash
         type: string
-      - description: Count of requested entities
+      - default: 10
+        description: 'Number of logs to return (default: 10)'
         in: query
         maximum: 100
         minimum: 1
         name: limit
         type: integer
-      - description: Offset
+      - default: 0
+        description: 'Number of logs to skip (default: 0)'
         in: query
         minimum: 0
         name: offset
         type: integer
-      - description: Address whose invocation generated this log
+      - description: Filter by contract address that emitted the log
+        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
         in: query
         maxLength: 42
         minLength: 42
         name: address
         type: string
-      - description: Block height
+      - description: Filter by block height
+        example: 12345
         in: query
         minimum: 1
         name: height
         type: integer
-      - description: 'Sort order. Default: desc'
+      - description: Filter by timestamp from (Unix timestamp)
+        example: 1692892095
+        in: query
+        minimum: 1
+        name: from
+        type: integer
+      - description: Filter by timestamp to (Unix timestamp)
+        example: 1692892095
+        in: query
+        minimum: 1
+        name: to
+        type: integer
+      - default: desc
+        description: 'Sort order by timestamp (default: desc)'
         enum:
         - asc
         - desc
@@ -960,57 +1113,64 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: List of event logs
           schema:
             items:
-              $ref: '#/definitions/responses.Trace'
+              $ref: '#/definitions/responses.Log'
             type: array
         "400":
-          description: Bad Request
+          description: Invalid request parameters
           schema:
             $ref: '#/definitions/handler.Error'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             $ref: '#/definitions/handler.Error'
-      summary: List logs
+      summary: List event logs
       tags:
       - transactions
-  /proxy-contracts:
+  /proxy:
     get:
-      description: List of all indexed proxy contracts
+      description: Returns a paginated list of proxy contracts. Proxy contracts are
+        smart contracts that delegate calls to implementation contracts. Can be filtered
+        by type, status, implementation address, or deployment height.
       operationId: list-proxy-contracts
       parameters:
-      - description: Count of requested entities
+      - default: 10
+        description: 'Number of proxy contracts to return (default: 10)'
         in: query
         maximum: 100
         minimum: 1
         name: limit
         type: integer
-      - description: Offset
+      - default: 0
+        description: 'Number of proxy contracts to skip (default: 0)'
         in: query
         minimum: 0
         name: offset
         type: integer
-      - description: 'Sort order. Default: desc'
+      - default: desc
+        description: 'Sort order by deployment height (default: desc)'
         enum:
         - asc
         - desc
         in: query
         name: sort
         type: string
-      - description: Proxy contract deploy height
+      - description: Filter by deployment block height
+        example: 12345
         in: query
         minimum: 1
         name: height
         type: integer
-      - description: Proxy contract implementation address
+      - description: Filter by implementation contract address
+        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
         in: query
         maxLength: 42
         minLength: 42
         name: implementation
         type: string
-      - description: Comma-separated proxy contracts type
+      - description: Filter by proxy pattern (comma-separated list)
         enum:
         - EIP1167
         - EIP7760
@@ -1021,7 +1181,8 @@ paths:
         in: query
         name: type
         type: string
-      - description: Comma-separated proxy contracts status
+      - description: 'Filter by resolution status: new (just detected), resolved (implementation
+          found), error (failed to resolve) (comma-separated)'
         enum:
         - new
         - resolved
@@ -1033,28 +1194,34 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: List of proxy contracts
           schema:
             items:
               $ref: '#/definitions/responses.ProxyContract'
             type: array
         "400":
-          description: Bad Request
+          description: Invalid request parameters
           schema:
             $ref: '#/definitions/handler.Error'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             $ref: '#/definitions/handler.Error'
-      summary: Proxy contracts list
+      summary: List proxy contracts
       tags:
       - proxy-contracts
   /search:
     get:
-      description: search
+      description: 'Performs a universal search across the blockchain. Supports searching
+        by: block height (numeric), transaction hash (0x prefixed hex), address (0x
+        prefixed hex), or token name/symbol (text). Returns matching blocks, transactions,
+        addresses, and tokens.'
       operationId: search
       parameters:
-      - description: Search string
+      - description: 'Search query: block height (e.g., 12345), transaction/block
+          hash (e.g., 0x1234...), address (e.g., 0x742d...), or token name/symbol
+          (e.g., USDC)'
+        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
         in: query
         name: query
         required: true
@@ -1063,190 +1230,69 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Search results (can include blocks, transactions, addresses,
+            tokens)
           schema:
             items:
               $ref: '#/definitions/responses.SearchItem'
             type: array
         "204":
-          description: No Content
+          description: No results found
         "400":
-          description: Bad Request
+          description: Invalid search query
           schema:
             $ref: '#/definitions/handler.Error'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             $ref: '#/definitions/handler.Error'
-      summary: Search by hash
+      summary: Universal search
       tags:
       - search
-  /token:
+  /token_balances:
     get:
-      description: List token transfers
-      operationId: list-token-transfers
-      parameters:
-      - description: Count of requested entities
-        in: query
-        maximum: 100
-        minimum: 1
-        name: limit
-        type: integer
-      - description: Offset
-        in: query
-        minimum: 0
-        name: offset
-        type: integer
-      - description: 'Sort order. Default: desc'
-        enum:
-        - asc
-        - desc
-        in: query
-        name: sort
-        type: string
-      - description: Block height
-        in: query
-        minimum: 0
-        name: height
-        type: integer
-      - description: Time from in unix timestamp
-        in: query
-        name: time_from
-        type: integer
-      - description: Time to in unix timestamp
-        in: query
-        name: time_to
-        type: integer
-      - description: Comma-separated list of token types
-        enum:
-        - burn
-        - mint
-        - transfer
-        - unknown
-        in: query
-        name: type
-        type: string
-      - description: Transaction hash in hexadecimal with 0x prefix
-        in: query
-        maxLength: 66
-        minLength: 66
-        name: tx_hash
-        type: string
-      - description: Address from
-        in: query
-        maxLength: 42
-        minLength: 42
-        name: address_from
-        type: string
-      - description: Address to
-        in: query
-        maxLength: 42
-        minLength: 42
-        name: address_to
-        type: string
-      - description: Contract address
-        in: query
-        maxLength: 42
-        minLength: 42
-        name: contract
-        type: string
-      - description: Token ID
-        in: query
-        name: token_id
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/responses.Transfer'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/handler.Error'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/handler.Error'
-      summary: List token transfers
-      tags:
-      - token
-  /token/{contract}/{token_id}:
-    get:
-      description: Get token info
-      operationId: get-token
-      parameters:
-      - description: Contract address
-        in: path
-        maxLength: 42
-        minLength: 42
-        name: contract
-        required: true
-        type: string
-      - description: Token ID
-        in: path
-        name: token_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/responses.Token'
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/handler.Error'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/handler.Error'
-      summary: Get token info
-      tags:
-      - token
-  /token_balance:
-    get:
-      description: List token balances
+      description: Returns a paginated list of token balances showing how many tokens
+        each address holds. Can be filtered by address, contract, or token ID. Useful
+        for finding token holders.
       operationId: list-token-balances
       parameters:
-      - description: Count of requested entities
+      - default: 10
+        description: 'Number of balances to return (default: 10)'
         in: query
         maximum: 100
         minimum: 1
         name: limit
         type: integer
-      - description: Offset
+      - default: 0
+        description: 'Number of balances to skip (default: 0)'
         in: query
         minimum: 0
         name: offset
         type: integer
-      - description: 'Sort order. Default: desc'
+      - default: asc
+        description: 'Sort order (default: asc)'
         enum:
         - asc
         - desc
         in: query
         name: sort
         type: string
-      - description: Address
+      - description: Filter by holder address
+        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
         in: query
         maxLength: 42
         minLength: 42
         name: address
         type: string
-      - description: Contract address
+      - description: Filter by token contract address
+        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
         in: query
         maxLength: 42
         minLength: 42
         name: contract
         type: string
-      - description: Token ID
+      - description: Filter by token ID
+        example: "0"
         in: query
         name: token_id
         type: string
@@ -1254,68 +1300,181 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: List of token balances
           schema:
             items:
               $ref: '#/definitions/responses.TokenBalance'
             type: array
         "400":
-          description: Bad Request
+          description: Invalid request parameters
           schema:
             $ref: '#/definitions/handler.Error'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             $ref: '#/definitions/handler.Error'
       summary: List token balances
       tags:
       - token
-  /traces:
+  /tokens:
     get:
-      description: List transaction traces
-      operationId: list-transaction-traces
+      description: Returns a paginated list of tokens (ERC20, ERC721, ERC1155). Can
+        be filtered by token type or issuing contract address.
+      operationId: list-tokens
       parameters:
-      - description: Transaction hash in hexadecimal with 0x prefix
-        in: query
-        maxLength: 66
-        minLength: 66
-        name: tx_hash
-        type: string
-      - description: Count of requested entities
-        in: query
-        maximum: 100
-        minimum: 1
-        name: limit
-        type: integer
-      - description: Offset
-        in: query
-        minimum: 0
-        name: offset
-        type: integer
-      - description: Address which initiate trace
-        in: query
-        maxLength: 42
-        minLength: 42
-        name: address_from
-        type: string
-      - description: Address which receiving trace result
-        in: query
-        maxLength: 42
-        minLength: 42
-        name: address_to
-        type: string
-      - description: Called contract
+      - description: Filter by contract address that issued the token
+        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
         in: query
         maxLength: 42
         minLength: 42
         name: contract
         type: string
-      - description: Block height
+      - default: 10
+        description: 'Number of tokens to return (default: 10)'
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - default: 0
+        description: 'Number of tokens to skip (default: 0)'
+        in: query
+        minimum: 0
+        name: offset
+        type: integer
+      - description: Filter by token standard (comma-separated list)
+        enum:
+        - ERC20
+        - ERC721
+        - ERC1155
+        in: query
+        name: type
+        type: string
+      - default: desc
+        description: 'Sort order by creation time (default: desc)'
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of tokens
+          schema:
+            items:
+              $ref: '#/definitions/responses.Token'
+            type: array
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: List tokens
+      tags:
+      - token
+  /tokens/{contract}/{token_id}:
+    get:
+      description: Returns detailed information about a specific token including metadata,
+        supply, and holder information. For ERC20 tokens use token_id=0, for ERC721/ERC1155
+        use the specific token ID.
+      operationId: get-token
+      parameters:
+      - description: Token contract address
+        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+        in: path
+        maxLength: 42
+        minLength: 42
+        name: contract
+        required: true
+        type: string
+      - description: Token ID (use 0 for ERC20)
+        example: "0"
+        in: path
+        name: token_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token information
+          schema:
+            $ref: '#/definitions/responses.Token'
+        "204":
+          description: Token not found
+        "400":
+          description: Invalid contract address or token ID
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Get token by contract and ID
+      tags:
+      - token
+  /traces:
+    get:
+      description: Returns a paginated list of execution traces showing internal calls,
+        contract creations, and other EVM operations. Traces provide detailed insight
+        into transaction execution. Can be filtered by transaction, addresses, contract,
+        block height, or trace type.
+      operationId: list-transaction-traces
+      parameters:
+      - description: Filter by transaction hash (hexadecimal with 0x prefix)
+        example: 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        in: query
+        maxLength: 66
+        minLength: 66
+        name: tx_hash
+        type: string
+      - default: 10
+        description: 'Number of traces to return (default: 10)'
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - default: 0
+        description: 'Number of traces to skip (default: 0)'
+        in: query
+        minimum: 0
+        name: offset
+        type: integer
+      - description: Filter by initiator address
+        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: address_from
+        type: string
+      - description: Filter by target address
+        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: address_to
+        type: string
+      - description: Filter by called contract address
+        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: contract
+        type: string
+      - description: Filter by block height
+        example: 12345
         in: query
         minimum: 1
         name: height
         type: integer
-      - description: Comma-separated list of trace types
+      - description: Filter by trace type (comma-separated list)
         enum:
         - call
         - delegatecall
@@ -1328,7 +1487,8 @@ paths:
         in: query
         name: type
         type: string
-      - description: 'Sort order. Default: desc'
+      - default: desc
+        description: 'Sort order (default: desc)'
         enum:
         - asc
         - desc
@@ -1339,92 +1499,212 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: List of execution traces
           schema:
             items:
               $ref: '#/definitions/responses.Trace'
             type: array
         "400":
-          description: Bad Request
+          description: Invalid request parameters
           schema:
             $ref: '#/definitions/handler.Error'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             $ref: '#/definitions/handler.Error'
-      summary: List transaction traces
+      summary: List execution traces
       tags:
       - transactions
-  /transfer/{id}:
+  /transfers:
     get:
-      description: Get token transfer info
+      description: Returns a paginated list of token transfer events (mint, burn,
+        transfer). Can be filtered by transfer type, addresses, contract, token ID,
+        transaction, block height, or time range.
+      operationId: list-token-transfers
+      parameters:
+      - default: 10
+        description: 'Number of transfers to return (default: 10)'
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - default: 0
+        description: 'Number of transfers to skip (default: 0)'
+        in: query
+        minimum: 0
+        name: offset
+        type: integer
+      - default: asc
+        description: 'Sort order by timestamp (default: asc)'
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Filter by block height
+        example: 12345
+        in: query
+        minimum: 0
+        name: height
+        type: integer
+      - description: Filter by timestamp from (Unix timestamp)
+        example: 1692892095
+        in: query
+        minimum: 1
+        name: from
+        type: integer
+      - description: Filter by timestamp to (Unix timestamp)
+        example: 1692892095
+        in: query
+        minimum: 1
+        name: to
+        type: integer
+      - description: Filter by transfer type (comma-separated list)
+        enum:
+        - burn
+        - mint
+        - transfer
+        - unknown
+        in: query
+        name: type
+        type: string
+      - description: Filter by transaction hash (hexadecimal with 0x prefix)
+        example: 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        in: query
+        maxLength: 66
+        minLength: 66
+        name: tx_hash
+        type: string
+      - description: Filter by sender address
+        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: address_from
+        type: string
+      - description: Filter by recipient address
+        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: address_to
+        type: string
+      - description: Filter by token contract address
+        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: contract
+        type: string
+      - description: Filter by token ID
+        example: "0"
+        in: query
+        name: token_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of token transfers
+          schema:
+            items:
+              $ref: '#/definitions/responses.Transfer'
+            type: array
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: List token transfers
+      tags:
+      - token
+  /transfers/{id}:
+    get:
+      description: Returns detailed information about a specific token transfer event
+        by its internal database ID
       operationId: get-token-transfer
       parameters:
-      - description: Internal id
+      - description: Transfer internal ID
+        example: 12345
         in: path
-        name: contract
+        minimum: 1
+        name: id
         required: true
         type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Transfer information
           schema:
             $ref: '#/definitions/responses.Transfer'
         "204":
-          description: No Content
+          description: Transfer not found
         "400":
-          description: Bad Request
+          description: Invalid transfer ID
           schema:
             $ref: '#/definitions/handler.Error'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             $ref: '#/definitions/handler.Error'
-      summary: Get token transfer info
+      summary: Get token transfer by ID
       tags:
       - token
-  /tx:
+  /txs:
     get:
-      description: List all of indexed transactions
+      description: Returns a paginated list of blockchain transactions. Can be filtered
+        by addresses, contract, block height, transaction type, status, or time range.
+        Supports various transaction types including legacy, EIP-1559 (dynamic fee),
+        EIP-4844 (blob), and EIP-7702 (set code).
       operationId: list-transactions
       parameters:
-      - description: Count of requested entities
+      - default: 10
+        description: 'Number of transactions to return (default: 10)'
         in: query
         maximum: 100
         minimum: 1
         name: limit
         type: integer
-      - description: Offset
+      - default: 0
+        description: 'Number of transactions to skip (default: 0)'
         in: query
         minimum: 0
         name: offset
         type: integer
-      - description: Address which used for sending tx
+      - description: Filter by sender address
+        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
         in: query
         maxLength: 42
         minLength: 42
         name: address_from
         type: string
-      - description: Address which used for receiving tx
+      - description: Filter by recipient address
+        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
         in: query
         maxLength: 42
         minLength: 42
         name: address_to
         type: string
-      - description: Contract address which was called
+      - description: Filter by called contract address
+        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
         in: query
         maxLength: 42
         minLength: 42
         name: contract
         type: string
-      - description: Block height
+      - description: Filter by block height
+        example: 12345
         in: query
         minimum: 1
         name: height
         type: integer
-      - description: Comma-separated list of transaction types
+      - description: Filter by transaction type (comma-separated list)
         enum:
         - TxTypeUnknown
         - TxTypeLegacy
@@ -1434,14 +1714,27 @@ paths:
         in: query
         name: type
         type: string
-      - description: Comma-separated list of transaction statuses
+      - description: Filter by execution status (comma-separated list)
         enum:
         - TxStatusSuccess
         - TxStatusRevert
         in: query
         name: status
         type: string
-      - description: 'Sort order. Default: desc'
+      - description: Filter by timestamp from (Unix timestamp)
+        example: 1692892095
+        in: query
+        minimum: 1
+        name: from
+        type: integer
+      - description: Filter by timestamp to (Unix timestamp)
+        example: 1692892095
+        in: query
+        minimum: 1
+        name: to
+        type: integer
+      - default: desc
+        description: 'Sort order by timestamp (default: desc)'
         enum:
         - asc
         - desc
@@ -1452,28 +1745,30 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: List of transactions
           schema:
             items:
               $ref: '#/definitions/responses.Transaction'
             type: array
         "400":
-          description: Bad Request
+          description: Invalid request parameters
           schema:
             $ref: '#/definitions/handler.Error'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             $ref: '#/definitions/handler.Error'
-      summary: Transactions list
+      summary: List transactions
       tags:
       - transactions
-  /tx/{hash}:
+  /txs/{hash}:
     get:
-      description: Get transaction by hash
+      description: Returns detailed information about a specific transaction including
+        status, gas used, value transferred, and associated traces
       operationId: get-transaction
       parameters:
       - description: Transaction hash in hexadecimal with 0x prefix
+        example: 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
         in: path
         maxLength: 66
         minLength: 66
@@ -1484,23 +1779,23 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Transaction information
           schema:
             $ref: '#/definitions/responses.Transaction'
         "204":
-          description: No Content
+          description: Transaction not found
         "400":
-          description: Bad Request
+          description: Invalid transaction hash format
           schema:
             $ref: '#/definitions/handler.Error'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             $ref: '#/definitions/handler.Error'
       summary: Get transaction by hash
       tags:
       - transactions
 schemes:
-- http
 - https
+- http
 swagger: "2.0"
