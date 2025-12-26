@@ -40,19 +40,19 @@ func (p *addressListRequest) SetDefault() {
 
 // List godoc
 //
-//	@Summary		List address info
-//	@Description	List address info
+//	@Summary		List addresses
+//	@Description	Returns a paginated list of addresses with their balances. Can be filtered to show only contract addresses.
 //	@Tags			address
 //	@ID				list-address
-//	@Param			limit	query	integer	false	"Count of requested entities"	mininum(1)	maximum(100)
-//	@Param			offset	query	integer	false	"Offset"						mininum(1)
-//	@Param			sort	query	string	false	"Sort order"					Enums(asc, desc)
-//	@Param			sort_by	query	string	false	"Sort field"					Enums(id, value, first_height, last_height)
-//	@Param			only_contracts	query	boolean	false	"Show only contract addresses"
+//	@Param			limit			query	integer	false	"Number of addresses to return (default: 10)"								minimum(1)	maximum(100)	default(10)
+//	@Param			offset			query	integer	false	"Number of addresses to skip (default: 0)"									minimum(0)	default(0)
+//	@Param			sort			query	string	false	"Sort order (default: asc)"													Enums(asc, desc)	default(asc)
+//	@Param			sort_by			query	string	false	"Field to sort by (default: id)"											Enums(id, value, first_height, last_height)
+//	@Param			only_contracts	query	boolean	false	"If true, return only addresses that are smart contracts (default: false)"	default(false)
 //	@Produce		json
-//	@Success		200	{array}		responses.Address
-//	@Failure		400	{object}	Error
-//	@Failure		500	{object}	Error
+//	@Success		200	{array}		responses.Address	"List of addresses with their balances"
+//	@Failure		400	{object}	Error				"Invalid request parameters"
+//	@Failure		500	{object}	Error				"Internal server error"
 //	@Router			/addresses [get]
 func (handler *AddressHandler) List(c echo.Context) error {
 	req, err := bindAndValidate[addressListRequest](c)
@@ -88,16 +88,16 @@ type getAddressRequest struct {
 
 // Get godoc
 //
-//	@Summary		Get address info
-//	@Description	Get address info
+//	@Summary		Get address by hash
+//	@Description	Returns detailed information about a specific address including its balance, contract status, and activity history
 //	@Tags			address
 //	@ID				get-address
-//	@Param			hash	path	string	true	"Hash"	minlength(42)	maxlength(42)
+//	@Param			hash	path	string	true	"Address hash in hexadecimal format (e.g., 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)"	minlength(42)	maxlength(42)
 //	@Produce		json
-//	@Success		200	{object}	responses.Address
-//	@Success		204
-//	@Failure		400	{object}	Error
-//	@Failure		500	{object}	Error
+//	@Success		200	{object}	responses.Address	"Address information with balance"
+//	@Success		204									"Address not found"
+//	@Failure		400	{object}	Error				"Invalid address hash format"
+//	@Failure		500	{object}	Error				"Internal server error"
 //	@Router			/addresses/{hash} [get]
 func (handler *AddressHandler) Get(c echo.Context) error {
 	req, err := bindAndValidate[getAddressRequest](c)
