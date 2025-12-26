@@ -24,3 +24,39 @@
   txs_count: 10
   contracts_count: 2
   interactions: 25
+
+- id: 4
+  first_height: 200
+  last_height: 200
+  hash: '0x40f055506ba543ea0942dc8ca03f596ab75bc880'
+  is_contract: true
+  txs_count: 1
+  contracts_count: 0
+  interactions: 1
+
+- id: 5
+  first_height: 300
+  last_height: 300
+  hash: '0x50f055506ba543ea0942dc8ca03f596ab75bc881'
+  is_contract: true
+  txs_count: 1
+  contracts_count: 0
+  interactions: 1
+
+- id: 6
+  first_height: 400
+  last_height: 400
+  hash: '0x60f055506ba543ea0942dc8ca03f596ab75bc882'
+  is_contract: true
+  txs_count: 1
+  contracts_count: 0
+  interactions: 1
+
+- id: 7
+  first_height: 600
+  last_height: 600
+  hash: '0x70f055506ba543ea0942dc8ca03f596ab75bc883'
+  is_contract: true
+  txs_count: 1
+  contracts_count: 0
+  interactions: 1

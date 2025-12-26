@@ -38,8 +38,11 @@ func addressListFilter(query *bun.SelectQuery, fltrs storage.AddressListFilter) 
 	query = query.Offset(fltrs.Offset)
 
 	switch fltrs.SortField {
-	case "id", "value", "first_height", "last_height":
+	case "value", "first_height", "last_height":
 		query = sortScope(query, fltrs.SortField, fltrs.Sort)
+		query = sortScope(query, "id", sdk.SortOrderAsc)
+	case "id":
+		query = sortScope(query, "id", fltrs.Sort)
 	default:
 		query = sortScope(query, "id", fltrs.Sort)
 	}
@@ -60,7 +63,7 @@ func contractListFilter(query *bun.SelectQuery, fltrs storage.ContractListFilter
 	}
 
 	if fltrs.IsVerified {
-		query = query.Where("is_verified = ?", true)
+		query = query.Where("verified = ?", true)
 	}
 
 	query = limitScope(query, fltrs.Limit)
