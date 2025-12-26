@@ -89,21 +89,21 @@ func (req *listProxyContracts) ToFilters(
 
 // List godoc
 //
-//	@Summary		Proxy contracts list
-//	@Description	List of all indexed proxy contracts
+//	@Summary		List proxy contracts
+//	@Description	Returns a paginated list of proxy contracts. Proxy contracts are smart contracts that delegate calls to implementation contracts. Can be filtered by type, status, implementation address, or deployment height.
 //	@Tags			proxy-contracts
 //	@ID				list-proxy-contracts
-//	@Param			limit			query	integer	false	"Count of requested entities"			 minimum(1)	maximum(100)
-//	@Param			offset			query	integer	false	"Offset"								 minimum(0)
-//	@Param			sort			query	string	false	"Sort order. Default: desc"				 Enums(asc, desc)
-//	@Param			height			query	integer	false	"Proxy contract deploy height"			 minimum(1)
-//	@Param			implementation	query	string	false	"Proxy contract implementation address"	 minlength(42)	maxlength(42)
-//	@Param			type			query	string	false	"Comma-separated proxy contracts type"	 Enums(EIP1167, EIP7760, EIP7702, EIP1967, custom, clone_with_immutable_args)
-//	@Param			status			query	string	false	"Comma-separated proxy contracts status" Enums(new, resolved, error)
+//	@Param			limit			query	integer	false	"Number of proxy contracts to return (default: 10)"																					minimum(1)	maximum(100)	default(10)
+//	@Param			offset			query	integer	false	"Number of proxy contracts to skip (default: 0)"																					minimum(0)	default(0)
+//	@Param			sort			query	string	false	"Sort order by deployment height (default: desc)"																					Enums(asc, desc)	default(desc)
+//	@Param			height			query	integer	false	"Filter by deployment block height"																									minimum(1)	example(12345)
+//	@Param			implementation	query	string	false	"Filter by implementation contract address"																							minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
+//	@Param			type			query	string	false	"Filter by proxy pattern (comma-separated list)"																					Enums(EIP1167, EIP7760, EIP7702, EIP1967, custom, clone_with_immutable_args)
+//	@Param			status			query	string	false	"Filter by resolution status: new (just detected), resolved (implementation found), error (failed to resolve) (comma-separated)"	Enums(new, resolved, error)
 //	@Produce		json
-//	@Success		200	{array}		responses.ProxyContract
-//	@Failure		400	{object}	Error
-//	@Failure		500	{object}	Error
+//	@Success		200	{array}		responses.ProxyContract	"List of proxy contracts"
+//	@Failure		400	{object}	Error					"Invalid request parameters"
+//	@Failure		500	{object}	Error					"Internal server error"
 //	@Router			/proxy [get]
 func (handler *ProxyContractHandler) List(c echo.Context) error {
 	req, err := bindAndValidate[listProxyContracts](c)

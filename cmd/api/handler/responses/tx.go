@@ -8,6 +8,9 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+// Transaction model info
+//
+//	@Description	Noble transaction information
 type Transaction struct {
 	Height            uint64          `example:"100"                                                                json:"height"              swaggertype:"integer"`
 	Time              time.Time       `example:"2023-07-04T03:10:57+00:00"                                          json:"time"                swaggertype:"string"`

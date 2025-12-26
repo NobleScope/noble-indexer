@@ -15,12 +15,12 @@ func NewConstantHandler() *ConstantHandler {
 
 // Enums godoc
 //
-//	@Summary		Get noble enumerators
-//	@Description	Get noble enumerators
+//	@Summary		Get enumeration values
+//	@Description	Returns all possible enumeration values used in the API including transaction types, transaction statuses, trace types, token types, transfer types, proxy contract types, and proxy contract statuses. Use these values for filtering in other API endpoints.
 //	@Tags			general
 //	@ID				get-enums
 //	@Produce		json
-//	@Success		200	{object}	responses.Enums
+//	@Success		200	{object}	responses.Enums	"All enumeration values available in the API"
 //	@Router			/enums [get]
 func (handler *ConstantHandler) Enums(c echo.Context) error {
 	return c.JSON(http.StatusOK, responses.NewEnums())

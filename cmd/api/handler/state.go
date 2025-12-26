@@ -22,15 +22,15 @@ func NewStateHandler(state storage.IState, indexerName string) *StateHandler {
 
 // Head godoc
 //
-//	@Summary		Get current indexer head
-//	@Description	Get current indexer head
+//	@Summary		Get indexer state
+//	@Description	Returns the current state of the blockchain indexer including the latest indexed block height and timestamp. Useful for checking indexer synchronization status.
 //	@Tags			general
 //	@ID				head
 //	@Produce		json
-//	@Success		200	{object}	responses.State
-//	@Success		204
-//	@Failure		400	{object}	Error
-//	@Failure		500	{object}	Error
+//	@Success		200	{object}	responses.State	"Current indexer state"
+//	@Success		204								"State not available"
+//	@Failure		400	{object}	Error			"Invalid request"
+//	@Failure		500	{object}	Error			"Internal server error"
 //	@Router			/head [get]
 func (sh *StateHandler) Head(c echo.Context) error {
 	state, err := sh.state.ByName(c.Request().Context(), sh.indexerName)

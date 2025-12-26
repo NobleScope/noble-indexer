@@ -8,6 +8,9 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+// Block model info
+//
+//	@Description	Noble block information
 type Block struct {
 	Height               uint64          `example:"100"                                                                json:"height"                 swaggertype:"integer"`
 	Time                 time.Time       `example:"2023-07-04T03:10:57+00:00"                                          json:"time"                   swaggertype:"string"`
@@ -66,6 +69,9 @@ func NewBlock(block storage.Block) Block {
 	return resultBlock
 }
 
+// BlockStats model info
+//
+//	@Description	Block statistics information
 type BlockStats struct {
 	Height    uint64    `example:"100"                       json:"height"     swaggertype:"integer"`
 	Time      time.Time `example:"2023-07-04T03:10:57+00:00" json:"time"       swaggertype:"string"`

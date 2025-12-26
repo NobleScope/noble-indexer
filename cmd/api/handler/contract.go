@@ -47,20 +47,20 @@ func (p *contractListRequest) SetDefault() {
 
 // List godoc
 //
-//	@Summary		List contract info
-//	@Description	List contract info
+//	@Summary		List smart contracts
+//	@Description	Returns a paginated list of deployed smart contracts. Can be filtered by verification status or deployment transaction.
 //	@Tags			contract
 //	@ID				list-contract
-//	@Param			limit	query	integer	false	"Count of requested entities"	mininum(1)	maximum(100)
-//	@Param			offset	query	integer	false	"Offset"						mininum(1)
-//	@Param			sort	query	string	false	"Sort order"					Enums(asc, desc)
-//	@Param			sort_by	query	string	false	"Sort field"					Enums(id, height)
-//	@Param			is_verified	query	boolean	false	"Show only verified contracts"
-//	@Param			tx_hash	query	string	false	"Transaction hash in hexadecimal with 0x prefix"	minlength(66)	maxlength(66)
+//	@Param			limit		query	integer	false	"Number of contracts to return (default: 10)"								minimum(1)	maximum(100)	default(10)
+//	@Param			offset		query	integer	false	"Number of contracts to skip (default: 0)"									minimum(0)	default(0)
+//	@Param			sort		query	string	false	"Sort order (default: asc)"													Enums(asc, desc)	default(asc)
+//	@Param			sort_by		query	string	false	"Field to sort by (default: id)"											Enums(id, height)
+//	@Param			is_verified	query	boolean	false	"Filter to show only verified contracts (default: false)"					default(false)
+//	@Param			tx_hash		query	string	false	"Filter by deployment transaction hash (hexadecimal with 0x prefix)"		minlength(66)	maxlength(66)	example(0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef)
 //	@Produce		json
-//	@Success		200	{array}		responses.Contract
-//	@Failure		400	{object}	Error
-//	@Failure		500	{object}	Error
+//	@Success		200	{array}		responses.Contract	"List of smart contracts"
+//	@Failure		400	{object}	Error				"Invalid request parameters"
+//	@Failure		500	{object}	Error				"Internal server error"
 //	@Router			/contracts [get]
 func (handler *ContractHandler) List(c echo.Context) error {
 	req, err := bindAndValidate[contractListRequest](c)
@@ -110,16 +110,16 @@ type getByHashRequest struct {
 
 // Get godoc
 //
-//	@Summary		Get contract info
-//	@Description	Get contract info
+//	@Summary		Get contract by address
+//	@Description	Returns detailed information about a specific smart contract including deployment info, verification status, and metadata
 //	@Tags			contract
 //	@ID				get-contract
-//	@Param			hash	path	string	true	"Hash"	minlength(42)	maxlength(42)
+//	@Param			hash	path	string	true	"Contract address in hexadecimal format (e.g., 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)"	minlength(42)	maxlength(42)
 //	@Produce		json
-//	@Success		200	{object}	responses.Contract
-//	@Success		204
-//	@Failure		400	{object}	Error
-//	@Failure		500	{object}	Error
+//	@Success		200	{object}	responses.Contract	"Contract information"
+//	@Success		204									"Contract not found"
+//	@Failure		400	{object}	Error				"Invalid contract address format"
+//	@Failure		500	{object}	Error				"Internal server error"
 //	@Router			/contracts/{hash} [get]
 func (handler *ContractHandler) Get(c echo.Context) error {
 	req, err := bindAndValidate[getByHashRequest](c)
@@ -148,18 +148,18 @@ type getSourcesRequest struct {
 
 // ContractSources godoc
 //
-//	@Summary		Get contract sources
-//	@Description	Get contract sources
+//	@Summary		Get contract source code
+//	@Description	Returns the verified source code files for a specific smart contract. Only available for verified contracts.
 //	@Tags			contract
 //	@ID				get-contract-sources
-//	@Param			hash	path	string	true	"Hash"							minlength(42)	maxlength(42)
-//	@Param			limit	query	integer	false	"Count of requested entities"	mininum(1)	maximum(100)
-//	@Param			offset	query	integer	false	"Offset"						mininum(1)
+//	@Param			hash	path	string	true	"Contract address in hexadecimal format (e.g., 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)"	minlength(42)	maxlength(42)
+//	@Param			limit	query	integer	false	"Number of source files to return (default: 10)"											minimum(1)	maximum(100)	default(10)
+//	@Param			offset	query	integer	false	"Number of source files to skip (default: 0)"												minimum(0)	default(0)
 //	@Produce		json
-//	@Success		200	{object}	responses.Contract
-//	@Success		204
-//	@Failure		400	{object}	Error
-//	@Failure		500	{object}	Error
+//	@Success		200	{array}		responses.Source	"List of source code files"
+//	@Success		204									"Contract not found or not verified"
+//	@Failure		400	{object}	Error				"Invalid contract address format"
+//	@Failure		500	{object}	Error				"Internal server error"
 //	@Router			/contracts/{hash}/sources [get]
 func (handler *ContractHandler) ContractSources(c echo.Context) error {
 	req, err := bindAndValidate[getSourcesRequest](c)

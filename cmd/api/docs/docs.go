@@ -26,26 +26,30 @@ const docTemplate = `{
     "paths": {
         "/addresses": {
             "get": {
-                "description": "List address info",
+                "description": "Returns a paginated list of addresses with their balances. Can be filtered to show only contract addresses.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "address"
                 ],
-                "summary": "List address info",
+                "summary": "List addresses",
                 "operationId": "list-address",
                 "parameters": [
                     {
                         "maximum": 100,
+                        "minimum": 1,
                         "type": "integer",
-                        "description": "Count of requested entities",
+                        "default": 10,
+                        "description": "Number of addresses to return (default: 10)",
                         "name": "limit",
                         "in": "query"
                     },
                     {
+                        "minimum": 0,
                         "type": "integer",
-                        "description": "Offset",
+                        "default": 0,
+                        "description": "Number of addresses to skip (default: 0)",
                         "name": "offset",
                         "in": "query"
                     },
@@ -55,7 +59,8 @@ const docTemplate = `{
                             "desc"
                         ],
                         "type": "string",
-                        "description": "Sort order",
+                        "default": "asc",
+                        "description": "Sort order (default: asc)",
                         "name": "sort",
                         "in": "query"
                     },
@@ -67,20 +72,21 @@ const docTemplate = `{
                             "last_height"
                         ],
                         "type": "string",
-                        "description": "Sort field",
+                        "description": "Field to sort by (default: id)",
                         "name": "sort_by",
                         "in": "query"
                     },
                     {
                         "type": "boolean",
-                        "description": "Show only contract addresses",
+                        "default": false,
+                        "description": "If true, return only addresses that are smart contracts (default: false)",
                         "name": "only_contracts",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "List of addresses with their balances",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -89,13 +95,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid request parameters",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -105,21 +111,21 @@ const docTemplate = `{
         },
         "/addresses/{hash}": {
             "get": {
-                "description": "Get address info",
+                "description": "Returns detailed information about a specific address including its balance, contract status, and activity history",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "address"
                 ],
-                "summary": "Get address info",
+                "summary": "Get address by hash",
                 "operationId": "get-address",
                 "parameters": [
                     {
                         "maxLength": 42,
                         "minLength": 42,
                         "type": "string",
-                        "description": "Hash",
+                        "description": "Address hash in hexadecimal format (e.g., 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)",
                         "name": "hash",
                         "in": "path",
                         "required": true
@@ -127,22 +133,22 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Address information with balance",
                         "schema": {
                             "$ref": "#/definitions/responses.Address"
                         }
                     },
                     "204": {
-                        "description": "No Content"
+                        "description": "Address not found"
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid address hash format",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -152,28 +158,30 @@ const docTemplate = `{
         },
         "/blocks": {
             "get": {
-                "description": "List blocks info",
+                "description": "Returns a paginated list of blocks. Blocks can be sorted by height in ascending or descending order. Optionally includes statistics for each block.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "block"
                 ],
-                "summary": "List blocks info",
+                "summary": "List blocks",
                 "operationId": "list-block",
                 "parameters": [
                     {
                         "maximum": 100,
                         "minimum": 1,
                         "type": "integer",
-                        "description": "Count of requested blocks",
+                        "default": 10,
+                        "description": "Number of blocks to return (default: 10)",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "minimum": 0,
                         "type": "integer",
-                        "description": "Offset",
+                        "default": 0,
+                        "description": "Number of blocks to skip (default: 0)",
                         "name": "offset",
                         "in": "query"
                     },
@@ -183,20 +191,22 @@ const docTemplate = `{
                             "desc"
                         ],
                         "type": "string",
-                        "description": "Sort order",
+                        "default": "asc",
+                        "description": "Sort order by height (default: asc)",
                         "name": "sort",
                         "in": "query"
                     },
                     {
                         "type": "boolean",
-                        "description": "Need join stats for block",
+                        "default": false,
+                        "description": "Include statistics for each block (default: false)",
                         "name": "stats",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "List of blocks",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -205,13 +215,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid request parameters",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -221,24 +231,24 @@ const docTemplate = `{
         },
         "/blocks/count": {
             "get": {
-                "description": "Get count of blocks in network",
+                "description": "Returns the total number of blocks indexed in the blockchain, including the genesis block",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "block"
                 ],
-                "summary": "Get count of blocks in network",
+                "summary": "Get total block count",
                 "operationId": "get-blocks-count",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Total number of blocks (including genesis)",
                         "schema": {
                             "type": "integer"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -248,49 +258,51 @@ const docTemplate = `{
         },
         "/blocks/{height}": {
             "get": {
-                "description": "Get block info",
+                "description": "Returns detailed information about a specific block at the given height. Optionally includes statistical data such as transaction count, gas usage, and fees.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "block"
                 ],
-                "summary": "Get block info",
+                "summary": "Get block by height",
                 "operationId": "get-block",
                 "parameters": [
                     {
                         "minimum": 1,
                         "type": "integer",
-                        "description": "Block height",
+                        "example": 12345,
+                        "description": "Block height (block number)",
                         "name": "height",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "boolean",
-                        "description": "Need include stats for block",
+                        "default": false,
+                        "description": "Include block statistics (transaction count, gas usage, fees) (default: false)",
                         "name": "stats",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Block information",
                         "schema": {
                             "$ref": "#/definitions/responses.Block"
                         }
                     },
                     "204": {
-                        "description": "No Content"
+                        "description": "Block not found"
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid request parameters",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -300,20 +312,21 @@ const docTemplate = `{
         },
         "/blocks/{height}/stats": {
             "get": {
-                "description": "Get block stats by height",
+                "description": "Returns statistical data for a specific block including transaction count, gas used, gas limit, base fee, and total fees",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "block"
                 ],
-                "summary": "Get block stats by height",
+                "summary": "Get block statistics",
                 "operationId": "get-block-stats",
                 "parameters": [
                     {
                         "minimum": 1,
                         "type": "integer",
-                        "description": "Block height",
+                        "example": 12345,
+                        "description": "Block height (block number)",
                         "name": "height",
                         "in": "path",
                         "required": true
@@ -321,19 +334,19 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Block statistics",
                         "schema": {
                             "$ref": "#/definitions/responses.BlockStats"
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid block height",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -343,20 +356,21 @@ const docTemplate = `{
         },
         "/blocks/{height}/transactions": {
             "get": {
-                "description": "List block transactions",
+                "description": "Returns a paginated list of all transactions included in the specified block",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "block"
                 ],
-                "summary": "List block transactions",
+                "summary": "List transactions in block",
                 "operationId": "list-block-transactions",
                 "parameters": [
                     {
                         "minimum": 1,
                         "type": "integer",
-                        "description": "Block height",
+                        "example": 12345,
+                        "description": "Block height (block number)",
                         "name": "height",
                         "in": "path",
                         "required": true
@@ -365,14 +379,16 @@ const docTemplate = `{
                         "maximum": 100,
                         "minimum": 1,
                         "type": "integer",
-                        "description": "Count of requested transactions",
+                        "default": 10,
+                        "description": "Number of transactions to return (default: 10)",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "minimum": 0,
                         "type": "integer",
-                        "description": "Offset",
+                        "default": 0,
+                        "description": "Number of transactions to skip (default: 0)",
                         "name": "offset",
                         "in": "query"
                     },
@@ -382,14 +398,15 @@ const docTemplate = `{
                             "desc"
                         ],
                         "type": "string",
-                        "description": "Sort order",
+                        "default": "asc",
+                        "description": "Sort order by index (default: asc)",
                         "name": "sort",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "List of transactions in the block",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -398,13 +415,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid block height",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -414,26 +431,30 @@ const docTemplate = `{
         },
         "/contracts": {
             "get": {
-                "description": "List contract info",
+                "description": "Returns a paginated list of deployed smart contracts. Can be filtered by verification status or deployment transaction.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "contract"
                 ],
-                "summary": "List contract info",
+                "summary": "List smart contracts",
                 "operationId": "list-contract",
                 "parameters": [
                     {
                         "maximum": 100,
+                        "minimum": 1,
                         "type": "integer",
-                        "description": "Count of requested entities",
+                        "default": 10,
+                        "description": "Number of contracts to return (default: 10)",
                         "name": "limit",
                         "in": "query"
                     },
                     {
+                        "minimum": 0,
                         "type": "integer",
-                        "description": "Offset",
+                        "default": 0,
+                        "description": "Number of contracts to skip (default: 0)",
                         "name": "offset",
                         "in": "query"
                     },
@@ -443,7 +464,8 @@ const docTemplate = `{
                             "desc"
                         ],
                         "type": "string",
-                        "description": "Sort order",
+                        "default": "asc",
+                        "description": "Sort order (default: asc)",
                         "name": "sort",
                         "in": "query"
                     },
@@ -453,13 +475,14 @@ const docTemplate = `{
                             "height"
                         ],
                         "type": "string",
-                        "description": "Sort field",
+                        "description": "Field to sort by (default: id)",
                         "name": "sort_by",
                         "in": "query"
                     },
                     {
                         "type": "boolean",
-                        "description": "Show only verified contracts",
+                        "default": false,
+                        "description": "Filter to show only verified contracts (default: false)",
                         "name": "is_verified",
                         "in": "query"
                     },
@@ -467,14 +490,15 @@ const docTemplate = `{
                         "maxLength": 66,
                         "minLength": 66,
                         "type": "string",
-                        "description": "Transaction hash in hexadecimal with 0x prefix",
+                        "example": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                        "description": "Filter by deployment transaction hash (hexadecimal with 0x prefix)",
                         "name": "tx_hash",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "List of smart contracts",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -483,13 +507,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid request parameters",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -499,21 +523,21 @@ const docTemplate = `{
         },
         "/contracts/{hash}": {
             "get": {
-                "description": "Get contract info",
+                "description": "Returns detailed information about a specific smart contract including deployment info, verification status, and metadata",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "contract"
                 ],
-                "summary": "Get contract info",
+                "summary": "Get contract by address",
                 "operationId": "get-contract",
                 "parameters": [
                     {
                         "maxLength": 42,
                         "minLength": 42,
                         "type": "string",
-                        "description": "Hash",
+                        "description": "Contract address in hexadecimal format (e.g., 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)",
                         "name": "hash",
                         "in": "path",
                         "required": true
@@ -521,22 +545,22 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Contract information",
                         "schema": {
                             "$ref": "#/definitions/responses.Contract"
                         }
                     },
                     "204": {
-                        "description": "No Content"
+                        "description": "Contract not found"
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid contract address format",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -546,57 +570,64 @@ const docTemplate = `{
         },
         "/contracts/{hash}/sources": {
             "get": {
-                "description": "Get contract sources",
+                "description": "Returns the verified source code files for a specific smart contract. Only available for verified contracts.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "contract"
                 ],
-                "summary": "Get contract sources",
+                "summary": "Get contract source code",
                 "operationId": "get-contract-sources",
                 "parameters": [
                     {
                         "maxLength": 42,
                         "minLength": 42,
                         "type": "string",
-                        "description": "Hash",
+                        "description": "Contract address in hexadecimal format (e.g., 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)",
                         "name": "hash",
                         "in": "path",
                         "required": true
                     },
                     {
                         "maximum": 100,
+                        "minimum": 1,
                         "type": "integer",
-                        "description": "Count of requested entities",
+                        "default": 10,
+                        "description": "Number of source files to return (default: 10)",
                         "name": "limit",
                         "in": "query"
                     },
                     {
+                        "minimum": 0,
                         "type": "integer",
-                        "description": "Offset",
+                        "default": 0,
+                        "description": "Number of source files to skip (default: 0)",
                         "name": "offset",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "List of source code files",
                         "schema": {
-                            "$ref": "#/definitions/responses.Contract"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/responses.Source"
+                            }
                         }
                     },
                     "204": {
-                        "description": "No Content"
+                        "description": "Contract not found or not verified"
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid contract address format",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -606,18 +637,18 @@ const docTemplate = `{
         },
         "/enums": {
             "get": {
-                "description": "Get noble enumerators",
+                "description": "Returns all possible enumeration values used in the API including transaction types, transaction statuses, trace types, token types, transfer types, proxy contract types, and proxy contract statuses. Use these values for filtering in other API endpoints.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "general"
                 ],
-                "summary": "Get noble enumerators",
+                "summary": "Get enumeration values",
                 "operationId": "get-enums",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "All enumeration values available in the API",
                         "schema": {
                             "$ref": "#/definitions/responses.Enums"
                         }
@@ -627,33 +658,33 @@ const docTemplate = `{
         },
         "/head": {
             "get": {
-                "description": "Get current indexer head",
+                "description": "Returns the current state of the blockchain indexer including the latest indexed block height and timestamp. Useful for checking indexer synchronization status.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "general"
                 ],
-                "summary": "Get current indexer head",
+                "summary": "Get indexer state",
                 "operationId": "head",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Current indexer state",
                         "schema": {
                             "$ref": "#/definitions/responses.State"
                         }
                     },
                     "204": {
-                        "description": "No Content"
+                        "description": "State not available"
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid request",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -663,21 +694,22 @@ const docTemplate = `{
         },
         "/logs": {
             "get": {
-                "description": "List logs",
+                "description": "Returns a paginated list of event logs emitted by smart contracts. Can be filtered by transaction, address, block height, or time range.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "transactions"
                 ],
-                "summary": "List logs",
+                "summary": "List event logs",
                 "operationId": "list-transaction-log",
                 "parameters": [
                     {
                         "maxLength": 66,
                         "minLength": 66,
                         "type": "string",
-                        "description": "Transaction hash in hexadecimal with 0x prefix",
+                        "example": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                        "description": "Filter by transaction hash (hexadecimal with 0x prefix)",
                         "name": "tx_hash",
                         "in": "query"
                     },
@@ -685,14 +717,16 @@ const docTemplate = `{
                         "maximum": 100,
                         "minimum": 1,
                         "type": "integer",
-                        "description": "Count of requested entities",
+                        "default": 10,
+                        "description": "Number of logs to return (default: 10)",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "minimum": 0,
                         "type": "integer",
-                        "description": "Offset",
+                        "default": 0,
+                        "description": "Number of logs to skip (default: 0)",
                         "name": "offset",
                         "in": "query"
                     },
@@ -700,15 +734,33 @@ const docTemplate = `{
                         "maxLength": 42,
                         "minLength": 42,
                         "type": "string",
-                        "description": "Address whose invocation generated this log",
+                        "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+                        "description": "Filter by contract address that emitted the log",
                         "name": "address",
                         "in": "query"
                     },
                     {
                         "minimum": 1,
                         "type": "integer",
-                        "description": "Block height",
+                        "example": 12345,
+                        "description": "Filter by block height",
                         "name": "height",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "example": 1692892095,
+                        "description": "Filter by timestamp from (Unix timestamp)",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "example": 1692892095,
+                        "description": "Filter by timestamp to (Unix timestamp)",
+                        "name": "to",
                         "in": "query"
                     },
                     {
@@ -717,29 +769,30 @@ const docTemplate = `{
                             "desc"
                         ],
                         "type": "string",
-                        "description": "Sort order. Default: desc",
+                        "default": "desc",
+                        "description": "Sort order by timestamp (default: desc)",
                         "name": "sort",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "List of event logs",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/responses.Trace"
+                                "$ref": "#/definitions/responses.Log"
                             }
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid request parameters",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -749,28 +802,30 @@ const docTemplate = `{
         },
         "/proxy": {
             "get": {
-                "description": "List of all indexed proxy contracts",
+                "description": "Returns a paginated list of proxy contracts. Proxy contracts are smart contracts that delegate calls to implementation contracts. Can be filtered by type, status, implementation address, or deployment height.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "proxy-contracts"
                 ],
-                "summary": "Proxy contracts list",
+                "summary": "List proxy contracts",
                 "operationId": "list-proxy-contracts",
                 "parameters": [
                     {
                         "maximum": 100,
                         "minimum": 1,
                         "type": "integer",
-                        "description": "Count of requested entities",
+                        "default": 10,
+                        "description": "Number of proxy contracts to return (default: 10)",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "minimum": 0,
                         "type": "integer",
-                        "description": "Offset",
+                        "default": 0,
+                        "description": "Number of proxy contracts to skip (default: 0)",
                         "name": "offset",
                         "in": "query"
                     },
@@ -780,14 +835,16 @@ const docTemplate = `{
                             "desc"
                         ],
                         "type": "string",
-                        "description": "Sort order. Default: desc",
+                        "default": "desc",
+                        "description": "Sort order by deployment height (default: desc)",
                         "name": "sort",
                         "in": "query"
                     },
                     {
                         "minimum": 1,
                         "type": "integer",
-                        "description": "Proxy contract deploy height",
+                        "example": 12345,
+                        "description": "Filter by deployment block height",
                         "name": "height",
                         "in": "query"
                     },
@@ -795,7 +852,8 @@ const docTemplate = `{
                         "maxLength": 42,
                         "minLength": 42,
                         "type": "string",
-                        "description": "Proxy contract implementation address",
+                        "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+                        "description": "Filter by implementation contract address",
                         "name": "implementation",
                         "in": "query"
                     },
@@ -809,7 +867,7 @@ const docTemplate = `{
                             "clone_with_immutable_args"
                         ],
                         "type": "string",
-                        "description": "Comma-separated proxy contracts type",
+                        "description": "Filter by proxy pattern (comma-separated list)",
                         "name": "type",
                         "in": "query"
                     },
@@ -820,14 +878,14 @@ const docTemplate = `{
                             "error"
                         ],
                         "type": "string",
-                        "description": "Comma-separated proxy contracts status",
+                        "description": "Filter by resolution status: new (just detected), resolved (implementation found), error (failed to resolve) (comma-separated)",
                         "name": "status",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "List of proxy contracts",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -836,13 +894,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid request parameters",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -852,19 +910,20 @@ const docTemplate = `{
         },
         "/search": {
             "get": {
-                "description": "search",
+                "description": "Performs a universal search across the blockchain. Supports searching by: block height (numeric), transaction hash (0x prefixed hex), address (0x prefixed hex), or token name/symbol (text). Returns matching blocks, transactions, addresses, and tokens.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "search"
                 ],
-                "summary": "Search by hash",
+                "summary": "Universal search",
                 "operationId": "search",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Search string",
+                        "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+                        "description": "Search query: block height (e.g., 12345), transaction/block hash (e.g., 0x1234...), address (e.g., 0x742d...), or token name/symbol (e.g., USDC)",
                         "name": "query",
                         "in": "query",
                         "required": true
@@ -872,7 +931,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Search results (can include blocks, transactions, addresses, tokens)",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -881,16 +940,16 @@ const docTemplate = `{
                         }
                     },
                     "204": {
-                        "description": "No Content"
+                        "description": "No results found"
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid search query",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -900,7 +959,7 @@ const docTemplate = `{
         },
         "/token_balances": {
             "get": {
-                "description": "List token balances",
+                "description": "Returns a paginated list of token balances showing how many tokens each address holds. Can be filtered by address, contract, or token ID. Useful for finding token holders.",
                 "produces": [
                     "application/json"
                 ],
@@ -914,14 +973,16 @@ const docTemplate = `{
                         "maximum": 100,
                         "minimum": 1,
                         "type": "integer",
-                        "description": "Count of requested entities",
+                        "default": 10,
+                        "description": "Number of balances to return (default: 10)",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "minimum": 0,
                         "type": "integer",
-                        "description": "Offset",
+                        "default": 0,
+                        "description": "Number of balances to skip (default: 0)",
                         "name": "offset",
                         "in": "query"
                     },
@@ -931,7 +992,8 @@ const docTemplate = `{
                             "desc"
                         ],
                         "type": "string",
-                        "description": "Sort order. Default: desc",
+                        "default": "asc",
+                        "description": "Sort order (default: asc)",
                         "name": "sort",
                         "in": "query"
                     },
@@ -939,7 +1001,8 @@ const docTemplate = `{
                         "maxLength": 42,
                         "minLength": 42,
                         "type": "string",
-                        "description": "Address",
+                        "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+                        "description": "Filter by holder address",
                         "name": "address",
                         "in": "query"
                     },
@@ -947,20 +1010,22 @@ const docTemplate = `{
                         "maxLength": 42,
                         "minLength": 42,
                         "type": "string",
-                        "description": "Contract address",
+                        "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+                        "description": "Filter by token contract address",
                         "name": "contract",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Token ID",
+                        "example": "0",
+                        "description": "Filter by token ID",
                         "name": "token_id",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "List of token balances",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -969,13 +1034,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid request parameters",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -985,7 +1050,7 @@ const docTemplate = `{
         },
         "/tokens": {
             "get": {
-                "description": "List tokens",
+                "description": "Returns a paginated list of tokens (ERC20, ERC721, ERC1155). Can be filtered by token type or issuing contract address.",
                 "produces": [
                     "application/json"
                 ],
@@ -999,7 +1064,8 @@ const docTemplate = `{
                         "maxLength": 42,
                         "minLength": 42,
                         "type": "string",
-                        "description": "Contract address which issued the token",
+                        "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+                        "description": "Filter by contract address that issued the token",
                         "name": "contract",
                         "in": "query"
                     },
@@ -1007,14 +1073,16 @@ const docTemplate = `{
                         "maximum": 100,
                         "minimum": 1,
                         "type": "integer",
-                        "description": "Count of requested entities",
+                        "default": 10,
+                        "description": "Number of tokens to return (default: 10)",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "minimum": 0,
                         "type": "integer",
-                        "description": "Offset",
+                        "default": 0,
+                        "description": "Number of tokens to skip (default: 0)",
                         "name": "offset",
                         "in": "query"
                     },
@@ -1025,7 +1093,7 @@ const docTemplate = `{
                             "ERC1155"
                         ],
                         "type": "string",
-                        "description": "Comma-separated list of token types",
+                        "description": "Filter by token standard (comma-separated list)",
                         "name": "type",
                         "in": "query"
                     },
@@ -1035,14 +1103,15 @@ const docTemplate = `{
                             "desc"
                         ],
                         "type": "string",
-                        "description": "Sort order. Default: desc",
+                        "default": "desc",
+                        "description": "Sort order by creation time (default: desc)",
                         "name": "sort",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "List of tokens",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -1051,13 +1120,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid request parameters",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -1067,28 +1136,30 @@ const docTemplate = `{
         },
         "/tokens/{contract}/{token_id}": {
             "get": {
-                "description": "Get token info",
+                "description": "Returns detailed information about a specific token including metadata, supply, and holder information. For ERC20 tokens use token_id=0, for ERC721/ERC1155 use the specific token ID.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "token"
                 ],
-                "summary": "Get token info",
+                "summary": "Get token by contract and ID",
                 "operationId": "get-token",
                 "parameters": [
                     {
                         "maxLength": 42,
                         "minLength": 42,
                         "type": "string",
-                        "description": "Contract address",
+                        "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+                        "description": "Token contract address",
                         "name": "contract",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Token ID",
+                        "example": "0",
+                        "description": "Token ID (use 0 for ERC20)",
                         "name": "token_id",
                         "in": "path",
                         "required": true
@@ -1096,22 +1167,22 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Token information",
                         "schema": {
                             "$ref": "#/definitions/responses.Token"
                         }
                     },
                     "204": {
-                        "description": "No Content"
+                        "description": "Token not found"
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid contract address or token ID",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -1121,21 +1192,22 @@ const docTemplate = `{
         },
         "/traces": {
             "get": {
-                "description": "List transaction traces",
+                "description": "Returns a paginated list of execution traces showing internal calls, contract creations, and other EVM operations. Traces provide detailed insight into transaction execution. Can be filtered by transaction, addresses, contract, block height, or trace type.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "transactions"
                 ],
-                "summary": "List transaction traces",
+                "summary": "List execution traces",
                 "operationId": "list-transaction-traces",
                 "parameters": [
                     {
                         "maxLength": 66,
                         "minLength": 66,
                         "type": "string",
-                        "description": "Transaction hash in hexadecimal with 0x prefix",
+                        "example": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                        "description": "Filter by transaction hash (hexadecimal with 0x prefix)",
                         "name": "tx_hash",
                         "in": "query"
                     },
@@ -1143,14 +1215,16 @@ const docTemplate = `{
                         "maximum": 100,
                         "minimum": 1,
                         "type": "integer",
-                        "description": "Count of requested entities",
+                        "default": 10,
+                        "description": "Number of traces to return (default: 10)",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "minimum": 0,
                         "type": "integer",
-                        "description": "Offset",
+                        "default": 0,
+                        "description": "Number of traces to skip (default: 0)",
                         "name": "offset",
                         "in": "query"
                     },
@@ -1158,7 +1232,8 @@ const docTemplate = `{
                         "maxLength": 42,
                         "minLength": 42,
                         "type": "string",
-                        "description": "Address which initiate trace",
+                        "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+                        "description": "Filter by initiator address",
                         "name": "address_from",
                         "in": "query"
                     },
@@ -1166,7 +1241,8 @@ const docTemplate = `{
                         "maxLength": 42,
                         "minLength": 42,
                         "type": "string",
-                        "description": "Address which receiving trace result",
+                        "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+                        "description": "Filter by target address",
                         "name": "address_to",
                         "in": "query"
                     },
@@ -1174,14 +1250,16 @@ const docTemplate = `{
                         "maxLength": 42,
                         "minLength": 42,
                         "type": "string",
-                        "description": "Called contract",
+                        "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+                        "description": "Filter by called contract address",
                         "name": "contract",
                         "in": "query"
                     },
                     {
                         "minimum": 1,
                         "type": "integer",
-                        "description": "Block height",
+                        "example": 12345,
+                        "description": "Filter by block height",
                         "name": "height",
                         "in": "query"
                     },
@@ -1197,7 +1275,7 @@ const docTemplate = `{
                             "suicide"
                         ],
                         "type": "string",
-                        "description": "Comma-separated list of trace types",
+                        "description": "Filter by trace type (comma-separated list)",
                         "name": "type",
                         "in": "query"
                     },
@@ -1207,14 +1285,15 @@ const docTemplate = `{
                             "desc"
                         ],
                         "type": "string",
-                        "description": "Sort order. Default: desc",
+                        "default": "desc",
+                        "description": "Sort order (default: desc)",
                         "name": "sort",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "List of execution traces",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -1223,13 +1302,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid request parameters",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -1239,7 +1318,7 @@ const docTemplate = `{
         },
         "/transfers": {
             "get": {
-                "description": "List token transfers",
+                "description": "Returns a paginated list of token transfer events (mint, burn, transfer). Can be filtered by transfer type, addresses, contract, token ID, transaction, block height, or time range.",
                 "produces": [
                     "application/json"
                 ],
@@ -1253,14 +1332,16 @@ const docTemplate = `{
                         "maximum": 100,
                         "minimum": 1,
                         "type": "integer",
-                        "description": "Count of requested entities",
+                        "default": 10,
+                        "description": "Number of transfers to return (default: 10)",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "minimum": 0,
                         "type": "integer",
-                        "description": "Offset",
+                        "default": 0,
+                        "description": "Number of transfers to skip (default: 0)",
                         "name": "offset",
                         "in": "query"
                     },
@@ -1270,27 +1351,33 @@ const docTemplate = `{
                             "desc"
                         ],
                         "type": "string",
-                        "description": "Sort order. Default: desc",
+                        "default": "asc",
+                        "description": "Sort order by timestamp (default: asc)",
                         "name": "sort",
                         "in": "query"
                     },
                     {
                         "minimum": 0,
                         "type": "integer",
-                        "description": "Block height",
+                        "example": 12345,
+                        "description": "Filter by block height",
                         "name": "height",
                         "in": "query"
                     },
                     {
+                        "minimum": 1,
                         "type": "integer",
-                        "description": "Time from in unix timestamp",
-                        "name": "time_from",
+                        "example": 1692892095,
+                        "description": "Filter by timestamp from (Unix timestamp)",
+                        "name": "from",
                         "in": "query"
                     },
                     {
+                        "minimum": 1,
                         "type": "integer",
-                        "description": "Time to in unix timestamp",
-                        "name": "time_to",
+                        "example": 1692892095,
+                        "description": "Filter by timestamp to (Unix timestamp)",
+                        "name": "to",
                         "in": "query"
                     },
                     {
@@ -1301,7 +1388,7 @@ const docTemplate = `{
                             "unknown"
                         ],
                         "type": "string",
-                        "description": "Comma-separated list of token types",
+                        "description": "Filter by transfer type (comma-separated list)",
                         "name": "type",
                         "in": "query"
                     },
@@ -1309,7 +1396,8 @@ const docTemplate = `{
                         "maxLength": 66,
                         "minLength": 66,
                         "type": "string",
-                        "description": "Transaction hash in hexadecimal with 0x prefix",
+                        "example": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                        "description": "Filter by transaction hash (hexadecimal with 0x prefix)",
                         "name": "tx_hash",
                         "in": "query"
                     },
@@ -1317,7 +1405,8 @@ const docTemplate = `{
                         "maxLength": 42,
                         "minLength": 42,
                         "type": "string",
-                        "description": "Address from",
+                        "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+                        "description": "Filter by sender address",
                         "name": "address_from",
                         "in": "query"
                     },
@@ -1325,7 +1414,8 @@ const docTemplate = `{
                         "maxLength": 42,
                         "minLength": 42,
                         "type": "string",
-                        "description": "Address to",
+                        "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+                        "description": "Filter by recipient address",
                         "name": "address_to",
                         "in": "query"
                     },
@@ -1333,20 +1423,22 @@ const docTemplate = `{
                         "maxLength": 42,
                         "minLength": 42,
                         "type": "string",
-                        "description": "Contract address",
+                        "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+                        "description": "Filter by token contract address",
                         "name": "contract",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Token ID",
+                        "example": "0",
+                        "description": "Filter by token ID",
                         "name": "token_id",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "List of token transfers",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -1355,13 +1447,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid request parameters",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -1371,42 +1463,44 @@ const docTemplate = `{
         },
         "/transfers/{id}": {
             "get": {
-                "description": "Get token transfer info",
+                "description": "Returns detailed information about a specific token transfer event by its internal database ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "token"
                 ],
-                "summary": "Get token transfer info",
+                "summary": "Get token transfer by ID",
                 "operationId": "get-token-transfer",
                 "parameters": [
                     {
+                        "minimum": 1,
                         "type": "integer",
-                        "description": "Internal id",
-                        "name": "contract",
+                        "example": 12345,
+                        "description": "Transfer internal ID",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Transfer information",
                         "schema": {
                             "$ref": "#/definitions/responses.Transfer"
                         }
                     },
                     "204": {
-                        "description": "No Content"
+                        "description": "Transfer not found"
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid transfer ID",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -1416,28 +1510,30 @@ const docTemplate = `{
         },
         "/txs": {
             "get": {
-                "description": "List all of indexed transactions",
+                "description": "Returns a paginated list of blockchain transactions. Can be filtered by addresses, contract, block height, transaction type, status, or time range. Supports various transaction types including legacy, EIP-1559 (dynamic fee), EIP-4844 (blob), and EIP-7702 (set code).",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "transactions"
                 ],
-                "summary": "Transactions list",
+                "summary": "List transactions",
                 "operationId": "list-transactions",
                 "parameters": [
                     {
                         "maximum": 100,
                         "minimum": 1,
                         "type": "integer",
-                        "description": "Count of requested entities",
+                        "default": 10,
+                        "description": "Number of transactions to return (default: 10)",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "minimum": 0,
                         "type": "integer",
-                        "description": "Offset",
+                        "default": 0,
+                        "description": "Number of transactions to skip (default: 0)",
                         "name": "offset",
                         "in": "query"
                     },
@@ -1445,7 +1541,8 @@ const docTemplate = `{
                         "maxLength": 42,
                         "minLength": 42,
                         "type": "string",
-                        "description": "Address which used for sending tx",
+                        "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+                        "description": "Filter by sender address",
                         "name": "address_from",
                         "in": "query"
                     },
@@ -1453,7 +1550,8 @@ const docTemplate = `{
                         "maxLength": 42,
                         "minLength": 42,
                         "type": "string",
-                        "description": "Address which used for receiving tx",
+                        "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+                        "description": "Filter by recipient address",
                         "name": "address_to",
                         "in": "query"
                     },
@@ -1461,14 +1559,16 @@ const docTemplate = `{
                         "maxLength": 42,
                         "minLength": 42,
                         "type": "string",
-                        "description": "Contract address which was called",
+                        "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+                        "description": "Filter by called contract address",
                         "name": "contract",
                         "in": "query"
                     },
                     {
                         "minimum": 1,
                         "type": "integer",
-                        "description": "Block height",
+                        "example": 12345,
+                        "description": "Filter by block height",
                         "name": "height",
                         "in": "query"
                     },
@@ -1481,7 +1581,7 @@ const docTemplate = `{
                             "TxTypeSetCode"
                         ],
                         "type": "string",
-                        "description": "Comma-separated list of transaction types",
+                        "description": "Filter by transaction type (comma-separated list)",
                         "name": "type",
                         "in": "query"
                     },
@@ -1491,8 +1591,24 @@ const docTemplate = `{
                             "TxStatusRevert"
                         ],
                         "type": "string",
-                        "description": "Comma-separated list of transaction statuses",
+                        "description": "Filter by execution status (comma-separated list)",
                         "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "example": 1692892095,
+                        "description": "Filter by timestamp from (Unix timestamp)",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "example": 1692892095,
+                        "description": "Filter by timestamp to (Unix timestamp)",
+                        "name": "to",
                         "in": "query"
                     },
                     {
@@ -1501,14 +1617,15 @@ const docTemplate = `{
                             "desc"
                         ],
                         "type": "string",
-                        "description": "Sort order. Default: desc",
+                        "default": "desc",
+                        "description": "Sort order by timestamp (default: desc)",
                         "name": "sort",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "List of transactions",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -1517,13 +1634,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid request parameters",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -1533,7 +1650,7 @@ const docTemplate = `{
         },
         "/txs/{hash}": {
             "get": {
-                "description": "Get transaction by hash",
+                "description": "Returns detailed information about a specific transaction including status, gas used, value transferred, and associated traces",
                 "produces": [
                     "application/json"
                 ],
@@ -1547,6 +1664,7 @@ const docTemplate = `{
                         "maxLength": 66,
                         "minLength": 66,
                         "type": "string",
+                        "example": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
                         "description": "Transaction hash in hexadecimal with 0x prefix",
                         "name": "hash",
                         "in": "path",
@@ -1555,22 +1673,22 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Transaction information",
                         "schema": {
                             "$ref": "#/definitions/responses.Transaction"
                         }
                     },
                     "204": {
-                        "description": "No Content"
+                        "description": "Transaction not found"
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid transaction hash format",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/handler.Error"
                         }
@@ -1644,6 +1762,7 @@ const docTemplate = `{
             }
         },
         "responses.Block": {
+            "description": "Noble block information",
             "type": "object",
             "properties": {
                 "difficulty": {
@@ -1720,6 +1839,7 @@ const docTemplate = `{
             }
         },
         "responses.BlockStats": {
+            "description": "Block statistics information",
             "type": "object",
             "properties": {
                 "block_time": {
@@ -1803,41 +1923,110 @@ const docTemplate = `{
             }
         },
         "responses.Enums": {
+            "description": "Available enum values for various entity types",
             "type": "object",
             "properties": {
                 "token_type": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "ERC20",
+                        "ERC721",
+                        "ERC1155"
+                    ]
                 },
                 "trace_type": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "call",
+                        "create"
+                    ]
                 },
                 "transfer_type": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "transfer",
+                        "mint",
+                        "burn"
+                    ]
                 },
                 "tx_status": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "success",
+                        "revert"
+                    ]
                 },
                 "tx_type": {
                     "type": "array",
                     "items": {
                         "type": "string"
+                    },
+                    "example": [
+                        "legacy",
+                        "dynamic_fee"
+                    ]
+                }
+            }
+        },
+        "responses.Log": {
+            "description": "Token transfer information",
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "0x0000000000000000000000000000000000000001"
+                },
+                "data": {
+                    "type": "string",
+                    "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+                },
+                "height": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "index": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "0xff64905f73a67fb594e0f940a8075a860db489ad991e032f48c81123eb52d60b"
+                },
+                "time": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2026-01-01T01:01:01+00:00"
+                },
+                "topics": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
                     }
+                },
+                "tx_hash": {
+                    "type": "string",
+                    "example": "0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d"
                 }
             }
         },
         "responses.ProxyContract": {
+            "description": "Proxy contract information",
             "type": "object",
             "properties": {
                 "contract": {
@@ -1876,6 +2065,7 @@ const docTemplate = `{
             }
         },
         "responses.SearchItem": {
+            "description": "Search result item",
             "type": "object",
             "properties": {
                 "result": {
@@ -1884,11 +2074,47 @@ const docTemplate = `{
                 },
                 "type": {
                     "description": "Result type which is in the result. Can be 'address', 'block', 'tx', 'token'",
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "address",
+                        "block",
+                        "tx",
+                        "token"
+                    ],
+                    "example": "address"
+                }
+            }
+        },
+        "responses.Source": {
+            "description": "Contract source information",
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string",
+                    "example": "Source content"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 321
+                },
+                "license": {
+                    "type": "string",
+                    "example": "License"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Contract source name"
+                },
+                "urls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
         "responses.State": {
+            "description": "Blockchain indexer state information",
             "type": "object",
             "properties": {
                 "hash": {
@@ -1995,6 +2221,7 @@ const docTemplate = `{
             }
         },
         "responses.Trace": {
+            "description": "Transaction execution trace information",
             "type": "object",
             "properties": {
                 "amount": {
@@ -2083,6 +2310,7 @@ const docTemplate = `{
             }
         },
         "responses.Transaction": {
+            "description": "Noble transaction information",
             "type": "object",
             "properties": {
                 "amount": {
