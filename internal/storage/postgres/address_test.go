@@ -172,7 +172,7 @@ func (s *StorageTestSuite) TestListWithBalanceLimitOffset() {
 	})
 	s.Require().NoError(err)
 	s.Require().Len(addresses, 1)
-	
+
 	s.Require().EqualValues(2, addresses[0].Id)
 	s.Require().EqualValues(200, addresses[0].FirstHeight)
 	s.Require().EqualValues(650, addresses[0].LastHeight)
