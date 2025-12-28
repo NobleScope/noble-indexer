@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/pkg/types"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 )
@@ -87,7 +88,12 @@ func (s *StorageTestSuite) TestBlockListWithStats() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
 
-	blocks, err := s.storage.Blocks.ListWithStats(ctx, 10, 0, sdk.SortOrderAsc)
+	blocks, err := s.storage.Blocks.Filter(ctx, storage.BlockListFilter{
+		Limit:     10,
+		Offset:    0,
+		Sort:      sdk.SortOrderAsc,
+		WithStats: true,
+	})
 	s.Require().NoError(err)
 	s.Require().Len(blocks, 5)
 
@@ -114,7 +120,12 @@ func (s *StorageTestSuite) TestBlockListWithStatsDesc() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
 
-	blocks, err := s.storage.Blocks.ListWithStats(ctx, 10, 0, sdk.SortOrderDesc)
+	blocks, err := s.storage.Blocks.Filter(ctx, storage.BlockListFilter{
+		Limit:     10,
+		Offset:    0,
+		Sort:      sdk.SortOrderDesc,
+		WithStats: true,
+	})
 	s.Require().NoError(err)
 	s.Require().Len(blocks, 5)
 
@@ -129,7 +140,12 @@ func (s *StorageTestSuite) TestBlockListWithStatsLimitOffset() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
 
-	blocks, err := s.storage.Blocks.ListWithStats(ctx, 2, 1, sdk.SortOrderAsc)
+	blocks, err := s.storage.Blocks.Filter(ctx, storage.BlockListFilter{
+		Limit:     2,
+		Offset:    1,
+		Sort:      sdk.SortOrderAsc,
+		WithStats: true,
+	})
 	s.Require().NoError(err)
 	s.Require().Len(blocks, 2)
 
@@ -144,7 +160,12 @@ func (s *StorageTestSuite) TestBlockListWithStatsEmptyResult() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
 
-	blocks, err := s.storage.Blocks.ListWithStats(ctx, 10, 100, sdk.SortOrderAsc)
+	blocks, err := s.storage.Blocks.Filter(ctx, storage.BlockListFilter{
+		Limit:     10,
+		Offset:    100,
+		Sort:      sdk.SortOrderAsc,
+		WithStats: true,
+	})
 	s.Require().NoError(err)
 	s.Require().Len(blocks, 0)
 }
@@ -153,7 +174,12 @@ func (s *StorageTestSuite) TestBlockListWithStatsBlockWithoutStats() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
 
-	blocks, err := s.storage.Blocks.ListWithStats(ctx, 10, 0, sdk.SortOrderAsc)
+	blocks, err := s.storage.Blocks.Filter(ctx, storage.BlockListFilter{
+		Limit:     10,
+		Offset:    0,
+		Sort:      sdk.SortOrderAsc,
+		WithStats: true,
+	})
 	s.Require().NoError(err)
 	s.Require().Len(blocks, 5)
 
@@ -161,4 +187,46 @@ func (s *StorageTestSuite) TestBlockListWithStatsBlockWithoutStats() {
 	s.Require().EqualValues(4, blocks[3].Id)
 	s.Require().EqualValues(400, blocks[3].Height)
 	s.Require().Nil(blocks[3].Stats)
+}
+
+func (s *StorageTestSuite) TestBlockFilterWithoutStats() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	blocks, err := s.storage.Blocks.Filter(ctx, storage.BlockListFilter{
+		Limit:     10,
+		Offset:    0,
+		Sort:      sdk.SortOrderAsc,
+		WithStats: false,
+	})
+	s.Require().NoError(err)
+	s.Require().Len(blocks, 5)
+
+	// Check that Stats are not loaded
+	for _, block := range blocks {
+		s.Require().Nil(block.Stats)
+	}
+
+	// Check basic block data is present
+	s.Require().EqualValues(1, blocks[0].Id)
+	s.Require().EqualValues(100, blocks[0].Height)
+}
+
+func (s *StorageTestSuite) TestBlockFilterLimitExceedsTotal() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	// Request 100 blocks when only 5 exist
+	blocks, err := s.storage.Blocks.Filter(ctx, storage.BlockListFilter{
+		Limit:     100,
+		Offset:    0,
+		Sort:      sdk.SortOrderAsc,
+		WithStats: false,
+	})
+	s.Require().NoError(err)
+	s.Require().Len(blocks, 5)
+
+	// Verify all 5 blocks are returned
+	s.Require().EqualValues(1, blocks[0].Id)
+	s.Require().EqualValues(5, blocks[4].Id)
 }

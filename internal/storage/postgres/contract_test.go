@@ -55,7 +55,7 @@ func (s *StorageTestSuite) TestContractByHashWithProxy() {
 
 	// Check proxy implementation
 	s.Require().NotNil(contract.Implementation)
-	s.Require().EqualValues("0x30f055506ba543ea0942dc8ca03f596ab75bc879", *contract.Implementation)
+	s.Require().EqualValues("0x30f055506ba543ea0942dc8ca03f596ab75bc879", contract.Implementation.Hex())
 }
 
 func (s *StorageTestSuite) TestContractByHashNotFound() {
