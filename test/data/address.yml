@@ -60,3 +60,48 @@
   txs_count: 1
   contracts_count: 0
   interactions: 1
+
+- id: 8
+  first_height: 500
+  last_height: 500
+  hash: '0x80f055506ba543ea0942dc8ca03f596ab75bc884'
+  is_contract: true
+  txs_count: 1
+  contracts_count: 0
+  interactions: 1
+
+- id: 9
+  first_height: 600
+  last_height: 600
+  hash: '0x90f055506ba543ea0942dc8ca03f596ab75bc885'
+  is_contract: true
+  txs_count: 1
+  contracts_count: 0
+  interactions: 1
+
+- id: 10
+  first_height: 600
+  last_height: 600
+  hash: '0xa0f055506ba543ea0942dc8ca03f596ab75bc886'
+  is_contract: true
+  txs_count: 1
+  contracts_count: 0
+  interactions: 1
+
+- id: 11
+  first_height: 700
+  last_height: 700
+  hash: '0xb0f055506ba543ea0942dc8ca03f596ab75bc887'
+  is_contract: true
+  txs_count: 1
+  contracts_count: 0
+  interactions: 1
+
+- id: 12
+  first_height: 800
+  last_height: 800
+  hash: '0xc0f055506ba543ea0942dc8ca03f596ab75bc888'
+  is_contract: true
+  txs_count: 1
+  contracts_count: 0
+  interactions: 1

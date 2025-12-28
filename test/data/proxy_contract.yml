@@ -4,3 +4,45 @@
   status: 'resolved'
   resolving_attempts: 1
   implementation_id: 3
+
+- id: 7
+  height: 500
+  type: 'EIP1167'
+  status: 'new'
+  resolving_attempts: 0
+  implementation_id: null
+
+- id: 8
+  height: 500
+  type: 'EIP1967'
+  status: 'resolved'
+  resolving_attempts: 2
+  implementation_id: 4
+
+- id: 9
+  height: 600
+  type: 'custom'
+  status: 'error'
+  resolving_attempts: 3
+  implementation_id: null
+
+- id: 10
+  height: 600
+  type: 'EIP7702'
+  status: 'new'
+  resolving_attempts: 0
+  implementation_id: null
+
+- id: 11
+  height: 700
+  type: 'EIP1967'
+  status: 'resolved'
+  resolving_attempts: 1
+  implementation_id: 5
+
+- id: 12
+  height: 800
+  type: 'clone_with_immutable_args'
+  status: 'resolved'
+  resolving_attempts: 1
+  implementation_id: 3
