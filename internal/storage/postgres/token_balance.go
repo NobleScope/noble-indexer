@@ -5,6 +5,7 @@ import (
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/dipdup-net/go-lib/database"
+	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage/postgres"
 )
 
@@ -25,14 +26,19 @@ func (t *TokenBalance) Filter(ctx context.Context, filter storage.TokenBalanceLi
 		Model(&tb)
 
 	query = tokenBalanceListFilter(query, filter)
-	err = t.DB().NewSelect().TableExpr("(?) AS token_balance", query).
+
+	outerQuery := t.DB().NewSelect().TableExpr("(?) AS token_balance", query).
 		ColumnExpr("token_balance.*").
 		ColumnExpr("contract_address.hash AS contract__address__hash").
 		ColumnExpr("address.hash AS address__hash").
 		Join("LEFT JOIN contract ON contract.id = token_balance.contract_id").
 		Join("LEFT JOIN address AS contract_address ON contract_address.id = contract.id").
-		Join("LEFT JOIN address ON address.id = token_balance.address_id").
-		Scan(ctx, &tb)
+		Join("LEFT JOIN address ON address.id = token_balance.address_id")
+
+	outerQuery = sortScope(outerQuery, "token_balance.balance", filter.Sort)
+	outerQuery = sortScope(outerQuery, "token_balance.id", sdk.SortOrderAsc)
+
+	err = outerQuery.Scan(ctx, &tb)
 
 	return
 }

@@ -173,6 +173,7 @@ func tokenBalanceListFilter(query *bun.SelectQuery, fltrs storage.TokenBalanceLi
 	query = limitScope(query, fltrs.Limit)
 	query = query.Offset(fltrs.Offset)
 	query = sortScope(query, "balance", fltrs.Sort)
+	query = sortScope(query, "id", sdk.SortOrderAsc)
 
 	return query
 }
