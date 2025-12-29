@@ -1,0 +1,172 @@
+- id: 1
+  token_id: '0'
+  contract_id: 3
+  type: 'ERC20'
+  height: 100
+  last_height: 200
+  name: 'Test Token'
+  symbol: 'TST'
+  decimals: 18
+  transfers_count: 100
+  supply: '1000000000000000000000'
+  metadata_link: 'https://example.com/metadata/1'
+  status: 'success'
+  retry_count: 0
+  error: ''
+  metadata: '{"name":"Test Token","symbol":"TST","description":"A test ERC20 token for testing purposes","decimals":18,"website":"https://testtoken.example.com","logoURI":"https://example.com/logo/tst.png"}'
+  updated_at: '2025-01-01T10:00:00Z'
+
+- id: 2
+  token_id: '1'
+  contract_id: 3
+  type: 'ERC721'
+  height: 150
+  last_height: 250
+  name: 'NFT Collection'
+  symbol: 'NFT'
+  decimals: 0
+  transfers_count: 50
+  supply: '1'
+  metadata_link: 'https://example.com/metadata/2'
+  status: 'pending'
+  retry_count: 0
+  error: ''
+  updated_at: '2025-01-01T09:00:00Z'
+
+- id: 3
+  token_id: '0'
+  contract_id: 4
+  type: 'ERC20'
+  height: 200
+  last_height: 300
+  name: 'Another Token'
+  symbol: 'ANT'
+  decimals: 6
+  transfers_count: 200
+  supply: '500000000000'
+  metadata_link: ''
+  status: 'pending'
+  retry_count: 3
+  error: 'metadata fetch failed'
+  updated_at: '2024-12-25T10:00:00Z'
+
+- id: 4
+  token_id: '2'
+  contract_id: 3
+  type: 'ERC1155'
+  height: 180
+  last_height: 280
+  name: 'Multi Token'
+  symbol: 'MLT'
+  decimals: 0
+  transfers_count: 75
+  supply: '1000'
+  metadata_link: 'https://example.com/metadata/4'
+  status: 'failed'
+  retry_count: 5
+  error: 'timeout'
+  updated_at: '2025-01-01T08:00:00Z'
+
+- id: 5
+  token_id: '0'
+  contract_id: 5
+  type: 'ERC721'
+  height: 250
+  last_height: 350
+  name: 'Rare NFT'
+  symbol: 'RARE'
+  decimals: 0
+  transfers_count: 10
+  supply: '1'
+  metadata_link: 'https://example.com/metadata/5'
+  status: 'success'
+  retry_count: 1
+  error: ''
+  metadata: '{"name":"Rare NFT #0","description":"A unique rare NFT from the collection","image":"ipfs://QmRareNFT123/0.png","attributes":[{"trait_type":"Rarity","value":"Legendary"},{"trait_type":"Edition","value":"First"},{"trait_type":"Background","value":"Gold"}]}'
+  updated_at: '2025-01-01T11:00:00Z'
+
+- id: 6
+  token_id: '5'
+  contract_id: 3
+  type: 'ERC1155'
+  height: 300
+  last_height: 400
+  name: 'Game Item'
+  symbol: 'GAME'
+  decimals: 0
+  transfers_count: 500
+  supply: '10000'
+  metadata_link: ''
+  status: 'pending'
+  retry_count: 0
+  error: ''
+  updated_at: '2025-01-01T12:00:00Z'
+
+- id: 7
+  token_id: '1'
+  contract_id: 4
+  type: 'ERC721'
+  height: 320
+  last_height: 420
+  name: ''
+  symbol: ''
+  decimals: 0
+  transfers_count: 5
+  supply: '1'
+  metadata_link: ''
+  status: 'pending'
+  retry_count: 2
+  error: 'rate limit exceeded'
+  updated_at: '2024-12-20T10:00:00Z'
+
+- id: 8
+  token_id: '0'
+  contract_id: 6
+  type: 'ERC20'
+  height: 350
+  last_height: 450
+  name: 'Stable Coin'
+  symbol: 'STBL'
+  decimals: 8
+  transfers_count: 1000
+  supply: '100000000000000'
+  metadata_link: 'https://example.com/metadata/8'
+  status: 'success'
+  retry_count: 0
+  error: ''
+  metadata: '{"name":"Stable Coin","symbol":"STBL","description":"A stable coin pegged to USD","decimals":8,"website":"https://stablecoin.example.com","social":{"twitter":"https://twitter.com/stablecoin","telegram":"https://t.me/stablecoin"},"tags":["stablecoin","defi"]}'
+  updated_at: '2025-01-01T13:00:00Z'
+
+- id: 9
+  token_id: '100'
+  contract_id: 5
+  type: 'ERC721'
+  height: 400
+  last_height: 500
+  name: 'Special NFT'
+  symbol: 'SPEC'
+  decimals: 0
+  transfers_count: 2
+  supply: '1'
+  metadata_link: 'https://example.com/metadata/9'
+  status: 'pending'
+  retry_count: 1
+  error: ''
+  updated_at: '2024-12-28T10:00:00Z'
+
+- id: 10
+  token_id: '10'
+  contract_id: 3
+  type: 'ERC1155'
+  height: 450
+  last_height: 550
+  name: 'Collectible'
+  symbol: 'COLL'
+  decimals: 0
+  transfers_count: 250
+  supply: '5000'
+  metadata_link: 'https://example.com/metadata/10'
+  status: 'failed'
+  retry_count: 10
+  error: 'server error'
+  updated_at: '2024-12-15T10:00:00Z'
