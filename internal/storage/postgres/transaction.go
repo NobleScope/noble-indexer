@@ -82,8 +82,8 @@ func (tx Transaction) SaveAddresses(ctx context.Context, addresses ...*models.Ad
 	}
 
 	_, err := tx.Tx().NewInsert().Model(&addr).
-		Column("hash", "height", "last_height", "is_contract", "txs_count", "contracts_count", "interactions").
-		On("CONFLICT ON CONSTRAINT address_hash_idx DO UPDATE").
+		Column("hash", "first_height", "last_height", "is_contract", "txs_count", "contracts_count", "interactions").
+		On("CONFLICT (hash) DO UPDATE").
 		Set("last_height = GREATEST(EXCLUDED.last_height, added_address.last_height)").
 		Set("txs_count = EXCLUDED.txs_count + added_address.txs_count").
 		Set("contracts_count = EXCLUDED.contracts_count + added_address.contracts_count").
@@ -111,7 +111,7 @@ func (tx Transaction) SaveBalances(ctx context.Context, balances ...*models.Bala
 
 	_, err := tx.Tx().NewInsert().Model(&balances).
 		Column("id", "currency", "value").
-		On("CONFLICT (id, currency) DO UPDATE").
+		On("CONFLICT (id) DO UPDATE").
 		Set("value = EXCLUDED.value + balance.value").
 		Exec(ctx)
 
@@ -214,7 +214,7 @@ func (tx Transaction) SaveTokenBalances(ctx context.Context, tokens ...*models.T
 
 	var tbs []models.TokenBalance
 	err := tx.Tx().NewInsert().Model(&tokens).
-		On("CONFLICT ON CONSTRAINT token_balance_idx DO UPDATE").
+		On("CONFLICT (address_id, contract_id, token_id) DO UPDATE").
 		Set("balance = token_balance.balance + EXCLUDED.balance").
 		Returning("*").
 		Scan(ctx, &tbs)
