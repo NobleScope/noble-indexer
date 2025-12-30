@@ -110,7 +110,7 @@ func (tx Transaction) SaveBalances(ctx context.Context, balances ...*models.Bala
 	}
 
 	_, err := tx.Tx().NewInsert().Model(&balances).
-		Column("id", "currency", "value").
+		Column("id", "value").
 		On("CONFLICT (id) DO UPDATE").
 		Set("value = EXCLUDED.value + balance.value").
 		Exec(ctx)

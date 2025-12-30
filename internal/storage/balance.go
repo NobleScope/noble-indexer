@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"github.com/baking-bad/noble-indexer/internal/currency"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
@@ -15,9 +14,8 @@ type IBalance interface {
 type Balance struct {
 	bun.BaseModel `bun:"balance" comment:"Table with account balances."`
 
-	Id       uint64          `bun:"id,pk,notnull"      comment:"Unique internal identity"`
-	Currency string          `bun:"currency"           comment:"Balance currency"`
-	Value    decimal.Decimal `bun:"value,type:numeric" comment:"Balance value"`
+	Id    uint64          `bun:"id,pk,notnull"      comment:"Unique internal identity"`
+	Value decimal.Decimal `bun:"value,type:numeric" comment:"Balance value"`
 }
 
 func (Balance) TableName() string {
@@ -26,7 +24,6 @@ func (Balance) TableName() string {
 
 func EmptyBalance() *Balance {
 	return &Balance{
-		Currency: currency.DefaultCurrency,
-		Value:    decimal.Zero,
+		Value: decimal.Zero,
 	}
 }
