@@ -5,7 +5,6 @@ import (
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/dipdup-net/go-lib/database"
-	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage/postgres"
 )
 
@@ -35,8 +34,10 @@ func (t *TokenBalance) Filter(ctx context.Context, filter storage.TokenBalanceLi
 		Join("LEFT JOIN address AS contract_address ON contract_address.id = contract.id").
 		Join("LEFT JOIN address ON address.id = token_balance.address_id")
 
-	outerQuery = sortScope(outerQuery, "token_balance.balance", filter.Sort)
-	outerQuery = sortScope(outerQuery, "token_balance.id", sdk.SortOrderAsc)
+	outerQuery = sortMultipleScope(outerQuery, []SortField{
+		{Field: "token_balance.balance", Order: filter.Sort},
+		{Field: "token_balance.id", Order: filter.Sort},
+	})
 
 	err = outerQuery.Scan(ctx, &tb)
 

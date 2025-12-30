@@ -20,6 +20,18 @@ func sortScope(q *bun.SelectQuery, field string, sort sdk.SortOrder) *bun.Select
 	return q.OrderExpr("? ?", bun.Ident(field), bun.Safe(sort))
 }
 
+type SortField struct {
+	Field string
+	Order sdk.SortOrder
+}
+
+func sortMultipleScope(q *bun.SelectQuery, fields []SortField) *bun.SelectQuery {
+	for i := range fields {
+		q = sortScope(q, fields[i].Field, fields[i].Order)
+	}
+	return q
+}
+
 func sortTimeIDScope(q *bun.SelectQuery, sort sdk.SortOrder) *bun.SelectQuery {
 
 	if sort != sdk.SortOrderAsc && sort != sdk.SortOrderDesc {
@@ -39,8 +51,10 @@ func addressListFilter(query *bun.SelectQuery, fltrs storage.AddressListFilter) 
 
 	switch fltrs.SortField {
 	case "value", "first_height", "last_height":
-		query = sortScope(query, fltrs.SortField, fltrs.Sort)
-		query = sortScope(query, "id", sdk.SortOrderAsc)
+		query = sortMultipleScope(query, []SortField{
+			{Field: fltrs.SortField, Order: fltrs.Sort},
+			{Field: "id", Order: fltrs.Sort},
+		})
 	case "id":
 		query = sortScope(query, "id", fltrs.Sort)
 	default:
@@ -172,8 +186,10 @@ func tokenBalanceListFilter(query *bun.SelectQuery, fltrs storage.TokenBalanceLi
 
 	query = limitScope(query, fltrs.Limit)
 	query = query.Offset(fltrs.Offset)
-	query = sortScope(query, "balance", fltrs.Sort)
-	query = sortScope(query, "id", sdk.SortOrderAsc)
+	query = sortMultipleScope(query, []SortField{
+		{Field: "balance", Order: fltrs.Sort},
+		{Field: "id", Order: fltrs.Sort},
+	})
 
 	return query
 }
