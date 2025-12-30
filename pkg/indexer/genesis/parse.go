@@ -3,7 +3,6 @@ package genesis
 import (
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/currency"
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	dCtx "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/parser"
@@ -29,10 +28,10 @@ func (module *Module) parse(genesis pkgTypes.Genesis) (parsedData, error) {
 	decodeCtx := dCtx.NewContext()
 
 	coinbase := &storage.Address{
-		Hash:       genesis.Coinbase,
-		Height:     0,
-		LastHeight: 0,
-		Balance:    storage.EmptyBalance(),
+		Hash:        genesis.Coinbase,
+		FirstHeight: 0,
+		LastHeight:  0,
+		Balance:     storage.EmptyBalance(),
 	}
 	decodeCtx.AddAddress(coinbase)
 
@@ -48,12 +47,11 @@ func (module *Module) parse(genesis pkgTypes.Genesis) (parsedData, error) {
 		}
 
 		address := &storage.Address{
-			Hash:       hash,
-			Height:     0,
-			LastHeight: 0,
+			Hash:        hash,
+			FirstHeight: 0,
+			LastHeight:  0,
 			Balance: &storage.Balance{
-				Currency: currency.DefaultCurrency,
-				Value:    balance,
+				Value: balance,
 			},
 		}
 		decodeCtx.AddAddress(address)

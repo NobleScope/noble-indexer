@@ -60,13 +60,18 @@ func (p *ProxyContract) FilteredList(
 	}
 	query = limitScope(query, filters.Limit)
 
-	err = p.DB().NewSelect().TableExpr("(?) AS proxy", query).
+	outerQuery := p.DB().NewSelect().TableExpr("(?) AS proxy", query).
 		ColumnExpr("proxy.*").
 		ColumnExpr("impl_addr.hash AS implementation__address__hash").
 		ColumnExpr("contract_addr.hash AS contract__address__hash").
 		Join("LEFT JOIN address AS impl_addr ON impl_addr.id = proxy.implementation_id").
-		Join("LEFT JOIN address AS contract_addr ON contract_addr.id = proxy.id").
-		Scan(ctx, &contracts)
+		Join("LEFT JOIN address AS contract_addr ON contract_addr.id = proxy.id")
+
+	if filters.Sort != "" {
+		outerQuery = sortScope(outerQuery, "proxy.height", filters.Sort)
+	}
+
+	err = outerQuery.Scan(ctx, &contracts)
 
 	return
 }

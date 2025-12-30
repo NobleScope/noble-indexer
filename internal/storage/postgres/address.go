@@ -24,31 +24,32 @@ func NewAddress(db *database.Bun) *Address {
 // ListWithBalance -
 func (a *Address) ListWithBalance(ctx context.Context, filters storage.AddressListFilter) (result []storage.Address, err error) {
 	if filters.SortField == "value" {
-		query := a.DB().NewSelect().
+		balanceQuery := a.DB().NewSelect().
 			Model((*storage.Balance)(nil))
 
-		query = addressListFilter(query, filters)
-		query = a.DB().NewSelect().
-			TableExpr("(?) AS balance", query).
+		balanceQuery = balanceListFilter(balanceQuery, filters)
+		query := a.DB().NewSelect().
+			TableExpr("(?) as balance", balanceQuery).
 			ColumnExpr("address.*").
-			ColumnExpr("balance.currency AS balance__currency, balance.value AS balance__value").
-			Join("LEFT JOIN address ON balance.id = address.id")
+			ColumnExpr("balance.id AS balance__id, balance.value AS balance__value").
+			Join("LEFT JOIN address ON address.id = balance.id")
 
-		query = addressListFilter(query, filters)
+		if filters.OnlyContracts {
+			query = query.Where("address.is_contract = ?", true)
+		}
+
 		err = query.Scan(ctx, &result)
 	} else {
-		query := a.DB().NewSelect().
+		addressQuery := a.DB().NewSelect().
 			Model((*storage.Address)(nil))
 
-		query = addressListFilter(query, filters)
-		query = a.DB().NewSelect().
-			TableExpr("(?) AS address", query).
+		addressQuery = addressListFilter(addressQuery, filters)
+		err = a.DB().NewSelect().
+			TableExpr("(?) as address", addressQuery).
 			ColumnExpr("address.*").
-			ColumnExpr("balance.currency AS balance__currency, balance.value AS balance__value").
-			Join("LEFT JOIN balance ON balance.id = address.id")
-
-		query = addressListFilter(query, filters)
-		err = query.Scan(ctx, &result)
+			ColumnExpr("balance.id AS balance__id, balance.value AS balance__value").
+			Join("LEFT JOIN balance ON balance.id = address.id").
+			Scan(ctx, &result)
 	}
 
 	return
@@ -62,7 +63,7 @@ func (a *Address) ByHash(ctx context.Context, hash pkgTypes.Hex) (address storag
 
 	err = a.DB().NewSelect().TableExpr("(?) AS address", addressQuery).
 		ColumnExpr("address.*").
-		ColumnExpr("balance.currency AS balance__currency, balance.value AS balance__value").
+		ColumnExpr("balance.id AS balance__id, balance.value AS balance__value").
 		Join("LEFT JOIN balance ON balance.id = address.id").
 		Scan(ctx, &address)
 

@@ -1717,7 +1717,7 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 7
                 },
-                "first_height": {
+                "first_first_height": {
                     "type": "integer",
                     "example": 100
                 },

@@ -3,7 +3,6 @@ package rollback
 import (
 	"context"
 
-	"github.com/baking-bad/noble-indexer/internal/currency"
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/internal/storage/types"
 	"github.com/shopspring/decimal"
@@ -126,9 +125,8 @@ func getBalanceUpdates(
 	result := make([]*storage.Balance, 0, len(updates))
 	for i := range updates {
 		balance := &storage.Balance{
-			Id:       i,
-			Currency: currency.DefaultCurrency,
-			Value:    updates[i],
+			Id:    i,
+			Value: updates[i],
 		}
 		result = append(result, balance)
 	}

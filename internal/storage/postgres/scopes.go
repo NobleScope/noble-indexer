@@ -20,6 +20,18 @@ func sortScope(q *bun.SelectQuery, field string, sort sdk.SortOrder) *bun.Select
 	return q.OrderExpr("? ?", bun.Ident(field), bun.Safe(sort))
 }
 
+type SortField struct {
+	Field string
+	Order sdk.SortOrder
+}
+
+func sortMultipleScope(q *bun.SelectQuery, fields []SortField) *bun.SelectQuery {
+	for i := range fields {
+		q = sortScope(q, fields[i].Field, fields[i].Order)
+	}
+	return q
+}
+
 func sortTimeIDScope(q *bun.SelectQuery, sort sdk.SortOrder) *bun.SelectQuery {
 
 	if sort != sdk.SortOrderAsc && sort != sdk.SortOrderDesc {
@@ -38,14 +50,24 @@ func addressListFilter(query *bun.SelectQuery, fltrs storage.AddressListFilter) 
 	query = query.Offset(fltrs.Offset)
 
 	switch fltrs.SortField {
-	case "id", "value", "last_height":
-		query = sortScope(query, fltrs.SortField, fltrs.Sort)
-	case "first_height":
-		query = sortScope(query, "height", fltrs.Sort)
+	case "value", "first_height", "last_height":
+		query = sortMultipleScope(query, []SortField{
+			{Field: fltrs.SortField, Order: fltrs.Sort},
+			{Field: "id", Order: fltrs.Sort},
+		})
+	case "id":
+		query = sortScope(query, "id", fltrs.Sort)
 	default:
 		query = sortScope(query, "id", fltrs.Sort)
 	}
 
+	return query
+}
+
+func balanceListFilter(query *bun.SelectQuery, fltrs storage.AddressListFilter) *bun.SelectQuery {
+	query = limitScope(query, fltrs.Limit)
+	query = query.Offset(fltrs.Offset)
+	query = sortScope(query, "value", fltrs.Sort)
 	return query
 }
 
@@ -55,7 +77,7 @@ func contractListFilter(query *bun.SelectQuery, fltrs storage.ContractListFilter
 	}
 
 	if fltrs.IsVerified {
-		query = query.Where("is_verified = ?", true)
+		query = query.Where("verified = ?", true)
 	}
 
 	query = limitScope(query, fltrs.Limit)
@@ -164,7 +186,10 @@ func tokenBalanceListFilter(query *bun.SelectQuery, fltrs storage.TokenBalanceLi
 
 	query = limitScope(query, fltrs.Limit)
 	query = query.Offset(fltrs.Offset)
-	query = sortScope(query, "balance", fltrs.Sort)
+	query = sortMultipleScope(query, []SortField{
+		{Field: "balance", Order: fltrs.Sort},
+		{Field: "id", Order: fltrs.Sort},
+	})
 
 	return query
 }

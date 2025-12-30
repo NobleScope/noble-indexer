@@ -1,0 +1,48 @@
+- id: 1
+  name: 'Token.sol'
+  license: 'MIT'
+  urls: '{https://github.com/example/token/blob/main/Token.sol}'
+  content: 'contract Token { ... }'
+  contract_id: 3
+
+- id: 2
+  name: 'TokenStorage.sol'
+  license: 'MIT'
+  urls: '{https://github.com/example/token/blob/main/TokenStorage.sol}'
+  content: 'contract TokenStorage { ... }'
+  contract_id: 3
+
+- id: 3
+  name: 'Proxy.sol'
+  license: 'Apache-2.0'
+  urls: '{https://github.com/example/proxy/blob/main/Proxy.sol}'
+  content: 'contract Proxy { ... }'
+  contract_id: 4
+
+- id: 4
+  name: 'ProxyAdmin.sol'
+  license: 'Apache-2.0'
+  urls: '{https://github.com/example/proxy/blob/main/ProxyAdmin.sol}'
+  content: 'contract ProxyAdmin { ... }'
+  contract_id: 4
+
+- id: 5
+  name: 'Implementation.sol'
+  license: 'GPL-3.0'
+  urls: '{https://github.com/example/impl/blob/main/Implementation.sol,https://etherscan.io/address/0x123}'
+  content: 'contract Implementation { ... }'
+  contract_id: 5
+
+- id: 6
+  name: 'Vault.sol'
+  license: 'UNLICENSED'
+  urls: '{}'
+  content: 'contract Vault { ... }'
+  contract_id: 6
+
+- id: 7
+  name: 'VaultV2.sol'
+  license: 'UNLICENSED'
+  urls: '{}'
+  content: 'contract VaultV2 { ... }'
+  contract_id: 6

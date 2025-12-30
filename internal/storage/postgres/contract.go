@@ -62,7 +62,7 @@ func (c *Contract) ByHash(ctx context.Context, hash pkgTypes.Hex) (contract stor
 	err = c.DB().NewSelect().
 		TableExpr("(?) AS contract", query).
 		ColumnExpr("contract.*").
-		ColumnExpr("address.hash AS address__hash").
+		ColumnExpr("address.id AS address__id, address.first_height AS address__first_height, address.last_height AS address__last_height, address.hash AS address__hash, address.is_contract AS address__is_contract, address.txs_count AS address__txs_count, address.contracts_count AS address__contracts_count, address.interactions AS address__interactions").
 		ColumnExpr("tx.hash AS tx__hash").
 		ColumnExpr("implementation_address.hash AS implementation").
 		Join("JOIN address ON address.id = contract.id").

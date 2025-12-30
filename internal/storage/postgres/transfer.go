@@ -25,7 +25,8 @@ func (t *Transfer) Filter(ctx context.Context, filter storage.TransferListFilter
 		Model(&transfers)
 
 	query = transferListFilter(query, filter)
-	err = t.DB().NewSelect().
+
+	outerQuery := t.DB().NewSelect().
 		ColumnExpr("transfer.*").
 		ColumnExpr("tx.hash AS tx__hash").
 		ColumnExpr("from_addr.hash AS from_address__hash").
@@ -36,8 +37,10 @@ func (t *Transfer) Filter(ctx context.Context, filter storage.TransferListFilter
 		Join("LEFT JOIN address AS from_addr ON from_addr.id = transfer.from_address_id").
 		Join("LEFT JOIN address AS to_addr ON to_addr.id = transfer.to_address_id").
 		Join("LEFT JOIN contract ON contract.id = transfer.contract_id").
-		Join("LEFT JOIN address AS contract_addr ON contract_addr.id = contract.id").
-		Scan(ctx, &transfers)
+		Join("LEFT JOIN address AS contract_addr ON contract_addr.id = contract.id")
+
+	outerQuery = sortTimeIDScope(outerQuery, filter.Sort)
+	err = outerQuery.Scan(ctx, &transfers)
 
 	return
 }

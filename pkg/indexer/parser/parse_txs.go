@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"github.com/baking-bad/noble-indexer/internal/currency"
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/internal/storage/types"
 	dCtx "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
@@ -62,7 +61,6 @@ func updateBalances(address *storage.Address, op enum.BalanceOp, amount decimal.
 	}
 
 	address.Balance = &storage.Balance{
-		Currency: currency.DefaultCurrency,
-		Value:    initial,
+		Value: initial,
 	}
 }

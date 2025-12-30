@@ -27,7 +27,7 @@ var (
 
 	testAddress1 = storage.Address{
 		Id:             1,
-		Height:         100,
+		FirstHeight:    100,
 		LastHeight:     200,
 		Hash:           testAddressHex1,
 		IsContract:     false,
@@ -35,15 +35,14 @@ var (
 		ContractsCount: 0,
 		Interactions:   75,
 		Balance: &storage.Balance{
-			Id:       1,
-			Currency: "noble",
-			Value:    decimal.RequireFromString("1000000000"),
+			Id:    1,
+			Value: decimal.RequireFromString("1000000000"),
 		},
 	}
 
 	testAddress2 = storage.Address{
 		Id:             2,
-		Height:         101,
+		FirstHeight:    101,
 		LastHeight:     201,
 		Hash:           testAddressHex2,
 		IsContract:     true,
@@ -51,15 +50,14 @@ var (
 		ContractsCount: 5,
 		Interactions:   150,
 		Balance: &storage.Balance{
-			Id:       2,
-			Currency: "noble",
-			Value:    decimal.RequireFromString("5000000000"),
+			Id:    2,
+			Value: decimal.RequireFromString("5000000000"),
 		},
 	}
 
 	testAddress3 = storage.Address{
 		Id:             3,
-		Height:         102,
+		FirstHeight:    102,
 		LastHeight:     202,
 		Hash:           testAddressHex3,
 		IsContract:     true,
@@ -67,9 +65,8 @@ var (
 		ContractsCount: 2,
 		Interactions:   30,
 		Balance: &storage.Balance{
-			Id:       3,
-			Currency: "noble",
-			Value:    decimal.RequireFromString("2500000000"),
+			Id:    3,
+			Value: decimal.RequireFromString("2500000000"),
 		},
 	}
 )

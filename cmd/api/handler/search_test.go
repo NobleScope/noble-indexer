@@ -29,7 +29,7 @@ const (
 var (
 	testSearchAddress1 = storage.Address{
 		Id:             1,
-		Height:         100,
+		FirstHeight:    100,
 		LastHeight:     200,
 		Hash:           pkgTypes.MustDecodeHex(testSearchTxHash),
 		IsContract:     false,
@@ -37,9 +37,8 @@ var (
 		ContractsCount: 0,
 		Interactions:   75,
 		Balance: &storage.Balance{
-			Id:       1,
-			Currency: "noble",
-			Value:    decimal.RequireFromString("1000000000"),
+			Id:    1,
+			Value: decimal.RequireFromString("1000000000"),
 		},
 	}
 
