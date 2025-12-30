@@ -31,7 +31,7 @@ func (a *Address) ListWithBalance(ctx context.Context, filters storage.AddressLi
 		query := a.DB().NewSelect().
 			TableExpr("(?) as balance", balanceQuery).
 			ColumnExpr("address.*").
-			ColumnExpr("balance.id AS balance__id, balance.currency AS balance__currency, balance.value AS balance__value").
+			ColumnExpr("balance.id AS balance__id, balance.value AS balance__value").
 			Join("LEFT JOIN address ON address.id = balance.id")
 
 		if filters.OnlyContracts {
@@ -47,7 +47,7 @@ func (a *Address) ListWithBalance(ctx context.Context, filters storage.AddressLi
 		err = a.DB().NewSelect().
 			TableExpr("(?) as address", addressQuery).
 			ColumnExpr("address.*").
-			ColumnExpr("balance.id AS balance__id, balance.currency AS balance__currency, balance.value AS balance__value").
+			ColumnExpr("balance.id AS balance__id, balance.value AS balance__value").
 			Join("LEFT JOIN balance ON balance.id = address.id").
 			Scan(ctx, &result)
 	}
@@ -63,7 +63,7 @@ func (a *Address) ByHash(ctx context.Context, hash pkgTypes.Hex) (address storag
 
 	err = a.DB().NewSelect().TableExpr("(?) AS address", addressQuery).
 		ColumnExpr("address.*").
-		ColumnExpr("balance.id AS balance__id, balance.currency AS balance__currency, balance.value AS balance__value").
+		ColumnExpr("balance.id AS balance__id, balance.value AS balance__value").
 		Join("LEFT JOIN balance ON balance.id = address.id").
 		Scan(ctx, &address)
 

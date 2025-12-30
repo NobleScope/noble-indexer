@@ -31,8 +31,7 @@ func NewAddress(addr storage.Address) Address {
 		DeployedContracts: addr.ContractsCount,
 		Interactions:      addr.Interactions,
 		Balance: Balance{
-			Currency: addr.Balance.Currency,
-			Value:    addr.Balance.Value.String(),
+			Value: addr.Balance.Value.String(),
 		},
 	}
 	return address

@@ -26,7 +26,6 @@ func (s *StorageTestSuite) TestByHash() {
 	s.Require().EqualValues(10, address.Interactions)
 	s.Require().NotNil(address.Balance)
 	s.Require().EqualValues(1, address.Balance.Id)
-	s.Require().EqualValues("noble", address.Balance.Currency)
 	s.Require().EqualValues("1000000", address.Balance.Value.String())
 }
 
@@ -64,7 +63,6 @@ func (s *StorageTestSuite) TestByHashContract() {
 	s.Require().EqualValues(25, address.Interactions)
 	s.Require().NotNil(address.Balance)
 	s.Require().EqualValues(3, address.Balance.Id)
-	s.Require().EqualValues("noble", address.Balance.Currency)
 	s.Require().EqualValues("5000000", address.Balance.Value.String())
 }
 
@@ -102,7 +100,6 @@ func (s *StorageTestSuite) TestListWithBalance() {
 	s.Require().EqualValues(10, addresses[0].Interactions)
 	s.Require().NotNil(addresses[0].Balance)
 	s.Require().EqualValues(1, addresses[0].Balance.Id)
-	s.Require().EqualValues("noble", addresses[0].Balance.Currency)
 	s.Require().EqualValues("1000000", addresses[0].Balance.Value.String())
 
 	// Address 2
@@ -127,7 +124,6 @@ func (s *StorageTestSuite) TestListWithBalance() {
 	s.Require().EqualValues(25, addresses[2].Interactions)
 	s.Require().NotNil(addresses[2].Balance)
 	s.Require().EqualValues(3, addresses[2].Balance.Id)
-	s.Require().EqualValues("noble", addresses[2].Balance.Currency)
 	s.Require().EqualValues("5000000", addresses[2].Balance.Value.String())
 }
 
@@ -155,7 +151,6 @@ func (s *StorageTestSuite) TestListWithBalanceOnlyContracts() {
 	s.Require().EqualValues(2, addresses[0].ContractsCount)
 	s.Require().EqualValues(25, addresses[0].Interactions)
 	s.Require().NotNil(addresses[0].Balance)
-	s.Require().EqualValues("noble", addresses[0].Balance.Currency)
 	s.Require().EqualValues("5000000", addresses[0].Balance.Value.String())
 }
 
