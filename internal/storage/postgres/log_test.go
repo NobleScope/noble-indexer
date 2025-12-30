@@ -36,7 +36,7 @@ func (s *StorageTestSuite) TestLogFilterBasic() {
 	// Check that relations are loaded with correct data
 	s.Require().NotNil(logs[0].Tx.Hash)
 	s.Require().NotNil(logs[0].Address.Hash)
-	s.Require().EqualValues("0xabc1234567890abcdef1234567890abcdef1234567890abcdef1234567890abc", logs[0].Tx.Hash.Hex())
+	s.Require().EqualValues("0x90f5df4e03620cc55d3ea295bf8826f84465065340cb6d0d095166dd2465f283", logs[0].Tx.Hash.Hex())
 	s.Require().EqualValues("0xa63d581a7fdab643c09f0524904b046cdb9ad9d2", logs[0].Address.Hash.Hex())
 }
 

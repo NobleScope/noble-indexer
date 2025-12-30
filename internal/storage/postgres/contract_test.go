@@ -37,7 +37,7 @@ func (s *StorageTestSuite) TestContractByHash() {
 
 	// Check Tx relation
 	s.Require().NotNil(contract.Tx)
-	s.Require().EqualValues("0xabc1234567890abcdef1234567890abcdef1234567890abcdef1234567890abc", contract.Tx.Hash.Hex())
+	s.Require().EqualValues("0x90f5df4e03620cc55d3ea295bf8826f84465065340cb6d0d095166dd2465f283", contract.Tx.Hash.Hex())
 
 	// No proxy implementation for this contract
 	s.Require().Nil(contract.Implementation)
@@ -87,7 +87,7 @@ func (s *StorageTestSuite) TestContractListWithTx() {
 	s.Require().EqualValues(100, contracts[0].Height)
 	s.Require().True(contracts[0].Verified)
 	s.Require().NotNil(contracts[0].Tx)
-	s.Require().EqualValues("0xabc1234567890abcdef1234567890abcdef1234567890abcdef1234567890abc", contracts[0].Tx.Hash.Hex())
+	s.Require().EqualValues("0x90f5df4e03620cc55d3ea295bf8826f84465065340cb6d0d095166dd2465f283", contracts[0].Tx.Hash.Hex())
 
 	// Check last contract
 	s.Require().EqualValues(7, contracts[4].Id)
