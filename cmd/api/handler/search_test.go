@@ -37,8 +37,8 @@ var (
 		ContractsCount: 0,
 		Interactions:   75,
 		Balance: &storage.Balance{
-			Id:       1,
-			Value:    decimal.RequireFromString("1000000000"),
+			Id:    1,
+			Value: decimal.RequireFromString("1000000000"),
 		},
 	}
 

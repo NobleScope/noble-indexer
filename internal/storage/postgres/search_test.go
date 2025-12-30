@@ -7,6 +7,10 @@ import (
 	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 )
 
+const (
+	searchTypeToken = "token"
+)
+
 // TestSearchByBlockHash tests Search method with block hash
 func (s *StorageTestSuite) TestSearchByBlockHash() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -57,7 +61,7 @@ func (s *StorageTestSuite) TestSearchTextByTokenName() {
 	// Find the matching result
 	found := false
 	for _, result := range results {
-		if result.Id == 1 && result.Type == "token" && result.Value == "Test Token" {
+		if result.Id == 1 && result.Type == searchTypeToken && result.Value == "Test Token" {
 			found = true
 			break
 		}
@@ -77,7 +81,7 @@ func (s *StorageTestSuite) TestSearchTextByTokenSymbol() {
 	// Find the matching result
 	found := false
 	for _, result := range results {
-		if result.Id == 1 && result.Type == "token" && result.Value == "TST" {
+		if result.Id == 1 && result.Type == searchTypeToken && result.Value == "TST" {
 			found = true
 			break
 		}
@@ -96,7 +100,7 @@ func (s *StorageTestSuite) TestSearchTextPartialName() {
 
 	// Verify all results contain "Token" in the name
 	for _, result := range results {
-		if result.Type == "token" {
+		if result.Type == searchTypeToken {
 			// Value should contain "Token" or be a symbol
 			s.Require().NotEmpty(result.Value)
 		}
@@ -125,7 +129,7 @@ func (s *StorageTestSuite) TestSearchTextCaseInsensitiveLowercase() {
 	// Find the matching result
 	found := false
 	for _, result := range results {
-		if result.Id == 1 && result.Type == "token" && result.Value == "Test Token" {
+		if result.Id == 1 && result.Type == searchTypeToken && result.Value == "Test Token" {
 			found = true
 			break
 		}
@@ -145,7 +149,7 @@ func (s *StorageTestSuite) TestSearchTextCaseInsensitiveUppercase() {
 	// Find the matching result
 	found := false
 	for _, result := range results {
-		if result.Id == 5 && result.Type == "token" && result.Value == "Rare NFT" {
+		if result.Id == 5 && result.Type == searchTypeToken && result.Value == "Rare NFT" {
 			found = true
 			break
 		}
@@ -202,7 +206,7 @@ func (s *StorageTestSuite) TestSearchTextBySymbolOnly() {
 	// Should find token with symbol "COLL" (Collectible)
 	found := false
 	for _, result := range results {
-		if result.Id == 10 && result.Type == "token" && result.Value == "COLL" {
+		if result.Id == 10 && result.Type == searchTypeToken && result.Value == "COLL" {
 			found = true
 			break
 		}
