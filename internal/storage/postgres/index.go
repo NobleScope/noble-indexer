@@ -94,6 +94,14 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			Exec(ctx); err != nil {
 			return err
 		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Tx)(nil)).
+			Index("tx_height_time_id_idx").
+			Column("height", "time", "id").
+			Exec(ctx); err != nil {
+			return err
+		}
 
 		// Log
 		if _, err := tx.NewCreateIndex().
