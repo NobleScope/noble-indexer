@@ -38,7 +38,6 @@ var (
 		Interactions:   75,
 		Balance: &storage.Balance{
 			Id:       1,
-			Currency: "noble",
 			Value:    decimal.RequireFromString("1000000000"),
 		},
 	}
