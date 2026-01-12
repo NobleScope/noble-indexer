@@ -1751,10 +1751,6 @@ const docTemplate = `{
             "description": "Balance of address information",
             "type": "object",
             "properties": {
-                "currency": {
-                    "type": "string",
-                    "example": "noble"
-                },
                 "value": {
                     "type": "string",
                     "example": "10000000000"

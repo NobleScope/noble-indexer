@@ -38,9 +38,6 @@ definitions:
   responses.Balance:
     description: Balance of address information
     properties:
-      currency:
-        example: noble
-        type: string
       value:
         example: "10000000000"
         type: string
