@@ -13,7 +13,7 @@ definitions:
       deployed_contracts:
         example: 7
         type: integer
-      first_first_height:
+      first_height:
         example: 100
         type: integer
       hash:
