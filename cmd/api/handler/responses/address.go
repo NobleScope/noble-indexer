@@ -41,6 +41,5 @@ func NewAddress(addr storage.Address) Address {
 //
 //	@Description	Balance of address information
 type Balance struct {
-	Currency string `example:"noble"       json:"currency" swaggertype:"string"`
-	Value    string `example:"10000000000" json:"value"    swaggertype:"string"`
+	Value string `example:"10000000000" json:"value" swaggertype:"string"`
 }
