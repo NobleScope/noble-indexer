@@ -35,7 +35,6 @@ func (f HeadFilter) Filter(c client, msg Notification[*responses.State]) bool {
 }
 
 type Filters struct {
-	head     bool
-	blocks   bool
-	gasPrice bool
+	head   bool
+	blocks bool
 }
