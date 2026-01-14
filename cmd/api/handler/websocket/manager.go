@@ -105,13 +105,13 @@ func (manager *Manager) countClientsByIp(ip string, value int) error {
 
 // Handle godoc
 //
-//	@Summary				Websocket API
-//	@Description.markdown	websocket
-//	@Tags					websocket
-//	@ID						websocket
-//	@x-internal				true
-//	@Produce				json
-//	@Router					/ws [get]
+//	@Summary		Websocket API
+//	@Description	Establishes a WebSocket connection for real-time updates. Clients can subscribe to channels to receive notifications about new blocks and head state changes.
+//	@Tags			websocket
+//	@ID				websocket
+//	@x-internal		true
+//	@Produce		json
+//	@Router			/ws [get]
 func (manager *Manager) Handle(c echo.Context) error {
 	ws, err := manager.upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
