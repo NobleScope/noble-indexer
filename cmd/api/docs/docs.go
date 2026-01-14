@@ -1695,6 +1695,21 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/ws": {
+            "get": {
+                "description": "Establishes a WebSocket connection for real-time updates. Clients can subscribe to channels to receive notifications about new blocks and head state changes.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "websocket"
+                ],
+                "summary": "Websocket API",
+                "operationId": "websocket",
+                "responses": {},
+                "x-internal": true
+            }
         }
     },
     "definitions": {

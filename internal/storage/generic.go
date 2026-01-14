@@ -2,9 +2,11 @@ package storage
 
 import (
 	"context"
+	"io"
 
 	"github.com/baking-bad/noble-indexer/pkg/types"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
+	"github.com/lib/pq"
 )
 
 var Models = []any{
@@ -56,6 +58,29 @@ type Transaction interface {
 	State(ctx context.Context, name string) (state State, err error)
 	LastBlock(ctx context.Context) (block Block, err error)
 }
+
+//go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
+type Notificator interface {
+	Notify(ctx context.Context, channel string, payload string) error
+}
+
+//go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
+type Listener interface {
+	io.Closer
+
+	Subscribe(ctx context.Context, channels ...string) error
+	Listen() chan *pq.Notification
+}
+
+//go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
+type ListenerFactory interface {
+	CreateListener() Listener
+}
+
+const (
+	ChannelHead  = "head"
+	ChannelBlock = "block"
+)
 
 type SearchResult struct {
 	Id    uint64 `bun:"id"`

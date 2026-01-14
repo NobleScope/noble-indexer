@@ -26,9 +26,10 @@ type Indexer struct {
 }
 
 type API struct {
-	Bind           string `validate:"required" yaml:"bind"`
-	RateLimit      int    `validate:"min=0"    yaml:"rate_limit"`
-	RequestTimeout int    `validate:"min=1"    yaml:"request_timeout"`
+	Bind           string `validate:"required"        yaml:"bind"`
+	RateLimit      int    `validate:"omitempty,min=0" yaml:"rate_limit"`
+	RequestTimeout int    `validate:"omitempty,min=1" yaml:"request_timeout"`
+	Websocket      bool   `validate:"omitempty"       yaml:"websocket"`
 }
 
 type MetadataResolver struct {

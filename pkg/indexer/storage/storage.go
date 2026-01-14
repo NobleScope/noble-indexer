@@ -10,6 +10,7 @@ import (
 	decodeContext "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
 	"github.com/dipdup-net/indexer-sdk/pkg/modules"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
+	"github.com/goccy/go-json"
 )
 
 const (
@@ -22,6 +23,7 @@ type Module struct {
 	modules.BaseModule
 	pg          postgres.Storage
 	storage     sdk.Transactable
+	notificator storage.Notificator
 	indexerName string
 }
 
@@ -29,12 +31,14 @@ var _ modules.Module = (*Module)(nil)
 
 func NewModule(
 	pg postgres.Storage,
+	notificator storage.Notificator,
 	cfg config.Indexer,
 ) Module {
 	m := Module{
 		BaseModule:  modules.New("storage"),
 		pg:          pg,
 		storage:     pg.Transactable,
+		notificator: notificator,
 		indexerName: cfg.Name,
 	}
 
@@ -79,6 +83,10 @@ func (module *Module) listen(ctx context.Context) {
 					Msg("block saving error")
 				module.MustOutput(StopOutput).Push(struct{}{})
 				continue
+			}
+
+			if err := module.notify(ctx, state, *decodedContext.Block); err != nil {
+				module.Log.Err(err).Msg("block notification error")
 			}
 		}
 	}
@@ -200,4 +208,29 @@ func (module *Module) processBlockInTransaction(
 	err = tx.Update(ctx, &state)
 
 	return state, err
+}
+
+func (module *Module) notify(ctx context.Context, state storage.State, block storage.Block) error {
+	if time.Since(block.Time) > time.Hour {
+		// do not notify all about events if initial indexing is in progress
+		return nil
+	}
+
+	rawState, err := json.Marshal(state)
+	if err != nil {
+		return err
+	}
+	if err := module.notificator.Notify(ctx, storage.ChannelHead, string(rawState)); err != nil {
+		return err
+	}
+
+	rawBlock, err := json.Marshal(block)
+	if err != nil {
+		return err
+	}
+	if err := module.notificator.Notify(ctx, storage.ChannelBlock, string(rawBlock)); err != nil {
+		return err
+	}
+
+	return nil
 }

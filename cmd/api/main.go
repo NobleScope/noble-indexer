@@ -108,6 +108,7 @@ func run(cfg *config.Config) error {
 	e.Pre(middleware.RemoveTrailingSlash())
 
 	db := initDatabase(cfg.Database, cfg.Indexer.ScriptsDir)
+	initDispatcher(ctx, db)
 	initHandlers(ctx, e, *cfg, db)
 
 	go func() {
