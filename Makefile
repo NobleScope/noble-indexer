@@ -1,6 +1,12 @@
 -include .env
 export $(shell sed 's/=.*//' .env)
 
+indexer:
+	go run ./cmd/indexer -c ./configs/dipdup.yml
+
+api:
+	go run ./cmd/api -c ./configs/dipdup.yml
+
 lint:
 	golangci-lint run
 

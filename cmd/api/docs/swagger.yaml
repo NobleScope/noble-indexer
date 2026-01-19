@@ -1792,6 +1792,19 @@ paths:
       summary: Get transaction by hash
       tags:
       - transactions
+  /ws:
+    get:
+      description: Establishes a WebSocket connection for real-time updates. Clients
+        can subscribe to channels to receive notifications about new blocks and head
+        state changes.
+      operationId: websocket
+      produces:
+      - application/json
+      responses: {}
+      summary: Websocket API
+      tags:
+      - websocket
+      x-internal: true
 schemes:
 - https
 - http

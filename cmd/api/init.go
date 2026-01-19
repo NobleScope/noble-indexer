@@ -4,7 +4,10 @@ import (
 	"context"
 	"time"
 
+	"github.com/baking-bad/noble-indexer/cmd/api/bus"
 	"github.com/baking-bad/noble-indexer/cmd/api/handler"
+	"github.com/baking-bad/noble-indexer/cmd/api/handler/websocket"
+	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/internal/storage/postgres"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
 	golibCfg "github.com/dipdup-net/go-lib/config"
@@ -12,6 +15,17 @@ import (
 	"github.com/rs/zerolog/log"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
+
+var dispatcher *bus.Dispatcher
+
+func initDispatcher(ctx context.Context, db postgres.Storage) {
+	d, err := bus.NewDispatcher(db)
+	if err != nil {
+		panic(err)
+	}
+	dispatcher = d
+	dispatcher.Start(ctx)
+}
 
 func initDatabase(cfg golibCfg.Database, viewsDir string) postgres.Storage {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -100,8 +114,23 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 		proxyGroup.GET("", proxyHandlers.List)
 	}
 
+	if cfg.API.Websocket {
+		initWebsocket(ctx, v1)
+	}
+
 	log.Info().Msg("API routes:")
 	for _, route := range e.Routes() {
 		log.Info().Msgf("[%s] %s -> %s", route.Method, route.Path, route.Name)
 	}
+}
+
+var (
+	wsManager *websocket.Manager
+)
+
+func initWebsocket(ctx context.Context, group *echo.Group) {
+	observer := dispatcher.Observe(storage.ChannelHead, storage.ChannelBlock)
+	wsManager = websocket.NewManager(observer)
+	wsManager.Start(ctx)
+	group.GET("/ws", wsManager.Handle)
 }

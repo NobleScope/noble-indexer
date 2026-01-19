@@ -16,6 +16,7 @@ import (
 	storage "github.com/baking-bad/noble-indexer/internal/storage"
 	types "github.com/baking-bad/noble-indexer/pkg/types"
 	storage0 "github.com/dipdup-net/indexer-sdk/pkg/storage"
+	pq "github.com/lib/pq"
 	bun "github.com/uptrace/bun"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -1446,6 +1447,273 @@ func (c *MockTransactionUpdateCall) Do(f func(context.Context, any) error) *Mock
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockTransactionUpdateCall) DoAndReturn(f func(context.Context, any) error) *MockTransactionUpdateCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// MockNotificator is a mock of Notificator interface.
+type MockNotificator struct {
+	ctrl     *gomock.Controller
+	recorder *MockNotificatorMockRecorder
+	isgomock struct{}
+}
+
+// MockNotificatorMockRecorder is the mock recorder for MockNotificator.
+type MockNotificatorMockRecorder struct {
+	mock *MockNotificator
+}
+
+// NewMockNotificator creates a new mock instance.
+func NewMockNotificator(ctrl *gomock.Controller) *MockNotificator {
+	mock := &MockNotificator{ctrl: ctrl}
+	mock.recorder = &MockNotificatorMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockNotificator) EXPECT() *MockNotificatorMockRecorder {
+	return m.recorder
+}
+
+// Notify mocks base method.
+func (m *MockNotificator) Notify(ctx context.Context, channel, payload string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Notify", ctx, channel, payload)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Notify indicates an expected call of Notify.
+func (mr *MockNotificatorMockRecorder) Notify(ctx, channel, payload any) *MockNotificatorNotifyCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Notify", reflect.TypeOf((*MockNotificator)(nil).Notify), ctx, channel, payload)
+	return &MockNotificatorNotifyCall{Call: call}
+}
+
+// MockNotificatorNotifyCall wrap *gomock.Call
+type MockNotificatorNotifyCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockNotificatorNotifyCall) Return(arg0 error) *MockNotificatorNotifyCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockNotificatorNotifyCall) Do(f func(context.Context, string, string) error) *MockNotificatorNotifyCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockNotificatorNotifyCall) DoAndReturn(f func(context.Context, string, string) error) *MockNotificatorNotifyCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// MockListener is a mock of Listener interface.
+type MockListener struct {
+	ctrl     *gomock.Controller
+	recorder *MockListenerMockRecorder
+	isgomock struct{}
+}
+
+// MockListenerMockRecorder is the mock recorder for MockListener.
+type MockListenerMockRecorder struct {
+	mock *MockListener
+}
+
+// NewMockListener creates a new mock instance.
+func NewMockListener(ctrl *gomock.Controller) *MockListener {
+	mock := &MockListener{ctrl: ctrl}
+	mock.recorder = &MockListenerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockListener) EXPECT() *MockListenerMockRecorder {
+	return m.recorder
+}
+
+// Close mocks base method.
+func (m *MockListener) Close() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Close")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Close indicates an expected call of Close.
+func (mr *MockListenerMockRecorder) Close() *MockListenerCloseCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockListener)(nil).Close))
+	return &MockListenerCloseCall{Call: call}
+}
+
+// MockListenerCloseCall wrap *gomock.Call
+type MockListenerCloseCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockListenerCloseCall) Return(arg0 error) *MockListenerCloseCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockListenerCloseCall) Do(f func() error) *MockListenerCloseCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockListenerCloseCall) DoAndReturn(f func() error) *MockListenerCloseCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// Listen mocks base method.
+func (m *MockListener) Listen() chan *pq.Notification {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Listen")
+	ret0, _ := ret[0].(chan *pq.Notification)
+	return ret0
+}
+
+// Listen indicates an expected call of Listen.
+func (mr *MockListenerMockRecorder) Listen() *MockListenerListenCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Listen", reflect.TypeOf((*MockListener)(nil).Listen))
+	return &MockListenerListenCall{Call: call}
+}
+
+// MockListenerListenCall wrap *gomock.Call
+type MockListenerListenCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockListenerListenCall) Return(arg0 chan *pq.Notification) *MockListenerListenCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockListenerListenCall) Do(f func() chan *pq.Notification) *MockListenerListenCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockListenerListenCall) DoAndReturn(f func() chan *pq.Notification) *MockListenerListenCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// Subscribe mocks base method.
+func (m *MockListener) Subscribe(ctx context.Context, channels ...string) error {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx}
+	for _, a := range channels {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Subscribe", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Subscribe indicates an expected call of Subscribe.
+func (mr *MockListenerMockRecorder) Subscribe(ctx any, channels ...any) *MockListenerSubscribeCall {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx}, channels...)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Subscribe", reflect.TypeOf((*MockListener)(nil).Subscribe), varargs...)
+	return &MockListenerSubscribeCall{Call: call}
+}
+
+// MockListenerSubscribeCall wrap *gomock.Call
+type MockListenerSubscribeCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockListenerSubscribeCall) Return(arg0 error) *MockListenerSubscribeCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockListenerSubscribeCall) Do(f func(context.Context, ...string) error) *MockListenerSubscribeCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockListenerSubscribeCall) DoAndReturn(f func(context.Context, ...string) error) *MockListenerSubscribeCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// MockListenerFactory is a mock of ListenerFactory interface.
+type MockListenerFactory struct {
+	ctrl     *gomock.Controller
+	recorder *MockListenerFactoryMockRecorder
+	isgomock struct{}
+}
+
+// MockListenerFactoryMockRecorder is the mock recorder for MockListenerFactory.
+type MockListenerFactoryMockRecorder struct {
+	mock *MockListenerFactory
+}
+
+// NewMockListenerFactory creates a new mock instance.
+func NewMockListenerFactory(ctrl *gomock.Controller) *MockListenerFactory {
+	mock := &MockListenerFactory{ctrl: ctrl}
+	mock.recorder = &MockListenerFactoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockListenerFactory) EXPECT() *MockListenerFactoryMockRecorder {
+	return m.recorder
+}
+
+// CreateListener mocks base method.
+func (m *MockListenerFactory) CreateListener() storage.Listener {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateListener")
+	ret0, _ := ret[0].(storage.Listener)
+	return ret0
+}
+
+// CreateListener indicates an expected call of CreateListener.
+func (mr *MockListenerFactoryMockRecorder) CreateListener() *MockListenerFactoryCreateListenerCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateListener", reflect.TypeOf((*MockListenerFactory)(nil).CreateListener))
+	return &MockListenerFactoryCreateListenerCall{Call: call}
+}
+
+// MockListenerFactoryCreateListenerCall wrap *gomock.Call
+type MockListenerFactoryCreateListenerCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockListenerFactoryCreateListenerCall) Return(arg0 storage.Listener) *MockListenerFactoryCreateListenerCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockListenerFactoryCreateListenerCall) Do(f func() storage.Listener) *MockListenerFactoryCreateListenerCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockListenerFactoryCreateListenerCall) DoAndReturn(f func() storage.Listener) *MockListenerFactoryCreateListenerCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

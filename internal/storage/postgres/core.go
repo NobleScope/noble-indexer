@@ -33,6 +33,7 @@ type Storage struct {
 	Sources        models.ISource
 	State          models.IState
 	Search         models.ISearch
+	Notificator    *Notificator
 }
 
 // Create -
@@ -62,6 +63,7 @@ func Create(ctx context.Context, cfg config.Database, scriptsDir string) (Storag
 		Sources:        NewSource(strg.Connection()),
 		State:          NewState(strg.Connection()),
 		Search:         NewSearch(strg.Connection()),
+		Notificator:    NewNotificator(cfg, strg.Connection().DB()),
 	}
 
 	if err := s.createScripts(ctx, "functions", false); err != nil {
@@ -132,6 +134,10 @@ func createExtensions(ctx context.Context, conn *database.Bun) error {
 		_, err := tx.ExecContext(ctx, "CREATE EXTENSION IF NOT EXISTS pg_trgm;")
 		return err
 	})
+}
+
+func (s Storage) CreateListener() models.Listener {
+	return NewNotificator(s.cfg, s.Notificator.db)
 }
 
 func (s Storage) Close() error {

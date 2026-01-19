@@ -61,6 +61,8 @@ api:
   bind: ${API_HOST:-0.0.0.0}:${API_PORT:-9876}
   rate_limit: ${API_RATE_LIMIT:-0}
   request_timeout: ${API_REQUEST_TIMEOUT:-30}
+  websocket: ${API_WEBSOCKET_ENABLED:-true}
+  websocket_clients_per_ip: ${API_WEBSOCKET_CLIENTS_PER_IP:-10}
 
 profiler:
   server: ${PROFILER_SERVER}
