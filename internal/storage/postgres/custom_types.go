@@ -92,6 +92,16 @@ func createTypes(ctx context.Context, conn *database.Bun) error {
 			return err
 		}
 
+		if _, err := tx.ExecContext(
+			ctx,
+			createTypeQuery,
+			"verification_task_status",
+			bun.Safe("verification_task_status"),
+			bun.In(types.VerificationTaskStatusValues()),
+		); err != nil {
+			return err
+		}
+
 		return nil
 	})
 }

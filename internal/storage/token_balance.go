@@ -2,8 +2,8 @@ package storage
 
 import (
 	"context"
-
 	"fmt"
+
 	"github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
@@ -42,7 +42,7 @@ type TokenBalance struct {
 
 // TableName -
 func (TokenBalance) TableName() string {
-	return "token"
+	return "token_balance"
 }
 
 func (t TokenBalance) String() string {

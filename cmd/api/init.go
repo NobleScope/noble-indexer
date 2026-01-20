@@ -114,6 +114,12 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 		proxyGroup.GET("", proxyHandlers.List)
 	}
 
+	contractVerificationHandler := handler.NewContractVerificationHandler(db.Contracts, db.VerificationTasks, db.VerificationFiles)
+	verificationGroup := v1.Group("/verification/code")
+	{
+		verificationGroup.POST("", contractVerificationHandler.ContractVerify)
+	}
+
 	if cfg.API.Websocket {
 		initWebsocket(ctx, v1)
 	}

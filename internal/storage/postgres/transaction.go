@@ -250,6 +250,25 @@ func (tx Transaction) SaveProxyContracts(ctx context.Context, contracts ...*mode
 	return err
 }
 
+func (tx Transaction) AddVerificationTask(ctx context.Context, task models.VerificationTask) error {
+	_, err := tx.Tx().NewInsert().Model(task).
+		Column("status", "creation_time", "contract_id").
+		On("CONFLICT ON CONSTRAINT verification_contract_id_idx DO NOTHING").
+		Exec(ctx)
+
+	return err
+}
+
+func (tx Transaction) UpdateVerificationTask(ctx context.Context, task models.VerificationTask) error {
+	_, err := tx.Tx().NewInsert().Model(task).
+		On("CONFLICT ON CONSTRAINT verification_contract_id_idx DO UPDATE").
+		Set("status = EXCLUDED.status").
+		Set("completion_time = now()").
+		Exec(ctx)
+
+	return err
+}
+
 func (tx Transaction) RollbackBlock(ctx context.Context, height types.Level) error {
 	_, err := tx.Tx().NewDelete().
 		Model((*models.Block)(nil)).
