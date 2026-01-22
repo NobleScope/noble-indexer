@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"bytes"
+	"io"
 	"net/http"
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
@@ -28,15 +30,6 @@ func NewContractVerificationHandler(
 	}
 }
 
-type postVerificationTaskRequest struct {
-	Contract            string `json:"contract"             validate:"required,address"`
-	SourceCode          string `json:"source_code"          validate:"required"`
-	CompilerVersion     string `json:"compiler_version"     validate:"required"`
-	LicenseType         string `json:"license_type"         validate:"required"`
-	OptimizationEnabled bool   `json:"optimization_enabled"`
-	OptimizationRuns    uint   `json:"optimization_runs"`
-}
-
 type verificationResponse struct {
 	Result string `json:"result"`
 }
@@ -44,22 +37,64 @@ type verificationResponse struct {
 // ContractVerify godoc
 //
 //	@Summary		Creates a task to verify the specified contract
-//	@Description	Creates a task to verify the specified contract
+//	@Description	Creates a task to verify the specified contract with source code file
 //	@Tags			verification
 //	@ID				contract-verification
-//	@Param			request	body postVerificationTaskRequest true "Request body containing contract, source_code, compiler_version and license_type"
-//	@Accept			json
+//	@Param			contract            formData string true  "Contract address"
+//	@Param			source_code         formData file   true  "Source code file"
+//	@Param			compiler_version    formData string true  "Compiler version"
+//	@Param			license_type		formData string true  "License type"
+//	@Param			optimization_enabled formData bool  false "Optimization enabled"
+//	@Param			optimization_runs   formData int    false "Optimization runs"
+//	@Accept			multipart/form-data
 //	@Produce		json
 //	@Success		200	{object}	verificationResponse
 //	@Failure		400	{object}	Error
 //	@Failure		500	{object}	Error
 //	@Router			/verification/code [post]
 func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error {
-	req, err := bindAndValidate[postVerificationTaskRequest](c)
-	if err != nil {
-		return badRequestError(c, err)
+	address := c.FormValue("contract")
+	if address == "" {
+		return badRequestError(c, errors.New("contract address is required"))
 	}
-	hash, err := types.HexFromString(req.Contract)
+
+	compilerVersion := c.FormValue("compiler_version")
+	if compilerVersion == "" {
+		return badRequestError(c, errors.New("compiler version is required"))
+	}
+
+	licenseType := c.FormValue("license_type")
+	if licenseType == "" {
+		return badRequestError(c, errors.New("license type is required"))
+	}
+
+	fileHeader, err := c.FormFile("source_code")
+	if err != nil {
+		return badRequestError(c, errors.New("source code file is required"))
+	}
+
+	file, err := fileHeader.Open()
+	if err != nil {
+		return badRequestError(c, errors.Wrap(err, "failed to open source code file"))
+	}
+	defer func() {
+		_ = file.Close()
+	}()
+
+	sourceCode, err := io.ReadAll(file)
+	if err != nil {
+		return badRequestError(c, errors.Wrap(err, "failed to read source code file"))
+	}
+
+	if len(sourceCode) == 0 {
+		return badRequestError(c, errors.New("source code file is empty"))
+	}
+
+	if !bytes.Contains(sourceCode, []byte("pragma solidity")) {
+		return badRequestError(c, errors.New("the uploaded file is not the source code of the contract"))
+	}
+
+	hash, err := types.HexFromString(address)
 	if err != nil {
 		return badRequestError(c, err)
 	}
@@ -89,6 +124,15 @@ func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error
 	err = handler.task.Save(c.Request().Context(), &newTask)
 	if err != nil {
 		return handleError(c, err, handler.task)
+	}
+
+	verificationFile := storage.VerificationFile{
+		File:               sourceCode,
+		VerificationTaskId: newTask.Id,
+	}
+	err = handler.file.Save(c.Request().Context(), &verificationFile)
+	if err != nil {
+		return handleError(c, err, handler.file)
 	}
 
 	return c.JSON(http.StatusOK, verificationResponse{Result: "success"})
