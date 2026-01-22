@@ -84,7 +84,7 @@ func (api *API) BlockBulk(ctx context.Context, levels ...pkgTypes.Level) ([]pkgT
 		requests[i*3] = types.Request{
 			Method:  pathBlock,
 			JsonRpc: "2.0",
-			Id:      1,
+			Id:      int64(i * 3),
 			Params: []any{
 				hexLevel,
 				true,
@@ -93,7 +93,7 @@ func (api *API) BlockBulk(ctx context.Context, levels ...pkgTypes.Level) ([]pkgT
 		requests[i*3+1] = types.Request{
 			Method:  pathReceipts,
 			JsonRpc: "2.0",
-			Id:      1,
+			Id:      int64(i*3 + 1),
 			Params: []any{
 				hexLevel,
 			},
@@ -102,7 +102,7 @@ func (api *API) BlockBulk(ctx context.Context, levels ...pkgTypes.Level) ([]pkgT
 		requests[i*3+2] = types.Request{
 			Method:  pathTraces,
 			JsonRpc: "2.0",
-			Id:      1,
+			Id:      int64(i*3 + 2),
 			Params: []any{
 				hexLevel,
 			},
