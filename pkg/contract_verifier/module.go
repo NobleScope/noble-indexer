@@ -80,12 +80,26 @@ func (m *Module) sync(ctx context.Context) error {
 		Time("creation task time", task.CreationTime).
 		Msg("get verification task")
 
-	m.verify()
+	files, err := m.pg.VerificationFiles.ByTaskId(ctx, task.Id)
+	if err != nil {
+		return errors.Wrap(err, "get verification files")
+	}
+
+	if len(files) == 0 {
+		m.Log.Warn().Uint64("task_id", task.Id).Msg("no files found for verification task")
+		return errors.New("no files found for verification task")
+	}
+
+	if err := m.verify(ctx, task, files); err != nil {
+		m.Log.Err(err).Msg("verify contract")
+		return errors.Wrap(err, "verify contract")
+	}
+
 	//if err := m.save(ctx, contracts, sources); err != nil {
 	//	m.Log.Err(err).Msg("save")
 	//}
 
-	return err
+	return nil
 }
 
 func (m *Module) save(ctx context.Context, contracts []*storage.Contract, sources []*storage.Source) error {

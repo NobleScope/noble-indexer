@@ -370,6 +370,16 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			return err
 		}
 
+		// Verification files
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.VerificationFile)(nil)).
+			Index("verification_file_verification_task_id_idx").
+			Column("verification_task_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+
 		return nil
 	})
 }

@@ -26,10 +26,10 @@ type VerificationTask struct {
 	CreationTime        time.Time                    `bun:"creation_time,default:now()"                     comment:"Task creation time"`
 	CompletionTime      time.Time                    `bun:"completion_time"                                 comment:"Task completion time"`
 	ContractId          uint64                       `bun:"contract_id,unique:verification_contract_id_idx" comment:"Contract id"`
-	CompilerVersion     string                       `bun:"compiler_version,notnull"         comment:"Compiler version"`
-	LicenseType         types.LicenseType            `bun:"license_type,type:license_type" comment:"License type"`
-	OptimizationEnabled *bool                        `bun:"optimization_enabled"                comment:"Optimization enabled"`
-	OptimizationRuns    *uint                        `bun:"optimization_runs"                comment:"Optimization runs"`
+	CompilerVersion     string                       `bun:"compiler_version,notnull"                        comment:"Compiler version"`
+	LicenseType         types.LicenseType            `bun:"license_type,type:license_type"                  comment:"License type"`
+	OptimizationEnabled *bool                        `bun:"optimization_enabled"                            comment:"Optimization enabled"`
+	OptimizationRuns    *uint                        `bun:"optimization_runs"                               comment:"Optimization runs"`
 }
 
 // TableName -
