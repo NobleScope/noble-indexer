@@ -71,7 +71,7 @@ func (m *Module) sync(ctx context.Context) error {
 	if err != nil {
 		return errors.Wrap(err, "get verification task")
 	}
-	if task == nil {
+	if task.Id == 0 {
 		m.Log.Info().Msg("no tasks for contract verification")
 		return nil
 	}

@@ -102,6 +102,16 @@ func createTypes(ctx context.Context, conn *database.Bun) error {
 			return err
 		}
 
+		if _, err := tx.ExecContext(
+			ctx,
+			createTypeQuery,
+			"license_type",
+			bun.Safe("license_type"),
+			bun.In(types.LicenseTypeValues()),
+		); err != nil {
+			return err
+		}
+
 		return nil
 	})
 }

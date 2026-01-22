@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"io"
 	"net/http"
+	"strconv"
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
-	ts "github.com/baking-bad/noble-indexer/internal/storage/types"
+	storageTypes "github.com/baking-bad/noble-indexer/internal/storage/types"
 	"github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
@@ -63,9 +64,34 @@ func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error
 		return badRequestError(c, errors.New("compiler version is required"))
 	}
 
-	licenseType := c.FormValue("license_type")
-	if licenseType == "" {
+	licenseTypeStr := c.FormValue("license_type")
+	if licenseTypeStr == "" {
 		return badRequestError(c, errors.New("license type is required"))
+	}
+
+	licenseType, err := storageTypes.ParseLicenseType(licenseTypeStr)
+	if err != nil {
+		return badRequestError(c, errors.Wrap(err, "invalid license type"))
+	}
+
+	var optimizationEnabled *bool
+	var optimizationRuns *uint
+
+	if optEnabledStr := c.FormValue("optimization_enabled"); optEnabledStr != "" {
+		optEnabled, err := strconv.ParseBool(optEnabledStr)
+		if err != nil {
+			return badRequestError(c, errors.Wrap(err, "invalid optimization_enabled value"))
+		}
+		optimizationEnabled = &optEnabled
+	}
+
+	if optRunsStr := c.FormValue("optimization_runs"); optRunsStr != "" {
+		optRuns64, err := strconv.ParseUint(optRunsStr, 10, 32)
+		if err != nil {
+			return badRequestError(c, errors.Wrap(err, "invalid optimization_runs value"))
+		}
+		optRuns := uint(optRuns64)
+		optimizationRuns = &optRuns
 	}
 
 	fileHeader, err := c.FormFile("source_code")
@@ -118,8 +144,12 @@ func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error
 	}
 
 	newTask := storage.VerificationTask{
-		Status:     ts.VerificationStatusNew,
-		ContractId: contract.Id,
+		Status:              storageTypes.VerificationStatusNew,
+		ContractId:          contract.Id,
+		CompilerVersion:     compilerVersion,
+		LicenseType:         licenseType,
+		OptimizationEnabled: optimizationEnabled,
+		OptimizationRuns:    optimizationRuns,
 	}
 	err = handler.task.Save(c.Request().Context(), &newTask)
 	if err != nil {

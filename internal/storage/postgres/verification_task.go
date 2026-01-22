@@ -24,7 +24,7 @@ func NewVerificationTask(db *database.Bun) *VerificationTask {
 func (t *VerificationTask) Latest(ctx context.Context) (task storage.VerificationTask, err error) {
 	err = t.DB().NewSelect().
 		Model(&task).
-		Where("status = 'new'").
+		Where("status = 'VerificationStatusNew'").
 		Order("creation_time ASC").
 		Limit(1).
 		Scan(ctx, &task)
