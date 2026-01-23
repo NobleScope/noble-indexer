@@ -22,6 +22,7 @@ import (
 type MockIProxyContract struct {
 	ctrl     *gomock.Controller
 	recorder *MockIProxyContractMockRecorder
+	isgomock struct{}
 }
 
 // MockIProxyContractMockRecorder is the mock recorder for MockIProxyContract.
