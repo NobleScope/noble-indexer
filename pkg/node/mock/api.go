@@ -21,7 +21,6 @@ import (
 type MockApi struct {
 	ctrl     *gomock.Controller
 	recorder *MockApiMockRecorder
-	isgomock struct{}
 }
 
 // MockApiMockRecorder is the mock recorder for MockApi.

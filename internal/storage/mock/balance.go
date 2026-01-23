@@ -22,7 +22,6 @@ import (
 type MockIBalance struct {
 	ctrl     *gomock.Controller
 	recorder *MockIBalanceMockRecorder
-	isgomock struct{}
 }
 
 // MockIBalanceMockRecorder is the mock recorder for MockIBalance.

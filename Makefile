@@ -16,4 +16,7 @@ test:
 api-docs:
 	cd cmd/api && swag init --parseDependency --parseInternal
 
+generate:
+	go generate -v ./internal/storage ./internal/storage/types ./pkg/node
+
 .PHONY: lint test api-docs

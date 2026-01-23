@@ -23,7 +23,6 @@ import (
 type MockITx struct {
 	ctrl     *gomock.Controller
 	recorder *MockITxMockRecorder
-	isgomock struct{}
 }
 
 // MockITxMockRecorder is the mock recorder for MockITx.
@@ -65,8 +64,8 @@ type MockITxByHashCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockITxByHashCall) Return(tx storage.Tx, err error) *MockITxByHashCall {
-	c.Call = c.Call.Return(tx, err)
+func (c *MockITxByHashCall) Return(arg0 storage.Tx, arg1 error) *MockITxByHashCall {
+	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
