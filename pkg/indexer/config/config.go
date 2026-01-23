@@ -21,6 +21,7 @@ type Indexer struct {
 	BlockPeriod     int64          `validate:"omitempty"     yaml:"block_period"`
 	ScriptsDir      string         `validate:"omitempty,dir" yaml:"scripts_dir"`
 	AssetsDir       string         `validate:"omitempty,dir" yaml:"assets_dir"`
+	GenesisFilename string         `validate:"omitempty"     yaml:"genesis_filename"`
 	RequestBulkSize int            `validate:"min=1"         yaml:"request_bulk_size"`
 	Proxy           ProxyContracts `yaml:"proxy_contracts"`
 }
