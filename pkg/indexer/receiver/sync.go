@@ -79,7 +79,7 @@ func (r *Module) live(ctx context.Context) error {
 
 			var wsMsg types.Response[pkgTypes.Block]
 			if err := json.Unmarshal(msg, &wsMsg); err != nil {
-				r.Log.Err(err).Any("Raw message:", string(msg)).Msg("failed to unmarshal ws message")
+				r.Log.Err(err).Str("raw_msg", string(msg)).Msg("failed to unmarshal ws message")
 				continue
 			}
 
