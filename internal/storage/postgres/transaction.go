@@ -125,16 +125,16 @@ func (tx Transaction) SaveContracts(ctx context.Context, contracts ...*models.Co
 
 	_, err := tx.Tx().NewInsert().Model(&contracts).
 		On("CONFLICT (id) DO UPDATE").
-		Set("verified = CASE WHEN EXCLUDED.verified IS NOT NULL THEN EXCLUDED.verified ELSE contract.verified END").
+		Set("verified = CASE WHEN EXCLUDED.verified THEN EXCLUDED.verified ELSE contract.verified END").
 		Set("abi = CASE WHEN EXCLUDED.abi IS NOT NULL THEN EXCLUDED.abi ELSE contract.abi END").
-		Set("compiler_version = CASE WHEN EXCLUDED.compiler_version IS NOT NULL THEN EXCLUDED.compiler_version ELSE contract.compiler_version END").
-		Set("metadata_link = CASE WHEN EXCLUDED.metadata_link IS NOT NULL THEN EXCLUDED.metadata_link ELSE contract.metadata_link END").
-		Set("language = CASE WHEN EXCLUDED.language IS NOT NULL THEN EXCLUDED.language ELSE contract.language END").
-		Set("optimizer_enabled = CASE WHEN EXCLUDED.optimizer_enabled IS NOT NULL THEN EXCLUDED.optimizer_enabled ELSE contract.optimizer_enabled END").
+		Set("compiler_version = CASE WHEN EXCLUDED.compiler_version != '' THEN EXCLUDED.compiler_version ELSE contract.compiler_version END").
+		Set("metadata_link = CASE WHEN EXCLUDED.metadata_link != '' THEN EXCLUDED.metadata_link ELSE contract.metadata_link END").
+		Set("language = CASE WHEN EXCLUDED.language != '' THEN EXCLUDED.language ELSE contract.language END").
+		Set("optimizer_enabled = CASE WHEN EXCLUDED.optimizer_enabled THEN EXCLUDED.optimizer_enabled ELSE contract.optimizer_enabled END").
 		Set("tags = CASE WHEN EXCLUDED.tags IS NOT NULL THEN EXCLUDED.tags ELSE contract.tags END").
 		Set("status = CASE WHEN EXCLUDED.status IS NOT NULL THEN EXCLUDED.status ELSE contract.status END").
-		Set("retry_count = CASE WHEN EXCLUDED.retry_count IS NOT NULL THEN EXCLUDED.retry_count ELSE contract.retry_count END").
-		Set("error = CASE WHEN EXCLUDED.error IS NOT NULL THEN EXCLUDED.error ELSE contract.error END").
+		Set("retry_count = CASE WHEN EXCLUDED.retry_count != 0 THEN EXCLUDED.retry_count ELSE contract.retry_count END").
+		Set("error = CASE WHEN EXCLUDED.error != '' THEN EXCLUDED.error ELSE contract.error END").
 		Set("updated_at = now()").
 		Exec(ctx)
 
@@ -193,14 +193,14 @@ func (tx Transaction) SaveTokenMetadata(ctx context.Context, tokens ...*models.T
 
 	_, err := tx.Tx().NewInsert().Model(&tokens).
 		On("CONFLICT (token_id, contract_id) DO UPDATE").
-		Set("name = CASE WHEN EXCLUDED.name IS NOT NULL THEN EXCLUDED.name ELSE token.name END").
-		Set("symbol = CASE WHEN EXCLUDED.symbol IS NOT NULL THEN EXCLUDED.symbol ELSE token.symbol END").
-		Set("decimals = CASE WHEN EXCLUDED.decimals IS NOT NULL THEN EXCLUDED.decimals ELSE token.decimals END").
+		Set("name = CASE WHEN EXCLUDED.name != '' THEN EXCLUDED.name ELSE token.name END").
+		Set("symbol = CASE WHEN EXCLUDED.symbol != '' THEN EXCLUDED.symbol ELSE token.symbol END").
+		Set("decimals = CASE WHEN EXCLUDED.decimals != 0 THEN EXCLUDED.decimals ELSE token.decimals END").
 		Set("status = CASE WHEN EXCLUDED.status IS NOT NULL THEN EXCLUDED.status ELSE token.status END").
-		Set("metadata_link = CASE WHEN EXCLUDED.metadata_link IS NOT NULL THEN EXCLUDED.metadata_link ELSE token.metadata_link END").
+		Set("metadata_link = CASE WHEN EXCLUDED.metadata_link != '' THEN EXCLUDED.metadata_link ELSE token.metadata_link END").
 		Set("metadata = CASE WHEN EXCLUDED.metadata IS NOT NULL THEN EXCLUDED.metadata ELSE token.metadata END").
-		Set("retry_count = CASE WHEN EXCLUDED.retry_count IS NOT NULL THEN EXCLUDED.retry_count ELSE token.retry_count END").
-		Set("error = CASE WHEN EXCLUDED.error IS NOT NULL THEN EXCLUDED.error ELSE token.error END").
+		Set("retry_count = CASE WHEN EXCLUDED.retry_count != 0 THEN EXCLUDED.retry_count ELSE token.retry_count END").
+		Set("error = CASE WHEN EXCLUDED.error != '' THEN EXCLUDED.error ELSE token.error END").
 		Set("updated_at = now()").
 		Exec(ctx)
 
