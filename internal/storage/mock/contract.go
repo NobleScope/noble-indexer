@@ -83,41 +83,41 @@ func (c *MockIContractByHashCall) DoAndReturn(f func(context.Context, types.Hex)
 	return c
 }
 
-// ByTxId mocks base method.
-func (m *MockIContract) ByTxId(ctx context.Context, id uint64) (storage.Contract, error) {
+// ById mocks base method.
+func (m *MockIContract) ById(ctx context.Context, id uint64) (storage.Contract, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ByTxId", ctx, id)
+	ret := m.ctrl.Call(m, "ById", ctx, id)
 	ret0, _ := ret[0].(storage.Contract)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ByTxId indicates an expected call of ByTxId.
-func (mr *MockIContractMockRecorder) ByTxId(ctx, id any) *MockIContractByTxIdCall {
+// ById indicates an expected call of ById.
+func (mr *MockIContractMockRecorder) ById(ctx, id any) *MockIContractByIdCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ByTxId", reflect.TypeOf((*MockIContract)(nil).ByTxId), ctx, id)
-	return &MockIContractByTxIdCall{Call: call}
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ById", reflect.TypeOf((*MockIContract)(nil).ById), ctx, id)
+	return &MockIContractByIdCall{Call: call}
 }
 
-// MockIContractByTxIdCall wrap *gomock.Call
-type MockIContractByTxIdCall struct {
+// MockIContractByIdCall wrap *gomock.Call
+type MockIContractByIdCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockIContractByTxIdCall) Return(arg0 storage.Contract, arg1 error) *MockIContractByTxIdCall {
+func (c *MockIContractByIdCall) Return(arg0 storage.Contract, arg1 error) *MockIContractByIdCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockIContractByTxIdCall) Do(f func(context.Context, uint64) (storage.Contract, error)) *MockIContractByTxIdCall {
+func (c *MockIContractByIdCall) Do(f func(context.Context, uint64) (storage.Contract, error)) *MockIContractByIdCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockIContractByTxIdCall) DoAndReturn(f func(context.Context, uint64) (storage.Contract, error)) *MockIContractByTxIdCall {
+func (c *MockIContractByIdCall) DoAndReturn(f func(context.Context, uint64) (storage.Contract, error)) *MockIContractByIdCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
