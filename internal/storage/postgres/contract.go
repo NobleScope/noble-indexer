@@ -78,7 +78,8 @@ func (c *Contract) ByHash(ctx context.Context, hash pkgTypes.Hex) (contract stor
 // ById -
 func (c *Contract) ById(ctx context.Context, id uint64) (contract storage.Contract, err error) {
 	query := c.DB().NewSelect().
-		Model((*storage.Contract)(nil))
+		Model((*storage.Contract)(nil)).
+		Where("id = ?", id)
 
 	err = c.DB().NewSelect().
 		TableExpr("(?) AS contract", query).
@@ -90,7 +91,6 @@ func (c *Contract) ById(ctx context.Context, id uint64) (contract storage.Contra
 		Join("LEFT JOIN proxy_contract ON proxy_contract.id = contract.id").
 		Join("LEFT JOIN address AS implementation_address ON implementation_address.id = proxy_contract.implementation_id").
 		Join("LEFT JOIN tx ON contract.tx_id = tx.id").
-		Where("contract.id = ?", id).
 		Scan(ctx, &contract)
 
 	return
