@@ -35,9 +35,9 @@ type Transaction interface {
 	SaveTraces(ctx context.Context, traces ...*Trace) error
 	SaveAddresses(ctx context.Context, addresses ...*Address) (int64, error)
 	SaveBalances(ctx context.Context, balances ...*Balance) error
-	SaveContracts(ctx context.Context, addresses ...*Contract) error
+	SaveContracts(ctx context.Context, addresses ...*Contract) (int64, error)
 	SaveTransfers(ctx context.Context, transfers ...*Transfer) error
-	SaveTokens(ctx context.Context, tokens ...*Token) error
+	SaveTokens(ctx context.Context, tokens ...*Token) (int64, error)
 	SaveTokenBalances(ctx context.Context, tokenBalances ...*TokenBalance) (tb []TokenBalance, err error)
 	SaveTokenMetadata(ctx context.Context, tokens ...*Token) error
 	SaveSources(ctx context.Context, sources ...*Source) error

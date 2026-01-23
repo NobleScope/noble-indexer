@@ -12,19 +12,19 @@ func saveTokens(
 	tx storage.Transaction,
 	tokens []*storage.Token,
 	addresses map[string]uint64,
-) error {
+) (int64, error) {
 	if len(tokens) == 0 {
-		return nil
+		return 0, nil
 	}
 
 	for i := range tokens {
 		id, ok := addresses[tokens[i].Contract.Address.String()]
 		if !ok {
-			return errors.Errorf("can't find contract key: %s", tokens[i].Contract.Address.String())
+			return 0, errors.Errorf("can't find contract key: %s", tokens[i].Contract.Address.String())
 		}
 		tokens[i].ContractId = id
 	}
 
-	err := tx.SaveTokens(ctx, tokens...)
-	return err
+	totalTokens, err := tx.SaveTokens(ctx, tokens...)
+	return totalTokens, err
 }

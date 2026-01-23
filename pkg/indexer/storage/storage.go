@@ -166,7 +166,7 @@ func (module *Module) processBlockInTransaction(
 		transfers = append(transfers, block.Txs[i].Transfers...)
 	}
 
-	err = saveContracts(ctx, tx, dCtx.GetContracts(), txHashToId, addrToId)
+	totalContracts, err := saveContracts(ctx, tx, dCtx.GetContracts(), txHashToId, addrToId)
 	if err != nil {
 		return state, err
 	}
@@ -186,7 +186,7 @@ func (module *Module) processBlockInTransaction(
 		return state, err
 	}
 
-	err = saveTokens(ctx, tx, dCtx.GetTokens(), addrToId)
+	totalTokens, err := saveTokens(ctx, tx, dCtx.GetTokens(), addrToId)
 	if err != nil {
 		return state, err
 	}
@@ -201,7 +201,7 @@ func (module *Module) processBlockInTransaction(
 		return state, err
 	}
 
-	if err := updateState(block, totalAccounts, int64(len(block.Txs)), int64(dCtx.Contracts.Len()), 0, &state); err != nil {
+	if err := updateState(block, totalAccounts, int64(len(block.Txs)), totalContracts, 0, totalTokens, &state); err != nil {
 		return state, err
 	}
 
