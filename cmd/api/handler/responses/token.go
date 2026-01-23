@@ -13,6 +13,7 @@ import (
 type Token struct {
 	Id             uint64 `example:"0"                                          json:"id"               swaggertype:"integer"`
 	Contract       string `example:"0xdAC17F958D2ee523a2206206994597C13D831ec7" json:"contract"         swaggertype:"string"`
+	TokenId        string `example:"0"                                          json:"token_id"         swaggertype:"string"`
 	Type           string `example:"ERC20"                                      json:"type"             swaggertype:"string"`
 	Name           string `example:"Tether USD"                                 json:"name,omitempty"   swaggertype:"string"`
 	Symbol         string `example:"USD"                                        json:"symbol,omitempty" swaggertype:"string"`
@@ -27,6 +28,7 @@ func NewToken(token storage.Token) Token {
 	t := Token{
 		Id:             token.Id,
 		Contract:       token.Contract.Address.Hash.Hex(),
+		TokenId:        token.TokenID.String(),
 		Type:           token.Type.String(),
 		Name:           token.Name,
 		Symbol:         token.Symbol,
