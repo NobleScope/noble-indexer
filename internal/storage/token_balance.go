@@ -42,7 +42,7 @@ type TokenBalance struct {
 
 // TableName -
 func (TokenBalance) TableName() string {
-	return "token"
+	return "token_balance"
 }
 
 func (t TokenBalance) String() string {

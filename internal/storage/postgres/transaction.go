@@ -118,27 +118,51 @@ func (tx Transaction) SaveBalances(ctx context.Context, balances ...*models.Bala
 	return err
 }
 
-func (tx Transaction) SaveContracts(ctx context.Context, contracts ...*models.Contract) error {
+type addedContract struct {
+	bun.BaseModel `bun:"contract"`
+	*models.Contract
+
+	Xmax uint64 `bun:"xmax"`
+}
+
+func (tx Transaction) SaveContracts(ctx context.Context, contracts ...*models.Contract) (int64, error) {
 	if len(contracts) == 0 {
-		return nil
+		return 0, nil
 	}
 
-	_, err := tx.Tx().NewInsert().Model(&contracts).
-		On("CONFLICT (id) DO UPDATE").
-		Set("verified = CASE WHEN EXCLUDED.verified THEN EXCLUDED.verified ELSE contract.verified END").
-		Set("abi = CASE WHEN EXCLUDED.abi IS NOT NULL THEN EXCLUDED.abi ELSE contract.abi END").
-		Set("compiler_version = CASE WHEN EXCLUDED.compiler_version != '' THEN EXCLUDED.compiler_version ELSE contract.compiler_version END").
-		Set("metadata_link = CASE WHEN EXCLUDED.metadata_link != '' THEN EXCLUDED.metadata_link ELSE contract.metadata_link END").
-		Set("language = CASE WHEN EXCLUDED.language != '' THEN EXCLUDED.language ELSE contract.language END").
-		Set("optimizer_enabled = CASE WHEN EXCLUDED.optimizer_enabled THEN EXCLUDED.optimizer_enabled ELSE contract.optimizer_enabled END").
-		Set("tags = CASE WHEN EXCLUDED.tags IS NOT NULL THEN EXCLUDED.tags ELSE contract.tags END").
-		Set("status = CASE WHEN EXCLUDED.status IS NOT NULL THEN EXCLUDED.status ELSE contract.status END").
-		Set("retry_count = CASE WHEN EXCLUDED.retry_count != 0 THEN EXCLUDED.retry_count ELSE contract.retry_count END").
-		Set("error = CASE WHEN EXCLUDED.error != '' THEN EXCLUDED.error ELSE contract.error END").
-		Set("updated_at = now()").
-		Exec(ctx)
+	cs := make([]addedContract, len(contracts))
+	for i := range contracts {
+		cs[i].Contract = contracts[i]
+	}
 
-	return err
+	_, err := tx.Tx().NewInsert().Model(&cs).
+		Column("id", "height", "code", "verified", "tx_id", "abi", "compiler_version", "metadata_link", "language", "optimizer_enabled", "tags", "status", "retry_count", "error", "updated_at").
+		On("CONFLICT (id) DO UPDATE").
+		Set("verified = CASE WHEN EXCLUDED.verified THEN EXCLUDED.verified ELSE added_contract.verified END").
+		Set("abi = CASE WHEN EXCLUDED.abi IS NOT NULL THEN EXCLUDED.abi ELSE added_contract.abi END").
+		Set("compiler_version = CASE WHEN EXCLUDED.compiler_version != '' THEN EXCLUDED.compiler_version ELSE added_contract.compiler_version END").
+		Set("metadata_link = CASE WHEN EXCLUDED.metadata_link != '' THEN EXCLUDED.metadata_link ELSE added_contract.metadata_link END").
+		Set("language = CASE WHEN EXCLUDED.language != '' THEN EXCLUDED.language ELSE added_contract.language END").
+		Set("optimizer_enabled = CASE WHEN EXCLUDED.optimizer_enabled THEN EXCLUDED.optimizer_enabled ELSE added_contract.optimizer_enabled END").
+		Set("tags = CASE WHEN EXCLUDED.tags IS NOT NULL THEN EXCLUDED.tags ELSE added_contract.tags END").
+		Set("status = CASE WHEN EXCLUDED.status IS NOT NULL THEN EXCLUDED.status ELSE added_contract.status END").
+		Set("retry_count = CASE WHEN EXCLUDED.retry_count != 0 THEN EXCLUDED.retry_count ELSE added_contract.retry_count END").
+		Set("error = CASE WHEN EXCLUDED.error != '' THEN EXCLUDED.error ELSE added_contract.error END").
+		Set("updated_at = now()").
+		Returning("xmax, id").
+		Exec(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	var count int64
+	for i := range cs {
+		if cs[i].Xmax == 0 {
+			count++
+		}
+	}
+
+	return count, err
 }
 
 func (tx Transaction) SaveTraces(ctx context.Context, traces ...*models.Trace) error {
@@ -171,19 +195,43 @@ func (tx Transaction) SaveTransfers(ctx context.Context, transfers ...*models.Tr
 	}
 }
 
-func (tx Transaction) SaveTokens(ctx context.Context, tokens ...*models.Token) error {
+type addedToken struct {
+	bun.BaseModel `bun:"token"`
+	*models.Token
+
+	Xmax uint64 `bun:"xmax"`
+}
+
+func (tx Transaction) SaveTokens(ctx context.Context, tokens ...*models.Token) (int64, error) {
 	if len(tokens) == 0 {
-		return nil
+		return 0, nil
 	}
 
-	_, err := tx.Tx().NewInsert().Model(&tokens).
-		On("CONFLICT (token_id, contract_id) DO UPDATE").
-		Set("transfers_count = token.transfers_count + EXCLUDED.transfers_count").
-		Set("supply = token.supply + EXCLUDED.supply").
-		Set("last_height = EXCLUDED.last_height").
-		Exec(ctx)
+	ts := make([]addedToken, len(tokens))
+	for i := range tokens {
+		ts[i].Token = tokens[i]
+	}
 
-	return err
+	_, err := tx.Tx().NewInsert().Model(&ts).
+		Column("token_id", "contract_id", "type", "height", "last_height", "name", "symbol", "decimals", "transfers_count", "supply", "metadata_link", "status", "retry_count", "error", "metadata", "updated_at").
+		On("CONFLICT (token_id, contract_id) DO UPDATE").
+		Set("transfers_count = added_token.transfers_count + EXCLUDED.transfers_count").
+		Set("supply = added_token.supply + EXCLUDED.supply").
+		Set("last_height = EXCLUDED.last_height").
+		Returning("xmax, id").
+		Exec(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	var count int64
+	for i := range ts {
+		if ts[i].Xmax == 0 {
+			count++
+		}
+	}
+
+	return count, err
 }
 
 func (tx Transaction) SaveTokenMetadata(ctx context.Context, tokens ...*models.Token) error {

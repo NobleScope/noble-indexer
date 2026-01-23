@@ -45,6 +45,7 @@ func (module *Module) save(ctx context.Context, data parsedData) error {
 		return tx.HandleError(ctx, err)
 	}
 
+	totalContracts := int64(0)
 	if len(data.contracts) > 0 {
 		entities := make([]*storage.Contract, 0, len(data.contracts))
 		for key := range data.contracts {
@@ -59,19 +60,22 @@ func (module *Module) save(ctx context.Context, data parsedData) error {
 			contract.Id = id
 		}
 
-		err = tx.SaveContracts(ctx, entities...)
+		totalContracts, err = tx.SaveContracts(ctx, entities...)
 		if err != nil {
 			return tx.HandleError(ctx, err)
 		}
 	}
 
 	if err := tx.Add(ctx, &storage.State{
-		Name:          module.indexerName,
-		ChainId:       data.chainId,
-		LastHeight:    0,
-		LastTime:      data.time,
-		TotalTx:       0,
-		TotalAccounts: totalAccounts,
+		Name:                   module.indexerName,
+		ChainId:                data.chainId,
+		LastHeight:             0,
+		LastTime:               data.time,
+		TotalTx:                0,
+		TotalAccounts:          totalAccounts,
+		TotalContracts:         totalContracts,
+		TotalVerifiedContracts: 0,
+		TotalTokens:            0,
 	}); err != nil {
 		return tx.HandleError(ctx, err)
 	}

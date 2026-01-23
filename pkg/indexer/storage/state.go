@@ -5,7 +5,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func updateState(block *storage.Block, totalAccounts, totalTxs, totalContracts, totalVerifiedContracts int64, state *storage.State) error {
+func updateState(block *storage.Block, totalAccounts, totalTxs, totalContracts, totalVerifiedContracts, totalTokens int64, state *storage.State) error {
 	if block.Height <= state.LastHeight {
 		return errors.Errorf("block has already indexed: height=%d  state=%d", block.Height, state.LastHeight)
 	}
@@ -17,5 +17,6 @@ func updateState(block *storage.Block, totalAccounts, totalTxs, totalContracts, 
 	state.TotalAccounts += totalAccounts
 	state.TotalContracts += totalContracts
 	state.TotalVerifiedContracts += totalVerifiedContracts
+	state.TotalTokens += totalTokens
 	return nil
 }

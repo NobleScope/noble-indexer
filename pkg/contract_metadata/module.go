@@ -151,7 +151,7 @@ func (m *Module) save(ctx context.Context, contracts []*storage.Contract, source
 	}
 	defer tx.Close(ctx)
 
-	err = tx.SaveContracts(ctx, contracts...)
+	_, err = tx.SaveContracts(ctx, contracts...)
 	if err != nil {
 		return errors.Wrap(err, "save contracts")
 	}
