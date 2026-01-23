@@ -20,9 +20,6 @@ func (r *Module) receiveGenesis(ctx context.Context) error {
 	if err = json.Unmarshal(file, &genesis); err != nil {
 		return err
 	}
-	if err != nil {
-		return err
-	}
 
 	r.MustOutput(GenesisOutput).Push(genesis)
 	genesisDoneInput := r.MustInput(GenesisDoneInput)

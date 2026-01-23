@@ -11,7 +11,6 @@ import (
 )
 
 const (
-	connectionName       = "noble_notifications"
 	minReconnectInterval = 10 * time.Second
 	maxReconnectInterval = time.Minute
 )

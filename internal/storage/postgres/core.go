@@ -85,8 +85,8 @@ func initDatabase(ctx context.Context, conn *database.Bun) error {
 	}
 
 	if err := database.CreateTables(ctx, conn, models.Models...); err != nil {
-		if err := conn.Close(); err != nil {
-			return err
+		if errClose := conn.Close(); errClose != nil {
+			return errors.Wrap(errClose, err.Error())
 		}
 		return err
 	}

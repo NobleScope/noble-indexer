@@ -125,6 +125,12 @@ func run(cfg *config.Config) error {
 	if err := e.Shutdown(context.Background()); err != nil {
 		log.Panic().Err(err).Msg("stopping API server")
 	}
+	if err := dispatcher.Close(); err != nil {
+		log.Panic().Err(err).Msg("stopping dispatcher")
+	}
+	if err := db.Close(); err != nil {
+		log.Panic().Err(err).Msg("closing database")
+	}
 
 	log.Info().Msg("stopped")
 	return nil

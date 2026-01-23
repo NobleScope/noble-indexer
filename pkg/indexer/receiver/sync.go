@@ -70,7 +70,7 @@ func (r *Module) live(ctx context.Context) error {
 
 		select {
 		case <-ctx.Done():
-			break
+			return nil
 		default:
 			_, msg, err := r.ws.ReadMessage()
 			if err != nil {
@@ -79,6 +79,7 @@ func (r *Module) live(ctx context.Context) error {
 
 			var wsMsg types.Response[pkgTypes.Block]
 			if err := json.Unmarshal(msg, &wsMsg); err != nil {
+				r.Log.Err(err).Any("Raw message:", string(msg)).Msg("failed to unmarshal ws message")
 				continue
 			}
 
@@ -99,6 +100,7 @@ func (r *Module) live(ctx context.Context) error {
 			height, err := payload.Result.Number.Uint64()
 			if err != nil {
 				r.Log.Err(err).Msg("failed to parse block number")
+				continue
 			}
 
 			r.Log.Info().Uint64("height", height).Msg("ws subscription received")
