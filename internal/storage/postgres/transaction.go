@@ -125,16 +125,16 @@ func (tx Transaction) SaveContracts(ctx context.Context, contracts ...*models.Co
 
 	_, err := tx.Tx().NewInsert().Model(&contracts).
 		On("CONFLICT (id) DO UPDATE").
-		Set("verified = EXCLUDED.verified").
-		Set("abi = EXCLUDED.abi").
-		Set("compiler_version = EXCLUDED.compiler_version").
-		Set("metadata_link = EXCLUDED.metadata_link").
-		Set("language = EXCLUDED.language").
-		Set("optimizer_enabled = EXCLUDED.optimizer_enabled").
-		Set("tags = EXCLUDED.tags").
-		Set("status = EXCLUDED.status").
-		Set("retry_count = EXCLUDED.retry_count").
-		Set("error = EXCLUDED.error").
+		Set("verified = CASE WHEN EXCLUDED.verified THEN EXCLUDED.verified ELSE contract.verified END").
+		Set("abi = CASE WHEN EXCLUDED.abi IS NOT NULL THEN EXCLUDED.abi ELSE contract.abi END").
+		Set("compiler_version = CASE WHEN EXCLUDED.compiler_version != '' THEN EXCLUDED.compiler_version ELSE contract.compiler_version END").
+		Set("metadata_link = CASE WHEN EXCLUDED.metadata_link != '' THEN EXCLUDED.metadata_link ELSE contract.metadata_link END").
+		Set("language = CASE WHEN EXCLUDED.language != '' THEN EXCLUDED.language ELSE contract.language END").
+		Set("optimizer_enabled = CASE WHEN EXCLUDED.optimizer_enabled THEN EXCLUDED.optimizer_enabled ELSE contract.optimizer_enabled END").
+		Set("tags = CASE WHEN EXCLUDED.tags IS NOT NULL THEN EXCLUDED.tags ELSE contract.tags END").
+		Set("status = CASE WHEN EXCLUDED.status IS NOT NULL THEN EXCLUDED.status ELSE contract.status END").
+		Set("retry_count = CASE WHEN EXCLUDED.retry_count != 0 THEN EXCLUDED.retry_count ELSE contract.retry_count END").
+		Set("error = CASE WHEN EXCLUDED.error != '' THEN EXCLUDED.error ELSE contract.error END").
 		Set("updated_at = now()").
 		Exec(ctx)
 
@@ -193,14 +193,14 @@ func (tx Transaction) SaveTokenMetadata(ctx context.Context, tokens ...*models.T
 
 	_, err := tx.Tx().NewInsert().Model(&tokens).
 		On("CONFLICT (token_id, contract_id) DO UPDATE").
-		Set("name = EXCLUDED.name").
-		Set("symbol = EXCLUDED.symbol").
-		Set("decimals = EXCLUDED.decimals").
-		Set("status = EXCLUDED.status").
-		Set("metadata_link = EXCLUDED.metadata_link").
-		Set("metadata = EXCLUDED.metadata").
-		Set("retry_count = EXCLUDED.retry_count").
-		Set("error = EXCLUDED.error").
+		Set("name = CASE WHEN EXCLUDED.name != '' THEN EXCLUDED.name ELSE token.name END").
+		Set("symbol = CASE WHEN EXCLUDED.symbol != '' THEN EXCLUDED.symbol ELSE token.symbol END").
+		Set("decimals = CASE WHEN EXCLUDED.decimals != 0 THEN EXCLUDED.decimals ELSE token.decimals END").
+		Set("status = CASE WHEN EXCLUDED.status IS NOT NULL THEN EXCLUDED.status ELSE token.status END").
+		Set("metadata_link = CASE WHEN EXCLUDED.metadata_link != '' THEN EXCLUDED.metadata_link ELSE token.metadata_link END").
+		Set("metadata = CASE WHEN EXCLUDED.metadata IS NOT NULL THEN EXCLUDED.metadata ELSE token.metadata END").
+		Set("retry_count = CASE WHEN EXCLUDED.retry_count != 0 THEN EXCLUDED.retry_count ELSE token.retry_count END").
+		Set("error = CASE WHEN EXCLUDED.error != '' THEN EXCLUDED.error ELSE token.error END").
 		Set("updated_at = now()").
 		Exec(ctx)
 
