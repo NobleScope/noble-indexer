@@ -359,6 +359,9 @@ definitions:
       symbol:
         example: USD
         type: string
+      token_id:
+        example: "0"
+        type: string
       transfers_count:
         example: 123
         type: integer

@@ -2199,6 +2199,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "USD"
                 },
+                "token_id": {
+                    "type": "string",
+                    "example": "0"
+                },
                 "transfers_count": {
                     "type": "integer",
                     "example": 123
