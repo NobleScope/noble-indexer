@@ -329,6 +329,14 @@ definitions:
         example: 43
         format: int64
         type: integer
+      total_contracts:
+        example: 1488
+        format: int64
+        type: integer
+      total_tokens:
+        example: 1742
+        format: int64
+        type: integer
       total_tx:
         example: 23456
         format: int64

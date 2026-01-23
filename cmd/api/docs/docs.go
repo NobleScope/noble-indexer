@@ -2158,6 +2158,16 @@ const docTemplate = `{
                     "format": "int64",
                     "example": 43
                 },
+                "total_contracts": {
+                    "type": "integer",
+                    "format": "int64",
+                    "example": 1488
+                },
+                "total_tokens": {
+                    "type": "integer",
+                    "format": "int64",
+                    "example": 1742
+                },
                 "total_tx": {
                     "type": "integer",
                     "format": "int64",
