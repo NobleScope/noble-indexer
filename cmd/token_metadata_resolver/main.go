@@ -37,7 +37,7 @@ func main() {
 	notifyCtx, notifyCancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	defer notifyCancel()
 
-	pg, err := postgres.Create(ctx, cfg.Database, cfg.Indexer.ScriptsDir)
+	pg, err := postgres.Create(ctx, cfg.Database, cfg.Indexer.ScriptsDir, false)
 	if err != nil {
 		log.Panic().Err(err).Msg("can't create database connection")
 		return
