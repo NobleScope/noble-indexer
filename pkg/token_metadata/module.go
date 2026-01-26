@@ -140,9 +140,8 @@ func (m *Module) sync(ctx context.Context) error {
 		}
 
 		if saveErr := m.save(ctx, updatedTokens); saveErr != nil {
-			m.Log.Err(saveErr).Msg("save failed tokens")
+			return errors.Wrap(saveErr, err.Error())
 		}
-
 		return errors.Wrap(err, "token metadata bulk")
 	}
 
