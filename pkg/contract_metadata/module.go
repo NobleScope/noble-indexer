@@ -138,10 +138,9 @@ func (m *Module) sync(ctx context.Context) error {
 	}
 
 	if err := m.save(ctx, contracts, sources); err != nil {
-		m.Log.Err(err).Msg("save")
+		return errors.Wrap(err, "saving contracts")
 	}
-
-	return err
+	return nil
 }
 
 func (m *Module) save(ctx context.Context, contracts []*storage.Contract, sources []*storage.Source) error {
