@@ -1101,13 +1101,13 @@ paths:
         example: 1692892095
         in: query
         minimum: 1
-        name: from
+        name: time_from
         type: integer
       - description: Filter by timestamp to (Unix timestamp)
         example: 1692892095
         in: query
         minimum: 1
-        name: to
+        name: time_to
         type: integer
       - default: desc
         description: 'Sort order by timestamp (default: desc)'
@@ -1561,13 +1561,13 @@ paths:
         example: 1692892095
         in: query
         minimum: 1
-        name: from
+        name: time_from
         type: integer
       - description: Filter by timestamp to (Unix timestamp)
         example: 1692892095
         in: query
         minimum: 1
-        name: to
+        name: time_to
         type: integer
       - description: Filter by transfer type (comma-separated list)
         enum:
@@ -1733,13 +1733,13 @@ paths:
         example: 1692892095
         in: query
         minimum: 1
-        name: from
+        name: time_from
         type: integer
       - description: Filter by timestamp to (Unix timestamp)
         example: 1692892095
         in: query
         minimum: 1
-        name: to
+        name: time_to
         type: integer
       - default: desc
         description: 'Sort order by timestamp (default: desc)'

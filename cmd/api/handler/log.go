@@ -59,8 +59,8 @@ func (req *logListRequest) SetDefault() {
 //	@Param			offset			query	integer	false	"Number of logs to skip (default: 0)"						minimum(0)	default(0)
 //	@Param			address			query	string	false	"Filter by contract address that emitted the log"			minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
 //	@Param			height			query	integer	false	"Filter by block height"									minimum(1)	example(12345)
-//	@Param			from			query	integer	false	"Filter by timestamp from (Unix timestamp)"					minimum(1)	example(1692892095)
-//	@Param			to				query	integer	false	"Filter by timestamp to (Unix timestamp)"					minimum(1)	example(1692892095)
+//	@Param			time_from		query	integer	false	"Filter by timestamp from (Unix timestamp)"					minimum(1)	example(1692892095)
+//	@Param			time_to			query	integer	false	"Filter by timestamp to (Unix timestamp)"					minimum(1)	example(1692892095)
 //	@Param			sort			query	string	false	"Sort order by timestamp (default: desc)"					Enums(asc, desc)	default(desc)
 //	@Produce		json
 //	@Success		200	{array}		responses.Log	"List of event logs"

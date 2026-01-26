@@ -221,8 +221,8 @@ func (req *listTxs) SetDefault() {
 //	@Param			height			query	integer	false	"Filter by block height"							minimum(1)	example(12345)
 //	@Param			type			query	string	false	"Filter by transaction type (comma-separated list)"	Enums(TxTypeUnknown, TxTypeLegacy, TxTypeDynamicFee, TxTypeBlob, TxTypeSetCode)
 //	@Param			status			query	string	false	"Filter by execution status (comma-separated list)"	Enums(TxStatusSuccess, TxStatusRevert)
-//	@Param			from			query	integer	false	"Filter by timestamp from (Unix timestamp)"			minimum(1)	example(1692892095)
-//	@Param			to				query	integer	false	"Filter by timestamp to (Unix timestamp)"			minimum(1)	example(1692892095)
+//	@Param			time_from		query	integer	false	"Filter by timestamp from (Unix timestamp)"			minimum(1)	example(1692892095)
+//	@Param			time_to			query	integer	false	"Filter by timestamp to (Unix timestamp)"			minimum(1)	example(1692892095)
 //	@Param			sort			query	string	false	"Sort order by timestamp (default: desc)"			Enums(asc, desc)	default(desc)
 //	@Produce		json
 //	@Success		200	{array}		responses.Transaction	"List of transactions"

@@ -752,7 +752,7 @@ const docTemplate = `{
                         "type": "integer",
                         "example": 1692892095,
                         "description": "Filter by timestamp from (Unix timestamp)",
-                        "name": "from",
+                        "name": "time_from",
                         "in": "query"
                     },
                     {
@@ -760,7 +760,7 @@ const docTemplate = `{
                         "type": "integer",
                         "example": 1692892095,
                         "description": "Filter by timestamp to (Unix timestamp)",
-                        "name": "to",
+                        "name": "time_to",
                         "in": "query"
                     },
                     {
@@ -1369,7 +1369,7 @@ const docTemplate = `{
                         "type": "integer",
                         "example": 1692892095,
                         "description": "Filter by timestamp from (Unix timestamp)",
-                        "name": "from",
+                        "name": "time_from",
                         "in": "query"
                     },
                     {
@@ -1377,7 +1377,7 @@ const docTemplate = `{
                         "type": "integer",
                         "example": 1692892095,
                         "description": "Filter by timestamp to (Unix timestamp)",
-                        "name": "to",
+                        "name": "time_to",
                         "in": "query"
                     },
                     {
@@ -1600,7 +1600,7 @@ const docTemplate = `{
                         "type": "integer",
                         "example": 1692892095,
                         "description": "Filter by timestamp from (Unix timestamp)",
-                        "name": "from",
+                        "name": "time_from",
                         "in": "query"
                     },
                     {
@@ -1608,7 +1608,7 @@ const docTemplate = `{
                         "type": "integer",
                         "example": 1692892095,
                         "description": "Filter by timestamp to (Unix timestamp)",
-                        "name": "to",
+                        "name": "time_to",
                         "in": "query"
                     },
                     {
