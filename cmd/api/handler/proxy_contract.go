@@ -66,7 +66,7 @@ func (req *listProxyContracts) ToFilters(
 		}
 		implementationAddress, err := address.ByHash(ctx, implementationHex)
 		if err != nil {
-			return filters, errors.Wrapf(err, "fetching implementation address by hash: %x", implementationAddress)
+			return filters, errors.Wrapf(err, "fetching implementation address by hash: %x", implementationHex)
 		}
 		filters.ImplementationId = implementationAddress.Id
 	}
