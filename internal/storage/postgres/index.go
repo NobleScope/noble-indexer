@@ -156,6 +156,15 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			Exec(ctx); err != nil {
 			return err
 		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Contract)(nil)).
+			Index("contract_pending_idx").
+			Column("status", "metadata_link", "updated_at").
+			Where("status = 'pending'").
+			Exec(ctx); err != nil {
+			return err
+		}
 
 		// Trace
 		if _, err := tx.NewCreateIndex().
@@ -337,6 +346,15 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			Model((*storage.Token)(nil)).
 			Index("token_type_idx").
 			Column("type").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Token)(nil)).
+			Index("token_pending_idx").
+			Column("status", "updated_at").
+			Where("status = 'pending'").
 			Exec(ctx); err != nil {
 			return err
 		}
