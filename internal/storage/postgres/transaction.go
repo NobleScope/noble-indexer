@@ -240,6 +240,7 @@ func (tx Transaction) SaveTokenMetadata(ctx context.Context, tokens ...*models.T
 	}
 
 	_, err := tx.Tx().NewInsert().Model(&tokens).
+		Column("token_id", "contract_id", "name", "symbol", "decimals", "status", "metadata_link", "metadata", "retry_count", "error", "updated_at").
 		On("CONFLICT (token_id, contract_id) DO UPDATE").
 		Set("name = CASE WHEN EXCLUDED.name != '' THEN EXCLUDED.name ELSE token.name END").
 		Set("symbol = CASE WHEN EXCLUDED.symbol != '' THEN EXCLUDED.symbol ELSE token.symbol END").
