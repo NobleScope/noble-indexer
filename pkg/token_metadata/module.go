@@ -3,6 +3,7 @@ package token_metadata
 import (
 	"context"
 	"path"
+	"sync"
 	"time"
 
 	"github.com/baking-bad/noble-indexer/internal/ipfs"
@@ -163,101 +164,112 @@ func (m *Module) sync(ctx context.Context) error {
 }
 
 func (m *Module) resolveMetadata(ctx context.Context, tokens map[uint64]*storage.Token, metadata map[uint64]pkgTypes.TokenMetadata) error {
+	var wg sync.WaitGroup
+
 	for i, t := range metadata {
-		iABI, ok := m.abiRegistry.abi[tokens[i].Type.String()]
-		if !ok {
-			err := errors.Errorf("no abi for token type: %s", tokens[i].Type.String())
-			m.Log.Err(err).
-				Str("contract", tokens[i].Contract.String()).
-				Msg("no abi for this token type")
-
-			m.failMetadata(tokens[i], err)
-			continue
-		}
-
-		switch tokens[i].Type {
-		case types.ERC20:
-			var name string
-			err := iABI.UnpackIntoInterface(&name, tmTypes.Name.String(), t.Name)
-			if err != nil {
-				m.failMetadata(tokens[i], err)
-				continue
-			}
-			tokens[i].Name = name
-
-			var symbol string
-			err = iABI.UnpackIntoInterface(&symbol, tmTypes.Symbol.String(), t.Symbol)
-			if err != nil {
-				m.failMetadata(tokens[i], err)
-				continue
-			}
-			tokens[i].Symbol = symbol
-
-			var decimals uint8
-			err = iABI.UnpackIntoInterface(&decimals, tmTypes.Decimals.String(), t.Decimals)
-			if err != nil {
-				m.failMetadata(tokens[i], err)
-				continue
-			}
-			tokens[i].Decimals = decimals
-		case types.ERC721:
-			var name string
-			err := iABI.UnpackIntoInterface(&name, tmTypes.Name.String(), t.Name)
-			if err != nil {
-				m.failMetadata(tokens[i], err)
-				continue
-			}
-			tokens[i].Name = name
-
-			var symbol string
-			err = iABI.UnpackIntoInterface(&symbol, tmTypes.Symbol.String(), t.Symbol)
-			if err != nil {
-				m.failMetadata(tokens[i], err)
-				continue
-			}
-			tokens[i].Symbol = symbol
-
-			var metadataLink string
-			err = iABI.UnpackIntoInterface(&metadataLink, tmTypes.TokenUri.String(), t.URI)
-			if err != nil {
-				m.failMetadata(tokens[i], err)
-				continue
-			}
-			tokens[i].MetadataLink = metadataLink
-
-			md, err := m.pool.LoadMetadata(ctx, metadataLink)
-			if err != nil {
-				m.failMetadata(tokens[i], err)
-				continue
-			}
-
-			tokens[i].Metadata = md
-
-		case types.ERC1155:
-			var metadataLink string
-			err := iABI.UnpackIntoInterface(&metadataLink, tmTypes.Uri.String(), t.URI)
-			if err != nil {
-				m.failMetadata(tokens[i], err)
-				continue
-			}
-			tokens[i].MetadataLink = metadataLink
-
-			md, err := m.pool.LoadMetadata(ctx, metadataLink)
-			if err != nil {
-				m.failMetadata(tokens[i], err)
-				continue
-			}
-			tokens[i].Metadata = md
-
-		default:
-			continue
-		}
-
-		tokens[i].Status = types.Success
-		tokens[i].Error = ""
+		wg.Add(1)
+		go func(i uint64, t pkgTypes.TokenMetadata) {
+			defer wg.Done()
+			m.resolveTokenMetadata(ctx, tokens[i], t)
+		}(i, t)
 	}
 
+	wg.Wait()
 	return nil
+}
+
+func (m *Module) resolveTokenMetadata(ctx context.Context, token *storage.Token, t pkgTypes.TokenMetadata) {
+	iABI, ok := m.abiRegistry.abi[token.Type.String()]
+	if !ok {
+		err := errors.Errorf("no abi for token type: %s", token.Type.String())
+		m.Log.Err(err).
+			Str("contract", token.Contract.String()).
+			Msg("no abi for this token type")
+
+		m.failMetadata(token, err)
+		return
+	}
+
+	switch token.Type {
+	case types.ERC20:
+		var name string
+		err := iABI.UnpackIntoInterface(&name, tmTypes.Name.String(), t.Name)
+		if err != nil {
+			m.failMetadata(token, err)
+			return
+		}
+		token.Name = name
+
+		var symbol string
+		err = iABI.UnpackIntoInterface(&symbol, tmTypes.Symbol.String(), t.Symbol)
+		if err != nil {
+			m.failMetadata(token, err)
+			return
+		}
+		token.Symbol = symbol
+
+		var decimals uint8
+		err = iABI.UnpackIntoInterface(&decimals, tmTypes.Decimals.String(), t.Decimals)
+		if err != nil {
+			m.failMetadata(token, err)
+			return
+		}
+		token.Decimals = decimals
+	case types.ERC721:
+		var name string
+		err := iABI.UnpackIntoInterface(&name, tmTypes.Name.String(), t.Name)
+		if err != nil {
+			m.failMetadata(token, err)
+			return
+		}
+		token.Name = name
+
+		var symbol string
+		err = iABI.UnpackIntoInterface(&symbol, tmTypes.Symbol.String(), t.Symbol)
+		if err != nil {
+			m.failMetadata(token, err)
+			return
+		}
+		token.Symbol = symbol
+
+		var metadataLink string
+		err = iABI.UnpackIntoInterface(&metadataLink, tmTypes.TokenUri.String(), t.URI)
+		if err != nil {
+			m.failMetadata(token, err)
+			return
+		}
+		token.MetadataLink = metadataLink
+
+		md, err := m.pool.LoadMetadata(ctx, metadataLink)
+		if err != nil {
+			m.failMetadata(token, err)
+			return
+		}
+
+		token.Metadata = md
+
+	case types.ERC1155:
+		var metadataLink string
+		err := iABI.UnpackIntoInterface(&metadataLink, tmTypes.Uri.String(), t.URI)
+		if err != nil {
+			m.failMetadata(token, err)
+			return
+		}
+		token.MetadataLink = metadataLink
+
+		md, err := m.pool.LoadMetadata(ctx, metadataLink)
+		if err != nil {
+			m.failMetadata(token, err)
+			return
+		}
+		token.Metadata = md
+
+	default:
+		return
+	}
+
+	token.Status = types.Success
+	token.Error = ""
 }
 
 func (m *Module) failMetadata(token *storage.Token, err error) {
