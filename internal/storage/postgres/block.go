@@ -54,6 +54,7 @@ func (b *Block) Filter(ctx context.Context, fltrs storage.BlockListFilter) (bloc
 	query := b.DB().NewSelect().
 		Model(&blocks)
 
+	query = sortTimeIDScope(query, fltrs.Sort)
 	query = limitScope(query, fltrs.Limit)
 	query = query.Offset(fltrs.Offset)
 
