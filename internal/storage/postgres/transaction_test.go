@@ -180,6 +180,18 @@ func (s *TransactionTestSuite) TestSaveBalances() {
 
 	s.Require().NoError(tx.Flush(ctx))
 	s.Require().NoError(tx.Close(ctx))
+
+	// Verify balances were saved (SaveBalances adds value to existing balance)
+	// Fixture: id=1 has value=1000000, id=3 has value=5000000
+	var balance1 storage.Balance
+	err = s.storage.Connection().DB().NewSelect().Model(&balance1).Where("id = ?", 1).Scan(ctx)
+	s.Require().NoError(err)
+	s.Require().Equal(decimal.RequireFromString("1500000"), balance1.Value) // 1000000 + 500000
+
+	var balance2 storage.Balance
+	err = s.storage.Connection().DB().NewSelect().Model(&balance2).Where("id = ?", 2).Scan(ctx)
+	s.Require().NoError(err)
+	s.Require().Equal(decimal.RequireFromString("1000000"), balance2.Value) // new balance
 }
 
 func (s *TransactionTestSuite) TestSaveContracts() {
@@ -202,6 +214,12 @@ func (s *TransactionTestSuite) TestSaveContracts() {
 
 	s.Require().NoError(tx.Flush(ctx))
 	s.Require().NoError(tx.Close(ctx))
+
+	// Verify contract was saved
+	contract, err := s.storage.Contracts.GetByID(ctx, 100)
+	s.Require().NoError(err)
+	s.Require().EqualValues(1000, contract.Height)
+	s.Require().Equal(pkgTypes.Hex(pkgTypes.MustDecodeHex("0x6080604052")), contract.Code)
 }
 
 func (s *TransactionTestSuite) TestSaveContractsUpdateMetadata() {
@@ -421,11 +439,26 @@ func (s *TransactionTestSuite) TestSaveProxyContracts() {
 
 	s.Require().NoError(tx.Flush(ctx))
 	s.Require().NoError(tx.Close(ctx))
+
+	// Verify proxy contract was saved
+	proxy, err := s.storage.ProxyContracts.GetByID(ctx, 100)
+	s.Require().NoError(err)
+	s.Require().EqualValues(1000, proxy.Height)
+	s.Require().Equal(types.EIP1967, proxy.Type)
+	s.Require().Equal(types.Resolved, proxy.Status)
+	s.Require().NotNil(proxy.ImplementationID)
+	s.Require().EqualValues(3, *proxy.ImplementationID)
 }
 
 func (s *TransactionTestSuite) TestRollbackBlock() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
+
+	// Verify block exists before rollback
+	block, err := s.storage.Blocks.ByHeight(ctx, 100, false)
+	s.Require().NoError(err)
+	s.Require().EqualValues(100, block.Height)
+	s.Require().EqualValues(pkgTypes.MustDecodeHex("0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"), block.Hash)
 
 	tx, err := BeginTransaction(ctx, s.storage.Transactable)
 	s.Require().NoError(err)
@@ -435,11 +468,20 @@ func (s *TransactionTestSuite) TestRollbackBlock() {
 
 	s.Require().NoError(tx.Flush(ctx))
 	s.Require().NoError(tx.Close(ctx))
+
+	// Verify block was deleted
+	_, err = s.storage.Blocks.ByHeight(ctx, 100, false)
+	s.Require().Error(err)
 }
 
 func (s *TransactionTestSuite) TestRollbackTxs() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
+
+	// Verify txs exist before rollback
+	txsBefore, err := s.storage.Tx.ByHeight(ctx, 100, 100, 0, "asc")
+	s.Require().NoError(err)
+	s.Require().NotEmpty(txsBefore)
 
 	tx, err := BeginTransaction(ctx, s.storage.Transactable)
 	s.Require().NoError(err)
@@ -447,14 +489,26 @@ func (s *TransactionTestSuite) TestRollbackTxs() {
 	txs, err := tx.RollbackTxs(ctx, 100)
 	s.Require().NoError(err)
 	s.Require().NotNil(txs)
+	s.Require().Len(txs, len(txsBefore))
 
 	s.Require().NoError(tx.Flush(ctx))
 	s.Require().NoError(tx.Close(ctx))
+
+	// Verify txs were deleted
+	txsAfter, err := s.storage.Tx.ByHeight(ctx, 100, 100, 0, "asc")
+	s.Require().NoError(err)
+	s.Require().Empty(txsAfter)
 }
 
 func (s *TransactionTestSuite) TestRollbackLogs() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
+
+	// Verify logs exist before rollback
+	height := uint64(100)
+	logsBefore, err := s.storage.Logs.Filter(ctx, storage.LogListFilter{Height: &height, Limit: 100})
+	s.Require().NoError(err)
+	s.Require().NotEmpty(logsBefore)
 
 	tx, err := BeginTransaction(ctx, s.storage.Transactable)
 	s.Require().NoError(err)
@@ -464,11 +518,22 @@ func (s *TransactionTestSuite) TestRollbackLogs() {
 
 	s.Require().NoError(tx.Flush(ctx))
 	s.Require().NoError(tx.Close(ctx))
+
+	// Verify logs were deleted
+	logsAfter, err := s.storage.Logs.Filter(ctx, storage.LogListFilter{Height: &height, Limit: 100})
+	s.Require().NoError(err)
+	s.Require().Empty(logsAfter)
 }
 
 func (s *TransactionTestSuite) TestRollbackTraces() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
+
+	// Verify traces exist before rollback
+	height := uint64(100)
+	tracesBefore, err := s.storage.Trace.Filter(ctx, storage.TraceListFilter{Height: &height, Limit: 100})
+	s.Require().NoError(err)
+	s.Require().NotEmpty(tracesBefore)
 
 	tx, err := BeginTransaction(ctx, s.storage.Transactable)
 	s.Require().NoError(err)
@@ -476,14 +541,26 @@ func (s *TransactionTestSuite) TestRollbackTraces() {
 	traces, err := tx.RollbackTraces(ctx, 100)
 	s.Require().NoError(err)
 	s.Require().NotNil(traces)
+	s.Require().Len(traces, len(tracesBefore))
 
 	s.Require().NoError(tx.Flush(ctx))
 	s.Require().NoError(tx.Close(ctx))
+
+	// Verify traces were deleted
+	tracesAfter, err := s.storage.Trace.Filter(ctx, storage.TraceListFilter{Height: &height, Limit: 100})
+	s.Require().NoError(err)
+	s.Require().Empty(tracesAfter)
 }
 
 func (s *TransactionTestSuite) TestRollbackTransfers() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
+
+	// Verify transfers exist before rollback
+	height := uint64(100)
+	transfersBefore, err := s.storage.Transfer.Filter(ctx, storage.TransferListFilter{Height: &height, Limit: 100})
+	s.Require().NoError(err)
+	s.Require().NotEmpty(transfersBefore)
 
 	tx, err := BeginTransaction(ctx, s.storage.Transactable)
 	s.Require().NoError(err)
@@ -491,14 +568,26 @@ func (s *TransactionTestSuite) TestRollbackTransfers() {
 	transfers, err := tx.RollbackTransfers(ctx, 100)
 	s.Require().NoError(err)
 	s.Require().NotNil(transfers)
+	s.Require().Len(transfers, len(transfersBefore))
 
 	s.Require().NoError(tx.Flush(ctx))
 	s.Require().NoError(tx.Close(ctx))
+
+	// Verify transfers were deleted
+	transfersAfter, err := s.storage.Transfer.Filter(ctx, storage.TransferListFilter{Height: &height, Limit: 100})
+	s.Require().NoError(err)
+	s.Require().Empty(transfersAfter)
 }
 
 func (s *TransactionTestSuite) TestRollbackTokens() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
+
+	// Verify tokens exist before rollback
+	var tokensBefore []storage.Token
+	err := s.storage.Connection().DB().NewSelect().Model(&tokensBefore).Where("height = ?", 100).Scan(ctx)
+	s.Require().NoError(err)
+	s.Require().NotEmpty(tokensBefore)
 
 	tx, err := BeginTransaction(ctx, s.storage.Transactable)
 	s.Require().NoError(err)
@@ -506,14 +595,27 @@ func (s *TransactionTestSuite) TestRollbackTokens() {
 	tokens, err := tx.RollbackTokens(ctx, 100)
 	s.Require().NoError(err)
 	s.Require().NotNil(tokens)
+	s.Require().Len(tokens, len(tokensBefore))
 
 	s.Require().NoError(tx.Flush(ctx))
 	s.Require().NoError(tx.Close(ctx))
+
+	// Verify tokens were deleted
+	var tokensAfter []storage.Token
+	err = s.storage.Connection().DB().NewSelect().Model(&tokensAfter).Where("height = ?", 100).Scan(ctx)
+	s.Require().NoError(err)
+	s.Require().Empty(tokensAfter)
 }
 
 func (s *TransactionTestSuite) TestRollbackContracts() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
+
+	// Verify contracts exist before rollback
+	var contractsBefore []storage.Contract
+	err := s.storage.Connection().DB().NewSelect().Model(&contractsBefore).Where("height = ?", 100).Scan(ctx)
+	s.Require().NoError(err)
+	s.Require().NotEmpty(contractsBefore)
 
 	tx, err := BeginTransaction(ctx, s.storage.Transactable)
 	s.Require().NoError(err)
@@ -523,11 +625,26 @@ func (s *TransactionTestSuite) TestRollbackContracts() {
 
 	s.Require().NoError(tx.Flush(ctx))
 	s.Require().NoError(tx.Close(ctx))
+
+	// Verify contracts were deleted
+	var contractsAfter []storage.Contract
+	err = s.storage.Connection().DB().NewSelect().Model(&contractsAfter).Where("height = ?", 100).Scan(ctx)
+	s.Require().NoError(err)
+	s.Require().Empty(contractsAfter)
 }
 
 func (s *TransactionTestSuite) TestDeleteBalances() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
+
+	// Verify balances exist before delete
+	var balance1Before storage.Balance
+	err := s.storage.Connection().DB().NewSelect().Model(&balance1Before).Where("id = ?", 1).Scan(ctx)
+	s.Require().NoError(err)
+
+	var balance3Before storage.Balance
+	err = s.storage.Connection().DB().NewSelect().Model(&balance3Before).Where("id = ?", 3).Scan(ctx)
+	s.Require().NoError(err)
 
 	tx, err := BeginTransaction(ctx, s.storage.Transactable)
 	s.Require().NoError(err)
@@ -537,6 +654,15 @@ func (s *TransactionTestSuite) TestDeleteBalances() {
 
 	s.Require().NoError(tx.Flush(ctx))
 	s.Require().NoError(tx.Close(ctx))
+
+	// Verify balances were deleted
+	var balance1After storage.Balance
+	err = s.storage.Connection().DB().NewSelect().Model(&balance1After).Where("id = ?", 1).Scan(ctx)
+	s.Require().Error(err)
+
+	var balance3After storage.Balance
+	err = s.storage.Connection().DB().NewSelect().Model(&balance3After).Where("id = ?", 3).Scan(ctx)
+	s.Require().Error(err)
 }
 
 func (s *TransactionTestSuite) TestDeleteBalancesEmpty() {
@@ -557,6 +683,17 @@ func (s *TransactionTestSuite) TestDeleteTokenBalances() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
 
+	// Verify token balances exist before delete (token_id=0, contract_id=3)
+	tokenId := decimal.NewFromInt(0)
+	contractId := uint64(3)
+	balancesBefore, err := s.storage.TokenBalance.Filter(ctx, storage.TokenBalanceListFilter{
+		TokenId:    &tokenId,
+		ContractId: &contractId,
+		Limit:      100,
+	})
+	s.Require().NoError(err)
+	s.Require().NotEmpty(balancesBefore)
+
 	tx, err := BeginTransaction(ctx, s.storage.Transactable)
 	s.Require().NoError(err)
 
@@ -565,11 +702,33 @@ func (s *TransactionTestSuite) TestDeleteTokenBalances() {
 
 	s.Require().NoError(tx.Flush(ctx))
 	s.Require().NoError(tx.Close(ctx))
+
+	// Verify token balances were deleted
+	balancesAfter, err := s.storage.TokenBalance.Filter(ctx, storage.TokenBalanceListFilter{
+		TokenId:    &tokenId,
+		ContractId: &contractId,
+		Limit:      100,
+	})
+	s.Require().NoError(err)
+	s.Require().Empty(balancesAfter)
 }
 
 func (s *TransactionTestSuite) TestDeleteTokenBalancesWithZeroBalances() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
+
+	// Verify token balance exists before delete (token_id=1, contract_id=3, address_id=1)
+	tokenId := decimal.NewFromInt(1)
+	contractId := uint64(3)
+	addressId := uint64(1)
+	balancesBefore, err := s.storage.TokenBalance.Filter(ctx, storage.TokenBalanceListFilter{
+		TokenId:    &tokenId,
+		ContractId: &contractId,
+		AddressId:  &addressId,
+		Limit:      100,
+	})
+	s.Require().NoError(err)
+	s.Require().NotEmpty(balancesBefore)
 
 	tx, err := BeginTransaction(ctx, s.storage.Transactable)
 	s.Require().NoError(err)
@@ -587,6 +746,16 @@ func (s *TransactionTestSuite) TestDeleteTokenBalancesWithZeroBalances() {
 
 	s.Require().NoError(tx.Flush(ctx))
 	s.Require().NoError(tx.Close(ctx))
+
+	// Verify token balance was deleted
+	balancesAfter, err := s.storage.TokenBalance.Filter(ctx, storage.TokenBalanceListFilter{
+		TokenId:    &tokenId,
+		ContractId: &contractId,
+		AddressId:  &addressId,
+		Limit:      100,
+	})
+	s.Require().NoError(err)
+	s.Require().Empty(balancesAfter)
 }
 
 func (s *TransactionTestSuite) TestDeleteTokenBalancesMismatchedLengths() {
