@@ -27,7 +27,7 @@ func main() {
 	if err = common.InitLogger(cfg.LogLevel); err != nil {
 		return
 	}
-	prscp, err := common.InitProfiler(cfg.Profiler, "token metadata resolver")
+	prscp, err := common.InitProfiler(cfg.Profiler, "token_metadata_resolver")
 	if err != nil {
 		return
 	}
