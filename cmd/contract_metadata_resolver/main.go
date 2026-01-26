@@ -27,7 +27,7 @@ func main() {
 	if err = common.InitLogger(cfg.LogLevel); err != nil {
 		return
 	}
-	prscp, err := common.InitProfiler(cfg.Profiler, "contract metadata resolver")
+	prscp, err := common.InitProfiler(cfg.Profiler, "contract_metadata_resolver")
 	if err != nil {
 		return
 	}
