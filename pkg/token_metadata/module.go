@@ -108,11 +108,6 @@ func (m *Module) sync(ctx context.Context) error {
 	tokens := make(map[uint64]*storage.Token)
 	tokenMetadata := make([]pkgTypes.TokenMetadataRequest, 0)
 	for i := range ts {
-		contract, err := m.pg.Contracts.ById(ctx, ts[i].ContractId)
-		if err != nil {
-			m.Log.Err(err).Uint64("contract ID", ts[i].ContractId).Msg("failed to get contract by id")
-			continue
-		}
 		iABI, ok := m.abiRegistry.abi[ts[i].Type.String()]
 		if !ok {
 			m.Log.Err(err).Str("token type", ts[i].Type.String()).Msg("no abi for token type")
@@ -122,7 +117,7 @@ func (m *Module) sync(ctx context.Context) error {
 		tokens[ts[i].Id] = ts[i]
 		tokenMetadata = append(tokenMetadata, pkgTypes.TokenMetadataRequest{
 			Id:        ts[i].Id,
-			Address:   contract.Address.String(),
+			Address:   ts[i].Contract.Address.String(),
 			ABI:       iABI,
 			Interface: ts[i].Type,
 			TokenID:   ts[i].TokenID.BigInt(),
