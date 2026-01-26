@@ -92,6 +92,7 @@ func (module *Module) rollback(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
+			return nil
 		default:
 			lastBlock, err := module.blocks.Last(ctx)
 			if err != nil {
