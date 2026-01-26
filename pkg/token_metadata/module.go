@@ -130,6 +130,18 @@ func (m *Module) sync(ctx context.Context) error {
 
 	metadata, err := m.api.TokenMetadataBulk(ctx, tokenMetadata)
 	if err != nil {
+		for _, t := range tokens {
+			m.failMetadata(t, err)
+		}
+
+		updatedTokens := make([]*storage.Token, 0)
+		for _, t := range tokens {
+			updatedTokens = append(updatedTokens, t)
+		}
+
+		if saveErr := m.save(ctx, updatedTokens); saveErr != nil {
+			return errors.Wrap(saveErr, err.Error())
+		}
 		return errors.Wrap(err, "token metadata bulk")
 	}
 
