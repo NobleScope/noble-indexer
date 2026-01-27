@@ -148,19 +148,17 @@ func (m *Module) loadSources(ctx context.Context, contractId uint64, metadataSou
 
 	g, groupCtx := errgroup.WithContext(ctx)
 	for k, v := range metadataSources {
-		name := k
-		src := v
 		g.Go(func() error {
-			content, err := m.pool.ContractText(groupCtx, src.Urls)
+			content, err := m.pool.ContractText(groupCtx, v.Urls)
 			if err != nil {
 				return err
 			}
 
 			mu.Lock()
 			sources = append(sources, &storage.Source{
-				Name:       name,
-				License:    src.License,
-				Urls:       src.Urls,
+				Name:       k,
+				License:    v.License,
+				Urls:       v.Urls,
 				ContractId: contractId,
 				Content:    content,
 			})
