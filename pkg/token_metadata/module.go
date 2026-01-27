@@ -2,6 +2,7 @@ package token_metadata
 
 import (
 	"context"
+	"encoding/json"
 	"path"
 	"sync"
 	"time"
@@ -263,6 +264,13 @@ func (m *Module) resolveTokenMetadata(ctx context.Context, token *storage.Token,
 			return
 		}
 		token.Metadata = md
+
+		var tokenMd ipfs.TokenMetadata
+		if err = json.Unmarshal(md, &tokenMd); err != nil {
+			m.failMetadata(token, err)
+			return
+		}
+		token.Name = tokenMd.Name
 
 	default:
 		return
