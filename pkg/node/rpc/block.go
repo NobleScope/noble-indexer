@@ -70,9 +70,10 @@ func (api *API) BlockBulk(ctx context.Context, levels ...pkgTypes.Level) ([]pkgT
 	if len(levels) == 0 {
 		return nil, nil
 	}
-
-	if err := api.rateLimit.Wait(ctx); err != nil {
-		return nil, err
+	if api.rateLimit != nil {
+		if err := api.rateLimit.Wait(ctx); err != nil {
+			return nil, err
+		}
 	}
 
 	u, err := url.Parse(api.cfg.URL)
