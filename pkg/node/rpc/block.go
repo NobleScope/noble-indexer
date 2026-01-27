@@ -18,6 +18,12 @@ const (
 )
 
 func (api *API) Block(ctx context.Context, level pkgTypes.Level) (pkgTypes.Block, error) {
+	if api.rateLimit != nil {
+		if err := api.rateLimit.Wait(ctx); err != nil {
+			return pkgTypes.Block{}, err
+		}
+	}
+
 	u, err := url.Parse(api.cfg.URL)
 	if err != nil {
 		return pkgTypes.Block{}, err
@@ -63,6 +69,11 @@ func (api *API) Block(ctx context.Context, level pkgTypes.Level) (pkgTypes.Block
 func (api *API) BlockBulk(ctx context.Context, levels ...pkgTypes.Level) ([]pkgTypes.BlockData, error) {
 	if len(levels) == 0 {
 		return nil, nil
+	}
+	if api.rateLimit != nil {
+		if err := api.rateLimit.Wait(ctx); err != nil {
+			return nil, err
+		}
 	}
 
 	u, err := url.Parse(api.cfg.URL)
