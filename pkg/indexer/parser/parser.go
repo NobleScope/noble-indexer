@@ -72,6 +72,19 @@ func (p *Module) createABIs() error {
 	if err != nil {
 		return errors.Wrap(err, "reading erc1155 abi json")
 	}
+	erc4337EntrypointV06Json, err := readJson(filepath.Join(p.cfg.AssetsDir, "abi"), "EIP4337_entrypoint_v06.json")
+	if err != nil {
+		return errors.Wrap(err, "reading EIP4337_entrypoint_v06 abi json")
+	}
+	erc4337EntrypointV07Json, err := readJson(filepath.Join(p.cfg.AssetsDir, "abi"), "EIP4337_entrypoint_v07.json")
+	if err != nil {
+		return errors.Wrap(err, "reading EIP4337_entrypoint_v07 abi json")
+	}
+	erc4337EntrypointForPaymasterJson, err := readJson(filepath.Join(p.cfg.AssetsDir, "abi"), "EIP4337_entrypoint_for_paymaster.json")
+	if err != nil {
+		return errors.Wrap(err, "reading ERC4337_entrypoint_for_paymaster abi json")
+	}
+
 	erc20ABI, err := abi.JSON(bytes.NewReader(erc20ABIJson))
 	if err != nil {
 		return errors.Wrap(err, "parsing erc20 abi")
@@ -84,10 +97,25 @@ func (p *Module) createABIs() error {
 	if err != nil {
 		return errors.Wrap(err, "parsing erc1155 abi")
 	}
+	erc4337EntrypointV06ABI, err := abi.JSON(bytes.NewReader(erc4337EntrypointV06Json))
+	if err != nil {
+		return errors.Wrap(err, "parsing ERC4337_entrypoint_v0.6 abi")
+	}
+	erc4337EntrypointV07ABI, err := abi.JSON(bytes.NewReader(erc4337EntrypointV07Json))
+	if err != nil {
+		return errors.Wrap(err, "parsing ERC4337_entrypoint_v0.7 abi")
+	}
+	erc4337EntrypointForPaymasterABI, err := abi.JSON(bytes.NewReader(erc4337EntrypointForPaymasterJson))
+	if err != nil {
+		return errors.Wrap(err, "parsing ERC4337_entrypoint_for_paymaster abi")
+	}
 
 	p.abi[types.ERC20] = erc20ABI
 	p.abi[types.ERC721] = erc721ABI
 	p.abi[types.ERC1155] = erc1155ABI
+	p.abi["EIP4337_entrypoint_v06"] = erc4337EntrypointV06ABI
+	p.abi["ERC4337_entrypoint_v07"] = erc4337EntrypointV07ABI
+	p.abi["ERC4337_entrypoint_for_paymaster"] = erc4337EntrypointForPaymasterABI
 
 	return nil
 }
