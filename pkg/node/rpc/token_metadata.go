@@ -24,6 +24,11 @@ func (api *API) TokenMetadataBulk(
 	ctx context.Context,
 	queries []pkgTypes.TokenMetadataRequest,
 ) (map[uint64]pkgTypes.TokenMetadata, error) {
+	if api.rateLimit != nil {
+		if err := api.rateLimit.Wait(ctx); err != nil {
+			return nil, err
+		}
+	}
 
 	u, err := url.Parse(api.cfg.URL)
 	if err != nil {
