@@ -161,7 +161,7 @@ type transferListRequest struct {
 	Sort        string      `query:"sort"         validate:"omitempty,oneof=asc desc"`
 	Height      *uint64     `query:"height"       validate:"omitempty,min=0"`
 	TxHash      string      `query:"tx_hash"      validate:"omitempty,tx_hash"`
-	Type        StringArray `query:"type"         validate:"omitempty"`
+	Type        StringArray `query:"type"         validate:"omitempty,dive,token_type"`
 	AddressFrom string      `query:"address_from" validate:"omitempty,address"`
 	AddressTo   string      `query:"address_to"   validate:"omitempty,address"`
 	Contract    string      `query:"contract"     validate:"omitempty,address"`
