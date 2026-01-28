@@ -68,7 +68,6 @@ const docTemplate = `{
                         "enum": [
                             "id",
                             "value",
-                            "first_height",
                             "last_height"
                         ],
                         "type": "string",

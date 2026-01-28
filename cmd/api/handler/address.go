@@ -47,7 +47,7 @@ func (p *addressListRequest) SetDefault() {
 //	@Param			limit			query	integer	false	"Number of addresses to return (default: 10)"								minimum(1)	maximum(100)	default(10)
 //	@Param			offset			query	integer	false	"Number of addresses to skip (default: 0)"									minimum(0)	default(0)
 //	@Param			sort			query	string	false	"Sort order (default: asc)"													Enums(asc, desc)	default(asc)
-//	@Param			sort_by			query	string	false	"Field to sort by (default: id)"											Enums(id, value, first_height, last_height)
+//	@Param			sort_by			query	string	false	"Field to sort by (default: id)"											Enums(id, value, last_height)
 //	@Param			only_contracts	query	boolean	false	"If true, return only addresses that are smart contracts (default: false)"	default(false)
 //	@Produce		json
 //	@Success		200	{array}		responses.Address	"List of addresses with their balances"
