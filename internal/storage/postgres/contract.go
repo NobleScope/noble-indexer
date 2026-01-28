@@ -56,8 +56,12 @@ func (c *Contract) ListWithTx(ctx context.Context, filters storage.ContractListF
 
 // ByHash -
 func (c *Contract) ByHash(ctx context.Context, hash pkgTypes.Hex) (contract storage.Contract, err error) {
-	err = c.DB().NewSelect().
+	query := c.DB().NewSelect().
 		Model((*storage.Address)(nil)).
+		Where("hash = ?", hash)
+
+	err = c.DB().NewSelect().
+		TableExpr("(?) AS address", query).
 		ColumnExpr("contract.*").
 		ColumnExpr("address.id AS address__id, address.first_height AS address__first_height, address.last_height AS address__last_height, address.hash AS address__hash, address.is_contract AS address__is_contract, address.txs_count AS address__txs_count, address.contracts_count AS address__contracts_count, address.interactions AS address__interactions").
 		ColumnExpr("tx.hash AS tx__hash").
@@ -66,7 +70,6 @@ func (c *Contract) ByHash(ctx context.Context, hash pkgTypes.Hex) (contract stor
 		Join("LEFT JOIN proxy_contract ON proxy_contract.id = contract.id").
 		Join("LEFT JOIN address AS implementation_address ON implementation_address.id = proxy_contract.implementation_id").
 		Join("LEFT JOIN tx ON contract.tx_id = tx.id").
-		Where("address.hash = ?", hash).
 		Scan(ctx, &contract)
 
 	return
