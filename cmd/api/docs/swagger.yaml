@@ -502,6 +502,9 @@ definitions:
       logs_bloom:
         example: "0x00000000000000000000000000000000000000000000"
         type: string
+      logs_count:
+        example: 1234
+        type: integer
       nonce:
         example: 1
         type: integer
@@ -517,6 +520,9 @@ definitions:
       to_address:
         example: "0x0000000000000000000000000000000000000001"
         type: string
+      traces_count:
+        example: 1488
+        type: integer
       type:
         enum:
         - TxTypeUnknown

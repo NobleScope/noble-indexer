@@ -2390,6 +2390,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "0x00000000000000000000000000000000000000000000"
                 },
+                "logs_count": {
+                    "type": "integer",
+                    "example": 1234
+                },
                 "nonce": {
                     "type": "integer",
                     "example": 1
@@ -2409,6 +2413,10 @@ const docTemplate = `{
                 "to_address": {
                     "type": "string",
                     "example": "0x0000000000000000000000000000000000000001"
+                },
+                "traces_count": {
+                    "type": "integer",
+                    "example": 1488
                 },
                 "type": {
                     "type": "string",
