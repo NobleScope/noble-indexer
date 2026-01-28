@@ -199,37 +199,6 @@ func (s *StorageTestSuite) TestListWithBalanceSortDesc() {
 	s.Require().EqualValues(500, addresses[11].FirstHeight)
 }
 
-func (s *StorageTestSuite) TestListWithBalanceSortByFirstHeight() {
-	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer ctxCancel()
-
-	addresses, err := s.storage.Addresses.ListWithBalance(ctx, storage.AddressListFilter{
-		Limit:         15,
-		Offset:        0,
-		Sort:          sdk.SortOrderAsc,
-		SortField:     "first_height",
-		OnlyContracts: false,
-	})
-	s.Require().NoError(err)
-	s.Require().Len(addresses, 12)
-
-	// Check sorting by first_height ascending with deterministic secondary sort by id
-	s.Require().EqualValues(3, addresses[0].Id)
-	s.Require().EqualValues(100, addresses[0].FirstHeight)
-	s.Require().EqualValues(2, addresses[1].Id)
-	s.Require().EqualValues(200, addresses[1].FirstHeight)
-	s.Require().EqualValues(4, addresses[2].Id)
-	s.Require().EqualValues(200, addresses[2].FirstHeight)
-	s.Require().EqualValues(5, addresses[3].Id)
-	s.Require().EqualValues(300, addresses[3].FirstHeight)
-	s.Require().EqualValues(6, addresses[4].Id)
-	s.Require().EqualValues(400, addresses[4].FirstHeight)
-	s.Require().EqualValues(1, addresses[5].Id)
-	s.Require().EqualValues(500, addresses[5].FirstHeight)
-	s.Require().EqualValues(8, addresses[6].Id)
-	s.Require().EqualValues(500, addresses[6].FirstHeight)
-}
-
 func (s *StorageTestSuite) TestListWithBalanceSortByLastHeight() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()

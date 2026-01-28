@@ -613,7 +613,6 @@ paths:
         enum:
         - id
         - value
-        - first_height
         - last_height
         in: query
         name: sort_by
