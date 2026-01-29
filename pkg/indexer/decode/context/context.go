@@ -36,6 +36,7 @@ func (ctx *Context) AddAddress(address *storage.Address) {
 		addr.Interactions += address.Interactions
 		addr.TxsCount += address.TxsCount
 		addr.ContractsCount += address.ContractsCount
+		address.Balance = addr.Balance
 	} else {
 		ctx.Addresses.Set(address.String(), address)
 	}
