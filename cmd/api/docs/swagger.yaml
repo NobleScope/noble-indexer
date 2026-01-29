@@ -539,9 +539,6 @@ definitions:
       amount:
         example: "123456789"
         type: string
-      contract:
-        example: 0xdAC17F958D2ee523a2206206994597C13D831ec7
-        type: string
       from:
         example: "0x0000000000000000000000000000000000000001"
         type: string
@@ -558,9 +555,8 @@ definitions:
       to:
         example: "0x0000000000000000000000000000000000000002"
         type: string
-      token_id:
-        example: "0"
-        type: string
+      token:
+        $ref: '#/definitions/responses.Token'
       tx_hash:
         example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d
         type: string

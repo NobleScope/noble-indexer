@@ -2438,10 +2438,6 @@ const docTemplate = `{
                     "type": "string",
                     "example": "123456789"
                 },
-                "contract": {
-                    "type": "string",
-                    "example": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
-                },
                 "from": {
                     "type": "string",
                     "example": "0x0000000000000000000000000000000000000001"
@@ -2463,9 +2459,8 @@ const docTemplate = `{
                     "type": "string",
                     "example": "0x0000000000000000000000000000000000000002"
                 },
-                "token_id": {
-                    "type": "string",
-                    "example": "0"
+                "token": {
+                    "$ref": "#/definitions/responses.Token"
                 },
                 "tx_hash": {
                     "type": "string",
