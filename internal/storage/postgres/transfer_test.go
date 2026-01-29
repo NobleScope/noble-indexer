@@ -31,6 +31,9 @@ func (s *StorageTestSuite) TestTransferFilterBasic() {
 	s.Require().EqualValues(1, *transfers[0].FromAddressId)
 	s.Require().NotNil(transfers[0].ToAddressId)
 	s.Require().EqualValues(2, *transfers[0].ToAddressId)
+	s.Require().EqualValues(1, transfers[0].TxID)
+	s.Require().True(transfers[0].TokenID.Equal(decimal.NewFromInt(0)))
+	s.Require().True(transfers[0].Amount.Equal(decimal.NewFromInt(1000000000000000000)))
 
 	// Check that JOIN fields are populated
 	s.Require().NotNil(transfers[0].Tx.Hash)
@@ -40,6 +43,13 @@ func (s *StorageTestSuite) TestTransferFilterBasic() {
 	s.Require().NotNil(transfers[0].ToAddress.Hash)
 	s.Require().NotNil(transfers[0].Contract.Address)
 	s.Require().NotNil(transfers[0].Contract.Address.Hash)
+	s.Require().NotNil(transfers[0].Token)
+	s.Require().NotNil(transfers[0].Token.Name)
+	s.Require().NotNil(transfers[0].Token.Symbol)
+	s.Require().NotNil(transfers[0].Token.Decimals)
+	s.Require().NotNil(transfers[0].Token.Type)
+	s.Require().NotNil(transfers[0].Token.Supply)
+	s.Require().NotNil(transfers[0].Token.TransfersCount)
 }
 
 // TestTransferFilterByTxId tests filtering by tx_id
