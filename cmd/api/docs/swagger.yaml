@@ -393,7 +393,7 @@ definitions:
     description: Transaction execution trace information
     properties:
       amount:
-        example: "1000000000000000000"
+        example: "123456789123456789"
         type: string
       contract:
         example: "0x0000000000000000000000000000000000000002"
@@ -402,10 +402,10 @@ definitions:
         example: create
         type: string
       from_address:
-        example: "0x0000000000000000000000000000000000000000"
+        example: "0x0000000000000000000000000000000000000001"
         type: string
       gas_limit:
-        example: "21000"
+        example: "2100"
         type: string
       gas_used:
         example: "21000"
@@ -417,7 +417,7 @@ definitions:
         example: 0x6060604052341561000f57600080fd5b
         type: string
       input:
-        example: "0x0"
+        example: hex input data
         type: string
       output:
         example: "0x0"
@@ -429,12 +429,13 @@ definitions:
         example: "2023-07-04T03:10:57+00:00"
         type: string
       to_address:
-        example: "0x0000000000000000000000000000000000000001"
+        example: 0x123456789abcdef123456789abcdef123456789abc
         type: string
       trace_address:
         example:
-        - 0
         - 1
+        - 2
+        - 3
         items:
           type: integer
         type: array
@@ -442,7 +443,7 @@ definitions:
         example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22
         type: string
       tx_position:
-        example: 0
+        example: 123456789
         type: integer
       type:
         enum:

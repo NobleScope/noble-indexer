@@ -2259,7 +2259,7 @@ const docTemplate = `{
             "properties": {
                 "amount": {
                     "type": "string",
-                    "example": "1000000000000000000"
+                    "example": "123456789123456789"
                 },
                 "contract": {
                     "type": "string",
@@ -2271,11 +2271,11 @@ const docTemplate = `{
                 },
                 "from_address": {
                     "type": "string",
-                    "example": "0x0000000000000000000000000000000000000000"
+                    "example": "0x0000000000000000000000000000000000000001"
                 },
                 "gas_limit": {
                     "type": "string",
-                    "example": "21000"
+                    "example": "2100"
                 },
                 "gas_used": {
                     "type": "string",
@@ -2291,7 +2291,7 @@ const docTemplate = `{
                 },
                 "input": {
                     "type": "string",
-                    "example": "0x0"
+                    "example": "hex input data"
                 },
                 "output": {
                     "type": "string",
@@ -2307,7 +2307,7 @@ const docTemplate = `{
                 },
                 "to_address": {
                     "type": "string",
-                    "example": "0x0000000000000000000000000000000000000001"
+                    "example": "0x123456789abcdef123456789abcdef123456789abc"
                 },
                 "trace_address": {
                     "type": "array",
@@ -2315,8 +2315,9 @@ const docTemplate = `{
                         "type": "integer"
                     },
                     "example": [
-                        0,
-                        1
+                        1,
+                        2,
+                        3
                     ]
                 },
                 "tx_hash": {
@@ -2325,7 +2326,7 @@ const docTemplate = `{
                 },
                 "tx_position": {
                     "type": "integer",
-                    "example": 0
+                    "example": 123456789
                 },
                 "type": {
                     "type": "string",
