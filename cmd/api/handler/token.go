@@ -267,10 +267,6 @@ func (handler *TokenHandler) TransferList(c echo.Context) error {
 		filters.TxId = &tx.Id
 	}
 
-	if req.Height != nil {
-		filters.Height = req.Height
-	}
-
 	if req.From > 0 {
 		filters.TimeFrom = time.Unix(req.From, 0).UTC()
 	}
