@@ -354,6 +354,9 @@ definitions:
       id:
         example: 0
         type: integer
+      logo:
+        example: http://site.com/image.png
+        type: string
       metadata:
         items:
           type: integer

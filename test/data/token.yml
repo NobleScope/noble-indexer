@@ -15,6 +15,7 @@
   error: ''
   metadata: '{"name":"Test Token","symbol":"TST","description":"A test ERC20 token for testing purposes","decimals":18,"website":"https://testtoken.example.com","logoURI":"https://example.com/logo/tst.png"}'
   updated_at: '2025-01-01T10:00:00Z'
+  logo: 
 
 - id: 2
   token_id: '1'
@@ -32,6 +33,7 @@
   retry_count: 0
   error: ''
   updated_at: '2025-01-01T09:00:00Z'
+  logo: 
 
 - id: 3
   token_id: '0'
@@ -49,6 +51,7 @@
   retry_count: 3
   error: 'metadata fetch failed'
   updated_at: '2024-12-25T10:00:00Z'
+  logo: 
 
 - id: 4
   token_id: '2'
@@ -66,6 +69,7 @@
   retry_count: 5
   error: 'timeout'
   updated_at: '2025-01-01T08:00:00Z'
+  logo: 
 
 - id: 5
   token_id: '0'
@@ -84,6 +88,7 @@
   error: ''
   metadata: '{"name":"Rare NFT #0","description":"A unique rare NFT from the collection","image":"ipfs://QmRareNFT123/0.png","attributes":[{"trait_type":"Rarity","value":"Legendary"},{"trait_type":"Edition","value":"First"},{"trait_type":"Background","value":"Gold"}]}'
   updated_at: '2025-01-01T11:00:00Z'
+  logo: 
 
 - id: 6
   token_id: '5'
@@ -101,6 +106,7 @@
   retry_count: 0
   error: ''
   updated_at: '2025-01-01T12:00:00Z'
+  logo: 
 
 - id: 7
   token_id: '1'
@@ -118,6 +124,7 @@
   retry_count: 2
   error: 'rate limit exceeded'
   updated_at: '2024-12-20T10:00:00Z'
+  logo: 
 
 - id: 8
   token_id: '0'
@@ -136,6 +143,7 @@
   error: ''
   metadata: '{"name":"Stable Coin","symbol":"STBL","description":"A stable coin pegged to USD","decimals":8,"website":"https://stablecoin.example.com","social":{"twitter":"https://twitter.com/stablecoin","telegram":"https://t.me/stablecoin"},"tags":["stablecoin","defi"]}'
   updated_at: '2025-01-01T13:00:00Z'
+  logo: 
 
 - id: 9
   token_id: '100'
@@ -153,6 +161,7 @@
   retry_count: 1
   error: ''
   updated_at: '2024-12-28T10:00:00Z'
+  logo: 
 
 - id: 10
   token_id: '10'
@@ -170,3 +179,4 @@
   retry_count: 10
   error: 'server error'
   updated_at: '2024-12-15T10:00:00Z'
+  logo: 

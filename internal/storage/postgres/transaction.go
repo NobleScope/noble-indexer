@@ -213,7 +213,7 @@ func (tx Transaction) SaveTokens(ctx context.Context, tokens ...*models.Token) (
 	}
 
 	_, err := tx.Tx().NewInsert().Model(&ts).
-		Column("token_id", "contract_id", "type", "height", "last_height", "name", "symbol", "decimals", "transfers_count", "supply", "metadata_link", "status", "retry_count", "error", "metadata", "updated_at").
+		Column("token_id", "contract_id", "type", "height", "last_height", "name", "symbol", "decimals", "transfers_count", "supply", "metadata_link", "status", "retry_count", "error", "metadata", "updated_at", "logo").
 		On("CONFLICT (token_id, contract_id) DO UPDATE").
 		Set("transfers_count = added_token.transfers_count + EXCLUDED.transfers_count").
 		Set("supply = added_token.supply + EXCLUDED.supply").
@@ -240,13 +240,14 @@ func (tx Transaction) SaveTokenMetadata(ctx context.Context, tokens ...*models.T
 	}
 
 	_, err := tx.Tx().NewInsert().Model(&tokens).
-		Column("token_id", "contract_id", "name", "symbol", "decimals", "status", "metadata_link", "metadata", "retry_count", "error", "updated_at").
+		Column("token_id", "contract_id", "name", "symbol", "decimals", "status", "metadata_link", "metadata", "retry_count", "error", "updated_at", "logo").
 		On("CONFLICT (token_id, contract_id) DO UPDATE").
 		Set("name = CASE WHEN EXCLUDED.name != '' THEN EXCLUDED.name ELSE token.name END").
 		Set("symbol = CASE WHEN EXCLUDED.symbol != '' THEN EXCLUDED.symbol ELSE token.symbol END").
 		Set("decimals = CASE WHEN EXCLUDED.decimals != 0 THEN EXCLUDED.decimals ELSE token.decimals END").
 		Set("status = CASE WHEN EXCLUDED.status IS NOT NULL THEN EXCLUDED.status ELSE token.status END").
 		Set("metadata_link = CASE WHEN EXCLUDED.metadata_link != '' THEN EXCLUDED.metadata_link ELSE token.metadata_link END").
+		Set("logo = CASE WHEN EXCLUDED.logo != '' THEN EXCLUDED.logo ELSE token.logo END").
 		Set("metadata = CASE WHEN EXCLUDED.metadata IS NOT NULL THEN EXCLUDED.metadata ELSE token.metadata END").
 		Set("retry_count = CASE WHEN EXCLUDED.retry_count != 0 THEN EXCLUDED.retry_count ELSE token.retry_count END").
 		Set("error = CASE WHEN EXCLUDED.error != '' THEN EXCLUDED.error ELSE token.error END").
