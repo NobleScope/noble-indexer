@@ -185,7 +185,7 @@ func getTokenAndTransferTypes(topics []pkgTypes.Hex) (types.TokenType, types.Tra
 	return "", ""
 }
 
-func parseLogs[T any](contractAbi abi.ABI, logData []byte, topics []pkgTypes.Hex) (*T, error) {
+func parseLogs[T any](contractAbi *abi.ABI, logData []byte, topics []pkgTypes.Hex) (*T, error) {
 	topic0 := common.BytesToHash(topics[0])
 	event, err := contractAbi.EventByID(topic0)
 	if err != nil {

@@ -231,6 +231,11 @@ func (p *Module) parse(b types.BlockData) error {
 		}
 
 		p.parseEIP1967Proxy(decodeCtx, decodeCtx.Block.Txs[i].Logs)
+
+		parseErr := p.parseEIP4337(decodeCtx, decodeCtx.Block.Txs[i])
+		if parseErr != nil {
+			return parseErr
+		}
 	}
 
 	for i, trace := range b.Traces {

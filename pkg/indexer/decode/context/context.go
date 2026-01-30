@@ -12,6 +12,7 @@ type Context struct {
 	Tokens         *sync.Map[string, *storage.Token]
 	TokenBalances  *sync.Map[string, *storage.TokenBalance]
 	ProxyContracts *sync.Map[string, *storage.ProxyContract]
+	ERC4337UserOps *sync.Map[string, *storage.UserOp]
 	Traces         *sync.Map[string, []*storage.Trace]
 
 	Block *storage.Block
@@ -24,6 +25,7 @@ func NewContext() *Context {
 		Tokens:         sync.NewMap[string, *storage.Token](),
 		TokenBalances:  sync.NewMap[string, *storage.TokenBalance](),
 		ProxyContracts: sync.NewMap[string, *storage.ProxyContract](),
+		ERC4337UserOps: sync.NewMap[string, *storage.UserOp](),
 		Traces:         sync.NewMap[string, []*storage.Trace](),
 	}
 }
@@ -92,6 +94,15 @@ func (ctx *Context) AddProxyContract(proxyContract *storage.ProxyContract) {
 	}
 }
 
+func (ctx *Context) AddUserOp(userOp *storage.UserOp) {
+	if userOp == nil {
+		return
+	}
+	if _, ok := ctx.ERC4337UserOps.Get(userOp.String()); !ok {
+		ctx.ERC4337UserOps.Set(userOp.String(), userOp)
+	}
+}
+
 func (ctx *Context) GetAddresses() []*storage.Address {
 	addresses := make([]*storage.Address, 0)
 	addresses = append(addresses, ctx.Addresses.Values()...)
@@ -137,4 +148,8 @@ func (ctx *Context) GetTokenBalances() []*storage.TokenBalance {
 
 func (ctx *Context) GetProxyContracts() []*storage.ProxyContract {
 	return ctx.ProxyContracts.Values()
+}
+
+func (ctx *Context) GetUserOps() []*storage.UserOp {
+	return ctx.ERC4337UserOps.Values()
 }

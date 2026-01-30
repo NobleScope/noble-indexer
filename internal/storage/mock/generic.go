@@ -949,6 +949,49 @@ func (c *MockTransactionSaveContractsCall) DoAndReturn(f func(context.Context, .
 	return c
 }
 
+// SaveERC4337UserOps mocks base method.
+func (m *MockTransaction) SaveERC4337UserOps(ctx context.Context, userOps ...*storage.UserOp) error {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx}
+	for _, a := range userOps {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SaveERC4337UserOps", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveERC4337UserOps indicates an expected call of SaveERC4337UserOps.
+func (mr *MockTransactionMockRecorder) SaveERC4337UserOps(ctx any, userOps ...any) *MockTransactionSaveERC4337UserOpsCall {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx}, userOps...)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveERC4337UserOps", reflect.TypeOf((*MockTransaction)(nil).SaveERC4337UserOps), varargs...)
+	return &MockTransactionSaveERC4337UserOpsCall{Call: call}
+}
+
+// MockTransactionSaveERC4337UserOpsCall wrap *gomock.Call
+type MockTransactionSaveERC4337UserOpsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionSaveERC4337UserOpsCall) Return(arg0 error) *MockTransactionSaveERC4337UserOpsCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionSaveERC4337UserOpsCall) Do(f func(context.Context, ...*storage.UserOp) error) *MockTransactionSaveERC4337UserOpsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionSaveERC4337UserOpsCall) DoAndReturn(f func(context.Context, ...*storage.UserOp) error) *MockTransactionSaveERC4337UserOpsCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // SaveLogs mocks base method.
 func (m *MockTransaction) SaveLogs(ctx context.Context, logs ...*storage.Log) error {
 	m.ctrl.T.Helper()

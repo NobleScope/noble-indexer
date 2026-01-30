@@ -299,6 +299,21 @@ func (tx Transaction) SaveProxyContracts(ctx context.Context, contracts ...*mode
 	return err
 }
 
+func (tx Transaction) SaveERC4337UserOps(ctx context.Context, userOps ...*models.UserOp) error {
+	switch len(userOps) {
+	case 0:
+		return nil
+	case 1:
+		return tx.Add(ctx, userOps[0])
+	default:
+		arr := make([]any, len(userOps))
+		for i := range userOps {
+			arr[i] = userOps[i]
+		}
+		return tx.BulkSave(ctx, arr)
+	}
+}
+
 func (tx Transaction) RollbackBlock(ctx context.Context, height types.Level) error {
 	_, err := tx.Tx().NewDelete().
 		Model((*models.Block)(nil)).

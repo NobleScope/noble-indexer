@@ -8,6 +8,7 @@ import (
 
 	"github.com/baking-bad/noble-indexer/internal/storage/types"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
+	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/eip4337"
 	"github.com/pkg/errors"
 
 	"github.com/dipdup-net/indexer-sdk/pkg/modules"
@@ -18,7 +19,7 @@ type Module struct {
 	modules.BaseModule
 
 	cfg config.Indexer
-	abi map[types.TokenType]abi.ABI
+	abi map[types.TokenType]*abi.ABI
 }
 
 var _ modules.Module = (*Module)(nil)
@@ -33,7 +34,7 @@ func NewModule(cfg config.Indexer) Module {
 	m := Module{
 		BaseModule: modules.New("parser"),
 		cfg:        cfg,
-		abi:        make(map[types.TokenType]abi.ABI),
+		abi:        make(map[types.TokenType]*abi.ABI),
 	}
 
 	err := m.createABIs()
@@ -142,16 +143,16 @@ func (p *Module) createABIs() error {
 		return errors.Wrap(err, "parsing EIP4337_paymaster_v07 abi")
 	}
 
-	p.abi[types.ERC20] = erc20ABI
-	p.abi[types.ERC721] = erc721ABI
-	p.abi[types.ERC1155] = erc1155ABI
-	p.abi["EIP4337_entrypoint_v06"] = eip4337EntrypointV06ABI
-	p.abi["EIP4337_entrypoint_v07"] = eip4337EntrypointV07ABI
-	p.abi["EIP4337_entrypoint_for_paymaster"] = eip4337EntrypointForPaymasterABI
-	p.abi["EIP4337_account_v06"] = eip4337AccountV06ABI
-	p.abi["EIP4337_account_v07"] = eip4337AccountV07ABI
-	p.abi["EIP4337_paymaster_v06"] = eip4337PaymasterV06ABI
-	p.abi["EIP4337_paymaster_v07"] = eip4337PaymasterV07ABI
+	p.abi[types.ERC20] = &erc20ABI
+	p.abi[types.ERC721] = &erc721ABI
+	p.abi[types.ERC1155] = &erc1155ABI
+	p.abi[eip4337.ABIEntryPointV06] = &eip4337EntrypointV06ABI
+	p.abi[eip4337.ABIEntryPointV07] = &eip4337EntrypointV07ABI
+	p.abi[eip4337.ABIEntryPointForPaymaster] = &eip4337EntrypointForPaymasterABI
+	p.abi[eip4337.ABIAccountV06] = &eip4337AccountV06ABI
+	p.abi[eip4337.ABIAccountV07] = &eip4337AccountV07ABI
+	p.abi[eip4337.ABIPaymasterV06] = &eip4337PaymasterV06ABI
+	p.abi[eip4337.ABIPaymasterV07] = &eip4337PaymasterV07ABI
 
 	return nil
 }
