@@ -524,3 +524,40 @@ func (s *StorageTestSuite) TestTransferFilterAmounts() {
 	// Check specific amount value for first transfer
 	s.Require().True(transfers[0].Amount.Equal(decimal.NewFromInt(1000000000000000000)))
 }
+
+// TestTransferFilterBasic tests basic Filter functionality
+func (s *StorageTestSuite) TestTransferGet() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	transfer, err := s.storage.Transfer.Get(ctx, 1)
+	s.Require().NoError(err)
+
+	// Check first transfer
+	s.Require().EqualValues(1, transfer.Id)
+	s.Require().EqualValues(100, transfer.Height)
+	s.Require().EqualValues(types.TransferType("transfer"), transfer.Type)
+	s.Require().NotNil(transfer.FromAddressId)
+	s.Require().EqualValues(1, *transfer.FromAddressId)
+	s.Require().NotNil(transfer.ToAddressId)
+	s.Require().EqualValues(2, *transfer.ToAddressId)
+	s.Require().EqualValues(1, transfer.TxID)
+	s.Require().True(transfer.TokenID.Equal(decimal.NewFromInt(0)))
+	s.Require().True(transfer.Amount.Equal(decimal.NewFromInt(1000000000000000000)))
+
+	// Check that JOIN fields are populated
+	s.Require().NotNil(transfer.Tx.Hash)
+	s.Require().NotNil(transfer.FromAddress)
+	s.Require().NotNil(transfer.FromAddress.Hash)
+	s.Require().NotNil(transfer.ToAddress)
+	s.Require().NotNil(transfer.ToAddress.Hash)
+	s.Require().NotNil(transfer.Contract.Address)
+	s.Require().NotNil(transfer.Contract.Address.Hash)
+	s.Require().NotNil(transfer.Token)
+	s.Require().NotNil(transfer.Token.Name)
+	s.Require().NotNil(transfer.Token.Symbol)
+	s.Require().NotNil(transfer.Token.Decimals)
+	s.Require().NotNil(transfer.Token.Type)
+	s.Require().NotNil(transfer.Token.Supply)
+	s.Require().NotNil(transfer.Token.TransfersCount)
+}

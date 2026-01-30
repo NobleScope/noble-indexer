@@ -263,6 +263,24 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			return err
 		}
 
+		// TokenBalance
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.TokenBalance)(nil)).
+			Index("token_balance_token_idx").
+			Column("contract_id", "token_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.TokenBalance)(nil)).
+			Index("token_balance_address_idx").
+			Column("address_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+
 		// Transfer
 		if _, err := tx.NewCreateIndex().
 			IfNotExists().
@@ -302,6 +320,14 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			Model((*storage.Transfer)(nil)).
 			Index("transfer_contract_id_idx").
 			Column("contract_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Transfer)(nil)).
+			Index("transfer_token_idx").
+			Column("contract_id", "token_id").
 			Exec(ctx); err != nil {
 			return err
 		}
