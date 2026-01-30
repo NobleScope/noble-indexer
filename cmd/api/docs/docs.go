@@ -68,7 +68,6 @@ const docTemplate = `{
                         "enum": [
                             "id",
                             "value",
-                            "first_height",
                             "last_height"
                         ],
                         "type": "string",
@@ -927,6 +926,20 @@ const docTemplate = `{
                         "name": "query",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "example": 10,
+                        "description": "Maximum number of results to return (default: 10, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "example": 0,
+                        "description": "Number of results to skip for pagination (default: 0)",
+                        "name": "offset",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2191,6 +2204,10 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 0
                 },
+                "logo": {
+                    "type": "string",
+                    "example": "http://site.com/image.png"
+                },
                 "metadata": {
                     "type": "array",
                     "items": {
@@ -2231,13 +2248,8 @@ const docTemplate = `{
                     "type": "string",
                     "example": "0x0000000000000000000000000000000000000001"
                 },
-                "contract": {
-                    "type": "string",
-                    "example": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
-                },
-                "token_id": {
-                    "type": "string",
-                    "example": "0"
+                "token": {
+                    "$ref": "#/definitions/responses.Token"
                 },
                 "value": {
                     "type": "string",
@@ -2251,7 +2263,7 @@ const docTemplate = `{
             "properties": {
                 "amount": {
                     "type": "string",
-                    "example": "1000000000000000000"
+                    "example": "123456789123456789"
                 },
                 "contract": {
                     "type": "string",
@@ -2263,11 +2275,11 @@ const docTemplate = `{
                 },
                 "from_address": {
                     "type": "string",
-                    "example": "0x0000000000000000000000000000000000000000"
+                    "example": "0x0000000000000000000000000000000000000001"
                 },
                 "gas_limit": {
                     "type": "string",
-                    "example": "21000"
+                    "example": "2100"
                 },
                 "gas_used": {
                     "type": "string",
@@ -2283,7 +2295,7 @@ const docTemplate = `{
                 },
                 "input": {
                     "type": "string",
-                    "example": "0x0"
+                    "example": "hex input data"
                 },
                 "output": {
                     "type": "string",
@@ -2299,7 +2311,7 @@ const docTemplate = `{
                 },
                 "to_address": {
                     "type": "string",
-                    "example": "0x0000000000000000000000000000000000000001"
+                    "example": "0x123456789abcdef123456789abcdef123456789abc"
                 },
                 "trace_address": {
                     "type": "array",
@@ -2307,8 +2319,9 @@ const docTemplate = `{
                         "type": "integer"
                     },
                     "example": [
-                        0,
-                        1
+                        1,
+                        2,
+                        3
                     ]
                 },
                 "tx_hash": {
@@ -2317,7 +2330,7 @@ const docTemplate = `{
                 },
                 "tx_position": {
                     "type": "integer",
-                    "example": 0
+                    "example": 123456789
                 },
                 "type": {
                     "type": "string",
@@ -2390,6 +2403,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "0x00000000000000000000000000000000000000000000"
                 },
+                "logs_count": {
+                    "type": "integer",
+                    "example": 1234
+                },
                 "nonce": {
                     "type": "integer",
                     "example": 1
@@ -2409,6 +2426,10 @@ const docTemplate = `{
                 "to_address": {
                     "type": "string",
                     "example": "0x0000000000000000000000000000000000000001"
+                },
+                "traces_count": {
+                    "type": "integer",
+                    "example": 1488
                 },
                 "type": {
                     "type": "string",
@@ -2431,10 +2452,6 @@ const docTemplate = `{
                     "type": "string",
                     "example": "123456789"
                 },
-                "contract": {
-                    "type": "string",
-                    "example": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
-                },
                 "from": {
                     "type": "string",
                     "example": "0x0000000000000000000000000000000000000001"
@@ -2456,9 +2473,8 @@ const docTemplate = `{
                     "type": "string",
                     "example": "0x0000000000000000000000000000000000000002"
                 },
-                "token_id": {
-                    "type": "string",
-                    "example": "0"
+                "token": {
+                    "$ref": "#/definitions/responses.Token"
                 },
                 "tx_hash": {
                     "type": "string",

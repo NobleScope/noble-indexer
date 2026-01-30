@@ -17,7 +17,7 @@ func (s *StorageTestSuite) TestSearchByBlockHash() {
 	defer ctxCancel()
 
 	hash := pkgTypes.MustDecodeHex("1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef")
-	results, err := s.storage.Search.Search(ctx, hash)
+	results, err := s.storage.Search.Search(ctx, hash, 10, 0)
 	s.Require().NoError(err)
 	s.Require().Len(results, 1)
 	s.Require().EqualValues(1, results[0].Id)
@@ -31,7 +31,7 @@ func (s *StorageTestSuite) TestSearchByTxHash() {
 	defer ctxCancel()
 
 	hash := pkgTypes.MustDecodeHex("90f5df4e03620cc55d3ea295bf8826f84465065340cb6d0d095166dd2465f283")
-	results, err := s.storage.Search.Search(ctx, hash)
+	results, err := s.storage.Search.Search(ctx, hash, 10, 0)
 	s.Require().NoError(err)
 	s.Require().Len(results, 1)
 	s.Require().EqualValues(1, results[0].Id)
@@ -44,7 +44,7 @@ func (s *StorageTestSuite) TestSearchNoResults() {
 	defer ctxCancel()
 
 	hash := pkgTypes.MustDecodeHex("0000000000000000000000000000000000000000000000000000000000000000")
-	results, err := s.storage.Search.Search(ctx, hash)
+	results, err := s.storage.Search.Search(ctx, hash, 10, 0)
 	s.Require().NoError(err)
 	s.Require().Len(results, 0)
 }
@@ -54,7 +54,7 @@ func (s *StorageTestSuite) TestSearchTextByTokenName() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
 
-	results, err := s.storage.Search.SearchText(ctx, "Test Token")
+	results, err := s.storage.Search.SearchText(ctx, "Test Token", 10, 0)
 	s.Require().NoError(err)
 	s.Require().GreaterOrEqual(len(results), 1)
 
@@ -74,7 +74,7 @@ func (s *StorageTestSuite) TestSearchTextByTokenSymbol() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
 
-	results, err := s.storage.Search.SearchText(ctx, "TST")
+	results, err := s.storage.Search.SearchText(ctx, "TST", 10, 0)
 	s.Require().NoError(err)
 	s.Require().GreaterOrEqual(len(results), 1)
 
@@ -94,7 +94,7 @@ func (s *StorageTestSuite) TestSearchTextPartialName() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
 
-	results, err := s.storage.Search.SearchText(ctx, "Token")
+	results, err := s.storage.Search.SearchText(ctx, "Token", 10, 0)
 	s.Require().NoError(err)
 	s.Require().GreaterOrEqual(len(results), 2) // "Test Token", "Another Token", "Multi Token"
 
@@ -112,7 +112,7 @@ func (s *StorageTestSuite) TestSearchTextPartialSymbol() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
 
-	results, err := s.storage.Search.SearchText(ctx, "ST")
+	results, err := s.storage.Search.SearchText(ctx, "ST", 10, 0)
 	s.Require().NoError(err)
 	s.Require().GreaterOrEqual(len(results), 1) // Should find "TST" and "STBL"
 }
@@ -122,7 +122,7 @@ func (s *StorageTestSuite) TestSearchTextCaseInsensitiveLowercase() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
 
-	results, err := s.storage.Search.SearchText(ctx, "test token")
+	results, err := s.storage.Search.SearchText(ctx, "test token", 10, 0)
 	s.Require().NoError(err)
 	s.Require().GreaterOrEqual(len(results), 1)
 
@@ -142,7 +142,7 @@ func (s *StorageTestSuite) TestSearchTextCaseInsensitiveUppercase() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
 
-	results, err := s.storage.Search.SearchText(ctx, "RARE NFT")
+	results, err := s.storage.Search.SearchText(ctx, "RARE NFT", 10, 0)
 	s.Require().NoError(err)
 	s.Require().GreaterOrEqual(len(results), 1)
 
@@ -162,7 +162,7 @@ func (s *StorageTestSuite) TestSearchTextNoResults() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
 
-	results, err := s.storage.Search.SearchText(ctx, "NonExistentToken12345")
+	results, err := s.storage.Search.SearchText(ctx, "NonExistentToken12345", 10, 0)
 	s.Require().NoError(err)
 	s.Require().Len(results, 0)
 }
@@ -172,7 +172,7 @@ func (s *StorageTestSuite) TestSearchTextMultipleResults() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
 
-	results, err := s.storage.Search.SearchText(ctx, "NFT")
+	results, err := s.storage.Search.SearchText(ctx, "NFT", 10, 0)
 	s.Require().NoError(err)
 	s.Require().GreaterOrEqual(len(results), 3) // "NFT Collection", "Rare NFT", "Special NFT" and symbol "NFT"
 
@@ -189,7 +189,7 @@ func (s *StorageTestSuite) TestSearchTextLimit() {
 
 	// Search for empty string should match all tokens (if we had >10)
 	// But with current fixtures we have 10 tokens, so this won't exceed limit
-	results, err := s.storage.Search.SearchText(ctx, "")
+	results, err := s.storage.Search.SearchText(ctx, "", 10, 0)
 	s.Require().NoError(err)
 	s.Require().LessOrEqual(len(results), 10)
 }
@@ -199,7 +199,7 @@ func (s *StorageTestSuite) TestSearchTextBySymbolOnly() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
 
-	results, err := s.storage.Search.SearchText(ctx, "COLL")
+	results, err := s.storage.Search.SearchText(ctx, "COLL", 10, 0)
 	s.Require().NoError(err)
 	s.Require().GreaterOrEqual(len(results), 1)
 

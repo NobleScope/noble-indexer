@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"golang.org/x/time/rate"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	_ "github.com/baking-bad/noble-indexer/cmd/api/docs"
 	"github.com/baking-bad/noble-indexer/cmd/api/handler"
@@ -106,6 +108,14 @@ func run(cfg *config.Config) error {
 	e.Use(middleware.Secure())
 	e.Use(middleware.CORS())
 	e.Pre(middleware.RemoveTrailingSlash())
+	if cfg.API.RequestTimeout > 0 {
+		e.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
+			Timeout: time.Duration(cfg.API.RequestTimeout) * time.Second,
+		}))
+	}
+	if cfg.API.RateLimit > 0 {
+		e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(rate.Limit(cfg.API.RateLimit))))
+	}
 
 	db := initDatabase(cfg.Database, cfg.Indexer.ScriptsDir)
 	initDispatcher(ctx, db)

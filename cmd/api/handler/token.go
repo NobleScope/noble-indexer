@@ -161,7 +161,7 @@ type transferListRequest struct {
 	Sort        string      `query:"sort"         validate:"omitempty,oneof=asc desc"`
 	Height      *uint64     `query:"height"       validate:"omitempty,min=0"`
 	TxHash      string      `query:"tx_hash"      validate:"omitempty,tx_hash"`
-	Type        StringArray `query:"type"         validate:"omitempty"`
+	Type        StringArray `query:"type"         validate:"omitempty,dive,transfer_type"`
 	AddressFrom string      `query:"address_from" validate:"omitempty,address"`
 	AddressTo   string      `query:"address_to"   validate:"omitempty,address"`
 	Contract    string      `query:"contract"     validate:"omitempty,address"`
@@ -265,10 +265,6 @@ func (handler *TokenHandler) TransferList(c echo.Context) error {
 			return handleError(c, err, handler.tx)
 		}
 		filters.TxId = &tx.Id
-	}
-
-	if req.Height != nil {
-		filters.Height = req.Height
 	}
 
 	if req.From > 0 {

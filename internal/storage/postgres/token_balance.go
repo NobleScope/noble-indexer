@@ -30,9 +30,11 @@ func (t *TokenBalance) Filter(ctx context.Context, filter storage.TokenBalanceLi
 		ColumnExpr("token_balance.*").
 		ColumnExpr("contract_address.hash AS contract__address__hash").
 		ColumnExpr("address.hash AS address__hash").
+		ColumnExpr("token.name AS token__name, token.symbol AS token__symbol, token.decimals AS token__decimals, token.type AS token__type, token.supply AS token__supply, token.transfers_count as token__transfers_count, token.logo as token__logo").
 		Join("LEFT JOIN contract ON contract.id = token_balance.contract_id").
 		Join("LEFT JOIN address AS contract_address ON contract_address.id = contract.id").
-		Join("LEFT JOIN address ON address.id = token_balance.address_id")
+		Join("LEFT JOIN address ON address.id = token_balance.address_id").
+		Join("LEFT JOIN token ON token.token_id = token_balance.token_id AND token_balance.contract_id = token.contract_id")
 
 	outerQuery = sortMultipleScope(outerQuery, []SortField{
 		{Field: "token_balance.balance", Order: filter.Sort},

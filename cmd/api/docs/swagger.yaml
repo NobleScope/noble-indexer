@@ -354,6 +354,9 @@ definitions:
       id:
         example: 0
         type: integer
+      logo:
+        example: http://site.com/image.png
+        type: string
       metadata:
         items:
           type: integer
@@ -383,12 +386,8 @@ definitions:
       address:
         example: "0x0000000000000000000000000000000000000001"
         type: string
-      contract:
-        example: 0xdAC17F958D2ee523a2206206994597C13D831ec7
-        type: string
-      token_id:
-        example: "0"
-        type: string
+      token:
+        $ref: '#/definitions/responses.Token'
       value:
         example: "123456789"
         type: string
@@ -397,7 +396,7 @@ definitions:
     description: Transaction execution trace information
     properties:
       amount:
-        example: "1000000000000000000"
+        example: "123456789123456789"
         type: string
       contract:
         example: "0x0000000000000000000000000000000000000002"
@@ -406,10 +405,10 @@ definitions:
         example: create
         type: string
       from_address:
-        example: "0x0000000000000000000000000000000000000000"
+        example: "0x0000000000000000000000000000000000000001"
         type: string
       gas_limit:
-        example: "21000"
+        example: "2100"
         type: string
       gas_used:
         example: "21000"
@@ -421,7 +420,7 @@ definitions:
         example: 0x6060604052341561000f57600080fd5b
         type: string
       input:
-        example: "0x0"
+        example: hex input data
         type: string
       output:
         example: "0x0"
@@ -433,12 +432,13 @@ definitions:
         example: "2023-07-04T03:10:57+00:00"
         type: string
       to_address:
-        example: "0x0000000000000000000000000000000000000001"
+        example: 0x123456789abcdef123456789abcdef123456789abc
         type: string
       trace_address:
         example:
-        - 0
         - 1
+        - 2
+        - 3
         items:
           type: integer
         type: array
@@ -446,7 +446,7 @@ definitions:
         example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22
         type: string
       tx_position:
-        example: 0
+        example: 123456789
         type: integer
       type:
         enum:
@@ -502,6 +502,9 @@ definitions:
       logs_bloom:
         example: "0x00000000000000000000000000000000000000000000"
         type: string
+      logs_count:
+        example: 1234
+        type: integer
       nonce:
         example: 1
         type: integer
@@ -517,6 +520,9 @@ definitions:
       to_address:
         example: "0x0000000000000000000000000000000000000001"
         type: string
+      traces_count:
+        example: 1488
+        type: integer
       type:
         enum:
         - TxTypeUnknown
@@ -532,9 +538,6 @@ definitions:
     properties:
       amount:
         example: "123456789"
-        type: string
-      contract:
-        example: 0xdAC17F958D2ee523a2206206994597C13D831ec7
         type: string
       from:
         example: "0x0000000000000000000000000000000000000001"
@@ -552,9 +555,8 @@ definitions:
       to:
         example: "0x0000000000000000000000000000000000000002"
         type: string
-      token_id:
-        example: "0"
-        type: string
+      token:
+        $ref: '#/definitions/responses.Token'
       tx_hash:
         example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d
         type: string
@@ -607,7 +609,6 @@ paths:
         enum:
         - id
         - value
-        - first_height
         - last_height
         in: query
         name: sort_by
@@ -1234,6 +1235,16 @@ paths:
         name: query
         required: true
         type: string
+      - description: 'Maximum number of results to return (default: 10, max: 100)'
+        example: 10
+        in: query
+        name: limit
+        type: integer
+      - description: 'Number of results to skip for pagination (default: 0)'
+        example: 0
+        in: query
+        name: offset
+        type: integer
       produces:
       - application/json
       responses:

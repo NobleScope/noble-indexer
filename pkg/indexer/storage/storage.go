@@ -135,6 +135,9 @@ func (module *Module) processBlockInTransaction(
 	if err != nil {
 		return state, err
 	}
+	if state.LastHeight > 0 {
+		block.Stats.BlockTime = uint64(block.Time.Sub(state.LastTime).Milliseconds())
+	}
 
 	addrToId, totalAccounts, err := saveAddresses(ctx, tx, dCtx.GetAddresses())
 	if err != nil {

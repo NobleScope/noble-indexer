@@ -28,6 +28,7 @@ require (
 	github.com/unpackdev/solgo v0.3.7
 	github.com/uptrace/bun v1.2.15
 	go.uber.org/mock v0.6.0
+	golang.org/x/sync v0.19.0
 	golang.org/x/time v0.14.0
 )
 
@@ -328,7 +329,6 @@ require (
 	golang.org/x/exp v0.0.0-20251009144603-d2f985daa21b // indirect
 	golang.org/x/mod v0.32.0 // indirect
 	golang.org/x/net v0.49.0 // indirect
-	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/telemetry v0.0.0-20260116145544-c6413dc483f5 // indirect
 	golang.org/x/text v0.33.0 // indirect

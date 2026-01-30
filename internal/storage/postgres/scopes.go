@@ -50,7 +50,7 @@ func addressListFilter(query *bun.SelectQuery, fltrs storage.AddressListFilter) 
 	query = query.Offset(fltrs.Offset)
 
 	switch fltrs.SortField {
-	case "value", "first_height", "last_height":
+	case "last_height":
 		query = sortMultipleScope(query, []SortField{
 			{Field: fltrs.SortField, Order: fltrs.Sort},
 			{Field: "id", Order: fltrs.Sort},
