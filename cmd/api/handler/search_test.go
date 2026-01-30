@@ -112,7 +112,7 @@ func (s *SearchHandlerTestSuite) TestSearchByHeight() {
 	// After checking block height, the code also checks the switch statement
 	// and since "100" doesn't match address or tx hash regex, it goes to default (searchText)
 	s.search.EXPECT().
-		SearchText(gomock.Any(), "100").
+		SearchText(gomock.Any(), "100", 10, 0).
 		Return([]storage.SearchResult{}, nil).
 		Times(1)
 
@@ -168,7 +168,7 @@ func (s *SearchHandlerTestSuite) TestSearchByTxHash() {
 	c.SetPath("/search")
 
 	s.search.EXPECT().
-		Search(gomock.Any(), hashBytes).
+		Search(gomock.Any(), hashBytes, 10, 0).
 		Return([]storage.SearchResult{
 			{Type: "tx", Id: 1},
 		}, nil).
@@ -200,7 +200,7 @@ func (s *SearchHandlerTestSuite) TestSearchByText() {
 	c.SetPath("/search")
 
 	s.search.EXPECT().
-		SearchText(gomock.Any(), testSearchTokenText).
+		SearchText(gomock.Any(), testSearchTokenText, 10, 0).
 		Return([]storage.SearchResult{
 			{Type: "token", Id: 1},
 		}, nil).
@@ -248,7 +248,7 @@ func (s *SearchHandlerTestSuite) TestSearchNoResults() {
 	c.SetPath("/search")
 
 	s.search.EXPECT().
-		SearchText(gomock.Any(), "nonexistent").
+		SearchText(gomock.Any(), "nonexistent", 10, 0).
 		Return([]storage.SearchResult{}, nil).
 		Times(1)
 
@@ -272,7 +272,7 @@ func (s *SearchHandlerTestSuite) TestSearchInvalidAddress() {
 	c.SetPath("/search")
 
 	s.search.EXPECT().
-		SearchText(gomock.Any(), "0xinvalid").
+		SearchText(gomock.Any(), "0xinvalid", 10, 0).
 		Return([]storage.SearchResult{}, nil).
 		Times(1)
 
@@ -327,7 +327,7 @@ func (s *SearchHandlerTestSuite) TestSearchByHashNotFound() {
 	c.SetPath("/search")
 
 	s.search.EXPECT().
-		Search(gomock.Any(), hashBytes).
+		Search(gomock.Any(), hashBytes, 10, 0).
 		Return([]storage.SearchResult{}, nil).
 		Times(1)
 

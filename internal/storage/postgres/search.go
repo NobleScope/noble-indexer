@@ -22,7 +22,7 @@ func NewSearch(db *database.Bun) *Search {
 }
 
 // Search -
-func (s *Search) Search(ctx context.Context, query []byte) (results []storage.SearchResult, err error) {
+func (s *Search) Search(ctx context.Context, query []byte, limit, offset int) (results []storage.SearchResult, err error) {
 	blockQuery := s.db.DB().NewSelect().
 		Model((*storage.Block)(nil)).
 		ColumnExpr("id, ? as value, 'block' as type", hex.EncodeToString(query)).
@@ -34,17 +34,19 @@ func (s *Search) Search(ctx context.Context, query []byte) (results []storage.Se
 
 	union := blockQuery.UnionAll(txQuery)
 
-	err = s.db.DB().NewSelect().
-		TableExpr("(?) as search", union).
-		Limit(10).
-		Offset(0).
-		Scan(ctx, &results)
+	q := s.db.DB().NewSelect().TableExpr("(?) as search", union)
+
+	q = limitScope(q, limit)
+	if offset > 0 {
+		q = q.Offset(offset)
+	}
+	err = q.Scan(ctx, &results)
 
 	return
 }
 
 // SearchText -
-func (s *Search) SearchText(ctx context.Context, text string) (results []storage.SearchResult, err error) {
+func (s *Search) SearchText(ctx context.Context, text string, limit, offset int) (results []storage.SearchResult, err error) {
 	text = strings.ToUpper(text)
 	text = "%" + text + "%"
 	tokenNameQuery := s.db.DB().NewSelect().
@@ -58,11 +60,13 @@ func (s *Search) SearchText(ctx context.Context, text string) (results []storage
 
 	union := tokenNameQuery.UnionAll(tokenSymbolQuery)
 
-	err = s.db.DB().NewSelect().
-		TableExpr("(?) as search", union).
-		Limit(10).
-		Offset(0).
-		Scan(ctx, &results)
+	q := s.db.DB().NewSelect().
+		TableExpr("(?) as search", union)
+	q = limitScope(q, limit)
+	if offset > 0 {
+		q = q.Offset(offset)
+	}
+	err = q.Scan(ctx, &results)
 
 	return
 }

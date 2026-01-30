@@ -1745,18 +1745,18 @@ func (m *MockISearch) EXPECT() *MockISearchMockRecorder {
 }
 
 // Search mocks base method.
-func (m *MockISearch) Search(ctx context.Context, query []byte) ([]storage.SearchResult, error) {
+func (m *MockISearch) Search(ctx context.Context, query []byte, limit, offset int) ([]storage.SearchResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Search", ctx, query)
+	ret := m.ctrl.Call(m, "Search", ctx, query, limit, offset)
 	ret0, _ := ret[0].([]storage.SearchResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Search indicates an expected call of Search.
-func (mr *MockISearchMockRecorder) Search(ctx, query any) *MockISearchSearchCall {
+func (mr *MockISearchMockRecorder) Search(ctx, query, limit, offset any) *MockISearchSearchCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockISearch)(nil).Search), ctx, query)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockISearch)(nil).Search), ctx, query, limit, offset)
 	return &MockISearchSearchCall{Call: call}
 }
 
@@ -1772,30 +1772,30 @@ func (c *MockISearchSearchCall) Return(arg0 []storage.SearchResult, arg1 error) 
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockISearchSearchCall) Do(f func(context.Context, []byte) ([]storage.SearchResult, error)) *MockISearchSearchCall {
+func (c *MockISearchSearchCall) Do(f func(context.Context, []byte, int, int) ([]storage.SearchResult, error)) *MockISearchSearchCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockISearchSearchCall) DoAndReturn(f func(context.Context, []byte) ([]storage.SearchResult, error)) *MockISearchSearchCall {
+func (c *MockISearchSearchCall) DoAndReturn(f func(context.Context, []byte, int, int) ([]storage.SearchResult, error)) *MockISearchSearchCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
 
 // SearchText mocks base method.
-func (m *MockISearch) SearchText(ctx context.Context, text string) ([]storage.SearchResult, error) {
+func (m *MockISearch) SearchText(ctx context.Context, text string, limit, offset int) ([]storage.SearchResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SearchText", ctx, text)
+	ret := m.ctrl.Call(m, "SearchText", ctx, text, limit, offset)
 	ret0, _ := ret[0].([]storage.SearchResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SearchText indicates an expected call of SearchText.
-func (mr *MockISearchMockRecorder) SearchText(ctx, text any) *MockISearchSearchTextCall {
+func (mr *MockISearchMockRecorder) SearchText(ctx, text, limit, offset any) *MockISearchSearchTextCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchText", reflect.TypeOf((*MockISearch)(nil).SearchText), ctx, text)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchText", reflect.TypeOf((*MockISearch)(nil).SearchText), ctx, text, limit, offset)
 	return &MockISearchSearchTextCall{Call: call}
 }
 
@@ -1811,13 +1811,13 @@ func (c *MockISearchSearchTextCall) Return(arg0 []storage.SearchResult, arg1 err
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockISearchSearchTextCall) Do(f func(context.Context, string) ([]storage.SearchResult, error)) *MockISearchSearchTextCall {
+func (c *MockISearchSearchTextCall) Do(f func(context.Context, string, int, int) ([]storage.SearchResult, error)) *MockISearchSearchTextCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockISearchSearchTextCall) DoAndReturn(f func(context.Context, string) ([]storage.SearchResult, error)) *MockISearchSearchTextCall {
+func (c *MockISearchSearchTextCall) DoAndReturn(f func(context.Context, string, int, int) ([]storage.SearchResult, error)) *MockISearchSearchTextCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

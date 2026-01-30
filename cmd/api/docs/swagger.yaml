@@ -1231,6 +1231,16 @@ paths:
         name: query
         required: true
         type: string
+      - description: 'Maximum number of results to return (default: 10, max: 100)'
+        example: 10
+        in: query
+        name: limit
+        type: integer
+      - description: 'Number of results to skip for pagination (default: 0)'
+        example: 0
+        in: query
+        name: offset
+        type: integer
       produces:
       - application/json
       responses:

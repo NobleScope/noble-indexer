@@ -90,6 +90,6 @@ type SearchResult struct {
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
 type ISearch interface {
-	Search(ctx context.Context, query []byte) ([]SearchResult, error)
-	SearchText(ctx context.Context, text string) ([]SearchResult, error)
+	Search(ctx context.Context, query []byte, limit, offset int) ([]SearchResult, error)
+	SearchText(ctx context.Context, text string, limit, offset int) ([]SearchResult, error)
 }

@@ -36,7 +36,16 @@ func NewSearchHandler(
 }
 
 type searchRequest struct {
-	Search string `query:"query" validate:"required"`
+	Search string `query:"query"  validate:"required"`
+	Limit  int    `query:"limit"  validate:"omitempty,min=1,max=100"`
+	Offset int    `query:"offset" validate:"omitempty,min=0"`
+}
+
+func (req *searchRequest) GetLimit() int {
+	if req.Limit < 1 || req.Limit > 100 {
+		return 10
+	}
+	return req.Limit
 }
 
 // Search godoc
@@ -46,6 +55,8 @@ type searchRequest struct {
 //	@Tags			search
 //	@ID				search
 //	@Param			query	query	string	true	"Search query: block height (e.g., 12345), transaction/block hash (e.g., 0x1234...), address (e.g., 0x742d...), or token name/symbol (e.g., USDC)"	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
+//	@Param			limit	query	int		false	"Maximum number of results to return (default: 10, max: 100)"						example(10)
+//	@Param			offset	query	int		false	"Number of results to skip for pagination (default: 0)"								example(0)
 //	@Produce		json
 //	@Success		200	{array}		responses.SearchItem	"Search results (can include blocks, transactions, addresses, tokens)"
 //	@Success		204										"No results found"
@@ -76,9 +87,9 @@ func (handler SearchHandler) Search(c echo.Context) error {
 	case evmAddressRegex.MatchString(req.Search):
 		response, err = handler.searchAddress(c.Request().Context(), req.Search)
 	case evmTransactionHashRegex.MatchString(req.Search):
-		response, err = handler.searchHash(c.Request().Context(), req.Search)
+		response, err = handler.searchHash(c.Request().Context(), req.Search, req.GetLimit(), req.Offset)
 	default:
-		response, err = handler.searchText(c.Request().Context(), req.Search)
+		response, err = handler.searchText(c.Request().Context(), req.Search, req.GetLimit(), req.Offset)
 	}
 	if err != nil {
 		if !handler.address.IsNoRows(err) {
@@ -108,13 +119,13 @@ func (handler SearchHandler) searchAddress(ctx context.Context, search string) (
 	return []responses.SearchItem{result}, nil
 }
 
-func (handler SearchHandler) searchHash(ctx context.Context, search string) ([]responses.SearchItem, error) {
+func (handler SearchHandler) searchHash(ctx context.Context, search string, limit, offset int) ([]responses.SearchItem, error) {
 	hash, err := types.HexFromString(search)
 	if err != nil {
 		return nil, err
 	}
 
-	result, err := handler.search.Search(ctx, hash)
+	result, err := handler.search.Search(ctx, hash, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -141,8 +152,8 @@ func (handler SearchHandler) searchHash(ctx context.Context, search string) ([]r
 	return response, nil
 }
 
-func (handler SearchHandler) searchText(ctx context.Context, text string) ([]responses.SearchItem, error) {
-	result, err := handler.search.SearchText(ctx, text)
+func (handler SearchHandler) searchText(ctx context.Context, text string, limit, offset int) ([]responses.SearchItem, error) {
+	result, err := handler.search.SearchText(ctx, text, limit, offset)
 	if err != nil {
 		return nil, err
 	}
