@@ -300,7 +300,7 @@ func (tx Transaction) SaveProxyContracts(ctx context.Context, contracts ...*mode
 	return err
 }
 
-func (tx Transaction) SaveERC4337UserOps(ctx context.Context, userOps ...*models.UserOp) error {
+func (tx Transaction) SaveERC4337UserOps(ctx context.Context, userOps ...*models.ERC4337UserOp) error {
 	switch len(userOps) {
 	case 0:
 		return nil

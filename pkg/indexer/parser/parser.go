@@ -8,7 +8,7 @@ import (
 
 	"github.com/baking-bad/noble-indexer/internal/storage/types"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/eip4337"
+	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/erc4337"
 	"github.com/pkg/errors"
 
 	"github.com/dipdup-net/indexer-sdk/pkg/modules"
@@ -73,33 +73,33 @@ func (p *Module) createABIs() error {
 	if err != nil {
 		return errors.Wrap(err, "reading erc1155 abi json")
 	}
-	eip4337EntrypointV06Json, err := readJson(filepath.Join(p.cfg.AssetsDir, "abi", "EIP4337"), "entrypoint_v06.json")
+	erc4337EntrypointV06Json, err := readJson(filepath.Join(p.cfg.AssetsDir, "abi", "ERC4337"), "entrypoint_v06.json")
 	if err != nil {
-		return errors.Wrap(err, "reading EIP4337_entrypoint_v06 abi json")
+		return errors.Wrap(err, "reading ERC4337_entrypoint_v06 abi json")
 	}
-	eip4337EntrypointV07Json, err := readJson(filepath.Join(p.cfg.AssetsDir, "abi", "EIP4337"), "entrypoint_v07.json")
+	erc4337EntrypointV07Json, err := readJson(filepath.Join(p.cfg.AssetsDir, "abi", "ERC4337"), "entrypoint_v07.json")
 	if err != nil {
-		return errors.Wrap(err, "reading EIP4337_entrypoint_v07 abi json")
+		return errors.Wrap(err, "reading ERC4337_entrypoint_v07 abi json")
 	}
-	eip4337EntrypointForPaymasterJson, err := readJson(filepath.Join(p.cfg.AssetsDir, "abi", "EIP4337"), "entrypoint_for_paymaster.json")
+	erc4337EntrypointForPaymasterJson, err := readJson(filepath.Join(p.cfg.AssetsDir, "abi", "ERC4337"), "entrypoint_for_paymaster.json")
 	if err != nil {
 		return errors.Wrap(err, "reading ERC4337_entrypoint_for_paymaster abi json")
 	}
-	eip4337AccountV06Json, err := readJson(filepath.Join(p.cfg.AssetsDir, "abi", "EIP4337"), "account_v06.json")
+	erc4337AccountV06Json, err := readJson(filepath.Join(p.cfg.AssetsDir, "abi", "ERC4337"), "account_v06.json")
 	if err != nil {
-		return errors.Wrap(err, "reading EIP4337_account_v06 abi json")
+		return errors.Wrap(err, "reading ERC4337_account_v06 abi json")
 	}
-	eip4337AccountV07Json, err := readJson(filepath.Join(p.cfg.AssetsDir, "abi", "EIP4337"), "account_v07.json")
+	erc4337AccountV07Json, err := readJson(filepath.Join(p.cfg.AssetsDir, "abi", "ERC4337"), "account_v07.json")
 	if err != nil {
-		return errors.Wrap(err, "reading EIP4337_account_v07 abi json")
+		return errors.Wrap(err, "reading ERC4337_account_v07 abi json")
 	}
-	eip4337PaymasterV06Json, err := readJson(filepath.Join(p.cfg.AssetsDir, "abi", "EIP4337"), "paymaster_v06.json")
+	erc4337PaymasterV06Json, err := readJson(filepath.Join(p.cfg.AssetsDir, "abi", "ERC4337"), "paymaster_v06.json")
 	if err != nil {
-		return errors.Wrap(err, "reading EIP4337_paymaster_v06 abi json")
+		return errors.Wrap(err, "reading ERC4337_paymaster_v06 abi json")
 	}
-	eip4337PaymasterV07Json, err := readJson(filepath.Join(p.cfg.AssetsDir, "abi", "EIP4337"), "paymaster_v07.json")
+	erc4337PaymasterV07Json, err := readJson(filepath.Join(p.cfg.AssetsDir, "abi", "ERC4337"), "paymaster_v07.json")
 	if err != nil {
-		return errors.Wrap(err, "reading EIP4337_paymaster_v07 abi json")
+		return errors.Wrap(err, "reading ERC4337_paymaster_v07 abi json")
 	}
 
 	erc20ABI, err := abi.JSON(bytes.NewReader(erc20ABIJson))
@@ -114,45 +114,45 @@ func (p *Module) createABIs() error {
 	if err != nil {
 		return errors.Wrap(err, "parsing erc1155 abi")
 	}
-	eip4337EntrypointV06ABI, err := abi.JSON(bytes.NewReader(eip4337EntrypointV06Json))
+	erc4337EntrypointV06ABI, err := abi.JSON(bytes.NewReader(erc4337EntrypointV06Json))
 	if err != nil {
-		return errors.Wrap(err, "parsing EIP4337_entrypoint_v06 abi")
+		return errors.Wrap(err, "parsing ERC4337_entrypoint_v06 abi")
 	}
-	eip4337EntrypointV07ABI, err := abi.JSON(bytes.NewReader(eip4337EntrypointV07Json))
+	erc4337EntrypointV07ABI, err := abi.JSON(bytes.NewReader(erc4337EntrypointV07Json))
 	if err != nil {
-		return errors.Wrap(err, "parsing EIP4337_entrypoint_v07 abi")
+		return errors.Wrap(err, "parsing ERC4337_entrypoint_v07 abi")
 	}
-	eip4337EntrypointForPaymasterABI, err := abi.JSON(bytes.NewReader(eip4337EntrypointForPaymasterJson))
+	erc4337EntrypointForPaymasterABI, err := abi.JSON(bytes.NewReader(erc4337EntrypointForPaymasterJson))
 	if err != nil {
-		return errors.Wrap(err, "parsing EIP4337_entrypoint_for_paymaster abi")
+		return errors.Wrap(err, "parsing ERC4337_entrypoint_for_paymaster abi")
 	}
-	eip4337AccountV06ABI, err := abi.JSON(bytes.NewReader(eip4337AccountV06Json))
+	erc4337AccountV06ABI, err := abi.JSON(bytes.NewReader(erc4337AccountV06Json))
 	if err != nil {
-		return errors.Wrap(err, "parsing EIP4337_account_v06 abi")
+		return errors.Wrap(err, "parsing ERC4337_account_v06 abi")
 	}
-	eip4337AccountV07ABI, err := abi.JSON(bytes.NewReader(eip4337AccountV07Json))
+	erc4337AccountV07ABI, err := abi.JSON(bytes.NewReader(erc4337AccountV07Json))
 	if err != nil {
-		return errors.Wrap(err, "parsing EIP4337_account_v07 abi")
+		return errors.Wrap(err, "parsing ERC4337_account_v07 abi")
 	}
-	eip4337PaymasterV06ABI, err := abi.JSON(bytes.NewReader(eip4337PaymasterV06Json))
+	erc4337PaymasterV06ABI, err := abi.JSON(bytes.NewReader(erc4337PaymasterV06Json))
 	if err != nil {
-		return errors.Wrap(err, "parsing EIP4337_paymaster_v06 abi")
+		return errors.Wrap(err, "parsing ERC4337_paymaster_v06 abi")
 	}
-	eip4337PaymasterV07ABI, err := abi.JSON(bytes.NewReader(eip4337PaymasterV07Json))
+	erc4337PaymasterV07ABI, err := abi.JSON(bytes.NewReader(erc4337PaymasterV07Json))
 	if err != nil {
-		return errors.Wrap(err, "parsing EIP4337_paymaster_v07 abi")
+		return errors.Wrap(err, "parsing ERC4337_paymaster_v07 abi")
 	}
 
 	p.abi[types.ERC20] = &erc20ABI
 	p.abi[types.ERC721] = &erc721ABI
 	p.abi[types.ERC1155] = &erc1155ABI
-	p.abi[eip4337.ABIEntryPointV06] = &eip4337EntrypointV06ABI
-	p.abi[eip4337.ABIEntryPointV07] = &eip4337EntrypointV07ABI
-	p.abi[eip4337.ABIEntryPointForPaymaster] = &eip4337EntrypointForPaymasterABI
-	p.abi[eip4337.ABIAccountV06] = &eip4337AccountV06ABI
-	p.abi[eip4337.ABIAccountV07] = &eip4337AccountV07ABI
-	p.abi[eip4337.ABIPaymasterV06] = &eip4337PaymasterV06ABI
-	p.abi[eip4337.ABIPaymasterV07] = &eip4337PaymasterV07ABI
+	p.abi[erc4337.ABIEntryPointV06] = &erc4337EntrypointV06ABI
+	p.abi[erc4337.ABIEntryPointV07] = &erc4337EntrypointV07ABI
+	p.abi[erc4337.ABIEntryPointForPaymaster] = &erc4337EntrypointForPaymasterABI
+	p.abi[erc4337.ABIAccountV06] = &erc4337AccountV06ABI
+	p.abi[erc4337.ABIAccountV07] = &erc4337AccountV07ABI
+	p.abi[erc4337.ABIPaymasterV06] = &erc4337PaymasterV06ABI
+	p.abi[erc4337.ABIPaymasterV07] = &erc4337PaymasterV07ABI
 
 	return nil
 }

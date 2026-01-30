@@ -12,7 +12,7 @@ type Context struct {
 	Tokens         *sync.Map[string, *storage.Token]
 	TokenBalances  *sync.Map[string, *storage.TokenBalance]
 	ProxyContracts *sync.Map[string, *storage.ProxyContract]
-	ERC4337UserOps *sync.Map[string, *storage.UserOp]
+	ERC4337UserOps *sync.Map[string, *storage.ERC4337UserOp]
 	Traces         *sync.Map[string, []*storage.Trace]
 
 	Block *storage.Block
@@ -25,7 +25,7 @@ func NewContext() *Context {
 		Tokens:         sync.NewMap[string, *storage.Token](),
 		TokenBalances:  sync.NewMap[string, *storage.TokenBalance](),
 		ProxyContracts: sync.NewMap[string, *storage.ProxyContract](),
-		ERC4337UserOps: sync.NewMap[string, *storage.UserOp](),
+		ERC4337UserOps: sync.NewMap[string, *storage.ERC4337UserOp](),
 		Traces:         sync.NewMap[string, []*storage.Trace](),
 	}
 }
@@ -95,7 +95,7 @@ func (ctx *Context) AddProxyContract(proxyContract *storage.ProxyContract) {
 	}
 }
 
-func (ctx *Context) AddUserOp(userOp *storage.UserOp) {
+func (ctx *Context) AddUserOp(userOp *storage.ERC4337UserOp) {
 	if userOp == nil {
 		return
 	}
@@ -151,6 +151,6 @@ func (ctx *Context) GetProxyContracts() []*storage.ProxyContract {
 	return ctx.ProxyContracts.Values()
 }
 
-func (ctx *Context) GetUserOps() []*storage.UserOp {
+func (ctx *Context) GetUserOps() []*storage.ERC4337UserOp {
 	return ctx.ERC4337UserOps.Values()
 }

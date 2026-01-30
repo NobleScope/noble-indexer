@@ -6,14 +6,14 @@ import (
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	dCtx "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/eip4337"
+	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/erc4337"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 )
 
-func (p *Module) parseEIP4337(ctx *dCtx.Context, tx *storage.Tx) error {
+func (p *Module) parseERC4337(ctx *dCtx.Context, tx *storage.Tx) error {
 	if len(tx.Logs) == 0 {
 		return nil
 	}
@@ -25,11 +25,11 @@ func (p *Module) parseEIP4337(ctx *dCtx.Context, tx *storage.Tx) error {
 
 	switch version {
 	case "v0.6":
-		decodedParams, err := decodeHandleOps[eip4337.UserOperation](tx, p.abi[eip4337.ABIEntryPointV06])
+		decodedParams, err := decodeHandleOps[erc4337.UserOperation](tx, p.abi[erc4337.ABIEntryPointV06])
 		if err != nil {
 			return errors.Wrap(err, "decoding handleOps params")
 		}
-		decodedUserOpEvents, err := decodeUserOperationEvents(p.abi[eip4337.ABIEntryPointV06], tx.Logs)
+		decodedUserOpEvents, err := decodeUserOperationEvents(p.abi[erc4337.ABIEntryPointV06], tx.Logs)
 		if err != nil {
 			return errors.Wrap(err, "decoding user operation events")
 		}
@@ -41,11 +41,11 @@ func (p *Module) parseEIP4337(ctx *dCtx.Context, tx *storage.Tx) error {
 		return nil
 
 	case "v0.7":
-		decodedParams, err := decodeHandleOps[eip4337.PackedUserOperation](tx, p.abi[eip4337.ABIEntryPointV07])
+		decodedParams, err := decodeHandleOps[erc4337.PackedUserOperation](tx, p.abi[erc4337.ABIEntryPointV07])
 		if err != nil {
 			return errors.Wrap(err, "decoding v0.7 handleOps params")
 		}
-		decodedUserOpEvents, err := decodeUserOperationEvents(p.abi[eip4337.ABIEntryPointV07], tx.Logs)
+		decodedUserOpEvents, err := decodeUserOperationEvents(p.abi[erc4337.ABIEntryPointV07], tx.Logs)
 		if err != nil {
 			return errors.Wrap(err, "decoding user operation events")
 		}
@@ -65,7 +65,7 @@ func isEntryPointCall(tx *storage.Tx) (version string, ok bool) {
 	if tx.ToAddress == nil {
 		return "", false
 	}
-	version, ok = eip4337.EntryPointAddresses[tx.ToAddress.Hash.Hex()]
+	version, ok = erc4337.EntryPointAddresses[tx.ToAddress.Hash.Hex()]
 	if !ok {
 		return "", false
 	}
@@ -77,10 +77,10 @@ func isEntryPointCall(tx *storage.Tx) (version string, ok bool) {
 }
 
 func isHandleOpsSelector(selector []byte) bool {
-	return bytes.Equal(selector, eip4337.HandleOpsV06Selector) || bytes.Equal(selector, eip4337.HandleOpsV07Selector)
+	return bytes.Equal(selector, erc4337.HandleOpsV06Selector) || bytes.Equal(selector, erc4337.HandleOpsV07Selector)
 }
 
-func decodeHandleOps[T eip4337.IdentifiableUserOp](
+func decodeHandleOps[T erc4337.IdentifiableUserOp](
 	tx *storage.Tx,
 	contractABI *abi.ABI,
 ) (map[string]T, error) {
@@ -114,17 +114,17 @@ func decodeHandleOps[T eip4337.IdentifiableUserOp](
 func decodeUserOperationEvents(
 	contractAbi *abi.ABI,
 	logs []*storage.Log,
-) (map[string]eip4337.UserOperationEvent, error) {
-	eventsMap := make(map[string]eip4337.UserOperationEvent)
+) (map[string]erc4337.UserOperationEvent, error) {
+	eventsMap := make(map[string]erc4337.UserOperationEvent)
 	for i := range logs {
 		if len(logs[i].Topics) < 4 {
 			continue
 		}
-		if logs[i].Topics[0].Hex() != eip4337.UserOperationEventSignature {
+		if logs[i].Topics[0].Hex() != erc4337.UserOperationEventSignature {
 			continue
 		}
 
-		event := eip4337.UserOperationEvent{}
+		event := erc4337.UserOperationEvent{}
 		event.UserOpHash = common.BytesToHash(logs[i].Topics[1])
 		event.Sender = common.BytesToAddress(logs[i].Topics[2])
 		event.Paymaster = common.BytesToAddress(logs[i].Topics[3])
@@ -138,11 +138,11 @@ func decodeUserOperationEvents(
 	return eventsMap, nil
 }
 
-func mergeDecodedParamsWithEvents[T eip4337.CommonUserOperation](
+func mergeDecodedParamsWithEvents[T erc4337.CommonUserOperation](
 	ctx *dCtx.Context,
 	tx *storage.Tx,
 	decodedHandleOpsParams map[string]T,
-	events map[string]eip4337.UserOperationEvent,
+	events map[string]erc4337.UserOperationEvent,
 ) error {
 	if len(decodedHandleOpsParams) == 0 {
 		return nil
@@ -160,11 +160,11 @@ func mergeDecodedParamsWithEvents[T eip4337.CommonUserOperation](
 		var accountGasLimits []byte
 		var gasFees []byte
 		switch op := any(decodedParams).(type) {
-		case eip4337.UserOperation:
+		case erc4337.UserOperation:
 			accountGasLimits = packUint128Pair(op.VerificationGasLimit, op.CallGasLimit)
 			gasFees = packUint128Pair(op.MaxPriorityFeePerGas, op.MaxFeePerGas)
 
-		case eip4337.PackedUserOperation:
+		case erc4337.PackedUserOperation:
 			accountGasLimits = op.AccountGasLimits[:]
 			gasFees = op.GasFees[:]
 		}
@@ -197,7 +197,7 @@ func mergeDecodedParamsWithEvents[T eip4337.CommonUserOperation](
 
 		// bunder address
 		ctx.AddAddress(&tx.FromAddress)
-		ctx.AddUserOp(&storage.UserOp{
+		ctx.AddUserOp(&storage.ERC4337UserOp{
 			Time:               tx.Time,
 			Height:             tx.Height,
 			Hash:               event.UserOpHash[:],

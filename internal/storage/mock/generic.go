@@ -950,7 +950,7 @@ func (c *MockTransactionSaveContractsCall) DoAndReturn(f func(context.Context, .
 }
 
 // SaveERC4337UserOps mocks base method.
-func (m *MockTransaction) SaveERC4337UserOps(ctx context.Context, userOps ...*storage.UserOp) error {
+func (m *MockTransaction) SaveERC4337UserOps(ctx context.Context, userOps ...*storage.ERC4337UserOp) error {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range userOps {
@@ -981,13 +981,13 @@ func (c *MockTransactionSaveERC4337UserOpsCall) Return(arg0 error) *MockTransact
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionSaveERC4337UserOpsCall) Do(f func(context.Context, ...*storage.UserOp) error) *MockTransactionSaveERC4337UserOpsCall {
+func (c *MockTransactionSaveERC4337UserOpsCall) Do(f func(context.Context, ...*storage.ERC4337UserOp) error) *MockTransactionSaveERC4337UserOpsCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionSaveERC4337UserOpsCall) DoAndReturn(f func(context.Context, ...*storage.UserOp) error) *MockTransactionSaveERC4337UserOpsCall {
+func (c *MockTransactionSaveERC4337UserOpsCall) DoAndReturn(f func(context.Context, ...*storage.ERC4337UserOp) error) *MockTransactionSaveERC4337UserOpsCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

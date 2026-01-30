@@ -1,4 +1,4 @@
-package eip4337
+package erc4337
 
 import (
 	"fmt"
@@ -10,13 +10,13 @@ import (
 )
 
 const (
-	ABIEntryPointV06          = "EIP4337_entrypoint_v06"
-	ABIEntryPointV07          = "EIP4337_entrypoint_v07"
-	ABIEntryPointForPaymaster = "EIP4337_entrypoint_for_paymaster"
-	ABIAccountV06             = "EIP4337_account_v06"
-	ABIAccountV07             = "EIP4337_account_v07"
-	ABIPaymasterV06           = "EIP4337_paymaster_v06"
-	ABIPaymasterV07           = "EIP4337_paymaster_v07"
+	ABIEntryPointV06          = "ERC4337_entrypoint_v06"
+	ABIEntryPointV07          = "ERC4337_entrypoint_v07"
+	ABIEntryPointForPaymaster = "ERC4337_entrypoint_for_paymaster"
+	ABIAccountV06             = "ERC4337_account_v06"
+	ABIAccountV07             = "ERC4337_account_v07"
+	ABIPaymasterV06           = "ERC4337_paymaster_v06"
+	ABIPaymasterV07           = "ERC4337_paymaster_v07"
 )
 
 const UserOperationEventSignature = "0x49628fd1471006c1482da88028e9ce4dbb080b815c9b0344d39e5a8e6ec1419f"

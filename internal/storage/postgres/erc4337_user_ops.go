@@ -6,13 +6,13 @@ import (
 	"github.com/dipdup-net/indexer-sdk/pkg/storage/postgres"
 )
 
-type UserOps struct {
-	*postgres.Table[*storage.UserOp]
+type ERC4337UserOps struct {
+	*postgres.Table[*storage.ERC4337UserOp]
 }
 
-// NewUserOps -
-func NewUserOps(db *database.Bun) *UserOps {
-	return &UserOps{
-		Table: postgres.NewTable[*storage.UserOp](db),
+// NewERC4337UserOps -
+func NewERC4337UserOps(db *database.Bun) *ERC4337UserOps {
+	return &ERC4337UserOps{
+		Table: postgres.NewTable[*storage.ERC4337UserOp](db),
 	}
 }

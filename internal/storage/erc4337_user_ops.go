@@ -10,11 +10,11 @@ import (
 )
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
-type IUserOps interface {
-	storage.Table[*UserOp]
+type IERC4337UserOps interface {
+	storage.Table[*ERC4337UserOp]
 }
 
-type UserOp struct {
+type ERC4337UserOp struct {
 	bun.BaseModel `bun:"erc4337_user_ops" comment:"Table with ERC-4337 user operations."`
 
 	Id                 uint64          `bun:"id,notnull,autoincrement"          comment:"Unique internal identity"`
@@ -44,10 +44,10 @@ type UserOp struct {
 }
 
 // TableName -
-func (UserOp) TableName() string {
+func (ERC4337UserOp) TableName() string {
 	return "erc4337_user_ops"
 }
 
-func (t UserOp) String() string {
+func (t ERC4337UserOp) String() string {
 	return t.Hash.Hex()
 }

@@ -35,7 +35,7 @@ type Storage struct {
 	Sources        models.ISource
 	State          models.IState
 	Search         models.ISearch
-	UserOps        models.IUserOps
+	ERC4337UserOps models.IERC4337UserOps
 	Notificator    *Notificator
 }
 
@@ -68,7 +68,7 @@ func Create(ctx context.Context, cfg config.Database, scriptsDir string, withMig
 		Sources:        NewSource(strg.Connection()),
 		State:          NewState(strg.Connection()),
 		Search:         NewSearch(strg.Connection()),
-		UserOps:        NewUserOps(strg.Connection()),
+		ERC4337UserOps: NewERC4337UserOps(strg.Connection()),
 		Notificator:    NewNotificator(cfg, strg.Connection().DB()),
 	}
 
@@ -137,7 +137,7 @@ func createHypertables(ctx context.Context, conn *database.Bun) error {
 			&models.Tx{},
 			&models.Transfer{},
 			&models.Log{},
-			&models.UserOp{},
+			&models.ERC4337UserOp{},
 		} {
 			if _, err := tx.ExecContext(ctx,
 				`SELECT create_hypertable(?, 'time', chunk_time_interval => INTERVAL '1 month', if_not_exists => TRUE);`,

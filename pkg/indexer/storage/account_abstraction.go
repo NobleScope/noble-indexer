@@ -10,7 +10,7 @@ import (
 func saveERC4337UserOps(
 	ctx context.Context,
 	tx storage.Transaction,
-	userOps []*storage.UserOp,
+	userOps []*storage.ERC4337UserOp,
 	txHashes map[string]uint64,
 	addresses map[string]uint64,
 ) error {

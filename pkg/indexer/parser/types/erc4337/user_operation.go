@@ -1,4 +1,4 @@
-package eip4337
+package erc4337
 
 import (
 	"math/big"
