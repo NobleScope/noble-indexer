@@ -2190,6 +2190,10 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 0
                 },
+                "logo": {
+                    "type": "string",
+                    "example": "http://site.com/image.png"
+                },
                 "metadata": {
                     "type": "array",
                     "items": {
