@@ -20,6 +20,7 @@ type Token struct {
 	Decimals       uint8  `example:"6"                                          json:"decimals"         swaggertype:"integer"`
 	TransfersCount uint64 `example:"123"                                        json:"transfers_count"  swaggertype:"integer"`
 	Supply         string `example:"123456789"                                  json:"supply"           swaggertype:"string"`
+	Logo           string `example:"http://site.com/image.png"                  json:"logo,omitempty"   swaggertype:"string"`
 
 	Metadata json.RawMessage `json:"metadata,omitempty"`
 }
@@ -36,6 +37,7 @@ func NewToken(token storage.Token) Token {
 		TransfersCount: token.TransfersCount,
 		Supply:         token.Supply.String(),
 		Metadata:       token.Metadata,
+		Logo:           token.Logo,
 	}
 
 	return t

@@ -32,7 +32,7 @@ func (t *Transfer) Filter(ctx context.Context, filter storage.TransferListFilter
 		ColumnExpr("from_addr.hash AS from_address__hash").
 		ColumnExpr("to_addr.hash AS to_address__hash").
 		ColumnExpr("contract.id AS contract__id, contract_addr.hash AS contract__address__hash, contract.code AS contract__code, contract.verified as contract__verified").
-		ColumnExpr("token.name AS token__name, token.symbol AS token__symbol, token.decimals AS token__decimals, token.type AS token__type, token.supply AS token__supply, token.transfers_count as token__transfers_count").
+		ColumnExpr("token.name AS token__name, token.symbol AS token__symbol, token.decimals AS token__decimals, token.type AS token__type, token.supply AS token__supply, token.transfers_count as token__transfers_count, token.logo as token__logo").
 		TableExpr("(?) AS transfer", query).
 		Join("LEFT JOIN tx ON tx.id = transfer.tx_id").
 		Join("LEFT JOIN address AS from_addr ON from_addr.id = transfer.from_address_id").
@@ -60,7 +60,7 @@ func (t *Transfer) Get(ctx context.Context, id uint64) (transfer storage.Transfe
 		ColumnExpr("from_addr.hash AS from_address__hash").
 		ColumnExpr("to_addr.hash AS to_address__hash").
 		ColumnExpr("contract.id AS contract__id, contract_addr.hash AS contract__address__hash, contract.code AS contract__code, contract.verified as contract__verified").
-		ColumnExpr("token.name AS token__name, token.symbol AS token__symbol, token.decimals AS token__decimals, token.type AS token__type, token.supply AS token__supply, token.transfers_count as token__transfers_count").
+		ColumnExpr("token.name AS token__name, token.symbol AS token__symbol, token.decimals AS token__decimals, token.type AS token__type, token.supply AS token__supply, token.transfers_count as token__transfers_count, token.logo as token__logo").
 		TableExpr("(?) AS transfer", query).
 		Join("LEFT JOIN tx ON tx.id = transfer.tx_id").
 		Join("LEFT JOIN address AS from_addr ON from_addr.id = transfer.from_address_id").
