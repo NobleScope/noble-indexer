@@ -924,6 +924,20 @@
                         "name": "query",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "example": 10,
+                        "description": "Maximum number of results to return (default: 10, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "example": 0,
+                        "description": "Number of results to skip for pagination (default: 0)",
+                        "name": "offset",
+                        "in": "query"
                     }
                 ],
                 "responses": {
