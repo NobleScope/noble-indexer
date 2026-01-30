@@ -383,12 +383,8 @@ definitions:
       address:
         example: "0x0000000000000000000000000000000000000001"
         type: string
-      contract:
-        example: 0xdAC17F958D2ee523a2206206994597C13D831ec7
-        type: string
-      token_id:
-        example: "0"
-        type: string
+      token:
+        $ref: '#/definitions/responses.Token'
       value:
         example: "123456789"
         type: string

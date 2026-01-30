@@ -67,7 +67,7 @@ func (t *Transfer) Get(ctx context.Context, id uint64) (transfer storage.Transfe
 		Join("LEFT JOIN address AS to_addr ON to_addr.id = transfer.to_address_id").
 		Join("LEFT JOIN contract ON contract.id = transfer.contract_id").
 		Join("LEFT JOIN address AS contract_addr ON contract_addr.id = contract.id").
-		Join("LEFT JOIN token on token.id = transfer.token_id AND transfer.contract_id = token.contract_id").
+		Join("LEFT JOIN token on token.token_id = transfer.token_id AND transfer.contract_id = token.contract_id").
 		Scan(ctx, &transfer)
 
 	return

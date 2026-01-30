@@ -87,19 +87,19 @@ func NewTransfer(transfer storage.Transfer) Transfer {
 //
 //	@Description	Token balance information
 type TokenBalance struct {
-	TokenId  string `example:"0"                                          json:"token_id" swaggertype:"string"`
-	Contract string `example:"0xdAC17F958D2ee523a2206206994597C13D831ec7" json:"contract" swaggertype:"string"`
-	Address  string `example:"0x0000000000000000000000000000000000000001" json:"address"  swaggertype:"string"`
-	Value    string `example:"123456789"                                  json:"value"    swaggertype:"string"`
+	Address string `example:"0x0000000000000000000000000000000000000001" json:"address" swaggertype:"string"`
+	Value   string `example:"123456789"                                  json:"value"   swaggertype:"string"`
+
+	Token Token `json:"token"`
 }
 
 func NewTokenBalance(tb storage.TokenBalance) TokenBalance {
 	t := TokenBalance{
-		TokenId:  tb.TokenID.String(),
-		Contract: tb.Contract.Address.Hash.Hex(),
-		Address:  tb.Address.Hash.Hex(),
-		Value:    tb.Balance.String(),
+		Address: tb.Address.Hash.Hex(),
+		Value:   tb.Balance.String(),
+		Token:   NewToken(tb.Token),
 	}
-
+	t.Token.Contract = tb.Contract.Address.Hash.Hex()
+	t.Token.TokenId = tb.TokenID.String()
 	return t
 }
