@@ -2,10 +2,11 @@ package contract_metadata
 
 import (
 	"context"
-	"golang.org/x/sync/errgroup"
 	"path"
 	"sync"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/baking-bad/noble-indexer/internal/ipfs"
 	"github.com/baking-bad/noble-indexer/internal/storage"
@@ -142,30 +143,38 @@ func (m *Module) loadSources(ctx context.Context, contractId uint64, metadataSou
 	}
 
 	var (
-		sources []*storage.Source
+		sources = make([]*storage.Source, 0, len(metadataSources))
 		mu      sync.Mutex
 	)
 
 	g, groupCtx := errgroup.WithContext(ctx)
 	for k, v := range metadataSources {
-		g.Go(func() error {
-			content, err := m.pool.ContractText(groupCtx, v.Urls)
-			if err != nil {
-				return err
-			}
-
+		source := &storage.Source{
+			Name:       k,
+			License:    v.License,
+			Urls:       v.Urls,
+			ContractId: contractId,
+			Content:    v.Content,
+		}
+		if v.Content != "" {
 			mu.Lock()
-			sources = append(sources, &storage.Source{
-				Name:       k,
-				License:    v.License,
-				Urls:       v.Urls,
-				ContractId: contractId,
-				Content:    content,
-			})
+			sources = append(sources, source)
 			mu.Unlock()
+		} else {
+			g.Go(func() error {
+				content, err := m.pool.ContractText(groupCtx, v.Urls)
+				if err != nil {
+					return err
+				}
+				source.Content = content
 
-			return nil
-		})
+				mu.Lock()
+				sources = append(sources, source)
+				mu.Unlock()
+
+				return nil
+			})
+		}
 	}
 
 	if err := g.Wait(); err != nil {

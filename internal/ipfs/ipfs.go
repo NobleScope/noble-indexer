@@ -61,6 +61,7 @@ type Source struct {
 	Keccak256 string   `json:"keccak256"`
 	License   string   `json:"license,omitempty"`
 	Urls      []string `json:"urls,omitempty"`
+	Content   string   `json:"content,omitempty"`
 }
 
 type Settings struct {
