@@ -564,6 +564,68 @@ definitions:
         example: transfer
         type: string
     type: object
+  responses.UserOp:
+    description: ERC-4337 user operation information
+    properties:
+      account_gas_limits:
+        example: 0x
+        type: string
+      actual_gas_cost:
+        example: "21000"
+        type: string
+      actual_gas_used:
+        example: "21000"
+        type: string
+      bundler:
+        example: "0x0000000000000000000000000000000000000003"
+        type: string
+      call_data:
+        example: 0x
+        type: string
+      gas_fees:
+        example: 0x
+        type: string
+      hash:
+        example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d
+        type: string
+      height:
+        example: 100
+        type: integer
+      id:
+        example: 1
+        type: integer
+      init_code:
+        example: 0x
+        type: string
+      nonce:
+        example: "1"
+        type: string
+      paymaster:
+        example: "0x0000000000000000000000000000000000000002"
+        type: string
+      paymaster_and_data:
+        example: 0x
+        type: string
+      pre_verification_gas:
+        example: "21000"
+        type: string
+      sender:
+        example: "0x0000000000000000000000000000000000000001"
+        type: string
+      signature:
+        example: 0x
+        type: string
+      success:
+        example: true
+        type: boolean
+      time:
+        example: "2026-01-01T01:01:01+00:00"
+        format: date-time
+        type: string
+      tx_hash:
+        example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d
+        type: string
+    type: object
 host: noble.dipdup.net
 info:
   contact:
@@ -1814,6 +1876,90 @@ paths:
       summary: Get transaction by hash
       tags:
       - transactions
+  /user_ops:
+    get:
+      description: Returns a paginated list of ERC-4337 user operations. Can be filtered
+        by transaction, block height, time range, bundler, paymaster, or success status.
+      operationId: list-user-ops
+      parameters:
+      - description: Filter by transaction hash (hexadecimal with 0x prefix)
+        in: query
+        maxLength: 66
+        minLength: 66
+        name: tx
+        type: string
+      - default: 10
+        description: 'Number of user operations to return (default: 10)'
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - default: 0
+        description: 'Number of user operations to skip (default: 0)'
+        in: query
+        minimum: 0
+        name: offset
+        type: integer
+      - description: Filter by block height
+        in: query
+        minimum: 0
+        name: height
+        type: integer
+      - description: Filter by bundler address
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: bundler
+        type: string
+      - description: Filter by paymaster address
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: paymaster
+        type: string
+      - description: Filter by success status
+        in: query
+        name: success
+        type: boolean
+      - description: Filter by timestamp from (Unix timestamp)
+        in: query
+        minimum: 1
+        name: from
+        type: integer
+      - description: Filter by timestamp to (Unix timestamp)
+        in: query
+        minimum: 1
+        name: to
+        type: integer
+      - default: desc
+        description: 'Sort order by timestamp (default: desc)'
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of user operations
+          schema:
+            items:
+              $ref: '#/definitions/responses.UserOp'
+            type: array
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: List ERC-4337 user operations
+      tags:
+      - user_ops
   /ws:
     get:
       description: Establishes a WebSocket connection for real-time updates. Clients
