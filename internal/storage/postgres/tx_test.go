@@ -537,3 +537,26 @@ func (s *StorageTestSuite) TestTxFilterByContractId() {
 		s.Require().True(hasAddress1, "tx %d should have address 1 as from or to", tx.Id)
 	}
 }
+
+// TestTxFilterByAddressId tests filtering by address_id (from or to address)
+func (s *StorageTestSuite) TestTxFilterByAddressId() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	addressId := uint64(2)
+	txs, err := s.storage.Tx.Filter(ctx, storage.TxListFilter{
+		AddressId: &addressId,
+		Limit:     10,
+		Offset:    0,
+		Sort:      sdk.SortOrderAsc,
+	})
+	s.Require().NoError(err)
+	s.Require().Len(txs, 4)
+
+	// Verify all have address 2 as either from or to
+	for _, tx := range txs {
+		hasAddress2 := tx.FromAddressId == 2 ||
+			(tx.ToAddressId != nil && *tx.ToAddressId == 2)
+		s.Require().True(hasAddress2, "tx %d should have address 2 as from or to", tx.Id)
+	}
+}

@@ -598,6 +598,45 @@ func (s *TxHandlerTestSuite) TestListNegativeOffset() {
 	s.Require().NotEmpty(e.Message)
 }
 
+func (s *TxHandlerTestSuite) TestListByAddressId() {
+	q := make(url.Values)
+	q.Set("address", testAddressHex1.Hex())
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/tx")
+
+	s.address.EXPECT().
+		ByHash(gomock.Any(), testAddressHex1).
+		Return(testFromAddress, nil).
+		Times(1)
+
+	addressId := testFromAddress.Id
+	s.tx.EXPECT().
+		Filter(gomock.Any(), storage.TxListFilter{
+			Limit:     10,
+			Offset:    0,
+			Sort:      sdk.SortOrderDesc,
+			Type:      []types.TxType{},
+			Status:    []types.TxStatus{},
+			AddressId: &addressId,
+		}).
+		Return([]storage.Tx{
+			testTxWithToAddress,
+			testTxContractCreation,
+		}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var txs []responses.Transaction
+	err := json.NewDecoder(rec.Body).Decode(&txs)
+	s.Require().NoError(err)
+	s.Require().Len(txs, 2)
+}
+
 // ====================================
 // Traces Tests
 // ====================================

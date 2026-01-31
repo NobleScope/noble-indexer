@@ -189,6 +189,7 @@ type listTxs struct {
 	Sort        string      `query:"sort"         validate:"omitempty,oneof=asc desc"`
 	AddressFrom string      `query:"address_from" validate:"omitempty,address"`
 	AddressTo   string      `query:"address_to"   validate:"omitempty,address"`
+	Address     string      `query:"address"      validate:"omitempty,address"`
 	Contract    string      `query:"contract"     validate:"omitempty,address"`
 	Height      *uint64     `query:"height"       validate:"omitempty,min=0"`
 	Type        StringArray `query:"type"         validate:"omitempty,dive,tx_type"`
@@ -252,6 +253,7 @@ func (handler *TxHandler) List(c echo.Context) error {
 		Sort:   pgSort(req.Sort),
 		Type:   txTypes,
 		Status: txStatus,
+		Height: req.Height,
 	}
 
 	if req.AddressFrom != "" {
@@ -270,16 +272,20 @@ func (handler *TxHandler) List(c echo.Context) error {
 		filters.AddressToId = &address.Id
 	}
 
+	if req.Address != "" {
+		address, err := handler.getAddressByHash(c, req.Address)
+		if err != nil {
+			return err
+		}
+		filters.AddressId = &address.Id
+	}
+
 	if req.Contract != "" {
 		address, err := handler.getAddressByHash(c, req.Contract)
 		if err != nil {
 			return err
 		}
 		filters.ContractId = &address.Id
-	}
-
-	if req.Height != nil {
-		filters.Height = req.Height
 	}
 
 	if req.From > 0 {
