@@ -54,6 +54,7 @@ type Transaction interface {
 	RollbackTransfers(ctx context.Context, height types.Level) (transfers []Transfer, err error)
 	RollbackTokens(ctx context.Context, height types.Level) (tokens []Token, err error)
 	RollbackContracts(ctx context.Context, height types.Level) error
+	RollbackERC4337UserOps(ctx context.Context, height types.Level) error
 	DeleteBalances(ctx context.Context, ids []uint64) error
 	DeleteTokenBalances(ctx context.Context, tokenIds []string, contractIds []uint64, zeroBalances []*TokenBalance) error
 

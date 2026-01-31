@@ -393,6 +393,14 @@ func (tx Transaction) RollbackContracts(ctx context.Context, height types.Level)
 	return
 }
 
+func (tx Transaction) RollbackERC4337UserOps(ctx context.Context, height types.Level) (err error) {
+	_, err = tx.Tx().NewDelete().
+		Model((*models.ERC4337UserOp)(nil)).
+		Where("height = ?", height).
+		Exec(ctx)
+	return
+}
+
 func (tx Transaction) DeleteBalances(ctx context.Context, ids []uint64) error {
 	if len(ids) == 0 {
 		return nil

@@ -192,6 +192,11 @@ func (module *Module) rollbackBlock(ctx context.Context, block storage.Block) er
 		return tx.HandleError(ctx, err)
 	}
 
+	err = tx.RollbackERC4337UserOps(ctx, height)
+	if err != nil {
+		return tx.HandleError(ctx, err)
+	}
+
 	if err := module.rollbackBalances(ctx, tx, block, txs, traces, transfers, tokens, addresses); err != nil {
 		return tx.HandleError(ctx, err)
 	}
