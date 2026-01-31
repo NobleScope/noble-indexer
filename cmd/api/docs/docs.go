@@ -493,6 +493,14 @@ const docTemplate = `{
                         "description": "Filter by deployment transaction hash (hexadecimal with 0x prefix)",
                         "name": "tx_hash",
                         "in": "query"
+                    },
+                    {
+                        "maxLength": 42,
+                        "minLength": 42,
+                        "type": "string",
+                        "description": "Filter by deployer address (hexadecimal with 0x prefix)",
+                        "name": "deployer",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1932,6 +1940,10 @@ const docTemplate = `{
                 "compiler_version": {
                     "type": "string",
                     "example": "0.1.1"
+                },
+                "deployer": {
+                    "type": "string",
+                    "example": "0x0000000000000000000000000000000000000003"
                 },
                 "error": {
                     "type": "string",

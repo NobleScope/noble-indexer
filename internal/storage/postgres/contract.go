@@ -47,8 +47,10 @@ func (c *Contract) ListWithTx(ctx context.Context, filters storage.ContractListF
 		ColumnExpr("contract.*").
 		ColumnExpr("address.hash AS address__hash").
 		ColumnExpr("tx.hash AS tx__hash").
+		ColumnExpr("deployer.hash AS deployer__hash").
 		Join("LEFT JOIN address ON address.id = contract.id").
 		Join("LEFT JOIN tx ON contract.tx_id = tx.id").
+		Join("LEFT JOIN address as deployer ON deployer.id = deployer_id").
 		Scan(ctx, &contracts)
 
 	return
@@ -66,10 +68,12 @@ func (c *Contract) ByHash(ctx context.Context, hash pkgTypes.Hex) (contract stor
 		ColumnExpr("address.id AS address__id, address.first_height AS address__first_height, address.last_height AS address__last_height, address.hash AS address__hash, address.is_contract AS address__is_contract, address.txs_count AS address__txs_count, address.contracts_count AS address__contracts_count, address.interactions AS address__interactions").
 		ColumnExpr("tx.hash AS tx__hash").
 		ColumnExpr("implementation_address.hash AS implementation").
+		ColumnExpr("deployer.hash AS deployer__hash").
 		Join("JOIN contract ON contract.id = address.id").
 		Join("LEFT JOIN proxy_contract ON proxy_contract.id = contract.id").
 		Join("LEFT JOIN address AS implementation_address ON implementation_address.id = proxy_contract.implementation_id").
 		Join("LEFT JOIN tx ON contract.tx_id = tx.id").
+		Join("LEFT JOIN address as deployer ON deployer.id = deployer_id").
 		Scan(ctx, &contract)
 
 	return
@@ -87,10 +91,12 @@ func (c *Contract) ById(ctx context.Context, id uint64) (contract storage.Contra
 		ColumnExpr("address.id AS address__id, address.first_height AS address__first_height, address.last_height AS address__last_height, address.hash AS address__hash, address.is_contract AS address__is_contract, address.txs_count AS address__txs_count, address.contracts_count AS address__contracts_count, address.interactions AS address__interactions").
 		ColumnExpr("tx.hash AS tx__hash").
 		ColumnExpr("implementation_address.hash AS implementation").
+		ColumnExpr("deployer.hash AS deployer__hash").
 		Join("JOIN address ON address.id = contract.id").
 		Join("LEFT JOIN proxy_contract ON proxy_contract.id = contract.id").
 		Join("LEFT JOIN address AS implementation_address ON implementation_address.id = proxy_contract.implementation_id").
 		Join("LEFT JOIN tx ON contract.tx_id = tx.id").
+		Join("LEFT JOIN address as deployer ON deployer.id = deployer_id").
 		Scan(ctx, &contract)
 
 	return

@@ -80,6 +80,10 @@ func contractListFilter(query *bun.SelectQuery, fltrs storage.ContractListFilter
 		query = query.Where("verified = ?", true)
 	}
 
+	if fltrs.DeployerId != nil {
+		query = query.Where("deployer_id = ?", *fltrs.DeployerId)
+	}
+
 	query = limitScope(query, fltrs.Limit)
 	query = query.Offset(fltrs.Offset)
 
