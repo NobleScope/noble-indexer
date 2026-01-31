@@ -1264,8 +1264,8 @@ const docTemplate = `{
                         "minLength": 42,
                         "type": "string",
                         "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
-                        "description": "Filter by called contract address",
-                        "name": "contract",
+                        "description": "Filter by address (from or to)",
+                        "name": "address",
                         "in": "query"
                     },
                     {

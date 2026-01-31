@@ -535,3 +535,25 @@ func (s *StorageTestSuite) TestTraceFilterMultipleHeights() {
 		}
 	}
 }
+
+func (s *StorageTestSuite) TestTraceFilterByAddressId() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	addressId := uint64(3)
+	traces, err := s.storage.Trace.Filter(ctx, storage.TraceListFilter{
+		AddressId: &addressId,
+		Limit:     10,
+		Offset:    0,
+	})
+	s.Require().NoError(err)
+	s.Require().Len(traces, 3)
+
+	// All should have from_address_id = 3 or to_address_id = 3
+	for _, trace := range traces {
+		s.Require().True(
+			(trace.From != nil && *trace.From == addressId) ||
+				(trace.To != nil && *trace.To == addressId),
+		)
+	}
+}

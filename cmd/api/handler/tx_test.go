@@ -852,6 +852,41 @@ func (s *TxHandlerTestSuite) TestTracesWithAddressTo() {
 	s.Require().Len(traces, 2)
 }
 
+func (s *TxHandlerTestSuite) TestTracesWithAddress() {
+	q := make(url.Values)
+	q.Set("address", testToAddress.Hash.Hex())
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/traces")
+
+	s.address.EXPECT().
+		ByHash(gomock.Any(), testToAddress.Hash).
+		Return(testToAddress, nil).
+		Times(1)
+
+	addressId := testToAddress.Id
+	s.trace.EXPECT().
+		Filter(gomock.Any(), storage.TraceListFilter{
+			Limit:     10,
+			Offset:    0,
+			Sort:      sdk.SortOrderDesc,
+			Type:      []types.TraceType{},
+			AddressId: &addressId,
+		}).
+		Return([]*storage.Trace{&testTrace1, &testTrace3}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.Traces(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var traces []responses.Trace
+	err := json.NewDecoder(rec.Body).Decode(&traces)
+	s.Require().NoError(err)
+	s.Require().Len(traces, 2)
+}
+
 // TestTracesWithType tests traces filtered by type
 func (s *TxHandlerTestSuite) TestTracesWithType() {
 	q := make(url.Values)
