@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"time"
 
 	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
@@ -9,9 +10,24 @@ import (
 	"github.com/uptrace/bun"
 )
 
+type ERC4337UserOpsListFilter struct {
+	Limit       int
+	Offset      int
+	Sort        storage.SortOrder
+	Height      *uint64
+	TxId        *uint64
+	BundlerId   *uint64
+	PaymasterId *uint64
+	Success     *bool
+	TimeFrom    time.Time
+	TimeTo      time.Time
+}
+
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
 type IERC4337UserOps interface {
 	storage.Table[*ERC4337UserOp]
+
+	Filter(ctx context.Context, filter ERC4337UserOpsListFilter) ([]ERC4337UserOp, error)
 }
 
 type ERC4337UserOp struct {

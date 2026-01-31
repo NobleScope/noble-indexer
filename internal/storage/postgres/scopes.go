@@ -219,6 +219,37 @@ func logListFilter(query *bun.SelectQuery, fltrs storage.LogListFilter) *bun.Sel
 	return query
 }
 
+func erc4337UserOpsListFilter(query *bun.SelectQuery, fltrs storage.ERC4337UserOpsListFilter) *bun.SelectQuery {
+	if fltrs.Height != nil {
+		query = query.Where("height = ?", *fltrs.Height)
+	}
+	if fltrs.TxId != nil {
+		query = query.Where("tx_id = ?", *fltrs.TxId)
+	}
+	if fltrs.BundlerId != nil {
+		query = query.Where("bundler_id = ?", *fltrs.BundlerId)
+	}
+	if fltrs.PaymasterId != nil {
+		query = query.Where("paymaster_id = ?", *fltrs.PaymasterId)
+	}
+	if fltrs.Success != nil {
+		query = query.Where("success = ?", *fltrs.Success)
+	}
+
+	if !fltrs.TimeFrom.IsZero() {
+		query = query.Where("time >= ?", fltrs.TimeFrom)
+	}
+	if !fltrs.TimeTo.IsZero() {
+		query = query.Where("time < ?", fltrs.TimeTo)
+	}
+
+	query = limitScope(query, fltrs.Limit)
+	query = query.Offset(fltrs.Offset)
+	query = sortTimeIDScope(query, fltrs.Sort)
+
+	return query
+}
+
 func txListFilter(query *bun.SelectQuery, fltrs storage.TxListFilter) *bun.SelectQuery {
 	if fltrs.AddressFromId != nil {
 		query = query.Where("from_address_id = ?", *fltrs.AddressFromId)
