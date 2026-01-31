@@ -335,7 +335,7 @@ func (tx Transaction) RollbackBlockStats(ctx context.Context, height types.Level
 func (tx Transaction) RollbackAddresses(ctx context.Context, height types.Level) (address []models.Address, err error) {
 	_, err = tx.Tx().NewDelete().
 		Model(&address).
-		Where("height = ?", height).
+		Where("first_height = ?", height).
 		Returning("*").
 		Exec(ctx)
 	return
