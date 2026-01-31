@@ -21,6 +21,7 @@ type Contract struct {
 	OptimizerEnabled bool   `example:"true"                                                                json:"optimizer_enabled,omitempty" swaggertype:"boolean"`
 	Language         string `example:"Solidity"                                                            json:"language,omitempty"          swaggertype:"string"`
 	Error            string `example:"Error string"                                                        json:"error,omitempty"             swaggertype:"string"`
+	Deployer         string `example:"0x0000000000000000000000000000000000000003"                          json:"deployer,omitempty"          swaggertype:"string"`
 
 	Tags []string        `json:"tags,omitempty"`
 	ABI  json.RawMessage `json:"abi,omitempty"`
@@ -47,6 +48,10 @@ func NewContract(contract storage.Contract) Contract {
 
 	if contract.Implementation != nil {
 		c.Implementation = contract.Implementation.Hex()
+	}
+
+	if contract.Deployer != nil {
+		c.Deployer = contract.Deployer.Hash.Hex()
 	}
 
 	return c

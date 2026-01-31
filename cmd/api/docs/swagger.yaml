@@ -131,6 +131,9 @@ definitions:
       compiler_version:
         example: 0.1.1
         type: string
+      deployer:
+        example: "0x0000000000000000000000000000000000000003"
+        type: string
       error:
         example: Error string
         type: string
@@ -914,6 +917,12 @@ paths:
         maxLength: 66
         minLength: 66
         name: tx_hash
+        type: string
+      - description: Filter by deployer address (hexadecimal with 0x prefix)
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: deployer
         type: string
       produces:
       - application/json

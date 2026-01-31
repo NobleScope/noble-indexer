@@ -136,7 +136,7 @@ func (tx Transaction) SaveContracts(ctx context.Context, contracts ...*models.Co
 	}
 
 	_, err := tx.Tx().NewInsert().Model(&cs).
-		Column("id", "height", "code", "verified", "tx_id", "abi", "compiler_version", "metadata_link", "language", "optimizer_enabled", "tags", "status", "retry_count", "error", "updated_at").
+		Column("id", "height", "code", "verified", "tx_id", "abi", "compiler_version", "metadata_link", "language", "optimizer_enabled", "tags", "status", "retry_count", "error", "updated_at", "deployer_id").
 		On("CONFLICT (id) DO UPDATE").
 		Set("verified = CASE WHEN EXCLUDED.verified THEN EXCLUDED.verified ELSE added_contract.verified END").
 		Set("abi = CASE WHEN EXCLUDED.abi IS NOT NULL THEN EXCLUDED.abi ELSE added_contract.abi END").

@@ -381,6 +381,7 @@ func (p *Module) parse(b types.BlockData) error {
 				Tx: &storage.Tx{
 					Hash: txHash,
 				},
+				Deployer: &deployerAddress,
 			}
 
 			newTrace.Contract = contract
