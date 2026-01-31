@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
@@ -152,4 +153,40 @@ func (handler *UserOpHandler) List(c echo.Context) error {
 	}
 
 	return returnArray(c, response)
+}
+
+type getUserOpRequest struct {
+	Hash string `param:"hash" validate:"required,tx_hash"`
+}
+
+// Get godoc
+//
+//	@Summary		Get user operation by hash
+//	@Description	Returns detailed information about a specific ERC-4337 user operation
+//	@Tags			user_ops
+//	@ID				get-user-op
+//	@Param			hash	path	string	true	"User operation hash in hexadecimal with 0x prefix"	minlength(66)	maxlength(66)
+//	@Produce		json
+//	@Success		200	{object}	responses.UserOp	"User operation information"
+//	@Success		204									"User operation not found"
+//	@Failure		400	{object}	Error				"Invalid user operation hash format"
+//	@Failure		500	{object}	Error				"Internal server error"
+//	@Router			/user_ops/{hash} [get]
+func (handler *UserOpHandler) Get(c echo.Context) error {
+	req, err := bindAndValidate[getUserOpRequest](c)
+	if err != nil {
+		return badRequestError(c, err)
+	}
+
+	hash, err := types.HexFromString(req.Hash)
+	if err != nil {
+		return badRequestError(c, err)
+	}
+
+	userOp, err := handler.userOps.ByHash(c.Request().Context(), hash)
+	if err != nil {
+		return handleError(c, err, handler.userOps)
+	}
+
+	return c.JSON(http.StatusOK, responses.NewUserOp(userOp))
 }

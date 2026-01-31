@@ -953,6 +953,223 @@ func (s *UserOpHandlerTestSuite) TestListWithAllFilters() {
 	s.Require().Len(ops, 1)
 }
 
+// TestGetSuccess tests successful retrieval of a user operation by hash
+func (s *UserOpHandlerTestSuite) TestGetSuccess() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/user_ops/:hash")
+	c.SetParamNames("hash")
+	c.SetParamValues(pkgTypes.Hex(testUserOpHash1).Hex())
+
+	s.userOps.EXPECT().
+		ByHash(gomock.Any(), testUserOpHash1).
+		Return(testUserOp1, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.Get(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var op responses.UserOp
+	err := json.NewDecoder(rec.Body).Decode(&op)
+	s.Require().NoError(err)
+	s.Require().EqualValues(1, op.Id)
+	s.Require().EqualValues(100, op.Height)
+	s.Require().True(op.Success)
+	s.Require().NotNil(op.Paymaster)
+}
+
+// TestGetSuccessNullPaymaster tests retrieval of user operation without paymaster
+func (s *UserOpHandlerTestSuite) TestGetSuccessNullPaymaster() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/user_ops/:hash")
+	c.SetParamNames("hash")
+	c.SetParamValues(pkgTypes.Hex(testUserOpHash2).Hex())
+
+	s.userOps.EXPECT().
+		ByHash(gomock.Any(), testUserOpHash2).
+		Return(testUserOp2, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.Get(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var op responses.UserOp
+	err := json.NewDecoder(rec.Body).Decode(&op)
+	s.Require().NoError(err)
+	s.Require().EqualValues(2, op.Id)
+	s.Require().False(op.Success)
+	s.Require().Nil(op.Paymaster)
+}
+
+// TestGetNotFound tests when user operation is not found
+func (s *UserOpHandlerTestSuite) TestGetNotFound() {
+	hash := "0xdeadbeef00000000000000000000000000000000000000000000000000000000"
+	hashBytes, err := pkgTypes.HexFromString(hash)
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/user_ops/:hash")
+	c.SetParamNames("hash")
+	c.SetParamValues(hash)
+
+	s.userOps.EXPECT().
+		ByHash(gomock.Any(), hashBytes).
+		Return(storage.ERC4337UserOp{}, sql.ErrNoRows).
+		Times(1)
+
+	s.userOps.EXPECT().
+		IsNoRows(sql.ErrNoRows).
+		Return(true).
+		Times(1)
+
+	s.Require().NoError(s.handler.Get(c))
+	s.Require().Equal(http.StatusNoContent, rec.Code)
+}
+
+// TestGetInternalError tests internal server error from ByHash
+func (s *UserOpHandlerTestSuite) TestGetInternalError() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/user_ops/:hash")
+	c.SetParamNames("hash")
+	c.SetParamValues(pkgTypes.Hex(testUserOpHash1).Hex())
+
+	testErr := sql.ErrConnDone
+	s.userOps.EXPECT().
+		ByHash(gomock.Any(), testUserOpHash1).
+		Return(storage.ERC4337UserOp{}, testErr).
+		Times(1)
+
+	s.userOps.EXPECT().
+		IsNoRows(testErr).
+		Return(false).
+		Times(1)
+
+	s.Require().NoError(s.handler.Get(c))
+	s.Require().Equal(http.StatusInternalServerError, rec.Code)
+
+	var e Error
+	err := json.NewDecoder(rec.Body).Decode(&e)
+	s.Require().NoError(err)
+	s.Require().NotEmpty(e.Message)
+}
+
+// TestGetInvalidHash tests handling of invalid user operation hash
+func (s *UserOpHandlerTestSuite) TestGetInvalidHash() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/user_ops/:hash")
+	c.SetParamNames("hash")
+	c.SetParamValues("invalid_hash")
+
+	s.Require().NoError(s.handler.Get(c))
+	s.Require().Equal(http.StatusBadRequest, rec.Code)
+
+	var e Error
+	err := json.NewDecoder(rec.Body).Decode(&e)
+	s.Require().NoError(err)
+	s.Require().NotEmpty(e.Message)
+}
+
+// TestGetMissingHash tests handling of missing hash parameter
+func (s *UserOpHandlerTestSuite) TestGetMissingHash() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/user_ops/:hash")
+	c.SetParamNames("hash")
+	c.SetParamValues("")
+
+	s.Require().NoError(s.handler.Get(c))
+	s.Require().Equal(http.StatusBadRequest, rec.Code)
+
+	var e Error
+	err := json.NewDecoder(rec.Body).Decode(&e)
+	s.Require().NoError(err)
+	s.Require().NotEmpty(e.Message)
+}
+
+// TestGetInvalidHashLength tests handling of hash with invalid length
+func (s *UserOpHandlerTestSuite) TestGetInvalidHashLength() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/user_ops/:hash")
+	c.SetParamNames("hash")
+	c.SetParamValues("0x01")
+
+	s.Require().NoError(s.handler.Get(c))
+	s.Require().Equal(http.StatusBadRequest, rec.Code)
+
+	var e Error
+	err := json.NewDecoder(rec.Body).Decode(&e)
+	s.Require().NoError(err)
+	s.Require().NotEmpty(e.Message)
+}
+
+// TestGetHashWithoutPrefix tests handling of hash without 0x prefix
+func (s *UserOpHandlerTestSuite) TestGetHashWithoutPrefix() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/user_ops/:hash")
+	c.SetParamNames("hash")
+	c.SetParamValues("010203")
+
+	s.Require().NoError(s.handler.Get(c))
+	s.Require().Equal(http.StatusBadRequest, rec.Code)
+
+	var e Error
+	err := json.NewDecoder(rec.Body).Decode(&e)
+	s.Require().NoError(err)
+	s.Require().NotEmpty(e.Message)
+}
+
+// TestGetResponseFields tests that all Get response fields are correctly mapped
+func (s *UserOpHandlerTestSuite) TestGetResponseFields() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/user_ops/:hash")
+	c.SetParamNames("hash")
+	c.SetParamValues(pkgTypes.Hex(testUserOpHash1).Hex())
+
+	s.userOps.EXPECT().
+		ByHash(gomock.Any(), testUserOpHash1).
+		Return(testUserOp1, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.Get(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var op responses.UserOp
+	err := json.NewDecoder(rec.Body).Decode(&op)
+	s.Require().NoError(err)
+
+	s.Require().EqualValues(1, op.Id)
+	s.Require().EqualValues(100, op.Height)
+	s.Require().Equal(testTime, op.Time)
+	s.Require().Equal(testUserOp1.Tx.Hash.Hex(), op.TxHash)
+	s.Require().Equal(testUserOp1.Hash.Hex(), op.Hash)
+	s.Require().Equal(testUserOp1.Sender.Hash.Hex(), op.Sender)
+	s.Require().NotNil(op.Paymaster)
+	s.Require().Equal(testUserOp1.Paymaster.Hash.Hex(), *op.Paymaster)
+	s.Require().Equal(testUserOp1.Bundler.Hash.Hex(), op.Bundler)
+	s.Require().True(op.Nonce.Equal(decimal.NewFromInt(0)))
+	s.Require().True(op.Success)
+	s.Require().True(op.ActualGasCost.Equal(decimal.NewFromInt(100000)))
+	s.Require().True(op.ActualGasUsed.Equal(decimal.NewFromInt(50000)))
+	s.Require().True(op.PreVerificationGas.Equal(decimal.NewFromInt(21000)))
+	s.Require().NotEmpty(op.Signature)
+}
+
 // TestListResponseFields tests that all response fields are correctly mapped
 func (s *UserOpHandlerTestSuite) TestListResponseFields() {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)

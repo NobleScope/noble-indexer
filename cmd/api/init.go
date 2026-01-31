@@ -106,7 +106,11 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 	v1.GET("/token_balances", tokenHandlers.TokenBalanceList)
 
 	userOpHandlers := handler.NewUserOpHandler(db.ERC4337UserOps, db.Tx, db.Addresses)
-	v1.GET("/user_ops", userOpHandlers.List)
+	userOpsGroup := v1.Group("/user_ops")
+	{
+		userOpsGroup.GET("", userOpHandlers.List)
+		userOpsGroup.GET("/:hash", userOpHandlers.Get)
+	}
 
 	searchHandler := handler.NewSearchHandler(db.Search, db.Addresses, db.Blocks, db.Tx, db.Token)
 	v1.GET("/search", searchHandler.Search)
