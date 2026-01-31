@@ -12,9 +12,11 @@ package mock
 import (
 	context "context"
 	reflect "reflect"
+	time "time"
 
 	storage "github.com/baking-bad/noble-indexer/internal/storage"
 	types "github.com/baking-bad/noble-indexer/pkg/types"
+	storage0 "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -40,6 +42,45 @@ func NewMockIBlockStats(ctrl *gomock.Controller) *MockIBlockStats {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockIBlockStats) EXPECT() *MockIBlockStatsMockRecorder {
 	return m.recorder
+}
+
+// AvgBlockTime mocks base method.
+func (m *MockIBlockStats) AvgBlockTime(ctx context.Context, from time.Time) (float64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AvgBlockTime", ctx, from)
+	ret0, _ := ret[0].(float64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AvgBlockTime indicates an expected call of AvgBlockTime.
+func (mr *MockIBlockStatsMockRecorder) AvgBlockTime(ctx, from any) *MockIBlockStatsAvgBlockTimeCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AvgBlockTime", reflect.TypeOf((*MockIBlockStats)(nil).AvgBlockTime), ctx, from)
+	return &MockIBlockStatsAvgBlockTimeCall{Call: call}
+}
+
+// MockIBlockStatsAvgBlockTimeCall wrap *gomock.Call
+type MockIBlockStatsAvgBlockTimeCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockIBlockStatsAvgBlockTimeCall) Return(arg0 float64, arg1 error) *MockIBlockStatsAvgBlockTimeCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockIBlockStatsAvgBlockTimeCall) Do(f func(context.Context, time.Time) (float64, error)) *MockIBlockStatsAvgBlockTimeCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockIBlockStatsAvgBlockTimeCall) DoAndReturn(f func(context.Context, time.Time) (float64, error)) *MockIBlockStatsAvgBlockTimeCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
 }
 
 // ByHeight mocks base method.
@@ -77,6 +118,276 @@ func (c *MockIBlockStatsByHeightCall) Do(f func(context.Context, types.Level) (s
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockIBlockStatsByHeightCall) DoAndReturn(f func(context.Context, types.Level) (storage.BlockStats, error)) *MockIBlockStatsByHeightCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// CursorList mocks base method.
+func (m *MockIBlockStats) CursorList(ctx context.Context, id, limit uint64, order storage0.SortOrder, cmp storage0.Comparator) ([]*storage.BlockStats, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CursorList", ctx, id, limit, order, cmp)
+	ret0, _ := ret[0].([]*storage.BlockStats)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CursorList indicates an expected call of CursorList.
+func (mr *MockIBlockStatsMockRecorder) CursorList(ctx, id, limit, order, cmp any) *MockIBlockStatsCursorListCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CursorList", reflect.TypeOf((*MockIBlockStats)(nil).CursorList), ctx, id, limit, order, cmp)
+	return &MockIBlockStatsCursorListCall{Call: call}
+}
+
+// MockIBlockStatsCursorListCall wrap *gomock.Call
+type MockIBlockStatsCursorListCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockIBlockStatsCursorListCall) Return(arg0 []*storage.BlockStats, arg1 error) *MockIBlockStatsCursorListCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockIBlockStatsCursorListCall) Do(f func(context.Context, uint64, uint64, storage0.SortOrder, storage0.Comparator) ([]*storage.BlockStats, error)) *MockIBlockStatsCursorListCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockIBlockStatsCursorListCall) DoAndReturn(f func(context.Context, uint64, uint64, storage0.SortOrder, storage0.Comparator) ([]*storage.BlockStats, error)) *MockIBlockStatsCursorListCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetByID mocks base method.
+func (m *MockIBlockStats) GetByID(ctx context.Context, id uint64) (*storage.BlockStats, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByID", ctx, id)
+	ret0, _ := ret[0].(*storage.BlockStats)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByID indicates an expected call of GetByID.
+func (mr *MockIBlockStatsMockRecorder) GetByID(ctx, id any) *MockIBlockStatsGetByIDCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockIBlockStats)(nil).GetByID), ctx, id)
+	return &MockIBlockStatsGetByIDCall{Call: call}
+}
+
+// MockIBlockStatsGetByIDCall wrap *gomock.Call
+type MockIBlockStatsGetByIDCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockIBlockStatsGetByIDCall) Return(arg0 *storage.BlockStats, arg1 error) *MockIBlockStatsGetByIDCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockIBlockStatsGetByIDCall) Do(f func(context.Context, uint64) (*storage.BlockStats, error)) *MockIBlockStatsGetByIDCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockIBlockStatsGetByIDCall) DoAndReturn(f func(context.Context, uint64) (*storage.BlockStats, error)) *MockIBlockStatsGetByIDCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// IsNoRows mocks base method.
+func (m *MockIBlockStats) IsNoRows(err error) bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsNoRows", err)
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// IsNoRows indicates an expected call of IsNoRows.
+func (mr *MockIBlockStatsMockRecorder) IsNoRows(err any) *MockIBlockStatsIsNoRowsCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsNoRows", reflect.TypeOf((*MockIBlockStats)(nil).IsNoRows), err)
+	return &MockIBlockStatsIsNoRowsCall{Call: call}
+}
+
+// MockIBlockStatsIsNoRowsCall wrap *gomock.Call
+type MockIBlockStatsIsNoRowsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockIBlockStatsIsNoRowsCall) Return(arg0 bool) *MockIBlockStatsIsNoRowsCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockIBlockStatsIsNoRowsCall) Do(f func(error) bool) *MockIBlockStatsIsNoRowsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockIBlockStatsIsNoRowsCall) DoAndReturn(f func(error) bool) *MockIBlockStatsIsNoRowsCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// LastID mocks base method.
+func (m *MockIBlockStats) LastID(ctx context.Context) (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LastID", ctx)
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// LastID indicates an expected call of LastID.
+func (mr *MockIBlockStatsMockRecorder) LastID(ctx any) *MockIBlockStatsLastIDCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LastID", reflect.TypeOf((*MockIBlockStats)(nil).LastID), ctx)
+	return &MockIBlockStatsLastIDCall{Call: call}
+}
+
+// MockIBlockStatsLastIDCall wrap *gomock.Call
+type MockIBlockStatsLastIDCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockIBlockStatsLastIDCall) Return(arg0 uint64, arg1 error) *MockIBlockStatsLastIDCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockIBlockStatsLastIDCall) Do(f func(context.Context) (uint64, error)) *MockIBlockStatsLastIDCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockIBlockStatsLastIDCall) DoAndReturn(f func(context.Context) (uint64, error)) *MockIBlockStatsLastIDCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// List mocks base method.
+func (m *MockIBlockStats) List(ctx context.Context, limit, offset uint64, order storage0.SortOrder) ([]*storage.BlockStats, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "List", ctx, limit, offset, order)
+	ret0, _ := ret[0].([]*storage.BlockStats)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// List indicates an expected call of List.
+func (mr *MockIBlockStatsMockRecorder) List(ctx, limit, offset, order any) *MockIBlockStatsListCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockIBlockStats)(nil).List), ctx, limit, offset, order)
+	return &MockIBlockStatsListCall{Call: call}
+}
+
+// MockIBlockStatsListCall wrap *gomock.Call
+type MockIBlockStatsListCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockIBlockStatsListCall) Return(arg0 []*storage.BlockStats, arg1 error) *MockIBlockStatsListCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockIBlockStatsListCall) Do(f func(context.Context, uint64, uint64, storage0.SortOrder) ([]*storage.BlockStats, error)) *MockIBlockStatsListCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockIBlockStatsListCall) DoAndReturn(f func(context.Context, uint64, uint64, storage0.SortOrder) ([]*storage.BlockStats, error)) *MockIBlockStatsListCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// Save mocks base method.
+func (m_2 *MockIBlockStats) Save(ctx context.Context, m *storage.BlockStats) error {
+	m_2.ctrl.T.Helper()
+	ret := m_2.ctrl.Call(m_2, "Save", ctx, m)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Save indicates an expected call of Save.
+func (mr *MockIBlockStatsMockRecorder) Save(ctx, m any) *MockIBlockStatsSaveCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockIBlockStats)(nil).Save), ctx, m)
+	return &MockIBlockStatsSaveCall{Call: call}
+}
+
+// MockIBlockStatsSaveCall wrap *gomock.Call
+type MockIBlockStatsSaveCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockIBlockStatsSaveCall) Return(arg0 error) *MockIBlockStatsSaveCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockIBlockStatsSaveCall) Do(f func(context.Context, *storage.BlockStats) error) *MockIBlockStatsSaveCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockIBlockStatsSaveCall) DoAndReturn(f func(context.Context, *storage.BlockStats) error) *MockIBlockStatsSaveCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// Update mocks base method.
+func (m_2 *MockIBlockStats) Update(ctx context.Context, m *storage.BlockStats) error {
+	m_2.ctrl.T.Helper()
+	ret := m_2.ctrl.Call(m_2, "Update", ctx, m)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Update indicates an expected call of Update.
+func (mr *MockIBlockStatsMockRecorder) Update(ctx, m any) *MockIBlockStatsUpdateCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockIBlockStats)(nil).Update), ctx, m)
+	return &MockIBlockStatsUpdateCall{Call: call}
+}
+
+// MockIBlockStatsUpdateCall wrap *gomock.Call
+type MockIBlockStatsUpdateCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockIBlockStatsUpdateCall) Return(arg0 error) *MockIBlockStatsUpdateCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockIBlockStatsUpdateCall) Do(f func(context.Context, *storage.BlockStats) error) *MockIBlockStatsUpdateCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockIBlockStatsUpdateCall) DoAndReturn(f func(context.Context, *storage.BlockStats) error) *MockIBlockStatsUpdateCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

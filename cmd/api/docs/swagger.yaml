@@ -1268,6 +1268,25 @@ paths:
       summary: Universal search
       tags:
       - search
+  /stats/block_time:
+    get:
+      description: Returns the average block time over a specified period. Useful
+        for analyzing blockchain performance and trends.
+      operationId: avg-block-time
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Average block time response
+          schema:
+            type: float
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Get average block time
+      tags:
+      - stats
   /token_balances:
     get:
       description: Returns a paginated list of token balances showing how many tokens
