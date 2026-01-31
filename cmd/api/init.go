@@ -114,6 +114,12 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 		proxyGroup.GET("", proxyHandlers.List)
 	}
 
+	statsHandler := handler.NewStatsHandler(db.State, db.BlockStats, cfg.Indexer.Name)
+	statsGroup := v1.Group("/stats")
+	{
+		statsGroup.GET("/block_time", statsHandler.AvgBlockTime)
+	}
+
 	if cfg.API.Websocket {
 		initWebsocket(ctx, v1)
 	}

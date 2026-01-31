@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"time"
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
@@ -27,5 +28,15 @@ func (b *BlockStats) ByHeight(ctx context.Context, height pkgTypes.Level) (stats
 		Limit(1).
 		Scan(ctx)
 
+	return
+}
+
+// AvgBlockTime -
+func (b *BlockStats) AvgBlockTime(ctx context.Context, from time.Time) (blockTime float64, err error) {
+	err = b.DB().NewSelect().
+		Model((*storage.BlockStats)(nil)).
+		ColumnExpr("AVG(block_time)").
+		Where("time >= ?", from).
+		Scan(ctx, &blockTime)
 	return
 }
