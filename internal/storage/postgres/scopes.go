@@ -226,6 +226,11 @@ func txListFilter(query *bun.SelectQuery, fltrs storage.TxListFilter) *bun.Selec
 	if fltrs.AddressToId != nil {
 		query = query.Where("to_address_id = ?", *fltrs.AddressToId)
 	}
+	if fltrs.AddressId != nil {
+		query = query.WhereGroup("", func(sq *bun.SelectQuery) *bun.SelectQuery {
+			return sq.WhereOr("from_address_id = ?", *fltrs.AddressId).WhereOr("to_address_id = ?", *fltrs.AddressId)
+		})
+	}
 	if fltrs.ContractId != nil {
 		query = query.Where("from_address_id = ?", *fltrs.ContractId).
 			WhereOr("to_address_id = ?", *fltrs.ContractId)
