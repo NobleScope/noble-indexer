@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
+	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 )
 
@@ -466,4 +467,57 @@ func (s *StorageTestSuite) TestUserOpsFilterAllFilters() {
 	s.Require().True(op.Success)
 	s.Require().True(op.Time.Equal(timeFrom) || op.Time.After(timeFrom))
 	s.Require().True(op.Time.Before(timeTo))
+}
+
+func (s *StorageTestSuite) TestUserOpsByHash() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	hash := pkgTypes.MustDecodeHex("aabbccddee0011223344556677889900aabbccddee0011223344556677889900")
+	op, err := s.storage.ERC4337UserOps.ByHash(ctx, hash)
+	s.Require().NoError(err)
+
+	s.Require().EqualValues(1, op.Id)
+	s.Require().EqualValues(1, op.Height)
+	s.Require().EqualValues(1, op.TxId)
+	s.Require().EqualValues(1, op.SenderId)
+	s.Require().EqualValues(2, op.BundlerId)
+	s.Require().NotNil(op.PaymasterId)
+	s.Require().EqualValues(3, *op.PaymasterId)
+	s.Require().True(op.Success)
+
+	// Check JOIN relations
+	s.Require().EqualValues("0x90f5df4e03620cc55d3ea295bf8826f84465065340cb6d0d095166dd2465f283", op.Tx.Hash.Hex())
+	s.Require().EqualValues("0xa63d581a7fdab643c09f0524904b046cdb9ad9d2", op.Sender.Hash.Hex())
+	s.Require().EqualValues("0xaa725ef35d90060a8cdfb77e324a9b770ca7e127", op.Bundler.Hash.Hex())
+	s.Require().NotNil(op.Paymaster)
+	s.Require().EqualValues("0x30f055506ba543ea0942dc8ca03f596ab75bc879", op.Paymaster.Hash.Hex())
+}
+
+func (s *StorageTestSuite) TestUserOpsByHashNullPaymaster() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	hash := pkgTypes.MustDecodeHex("1122334455667788990011223344556677889900aabbccddeeff001122334455")
+	op, err := s.storage.ERC4337UserOps.ByHash(ctx, hash)
+	s.Require().NoError(err)
+
+	s.Require().EqualValues(2, op.Id)
+	s.Require().False(op.Success)
+	s.Require().Nil(op.PaymasterId)
+	s.Require().Nil(op.Paymaster)
+
+	// Other JOIN relations still loaded
+	s.Require().NotNil(op.Tx.Hash)
+	s.Require().NotNil(op.Sender.Hash)
+	s.Require().NotNil(op.Bundler.Hash)
+}
+
+func (s *StorageTestSuite) TestUserOpsByHashNotFound() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	hash := pkgTypes.MustDecodeHex("0000000000000000000000000000000000000000000000000000000000000000")
+	_, err := s.storage.ERC4337UserOps.ByHash(ctx, hash)
+	s.Require().Error(err)
 }

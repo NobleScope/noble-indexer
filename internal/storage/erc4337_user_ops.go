@@ -27,6 +27,7 @@ type ERC4337UserOpsListFilter struct {
 type IERC4337UserOps interface {
 	storage.Table[*ERC4337UserOp]
 
+	ByHash(ctx context.Context, hash pkgTypes.Hex) (ERC4337UserOp, error)
 	Filter(ctx context.Context, filter ERC4337UserOpsListFilter) ([]ERC4337UserOp, error)
 }
 
