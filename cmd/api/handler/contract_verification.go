@@ -41,7 +41,8 @@ type verificationResponse struct {
 //	@Description	Creates a task to verify the specified contract with source code file
 //	@Tags			verification
 //	@ID				contract-verification
-//	@Param			contract            formData string true  "Contract address"
+//	@Param			contract_address	formData string true  "Contract address"
+//	@Param			contract_name       formData string true  "Contract name in Solidity source"
 //	@Param			source_code         formData file   true  "Source code file"
 //	@Param			compiler_version    formData string true  "Compiler version"
 //	@Param			license_type		formData string true  "License type"
@@ -54,9 +55,14 @@ type verificationResponse struct {
 //	@Failure		500	{object}	Error
 //	@Router			/verification/code [post]
 func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error {
-	address := c.FormValue("contract")
+	address := c.FormValue("contract_address")
 	if address == "" {
 		return badRequestError(c, errors.New("contract address is required"))
+	}
+
+	contractName := c.FormValue("contract_name")
+	if contractName == "" {
+		return badRequestError(c, errors.New("contract name is required"))
 	}
 
 	compilerVersion := c.FormValue("compiler_version")
@@ -146,6 +152,7 @@ func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error
 	newTask := storage.VerificationTask{
 		Status:              storageTypes.VerificationStatusNew,
 		ContractId:          contract.Id,
+		ContractName:        contractName,
 		CompilerVersion:     compilerVersion,
 		LicenseType:         licenseType,
 		OptimizationEnabled: optimizationEnabled,

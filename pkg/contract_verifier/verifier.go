@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/lmittmann/go-solc"
 	"github.com/pkg/errors"
 )
@@ -61,7 +64,12 @@ func (m *Module) verify(ctx context.Context, task storage.VerificationTask, file
 		return errors.Wrap(err, "write source code file")
 	}
 
-	compiler := solc.New(solc.Version(task.CompilerVersion))
+	compilerVersion := strings.TrimPrefix(task.CompilerVersion, "v")
+	if idx := strings.Index(compilerVersion, "+"); idx != -1 {
+		compilerVersion = compilerVersion[:idx]
+	}
+
+	compiler := solc.New(solc.Version(compilerVersion))
 
 	var opts []solc.Option
 	if task.OptimizationEnabled != nil && *task.OptimizationEnabled {
@@ -75,7 +83,7 @@ func (m *Module) verify(ctx context.Context, task storage.VerificationTask, file
 		}))
 	}
 
-	contract, err := compiler.Compile(tmpDir, "contract", opts...)
+	contract, err := compiler.Compile(tmpDir, task.ContractName, opts...)
 	if err != nil {
 		m.Log.Err(err).Msg("failed to compile contract")
 		return errors.Wrap(err, "compile contract")
@@ -97,7 +105,7 @@ func (m *Module) verify(ctx context.Context, task storage.VerificationTask, file
 		return errors.Wrap(err, "write modified source code file")
 	}
 
-	contract2, err := compiler.Compile(tmpDir, "contract2", opts...)
+	contract2, err := compiler.Compile(tmpDir, task.ContractName, opts...)
 	if err != nil {
 		m.Log.Warn().Err(err).Msg("failed to compile modified contract for metadata detection, skipping split")
 		contract2 = nil
@@ -141,6 +149,47 @@ func (m *Module) verify(ctx context.Context, task storage.VerificationTask, file
 		Uint64("contract_id", task.ContractId).
 		Int("main_part_size", len(parts.main)).
 		Msg("bytecode verification successfully: main parts match")
+
+	abiJSON, err := json.Marshal(contract.ABI)
+	if err != nil {
+		return errors.Wrap(err, "marshal contract ABI")
+	}
+
+	parsedABI, err := abi.JSON(bytes.NewReader(abiJSON))
+	if err != nil {
+		return errors.Wrap(err, "parse contract ABI")
+	}
+
+	if len(parsedABI.Constructor.Inputs) > 0 {
+		if onchainContract.TxId == nil {
+			return errors.New("contract has constructor parameters but no deployment transaction found")
+		}
+
+		deployTx, err := m.pg.Tx.GetByID(ctx, *onchainContract.TxId)
+		if err != nil {
+			return errors.Wrap(err, "get deployment transaction")
+		}
+
+		if len(deployTx.Input) < len(contract.Constructor) {
+			return errors.New("deployment transaction input is shorter than constructor bytecode")
+		}
+
+		constructorArgs := deployTx.Input[len(contract.Constructor):]
+		if len(constructorArgs) == 0 {
+			return errors.New("constructor has parameters but no arguments found in deployment transaction")
+		}
+
+		decodedArgs, err := parsedABI.Constructor.Inputs.Unpack(constructorArgs)
+		if err != nil {
+			return errors.Wrap(err, "decode constructor arguments")
+		}
+
+		m.Log.Info().
+			Int("arg_count", len(decodedArgs)).
+			Msg("constructor arguments decoded successfully")
+	} else {
+		m.Log.Info().Msg("no constructor parameters, skipping constructor args verification")
+	}
 
 	// todo: save verified contract, update verification task status and remove verification_files
 	// todo: update indexer state (inc qty of verified contracts)
