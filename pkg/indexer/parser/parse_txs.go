@@ -17,24 +17,51 @@ func (p *Module) parseTxs(context *dCtx.Context) error {
 		}
 
 		totalAmount := tx.Amount.Add(tx.Fee)
-		updateBalances(&tx.FromAddress, enum.Sub, totalAmount)
-		updateBalances(tx.ToAddress, enum.Add, tx.Amount)
+		updateAddressBalance(context, tx.FromAddress.String(), enum.Sub, totalAmount)
+
+		if tx.ToAddress != nil {
+			updateAddressBalance(context, tx.ToAddress.String(), enum.Add, tx.Amount)
+		}
 
 		burnedFee := tx.CumulativeGasUsed.Mul(decimal.NewFromUint64(context.Block.BaseFeePerGas))
 		fee := tx.Fee.Sub(burnedFee)
-		updateBalances(&context.Block.Miner, enum.Add, fee)
+		updateAddressBalance(context, context.Block.Miner.String(), enum.Add, fee)
 	}
 
 	for _, trace := range context.Block.Traces {
-		if len(trace.TraceAddress) == 0 || trace.Amount == nil || trace.Amount.IsZero() {
+		if trace.Amount == nil || trace.Amount.IsZero() {
 			continue
 		}
 
-		updateBalances(trace.FromAddress, enum.Sub, *trace.Amount)
-		updateBalances(trace.ToAddress, enum.Add, *trace.Amount)
+		isCreate := trace.Type == types.Create || trace.Type == types.Create2
+
+		if len(trace.TraceAddress) == 0 {
+			if isCreate && trace.Contract != nil {
+				updateAddressBalance(context, trace.Contract.Address.String(), enum.Add, *trace.Amount)
+			}
+			continue
+		}
+
+		if trace.FromAddress != nil {
+			updateAddressBalance(context, trace.FromAddress.String(), enum.Sub, *trace.Amount)
+		}
+
+		if isCreate && trace.ToAddress == nil && trace.Contract != nil {
+			updateAddressBalance(context, trace.Contract.Address.String(), enum.Add, *trace.Amount)
+		} else if trace.ToAddress != nil {
+			updateAddressBalance(context, trace.ToAddress.String(), enum.Add, *trace.Amount)
+		}
 	}
 
 	return nil
+}
+
+func updateAddressBalance(ctx *dCtx.Context, addressKey string, op enum.BalanceOp, amount decimal.Decimal) {
+	addr, ok := ctx.Addresses.Get(addressKey)
+	if !ok {
+		return
+	}
+	updateBalances(addr, op, amount)
 }
 
 func updateBalances(address *storage.Address, op enum.BalanceOp, amount decimal.Decimal) {
