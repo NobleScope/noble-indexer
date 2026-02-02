@@ -10,6 +10,7 @@ import (
 )
 
 type ContractHandler struct {
+	address  storage.IAddress
 	contract storage.IContract
 	tx       storage.ITx
 	source   storage.ISource
@@ -17,11 +18,13 @@ type ContractHandler struct {
 
 func NewContractHandler(
 	contract storage.IContract,
+	address storage.IAddress,
 	tx storage.ITx,
 	source storage.ISource,
 ) *ContractHandler {
 	return &ContractHandler{
 		contract: contract,
+		address:  address,
 		tx:       tx,
 		source:   source,
 	}
@@ -34,6 +37,7 @@ type contractListRequest struct {
 	SortBy     string `query:"sort_by"     validate:"omitempty,oneof=id height"`
 	IsVerified bool   `query:"is_verified" validate:"omitempty"`
 	TxHash     string `query:"tx_hash"     validate:"omitempty,tx_hash"`
+	Deployer   string `query:"deployer"    validate:"omitempty,address"`
 }
 
 func (p *contractListRequest) SetDefault() {
@@ -57,6 +61,7 @@ func (p *contractListRequest) SetDefault() {
 //	@Param			sort_by		query	string	false	"Field to sort by (default: id)"											Enums(id, height)
 //	@Param			is_verified	query	boolean	false	"Filter to show only verified contracts (default: false)"					default(false)
 //	@Param			tx_hash		query	string	false	"Filter by deployment transaction hash (hexadecimal with 0x prefix)"		minlength(66)	maxlength(66)	example(0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef)
+//	@Param			deployer	query	string	false	"Filter by deployer address (hexadecimal with 0x prefix)"					minlength(42)	maxlength(42)
 //	@Produce		json
 //	@Success		200	{array}		responses.Contract	"List of smart contracts"
 //	@Failure		400	{object}	Error				"Invalid request parameters"
@@ -89,6 +94,18 @@ func (handler *ContractHandler) List(c echo.Context) error {
 		}
 
 		filters.TxId = &tx.Id
+	}
+
+	if req.Deployer != "" {
+		hash, err := types.HexFromString(req.Deployer)
+		if err != nil {
+			return badRequestError(c, err)
+		}
+		address, err := handler.address.ByHash(c.Request().Context(), hash)
+		if err != nil {
+			return handleError(c, err, handler.address)
+		}
+		filters.DeployerId = &address.Id
 	}
 
 	contracts, err := handler.contract.ListWithTx(c.Request().Context(), filters)

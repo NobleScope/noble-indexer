@@ -20,6 +20,7 @@ type TxListFilter struct {
 	Status        []types.TxStatus
 	AddressFromId *uint64
 	AddressToId   *uint64
+	AddressId     *uint64
 	ContractId    *uint64
 	TimeFrom      time.Time
 	TimeTo        time.Time

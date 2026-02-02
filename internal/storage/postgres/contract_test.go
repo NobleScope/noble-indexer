@@ -322,3 +322,25 @@ func (s *StorageTestSuite) TestContractPendingMetadataExcludesEmptyMetadataLink(
 		s.Require().NotEmpty(contract.MetadataLink)
 	}
 }
+
+func (s *StorageTestSuite) TestContractListByDeployerId() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	deployerId := uint64(1)
+	contracts, err := s.storage.Contracts.ListWithTx(ctx, storage.ContractListFilter{
+		Limit:      10,
+		Offset:     0,
+		Sort:       sdk.SortOrderAsc,
+		DeployerId: &deployerId,
+	})
+	s.Require().NoError(err)
+	s.Require().Len(contracts, 3)
+
+	for _, contract := range contracts {
+		s.Require().NotNil(contract.DeployerId)
+		s.Require().EqualValues(deployerId, *contract.DeployerId)
+		s.Require().NotNil(contract.Deployer)
+		s.Require().EqualValues("0xa63d581a7fdab643c09f0524904b046cdb9ad9d2", contract.Deployer.Hash.Hex())
+	}
+}

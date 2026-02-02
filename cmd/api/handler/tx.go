@@ -74,6 +74,7 @@ type getTxTraces struct {
 	Offset      int         `query:"offset"       validate:"omitempty,min=0"`
 	AddressFrom string      `query:"address_from" validate:"omitempty,address"`
 	AddressTo   string      `query:"address_to"   validate:"omitempty,address"`
+	Address     string      `query:"address"      validate:"omitempty,address"`
 	Contract    string      `query:"contract"     validate:"omitempty,address"`
 	Height      *uint64     `query:"height"       validate:"omitempty,min=0"`
 	Type        StringArray `query:"type"         validate:"omitempty,dive,trace_type"`
@@ -100,7 +101,7 @@ func (req *getTxTraces) SetDefault() {
 //	@Param			offset			query	integer	false	"Number of traces to skip (default: 0)"						minimum(0)	default(0)
 //	@Param			address_from	query	string	false	"Filter by initiator address"								minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
 //	@Param			address_to		query	string	false	"Filter by target address"									minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
-//	@Param			contract		query	string	false	"Filter by called contract address"							minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
+//	@Param			address			query	string	false	"Filter by address (from or to)"							minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
 //	@Param			height			query	integer	false	"Filter by block height"									minimum(1)	example(12345)
 //	@Param			type			query	string	false	"Filter by trace type (comma-separated list)"				Enums(call, delegatecall, staticcall, create, create2, selfdestruct, reward, suicide)
 //	@Param			sort			query	string	false	"Sort order (default: desc)"								Enums(asc, desc)	default(desc)
@@ -126,6 +127,7 @@ func (handler *TxHandler) Traces(c echo.Context) error {
 		Offset: req.Offset,
 		Sort:   pgSort(req.Sort),
 		Type:   traceTypes,
+		Height: req.Height,
 	}
 
 	if req.TxHash != "" {
@@ -158,16 +160,20 @@ func (handler *TxHandler) Traces(c echo.Context) error {
 		filters.AddressToId = &address.Id
 	}
 
+	if req.Address != "" {
+		address, err := handler.getAddressByHash(c, req.Address)
+		if err != nil {
+			return err
+		}
+		filters.AddressId = &address.Id
+	}
+
 	if req.Contract != "" {
 		address, err := handler.getAddressByHash(c, req.Contract)
 		if err != nil {
 			return err
 		}
 		filters.ContractId = &address.Id
-	}
-
-	if req.Height != nil {
-		filters.Height = req.Height
 	}
 
 	traces, err := handler.trace.Filter(c.Request().Context(), filters)
@@ -189,6 +195,7 @@ type listTxs struct {
 	Sort        string      `query:"sort"         validate:"omitempty,oneof=asc desc"`
 	AddressFrom string      `query:"address_from" validate:"omitempty,address"`
 	AddressTo   string      `query:"address_to"   validate:"omitempty,address"`
+	Address     string      `query:"address"      validate:"omitempty,address"`
 	Contract    string      `query:"contract"     validate:"omitempty,address"`
 	Height      *uint64     `query:"height"       validate:"omitempty,min=0"`
 	Type        StringArray `query:"type"         validate:"omitempty,dive,tx_type"`
@@ -252,6 +259,7 @@ func (handler *TxHandler) List(c echo.Context) error {
 		Sort:   pgSort(req.Sort),
 		Type:   txTypes,
 		Status: txStatus,
+		Height: req.Height,
 	}
 
 	if req.AddressFrom != "" {
@@ -270,16 +278,20 @@ func (handler *TxHandler) List(c echo.Context) error {
 		filters.AddressToId = &address.Id
 	}
 
+	if req.Address != "" {
+		address, err := handler.getAddressByHash(c, req.Address)
+		if err != nil {
+			return err
+		}
+		filters.AddressId = &address.Id
+	}
+
 	if req.Contract != "" {
 		address, err := handler.getAddressByHash(c, req.Contract)
 		if err != nil {
 			return err
 		}
 		filters.ContractId = &address.Id
-	}
-
-	if req.Height != nil {
-		filters.Height = req.Height
 	}
 
 	if req.From > 0 {

@@ -81,7 +81,7 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 		}
 	}
 
-	contractHandlers := handler.NewContractHandler(db.Contracts, db.Tx, db.Sources)
+	contractHandlers := handler.NewContractHandler(db.Contracts, db.Addresses, db.Tx, db.Sources)
 	contractsGroup := v1.Group("/contracts")
 	{
 		contractsGroup.GET("", contractHandlers.List)
@@ -119,6 +119,12 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 	proxyGroup := v1.Group("/proxy")
 	{
 		proxyGroup.GET("", proxyHandlers.List)
+	}
+
+	statsHandler := handler.NewStatsHandler(db.State, db.BlockStats, cfg.Indexer.Name)
+	statsGroup := v1.Group("/stats")
+	{
+		statsGroup.GET("/block_time", statsHandler.AvgBlockTime)
 	}
 
 	if cfg.API.Websocket {

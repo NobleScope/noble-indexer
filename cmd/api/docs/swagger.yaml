@@ -131,6 +131,9 @@ definitions:
       compiler_version:
         example: 0.1.1
         type: string
+      deployer:
+        example: "0x0000000000000000000000000000000000000003"
+        type: string
       error:
         example: Error string
         type: string
@@ -977,6 +980,12 @@ paths:
         minLength: 66
         name: tx_hash
         type: string
+      - description: Filter by deployer address (hexadecimal with 0x prefix)
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: deployer
+        type: string
       produces:
       - application/json
       responses:
@@ -1330,6 +1339,25 @@ paths:
       summary: Universal search
       tags:
       - search
+  /stats/block_time:
+    get:
+      description: Returns the average block time over a specified period. Useful
+        for analyzing blockchain performance and trends.
+      operationId: avg-block-time
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Average block time response
+          schema:
+            type: float
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Get average block time
+      tags:
+      - stats
   /token_balances:
     get:
       description: Returns a paginated list of token balances showing how many tokens
@@ -1542,12 +1570,12 @@ paths:
         minLength: 42
         name: address_to
         type: string
-      - description: Filter by called contract address
+      - description: Filter by address (from or to)
         example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
         in: query
         maxLength: 42
         minLength: 42
-        name: contract
+        name: address
         type: string
       - description: Filter by block height
         example: 12345

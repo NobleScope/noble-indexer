@@ -493,6 +493,14 @@ const docTemplate = `{
                         "description": "Filter by deployment transaction hash (hexadecimal with 0x prefix)",
                         "name": "tx_hash",
                         "in": "query"
+                    },
+                    {
+                        "maxLength": 42,
+                        "minLength": 42,
+                        "type": "string",
+                        "description": "Filter by deployer address (hexadecimal with 0x prefix)",
+                        "name": "deployer",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -970,6 +978,33 @@ const docTemplate = `{
                 }
             }
         },
+        "/stats/block_time": {
+            "get": {
+                "description": "Returns the average block time over a specified period. Useful for analyzing blockchain performance and trends.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stats"
+                ],
+                "summary": "Get average block time",
+                "operationId": "avg-block-time",
+                "responses": {
+                    "200": {
+                        "description": "Average block time response",
+                        "schema": {
+                            "type": "float"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/token_balances": {
             "get": {
                 "description": "Returns a paginated list of token balances showing how many tokens each address holds. Can be filtered by address, contract, or token ID. Useful for finding token holders.",
@@ -1264,8 +1299,8 @@ const docTemplate = `{
                         "minLength": 42,
                         "type": "string",
                         "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
-                        "description": "Filter by called contract address",
-                        "name": "contract",
+                        "description": "Filter by address (from or to)",
+                        "name": "address",
                         "in": "query"
                     },
                     {
@@ -2022,6 +2057,10 @@ const docTemplate = `{
                 "compiler_version": {
                     "type": "string",
                     "example": "0.1.1"
+                },
+                "deployer": {
+                    "type": "string",
+                    "example": "0x0000000000000000000000000000000000000003"
                 },
                 "error": {
                     "type": "string",

@@ -125,11 +125,11 @@ func (p *Module) parse(b types.BlockData) error {
 		if err != nil {
 			return err
 		}
-		fee := cumulativeGasUsed.Mul(effectiveGasPrice)
 		txGasUsed, err := b.Receipts[i].GasUsed.Decimal()
 		if err != nil {
 			return err
 		}
+		fee := txGasUsed.Mul(effectiveGasPrice)
 		amount, err := tx.Value.Decimal()
 		if err != nil {
 			return err
@@ -386,6 +386,7 @@ func (p *Module) parse(b types.BlockData) error {
 				Tx: &storage.Tx{
 					Hash: txHash,
 				},
+				Deployer: &deployerAddress,
 			}
 
 			newTrace.Contract = contract
