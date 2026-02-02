@@ -195,7 +195,6 @@ func mergeDecodedParamsWithEvents[T erc4337.CommonUserOperation](
 			ctx.AddAddress(paymasterAddress)
 		}
 
-		// bunder address
 		ctx.AddAddress(&tx.FromAddress)
 		ctx.AddUserOp(&storage.ERC4337UserOp{
 			Time:               tx.Time,
