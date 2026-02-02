@@ -174,10 +174,11 @@ func mergeDecodedParamsWithEvents[T erc4337.CommonUserOperation](
 			gasFees = op.GasFees[:]
 		}
 		senderAddress := &storage.Address{
-			Hash:       decodedParams.GetSender().Bytes(),
-			LastHeight: ctx.Block.Height,
-			IsContract: true,
-			Balance:    storage.EmptyBalance(),
+			Hash:        decodedParams.GetSender().Bytes(),
+			FirstHeight: ctx.Block.Height,
+			LastHeight:  ctx.Block.Height,
+			IsContract:  true,
+			Balance:     storage.EmptyBalance(),
 		}
 		senderContract := &storage.Contract{
 			Address: *senderAddress,
@@ -188,10 +189,11 @@ func mergeDecodedParamsWithEvents[T erc4337.CommonUserOperation](
 		var paymasterAddress *storage.Address
 		if event.Paymaster != (common.Address{}) {
 			paymasterAddress = &storage.Address{
-				Hash:       event.Paymaster.Bytes(),
-				LastHeight: ctx.Block.Height,
-				IsContract: true,
-				Balance:    storage.EmptyBalance(),
+				Hash:        event.Paymaster.Bytes(),
+				FirstHeight: ctx.Block.Height,
+				LastHeight:  ctx.Block.Height,
+				IsContract:  true,
+				Balance:     storage.EmptyBalance(),
 			}
 			paymasterContract := &storage.Contract{
 				Address: *paymasterAddress,
