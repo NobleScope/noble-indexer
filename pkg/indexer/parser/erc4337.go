@@ -5,6 +5,7 @@ import (
 	"math/big"
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/baking-bad/noble-indexer/internal/storage/types"
 	dCtx "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/erc4337"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -15,6 +16,10 @@ import (
 
 func (p *Module) parseERC4337(ctx *dCtx.Context, tx *storage.Tx) error {
 	if len(tx.Logs) == 0 {
+		return nil
+	}
+
+	if tx.Status != types.TxStatusSuccess {
 		return nil
 	}
 
