@@ -22,4 +22,4 @@ generate:
 tagalign:
 	tagalign --fix ./...
 
-.PHONY: lint test api-docs
+.PHONY: indexer api lint test api-docs generate tagalign
