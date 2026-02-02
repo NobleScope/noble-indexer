@@ -25,9 +25,9 @@ func saveERC4337UserOps(
 		}
 		userOps[i].TxId = txId
 
-		senderId, ok := addresses[userOps[i].Sender.Hash.String()]
+		senderId, ok := addresses[userOps[i].Sender.String()]
 		if !ok {
-			return errors.Errorf("can't find sender addr key: %s", userOps[i].Sender.Hash.String())
+			return errors.Errorf("can't find sender addr key: %s", userOps[i].Sender.String())
 		}
 		userOps[i].SenderId = senderId
 
