@@ -1988,6 +1988,38 @@ paths:
       summary: List ERC-4337 user operations
       tags:
       - user_ops
+  /user_ops/{hash}:
+    get:
+      description: Returns detailed information about a specific ERC-4337 user operation
+      operationId: get-user-op
+      parameters:
+      - description: User operation hash in hexadecimal with 0x prefix
+        in: path
+        maxLength: 66
+        minLength: 66
+        name: hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User operation information
+          schema:
+            $ref: '#/definitions/responses.UserOp'
+        "204":
+          description: User operation not found
+        "400":
+          description: Invalid user operation hash format
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Get user operation by hash
+      tags:
+      - user_ops
   /ws:
     get:
       description: Establishes a WebSocket connection for real-time updates. Clients

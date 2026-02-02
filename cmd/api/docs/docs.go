@@ -1861,6 +1861,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/user_ops/{hash}": {
+            "get": {
+                "description": "Returns detailed information about a specific ERC-4337 user operation",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user_ops"
+                ],
+                "summary": "Get user operation by hash",
+                "operationId": "get-user-op",
+                "parameters": [
+                    {
+                        "maxLength": 66,
+                        "minLength": 66,
+                        "type": "string",
+                        "description": "User operation hash in hexadecimal with 0x prefix",
+                        "name": "hash",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User operation information",
+                        "schema": {
+                            "$ref": "#/definitions/responses.UserOp"
+                        }
+                    },
+                    "204": {
+                        "description": "User operation not found"
+                    },
+                    "400": {
+                        "description": "Invalid user operation hash format",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/ws": {
             "get": {
                 "description": "Establishes a WebSocket connection for real-time updates. Clients can subscribe to channels to receive notifications about new blocks and head state changes.",
