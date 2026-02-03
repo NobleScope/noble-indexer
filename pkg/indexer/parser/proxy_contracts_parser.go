@@ -91,8 +91,12 @@ func (p *Module) parseProxyContract(ctx *dCtx.Context, contract *storage.Contrac
 	return nil
 }
 
-func (p *Module) parseEIP1967Proxy(ctx *dCtx.Context, logs []*storage.Log) {
-	eip1967Contracts := getEIP1967Proxy(logs)
+func (p *Module) parseEIP1967Proxy(ctx *dCtx.Context, tx *storage.Tx) {
+	if tx.Status != types.TxStatusSuccess {
+		return
+	}
+
+	eip1967Contracts := getEIP1967Proxy(tx.Logs)
 	for proxyAddress, implementationAddress := range eip1967Contracts {
 		storageImplementationAddress := storage.Address{
 			Hash:       implementationAddress,

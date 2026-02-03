@@ -414,6 +414,49 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			return err
 		}
 
+		// ERC4337UserOps
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.ERC4337UserOp)(nil)).
+			Index("erc4337_user_ops_hash_idx").
+			Column("hash").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.ERC4337UserOp)(nil)).
+			Index("erc4337_user_ops_height_idx").
+			Column("height").
+			Using("BRIN").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.ERC4337UserOp)(nil)).
+			Index("erc4337_user_ops_tx_id_idx").
+			Column("tx_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.ERC4337UserOp)(nil)).
+			Index("erc4337_user_ops_bundler_id_idx").
+			Column("bundler_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.ERC4337UserOp)(nil)).
+			Index("erc4337_user_ops_paymaster_id_idx").
+			Column("paymaster_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+
 		return nil
 	})
 }

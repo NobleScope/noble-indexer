@@ -230,7 +230,12 @@ func (p *Module) parse(b types.BlockData) error {
 			decodeCtx.AddAddress(&decodeCtx.Block.Txs[i].Logs[j].Address)
 		}
 
-		p.parseEIP1967Proxy(decodeCtx, decodeCtx.Block.Txs[i].Logs)
+		p.parseEIP1967Proxy(decodeCtx, decodeCtx.Block.Txs[i])
+
+		parseErr := p.parseERC4337(decodeCtx, decodeCtx.Block.Txs[i])
+		if parseErr != nil {
+			return parseErr
+		}
 	}
 
 	for i, trace := range b.Traces {

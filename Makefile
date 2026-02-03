@@ -19,4 +19,7 @@ api-docs:
 generate:
 	go generate -v ./internal/storage ./internal/storage/types ./pkg/node
 
-.PHONY: lint test api-docs
+tagalign:
+	tagalign --fix ./...
+
+.PHONY: indexer api lint test api-docs generate tagalign

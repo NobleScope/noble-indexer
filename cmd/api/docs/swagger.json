@@ -1742,6 +1742,170 @@
                 }
             }
         },
+        "/user_ops": {
+            "get": {
+                "description": "Returns a paginated list of ERC-4337 user operations. Can be filtered by transaction, block height, time range, bundler, paymaster, or success status.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user_ops"
+                ],
+                "summary": "List ERC-4337 user operations",
+                "operationId": "list-user-ops",
+                "parameters": [
+                    {
+                        "maxLength": 66,
+                        "minLength": 66,
+                        "type": "string",
+                        "description": "Filter by transaction hash (hexadecimal with 0x prefix)",
+                        "name": "tx",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Number of user operations to return (default: 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Number of user operations to skip (default: 0)",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "description": "Filter by block height",
+                        "name": "height",
+                        "in": "query"
+                    },
+                    {
+                        "maxLength": 42,
+                        "minLength": 42,
+                        "type": "string",
+                        "description": "Filter by bundler address",
+                        "name": "bundler",
+                        "in": "query"
+                    },
+                    {
+                        "maxLength": 42,
+                        "minLength": 42,
+                        "type": "string",
+                        "description": "Filter by paymaster address",
+                        "name": "paymaster",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Filter by success status",
+                        "name": "success",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Filter by timestamp from (Unix timestamp)",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Filter by timestamp to (Unix timestamp)",
+                        "name": "to",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "default": "desc",
+                        "description": "Sort order by timestamp (default: desc)",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of user operations",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/responses.UserOp"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/user_ops/{hash}": {
+            "get": {
+                "description": "Returns detailed information about a specific ERC-4337 user operation",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user_ops"
+                ],
+                "summary": "Get user operation by hash",
+                "operationId": "get-user-op",
+                "parameters": [
+                    {
+                        "maxLength": 66,
+                        "minLength": 66,
+                        "type": "string",
+                        "description": "User operation hash in hexadecimal with 0x prefix",
+                        "name": "hash",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User operation information",
+                        "schema": {
+                            "$ref": "#/definitions/responses.UserOp"
+                        }
+                    },
+                    "204": {
+                        "description": "User operation not found"
+                    },
+                    "400": {
+                        "description": "Invalid user operation hash format",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/ws": {
             "get": {
                 "description": "Establishes a WebSocket connection for real-time updates. Clients can subscribe to channels to receive notifications about new blocks and head state changes.",
@@ -2520,6 +2684,89 @@
                 "type": {
                     "type": "string",
                     "example": "transfer"
+                }
+            }
+        },
+        "responses.UserOp": {
+            "description": "ERC-4337 user operation information",
+            "type": "object",
+            "properties": {
+                "account_gas_limits": {
+                    "type": "string",
+                    "example": "0x"
+                },
+                "actual_gas_cost": {
+                    "type": "string",
+                    "example": "21000"
+                },
+                "actual_gas_used": {
+                    "type": "string",
+                    "example": "21000"
+                },
+                "bundler": {
+                    "type": "string",
+                    "example": "0x0000000000000000000000000000000000000003"
+                },
+                "call_data": {
+                    "type": "string",
+                    "example": "0x"
+                },
+                "gas_fees": {
+                    "type": "string",
+                    "example": "0x"
+                },
+                "hash": {
+                    "type": "string",
+                    "example": "0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d"
+                },
+                "height": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "init_code": {
+                    "type": "string",
+                    "example": "0x"
+                },
+                "nonce": {
+                    "type": "string",
+                    "example": "1"
+                },
+                "paymaster": {
+                    "type": "string",
+                    "example": "0x0000000000000000000000000000000000000002"
+                },
+                "paymaster_and_data": {
+                    "type": "string",
+                    "example": "0x"
+                },
+                "pre_verification_gas": {
+                    "type": "string",
+                    "example": "21000"
+                },
+                "sender": {
+                    "type": "string",
+                    "example": "0x0000000000000000000000000000000000000001"
+                },
+                "signature": {
+                    "type": "string",
+                    "example": "0x"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "time": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2026-01-01T01:01:01+00:00"
+                },
+                "tx_hash": {
+                    "type": "string",
+                    "example": "0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d"
                 }
             }
         }

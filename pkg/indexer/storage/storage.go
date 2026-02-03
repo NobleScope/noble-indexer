@@ -204,6 +204,11 @@ func (module *Module) processBlockInTransaction(
 		return state, err
 	}
 
+	err = saveERC4337UserOps(ctx, tx, dCtx.GetUserOps(), txHashToId, addrToId)
+	if err != nil {
+		return state, err
+	}
+
 	if err := updateState(block, totalAccounts, int64(len(block.Txs)), totalContracts, 0, totalTokens, &state); err != nil {
 		return state, err
 	}

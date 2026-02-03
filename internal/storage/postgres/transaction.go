@@ -300,6 +300,21 @@ func (tx Transaction) SaveProxyContracts(ctx context.Context, contracts ...*mode
 	return err
 }
 
+func (tx Transaction) SaveERC4337UserOps(ctx context.Context, userOps ...*models.ERC4337UserOp) error {
+	switch len(userOps) {
+	case 0:
+		return nil
+	case 1:
+		return tx.Add(ctx, userOps[0])
+	default:
+		arr := make([]any, len(userOps))
+		for i := range userOps {
+			arr[i] = userOps[i]
+		}
+		return tx.BulkSave(ctx, arr)
+	}
+}
+
 func (tx Transaction) RollbackBlock(ctx context.Context, height types.Level) error {
 	_, err := tx.Tx().NewDelete().
 		Model((*models.Block)(nil)).
@@ -320,7 +335,7 @@ func (tx Transaction) RollbackBlockStats(ctx context.Context, height types.Level
 func (tx Transaction) RollbackAddresses(ctx context.Context, height types.Level) (address []models.Address, err error) {
 	_, err = tx.Tx().NewDelete().
 		Model(&address).
-		Where("height = ?", height).
+		Where("first_height = ?", height).
 		Returning("*").
 		Exec(ctx)
 	return
@@ -373,6 +388,14 @@ func (tx Transaction) RollbackTokens(ctx context.Context, height types.Level) (t
 func (tx Transaction) RollbackContracts(ctx context.Context, height types.Level) (err error) {
 	_, err = tx.Tx().NewDelete().
 		Model((*models.Contract)(nil)).
+		Where("height = ?", height).
+		Exec(ctx)
+	return
+}
+
+func (tx Transaction) RollbackERC4337UserOps(ctx context.Context, height types.Level) (err error) {
+	_, err = tx.Tx().NewDelete().
+		Model((*models.ERC4337UserOp)(nil)).
 		Where("height = ?", height).
 		Exec(ctx)
 	return

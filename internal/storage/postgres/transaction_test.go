@@ -965,3 +965,63 @@ func (s *TransactionTestSuite) TestSaveProxyContractsEmpty() {
 
 	s.Require().NoError(tx.Close(ctx))
 }
+
+func (s *TransactionTestSuite) TestRollbackERC4337UserOps() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	// Verify user ops exist before rollback
+	var userOpsBefore []storage.ERC4337UserOp
+	err := s.storage.Connection().DB().NewSelect().Model(&userOpsBefore).Where("height = ?", 3).Scan(ctx)
+	s.Require().NoError(err)
+	s.Require().NotEmpty(userOpsBefore)
+
+	tx, err := BeginTransaction(ctx, s.storage.Transactable)
+	s.Require().NoError(err)
+
+	err = tx.RollbackERC4337UserOps(ctx, 3)
+	s.Require().NoError(err)
+
+	s.Require().NoError(tx.Flush(ctx))
+	s.Require().NoError(tx.Close(ctx))
+
+	// Verify user ops were deleted
+	var userOpsAfter []storage.ERC4337UserOp
+	err = s.storage.Connection().DB().NewSelect().Model(&userOpsAfter).Where("height = ?", 3).Scan(ctx)
+	s.Require().NoError(err)
+	s.Require().Empty(userOpsAfter)
+
+	// Verify user ops at lower heights were not affected
+	var userOpsOtherHeight []storage.ERC4337UserOp
+	err = s.storage.Connection().DB().NewSelect().Model(&userOpsOtherHeight).Where("height < ?", 3).Scan(ctx)
+	s.Require().NoError(err)
+	s.Require().Len(userOpsOtherHeight, 2)
+}
+
+func (s *TransactionTestSuite) TestRollbackERC4337UserOpsNoData() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	tx, err := BeginTransaction(ctx, s.storage.Transactable)
+	s.Require().NoError(err)
+
+	// Rollback at height with no user ops should not error
+	err = tx.RollbackERC4337UserOps(ctx, 999999)
+	s.Require().NoError(err)
+
+	s.Require().NoError(tx.Flush(ctx))
+	s.Require().NoError(tx.Close(ctx))
+}
+
+func (s *TransactionTestSuite) TestSaveERC4337UserOpsEmpty() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	tx, err := BeginTransaction(ctx, s.storage.Transactable)
+	s.Require().NoError(err)
+
+	err = tx.SaveERC4337UserOps(ctx)
+	s.Require().NoError(err)
+
+	s.Require().NoError(tx.Close(ctx))
+}
