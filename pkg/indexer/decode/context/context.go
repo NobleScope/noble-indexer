@@ -1,6 +1,7 @@
 package context
 
 import (
+	"github.com/baking-bad/noble-indexer/internal/pool"
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/dipdup-net/indexer-sdk/pkg/sync"
@@ -109,21 +110,27 @@ func (ctx *Context) AddUserOp(userOp *storage.ERC4337UserOp) {
 }
 
 func (ctx *Context) GetAddresses() []*storage.Address {
-	addresses := make([]*storage.Address, 0)
-	addresses = append(addresses, ctx.Addresses.Values()...)
-
-	return addresses
+	return ctx.Addresses.Values()
 }
 
 func (ctx *Context) GetContracts() []*storage.Contract {
-	contracts := make([]*storage.Contract, 0)
-	contracts = append(contracts, ctx.Contracts.Values()...)
-
-	return contracts
+	return ctx.Contracts.Values()
 }
 
+var tracesPool = pool.New(func() []*storage.Trace {
+	return make([]*storage.Trace, 0, 1024)
+})
+
 func (ctx *Context) GetTraces() []*storage.Trace {
-	traces := make([]*storage.Trace, 0)
+	traces := tracesPool.Get()
+	defer func() {
+		for i := range traces {
+			traces[i] = nil
+		}
+		traces = traces[:0]
+		tracesPool.Put(traces)
+	}()
+
 	for _, ts := range ctx.Traces.Values() {
 		traces = append(traces, ts...)
 	}
@@ -138,17 +145,11 @@ func (ctx *Context) GetTracesByTxHash(txHash types.Hex) []*storage.Trace {
 }
 
 func (ctx *Context) GetTokens() []*storage.Token {
-	tokens := make([]*storage.Token, 0)
-	tokens = append(tokens, ctx.Tokens.Values()...)
-
-	return tokens
+	return ctx.Tokens.Values()
 }
 
 func (ctx *Context) GetTokenBalances() []*storage.TokenBalance {
-	tokenBalances := make([]*storage.TokenBalance, 0)
-	tokenBalances = append(tokenBalances, ctx.TokenBalances.Values()...)
-
-	return tokenBalances
+	return ctx.TokenBalances.Values()
 }
 
 func (ctx *Context) GetProxyContracts() []*storage.ProxyContract {
