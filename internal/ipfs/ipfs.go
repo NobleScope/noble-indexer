@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/dipdup-io/ipfs-tools"
+	lru "github.com/hashicorp/golang-lru/v2"
 	"github.com/pkg/errors"
 )
 
@@ -83,7 +84,8 @@ type OptimizerSettings struct {
 }
 
 type Pool struct {
-	ipfs *ipfs.Pool
+	ipfs  ipfs.IPool
+	cache *lru.Cache[string, []byte]
 }
 
 func New(gateways string) (Pool, error) {
@@ -96,8 +98,14 @@ func New(gateways string) (Pool, error) {
 		return Pool{}, errors.Wrap(err, "creating ipfs pool")
 	}
 
+	cache, err := lru.New[string, []byte](1024)
+	if err != nil {
+		return Pool{}, errors.Wrap(err, "creating lru cache")
+	}
+
 	pool := Pool{
-		ipfs: p,
+		ipfs:  p,
+		cache: cache,
 	}
 
 	return pool, nil
@@ -165,6 +173,10 @@ func (p Pool) TokenMetadata(ctx context.Context, cid string) (TokenMetadata, err
 }
 
 func (p Pool) LoadMetadata(ctx context.Context, cid string) ([]byte, error) {
+	if val, ok := p.cache.Get(cid); ok {
+		return val, nil
+	}
+
 	parsed, err := url.ParseRequestURI(cid)
 	if err != nil {
 		return nil, ErrInvalidURI
@@ -184,6 +196,7 @@ func (p Pool) LoadMetadata(ctx context.Context, cid string) ([]byte, error) {
 		return nil, errors.New("empty metadata")
 	}
 
+	p.cache.Add(cid, data.Raw)
 	return data.Raw, nil
 }
 
