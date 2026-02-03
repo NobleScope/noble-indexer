@@ -3,7 +3,7 @@ module github.com/baking-bad/noble-indexer
 go 1.25.1
 
 require (
-	github.com/dipdup-io/ipfs-tools v0.0.4
+	github.com/dipdup-io/ipfs-tools v0.0.5
 	github.com/dipdup-io/workerpool v0.0.4
 	github.com/dipdup-net/go-lib v0.4.10
 	github.com/dipdup-net/indexer-sdk v0.0.8
@@ -13,6 +13,7 @@ require (
 	github.com/goccy/go-json v0.10.4
 	github.com/gorilla/websocket v1.5.3
 	github.com/grafana/pyroscope-go v1.2.7
+	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/json-iterator/go v1.1.12
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/lib/pq v1.10.9
@@ -130,7 +131,6 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.2 // indirect
 	github.com/guillaumemichel/reservedpool v0.3.0 // indirect
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
-	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/holiman/uint256 v1.3.2 // indirect
 	github.com/huandu/xstrings v1.5.0 // indirect
 	github.com/huin/goupnp v1.3.0 // indirect

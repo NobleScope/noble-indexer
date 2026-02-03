@@ -191,8 +191,8 @@ github.com/dgraph-io/ristretto v0.0.2/go.mod h1:KPxhHT9ZxKefz+PCeOGsrHpl1qZ7i70d
 github.com/dgryski/go-farm v0.0.0-20190423205320-6a90982ecee2/go.mod h1:SqUrOPUnsFjfmXRMNPybcSiG0BgUW2AuFH8PAnS2iTw=
 github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 h1:fAjc9m62+UWV/WAFKLNi6ZS0675eEUC9y3AlwSbQu1Y=
 github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13/go.mod h1:SqUrOPUnsFjfmXRMNPybcSiG0BgUW2AuFH8PAnS2iTw=
-github.com/dipdup-io/ipfs-tools v0.0.4 h1:aI+9Lw1DQWXwK5keYWSrrix33RgYQiai41ceV893Wc4=
-github.com/dipdup-io/ipfs-tools v0.0.4/go.mod h1:lUn4vs6JqdTdwFzy0UL7ynunmSXZB2R00aUng7RVLOM=
+github.com/dipdup-io/ipfs-tools v0.0.5 h1:5puKqLP5QJ1C3A67uU8sWcheKo+dO5QxISAHat6NlnA=
+github.com/dipdup-io/ipfs-tools v0.0.5/go.mod h1:M97SjoBIXPHH9fmJ1M15JCJSJ/XMBYs9BQEnyu35n5k=
 github.com/dipdup-io/workerpool v0.0.4 h1:m58fuFY3VIPRc+trWpjw2Lsm4FvIgtjP/4VRe79r+/s=
 github.com/dipdup-io/workerpool v0.0.4/go.mod h1:m6YMqx7M+fORTyabHD/auKymBRpbDax0t1aPZ1i7GZA=
 github.com/dipdup-net/go-lib v0.4.10 h1:9zaP+gDgfV+uSyEGj8pLlvFpHL9Ut8x0OZwJFwmFHgM=
