@@ -258,6 +258,7 @@ func (p *Module) parse(b types.BlockData) error {
 			Amount:         &value,
 			TraceAddress:   trace.TraceAddress,
 			Type:           typ,
+			Error:          trace.Error,
 			Subtraces:      trace.Subtraces,
 			InitHash:       trace.Action.Init,
 			CreationMethod: trace.Action.CreationMethod,

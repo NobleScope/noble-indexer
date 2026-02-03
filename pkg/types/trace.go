@@ -4,6 +4,7 @@ type Trace struct {
 	Action       Action      `json:"action"`
 	BlockHash    Hex         `json:"blockHash"`
 	BlockNumber  uint64      `json:"blockNumber"`
+	Error        *string     `json:"error"`
 	Result       TraceResult `json:"result"`
 	Subtraces    uint64      `json:"subtraces"`
 	TraceAddress []uint64    `json:"traceAddress"`
