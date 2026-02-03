@@ -54,6 +54,18 @@ func (p *Module) parseTxs(context *dCtx.Context) error {
 		}
 	}
 
+	for i := range context.Block.Traces {
+		if context.Block.Traces[i].Type != types.Reward {
+			continue
+		}
+		if context.Block.Traces[i].Amount == nil || context.Block.Traces[i].Amount.IsZero() {
+			continue
+		}
+		if context.Block.Traces[i].ToAddress != nil {
+			updateAddressBalance(context, context.Block.Traces[i].ToAddress.String(), enum.Add, *context.Block.Traces[i].Amount)
+		}
+	}
+
 	return nil
 }
 
