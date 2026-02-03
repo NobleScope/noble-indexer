@@ -1,7 +1,6 @@
 package context
 
 import (
-	"github.com/baking-bad/noble-indexer/internal/pool"
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/dipdup-net/indexer-sdk/pkg/sync"
@@ -117,20 +116,8 @@ func (ctx *Context) GetContracts() []*storage.Contract {
 	return ctx.Contracts.Values()
 }
 
-var tracesPool = pool.New(func() []*storage.Trace {
-	return make([]*storage.Trace, 0, 1024)
-})
-
 func (ctx *Context) GetTraces() []*storage.Trace {
-	traces := tracesPool.Get()
-	defer func() {
-		for i := range traces {
-			traces[i] = nil
-		}
-		traces = traces[:0]
-		tracesPool.Put(traces)
-	}()
-
+	traces := make([]*storage.Trace, 0)
 	for _, ts := range ctx.Traces.Values() {
 		traces = append(traces, ts...)
 	}
