@@ -426,14 +426,6 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 		if _, err := tx.NewCreateIndex().
 			IfNotExists().
 			Model((*storage.ERC4337UserOp)(nil)).
-			Index("erc4337_user_ops_time_id_idx").
-			Column("time", "id").
-			Exec(ctx); err != nil {
-			return err
-		}
-		if _, err := tx.NewCreateIndex().
-			IfNotExists().
-			Model((*storage.ERC4337UserOp)(nil)).
 			Index("erc4337_user_ops_height_idx").
 			Column("height").
 			Using("BRIN").
