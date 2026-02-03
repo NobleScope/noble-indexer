@@ -24,7 +24,7 @@ func (p *Module) parseTxs(context *dCtx.Context) error {
 			updateAddressBalance(context, context.Block.Txs[i].ToAddress.String(), enum.Add, context.Block.Txs[i].Amount)
 		}
 
-		burnedFee := context.Block.Txs[i].CumulativeGasUsed.Mul(decimal.NewFromUint64(context.Block.BaseFeePerGas))
+		burnedFee := context.Block.Txs[i].GasUsed.Mul(decimal.NewFromUint64(context.Block.BaseFeePerGas))
 		fee := context.Block.Txs[i].Fee.Sub(burnedFee)
 		updateAddressBalance(context, context.Block.Miner.String(), enum.Add, fee)
 
