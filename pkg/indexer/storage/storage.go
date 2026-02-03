@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/baking-bad/noble-indexer/internal/pool"
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/internal/storage/postgres"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
@@ -125,6 +126,10 @@ func (module *Module) saveBlock(ctx context.Context, dCtx *decodeContext.Context
 	return state, nil
 }
 
+var transfersPool = pool.New(func() []*storage.Transfer {
+	return make([]*storage.Transfer, 0, 100)
+})
+
 func (module *Module) processBlockInTransaction(
 	ctx context.Context,
 	tx storage.Transaction,
@@ -158,8 +163,16 @@ func (module *Module) processBlockInTransaction(
 		return state, err
 	}
 
-	txHashToId := make(map[string]uint64)
-	transfers := make([]*storage.Transfer, 0)
+	txHashToId := make(map[string]uint64, len(block.Txs))
+	transfers := transfersPool.Get()
+	defer func() {
+		for i := range transfers {
+			transfers[i] = nil
+		}
+		transfers = transfers[:0]
+		transfersPool.Put(transfers)
+	}()
+
 	for i := range block.Txs {
 		txHashToId[block.Txs[i].Hash.String()] = block.Txs[i].Id
 

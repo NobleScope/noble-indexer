@@ -109,17 +109,11 @@ func (ctx *Context) AddUserOp(userOp *storage.ERC4337UserOp) {
 }
 
 func (ctx *Context) GetAddresses() []*storage.Address {
-	addresses := make([]*storage.Address, 0)
-	addresses = append(addresses, ctx.Addresses.Values()...)
-
-	return addresses
+	return ctx.Addresses.Values()
 }
 
 func (ctx *Context) GetContracts() []*storage.Contract {
-	contracts := make([]*storage.Contract, 0)
-	contracts = append(contracts, ctx.Contracts.Values()...)
-
-	return contracts
+	return ctx.Contracts.Values()
 }
 
 func (ctx *Context) GetTraces() []*storage.Trace {
@@ -138,17 +132,11 @@ func (ctx *Context) GetTracesByTxHash(txHash types.Hex) []*storage.Trace {
 }
 
 func (ctx *Context) GetTokens() []*storage.Token {
-	tokens := make([]*storage.Token, 0)
-	tokens = append(tokens, ctx.Tokens.Values()...)
-
-	return tokens
+	return ctx.Tokens.Values()
 }
 
 func (ctx *Context) GetTokenBalances() []*storage.TokenBalance {
-	tokenBalances := make([]*storage.TokenBalance, 0)
-	tokenBalances = append(tokenBalances, ctx.TokenBalances.Values()...)
-
-	return tokenBalances
+	return ctx.TokenBalances.Values()
 }
 
 func (ctx *Context) GetProxyContracts() []*storage.ProxyContract {

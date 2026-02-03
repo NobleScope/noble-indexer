@@ -122,13 +122,12 @@ func getBalanceUpdates(
 		}
 	}
 
-	result := make([]*storage.Balance, 0, len(updates))
+	result := make([]*storage.Balance, len(updates))
 	for i := range updates {
-		balance := &storage.Balance{
+		result[i] = &storage.Balance{
 			Id:    i,
 			Value: updates[i],
 		}
-		result = append(result, balance)
 	}
 	// TODO: update LastHeight for addresses
 	return result, nil
