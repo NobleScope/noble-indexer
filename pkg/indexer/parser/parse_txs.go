@@ -9,47 +9,48 @@ import (
 )
 
 func (p *Module) parseTxs(context *dCtx.Context) error {
-	for _, tx := range context.Block.Txs {
-		tx.TracesCount = len(context.GetTracesByTxHash(tx.Hash))
+	for i := range context.Block.Txs {
+		traces := context.GetTracesByTxHash(context.Block.Txs[i].Hash)
+		context.Block.Txs[i].TracesCount = len(traces)
 
-		if tx.Status == types.TxStatusRevert {
+		if context.Block.Txs[i].Status != types.TxStatusSuccess {
 			continue
 		}
 
-		totalAmount := tx.Amount.Add(tx.Fee)
-		updateAddressBalance(context, tx.FromAddress.String(), enum.Sub, totalAmount)
+		totalAmount := context.Block.Txs[i].Amount.Add(context.Block.Txs[i].Fee)
+		updateAddressBalance(context, context.Block.Txs[i].FromAddress.String(), enum.Sub, totalAmount)
 
-		if tx.ToAddress != nil {
-			updateAddressBalance(context, tx.ToAddress.String(), enum.Add, tx.Amount)
+		if context.Block.Txs[i].ToAddress != nil {
+			updateAddressBalance(context, context.Block.Txs[i].ToAddress.String(), enum.Add, context.Block.Txs[i].Amount)
 		}
 
-		burnedFee := tx.CumulativeGasUsed.Mul(decimal.NewFromUint64(context.Block.BaseFeePerGas))
-		fee := tx.Fee.Sub(burnedFee)
+		burnedFee := context.Block.Txs[i].CumulativeGasUsed.Mul(decimal.NewFromUint64(context.Block.BaseFeePerGas))
+		fee := context.Block.Txs[i].Fee.Sub(burnedFee)
 		updateAddressBalance(context, context.Block.Miner.String(), enum.Add, fee)
-	}
 
-	for _, trace := range context.Block.Traces {
-		if trace.Amount == nil || trace.Amount.IsZero() {
-			continue
-		}
-
-		isCreate := trace.Type == types.Create || trace.Type == types.Create2
-
-		if len(trace.TraceAddress) == 0 {
-			if isCreate && trace.Contract != nil {
-				updateAddressBalance(context, trace.Contract.Address.String(), enum.Add, *trace.Amount)
+		for j := range traces {
+			if traces[j].Amount == nil || traces[j].Amount.IsZero() {
+				continue
 			}
-			continue
-		}
 
-		if trace.FromAddress != nil {
-			updateAddressBalance(context, trace.FromAddress.String(), enum.Sub, *trace.Amount)
-		}
+			isCreate := traces[j].Type == types.Create || traces[j].Type == types.Create2
 
-		if isCreate && trace.ToAddress == nil && trace.Contract != nil {
-			updateAddressBalance(context, trace.Contract.Address.String(), enum.Add, *trace.Amount)
-		} else if trace.ToAddress != nil {
-			updateAddressBalance(context, trace.ToAddress.String(), enum.Add, *trace.Amount)
+			if len(traces[j].TraceAddress) == 0 {
+				if isCreate && traces[j].Contract != nil {
+					updateAddressBalance(context, traces[j].Contract.Address.String(), enum.Add, *traces[j].Amount)
+				}
+				continue
+			}
+
+			if traces[j].FromAddress != nil {
+				updateAddressBalance(context, traces[j].FromAddress.String(), enum.Sub, *traces[j].Amount)
+			}
+
+			if isCreate && traces[j].ToAddress == nil && traces[j].Contract != nil {
+				updateAddressBalance(context, traces[j].Contract.Address.String(), enum.Add, *traces[j].Amount)
+			} else if traces[j].ToAddress != nil {
+				updateAddressBalance(context, traces[j].ToAddress.String(), enum.Add, *traces[j].Amount)
+			}
 		}
 	}
 

@@ -258,6 +258,7 @@ func (p *Module) parse(b types.BlockData) error {
 			Amount:         &value,
 			TraceAddress:   trace.TraceAddress,
 			Type:           typ,
+			Error:          trace.Error,
 			Subtraces:      trace.Subtraces,
 			InitHash:       trace.Action.Init,
 			CreationMethod: trace.Action.CreationMethod,
@@ -310,6 +311,9 @@ func (p *Module) parse(b types.BlockData) error {
 		if trace.TxHash != nil {
 			newTrace.Tx = &storage.Tx{
 				Hash: *trace.TxHash,
+			}
+			if trace.TxPosition != nil && *trace.TxPosition < uint64(len(decodeCtx.Block.Txs)) {
+				newTrace.Tx.Status = decodeCtx.Block.Txs[*trace.TxPosition].Status
 			}
 		}
 

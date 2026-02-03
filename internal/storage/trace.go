@@ -56,7 +56,8 @@ type Trace struct {
 	Output     []byte          `bun:"output"                comment:"Output data"`
 	ContractId *uint64         `bun:"contract_id"           comment:"Address identity of the new contract"`
 
-	Subtraces uint64 `bun:"subtraces" comment:"Amount of subtraces"`
+	Error     *string `bun:"error"     comment:"Trace error message"`
+	Subtraces uint64  `bun:"subtraces" comment:"Amount of subtraces"`
 
 	FromAddress *Address  `bun:"rel:belongs-to,join:from_address_id=id"`
 	ToAddress   *Address  `bun:"rel:belongs-to,join:to_address_id=id"`
