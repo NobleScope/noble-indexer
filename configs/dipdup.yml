@@ -70,3 +70,10 @@ api:
 profiler:
   server: ${PROFILER_SERVER}
   project: noble
+
+networks:
+  noble-devnet:
+    precompiled_contracts:
+      - 0x6625300000000000000000000000000000000000
+  hoodi:
+    precompiled_contracts:

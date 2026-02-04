@@ -29,7 +29,6 @@ WORKDIR /app
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /go/bin/indexer ./indexer
 COPY configs/dipdup.yml ./config.yml
-COPY configs/networks.yml ./networks.yml
 COPY assets ./assets
 COPY database ./database
 

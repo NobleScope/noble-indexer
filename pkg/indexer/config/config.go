@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/baking-bad/noble-indexer/internal/profiler"
 	"github.com/dipdup-net/go-lib/config"
+	"github.com/pkg/errors"
 )
 
 type Config struct {
@@ -14,6 +15,7 @@ type Config struct {
 	ContractMetadataResolver MetadataResolver `yaml:"contract_resolver"`
 	TokenMetadataResolver    MetadataResolver `yaml:"token_resolver"`
 	Network                  string           `validate:"required"                                                yaml:"network"`
+	Networks                 NetworksConfig   `yaml:"networks,required"`
 }
 
 type Indexer struct {
@@ -56,4 +58,17 @@ func (c *Config) Substitute() error {
 		return err
 	}
 	return nil
+}
+
+type Network struct {
+	PrecompiledContracts []string `validate:"omitempty,dive,eth_addr" yaml:"precompiled_contracts,omitempty"`
+}
+
+type NetworksConfig map[string]Network
+
+func (nc NetworksConfig) Get(network string) (Network, error) {
+	if netCfg, ok := nc[network]; ok {
+		return netCfg, nil
+	}
+	return Network{}, errors.Errorf("network %s config not found", network)
 }

@@ -28,11 +28,6 @@ func main() {
 		return
 	}
 
-	networkConfig, err := common.InitNetworksConfig(cfg.Network)
-	if err != nil {
-		return
-	}
-
 	prscp, err := common.InitProfiler(cfg.Profiler, "indexer")
 	if err != nil {
 		return
@@ -44,7 +39,7 @@ func main() {
 	defer notifyCancel()
 
 	stopperModule := stopper.NewModule(cancel)
-	indexerModule, err := indexer.New(ctx, *cfg, networkConfig, stopperModule)
+	indexerModule, err := indexer.New(ctx, *cfg, stopperModule)
 	if err != nil {
 		log.Panic().Err(err).Msg("error during indexer module creation")
 		return

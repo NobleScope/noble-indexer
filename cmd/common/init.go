@@ -8,7 +8,6 @@ import (
 	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
 	goLibConfig "github.com/dipdup-net/go-lib/config"
 	"github.com/grafana/pyroscope-go"
-	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -44,19 +43,6 @@ func InitConfig(rootCmd *cobra.Command) (*config.Config, error) {
 	}
 
 	return &cfg, nil
-}
-
-func InitNetworksConfig(network string) (config.Network, error) {
-	var networksConfig config.NetworksConfig
-	if err := goLibConfig.Parse("networks.yml", &networksConfig); err != nil {
-		return config.Network{}, errors.Wrap(err, "parsing networks config")
-	}
-
-	netCfg, err := networksConfig.Get(network)
-	if err != nil {
-		return config.Network{}, errors.Wrap(err, "getting network config")
-	}
-	return netCfg, nil
 }
 
 func InitLogger(level string) error {

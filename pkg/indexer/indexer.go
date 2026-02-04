@@ -39,7 +39,7 @@ type Indexer struct {
 	log           zerolog.Logger
 }
 
-func New(ctx context.Context, cfg config.Config, networkConfig config.Network, stopperModule modules.Module) (Indexer, error) {
+func New(ctx context.Context, cfg config.Config, stopperModule modules.Module) (Indexer, error) {
 	pg, err := postgres.Create(ctx, cfg.Database, cfg.Indexer.ScriptsDir, true)
 	if err != nil {
 		return Indexer{}, errors.Wrap(err, "while creating pg context")
@@ -48,6 +48,11 @@ func New(ctx context.Context, cfg config.Config, networkConfig config.Network, s
 	api, r, err := createReceiver(ctx, cfg, pg)
 	if err != nil {
 		return Indexer{}, errors.Wrap(err, "while creating receiver module")
+	}
+
+	networkConfig, err := cfg.Networks.Get(cfg.Network)
+	if err != nil {
+		return Indexer{}, errors.Wrap(err, "while getting network config")
 	}
 
 	p, err := createParser(cfg.Indexer, networkConfig, r)
