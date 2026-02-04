@@ -42,6 +42,29 @@ definitions:
         example: "10000000000"
         type: string
     type: object
+  responses.BeaconWithdrawal:
+    description: Beacon chain withdrawal transferring ETH from a validator to an execution
+      layer address
+    properties:
+      address:
+        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+        type: string
+      amount:
+        example: "1000000000000000000"
+        type: string
+      height:
+        example: 100
+        type: integer
+      index:
+        example: 1
+        type: integer
+      time:
+        example: "2023-07-04T03:10:57+00:00"
+        type: string
+      validator_index:
+        example: 100000
+        type: integer
+    type: object
   responses.Block:
     description: Noble block information
     properties:
@@ -737,6 +760,67 @@ paths:
       summary: Get address by hash
       tags:
       - address
+  /beacon_withdrawals:
+    get:
+      description: Returns a paginated list of beacon chain (consensus layer) withdrawals.
+        Withdrawals represent ETH transferred from validators to execution layer addresses.
+        Can be filtered by block height or recipient address.
+      operationId: list-beacon-withdrawals
+      parameters:
+      - default: 10
+        description: 'Number of withdrawals to return (default: 10)'
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - default: 0
+        description: 'Number of withdrawals to skip (default: 0)'
+        in: query
+        minimum: 0
+        name: offset
+        type: integer
+      - default: asc
+        description: 'Sort order by block height (default: asc)'
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Filter by block height
+        example: 12345
+        in: query
+        minimum: 0
+        name: height
+        type: integer
+      - description: Filter by recipient address (hexadecimal with 0x prefix)
+        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: address
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of beacon withdrawals
+          schema:
+            items:
+              $ref: '#/definitions/responses.BeaconWithdrawal'
+            type: array
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: List beacon chain withdrawals
+      tags:
+      - beacon
   /blocks:
     get:
       description: Returns a paginated list of blocks. Blocks can be sorted by height

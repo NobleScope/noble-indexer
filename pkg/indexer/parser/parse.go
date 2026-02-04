@@ -6,6 +6,7 @@ import (
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	storageType "github.com/baking-bad/noble-indexer/internal/storage/types"
 	dCtx "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
+	"github.com/baking-bad/noble-indexer/pkg/indexer/enum"
 	"github.com/baking-bad/noble-indexer/pkg/types"
 	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
@@ -75,6 +76,7 @@ func (p *Module) parse(b types.BlockData) error {
 		TransactionsRootHash: b.TransactionsRoot,
 		Txs:                  make([]*storage.Tx, len(b.Transactions)),
 		Traces:               make([]*storage.Trace, len(b.Traces)),
+		Withdrawals:          make([]*storage.BeaconWithdrawal, len(b.Withdrawals)),
 		Stats: &storage.BlockStats{
 			Height:  types.Level(height),
 			Time:    blockTime,
@@ -416,6 +418,39 @@ func (p *Module) parse(b types.BlockData) error {
 
 	if err = p.parseTransfers(decodeCtx); err != nil {
 		return err
+	}
+
+	for i := range b.Withdrawals {
+		amount, err := b.Withdrawals[i].Amount.Decimal()
+		if err != nil {
+			return errors.Wrap(err, "parsing withdrawal amount")
+		}
+		validatorIdx, err := b.Withdrawals[i].ValidatorIndex.Int64()
+		if err != nil {
+			return errors.Wrap(err, "parsing withdrawal validator index")
+		}
+		index, err := b.Withdrawals[i].Index.Int64()
+		if err != nil {
+			return errors.Wrap(err, "parsing withdrawal index")
+		}
+
+		address := storage.Address{
+			Hash:        b.Withdrawals[i].Address,
+			FirstHeight: decodeCtx.Block.Height,
+			LastHeight:  decodeCtx.Block.Height,
+			Balance:     storage.EmptyBalance(),
+		}
+		decodeCtx.AddAddress(&address)
+		updateAddressBalance(decodeCtx, b.Withdrawals[i].Address.Hex(), enum.Add, amount)
+
+		decodeCtx.Block.Withdrawals[i] = &storage.BeaconWithdrawal{
+			Height:         decodeCtx.Block.Height,
+			Time:           decodeCtx.Block.Time,
+			ValidatorIndex: validatorIdx,
+			Amount:         amount,
+			Index:          index,
+			Address:        address,
+		}
 	}
 
 	output := p.MustOutput(OutputName)

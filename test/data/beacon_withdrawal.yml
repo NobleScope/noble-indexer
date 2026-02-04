@@ -1,0 +1,79 @@
+- id: 1
+  height: 100
+  time: '2024-01-01T10:00:00Z'
+  index: 0
+  validator_index: 12345
+  address_id: 1
+  amount: '32000000000000000000'
+
+- id: 2
+  height: 100
+  time: '2024-01-01T10:00:00Z'
+  index: 1
+  validator_index: 12346
+  address_id: 2
+  amount: '1500000000000000000'
+
+- id: 3
+  height: 100
+  time: '2024-01-01T10:00:00Z'
+  index: 2
+  validator_index: 12347
+  address_id: 1
+  amount: '500000000000000000'
+
+- id: 4
+  height: 200
+  time: '2024-01-02T10:00:00Z'
+  index: 0
+  validator_index: 23456
+  address_id: 3
+  amount: '32000000000000000000'
+
+- id: 5
+  height: 200
+  time: '2024-01-02T10:00:00Z'
+  index: 1
+  validator_index: 23457
+  address_id: 4
+  amount: '750000000000000000'
+
+- id: 6
+  height: 300
+  time: '2024-01-03T10:00:00Z'
+  index: 0
+  validator_index: 34567
+  address_id: 2
+  amount: '32000000000000000000'
+
+- id: 7
+  height: 300
+  time: '2024-01-03T10:00:00Z'
+  index: 1
+  validator_index: 34568
+  address_id: 5
+  amount: '2100000000000000000'
+
+- id: 8
+  height: 300
+  time: '2024-01-03T10:00:00Z'
+  index: 2
+  validator_index: 34569
+  address_id: 1
+  amount: '125000000000000000'
+
+- id: 9
+  height: 400
+  time: '2024-01-04T10:00:00Z'
+  index: 0
+  validator_index: 45678
+  address_id: 6
+  amount: '32000000000000000000'
+
+- id: 10
+  height: 400
+  time: '2024-01-04T10:00:00Z'
+  index: 1
+  validator_index: 45679
+  address_id: 3
+  amount: '980000000000000000'

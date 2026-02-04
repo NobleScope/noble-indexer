@@ -509,6 +509,44 @@ func (c *MockTransactionRollbackAddressesCall) DoAndReturn(f func(context.Contex
 	return c
 }
 
+// RollbackBeaconWithdrawals mocks base method.
+func (m *MockTransaction) RollbackBeaconWithdrawals(ctx context.Context, height types.Level) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RollbackBeaconWithdrawals", ctx, height)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RollbackBeaconWithdrawals indicates an expected call of RollbackBeaconWithdrawals.
+func (mr *MockTransactionMockRecorder) RollbackBeaconWithdrawals(ctx, height any) *MockTransactionRollbackBeaconWithdrawalsCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RollbackBeaconWithdrawals", reflect.TypeOf((*MockTransaction)(nil).RollbackBeaconWithdrawals), ctx, height)
+	return &MockTransactionRollbackBeaconWithdrawalsCall{Call: call}
+}
+
+// MockTransactionRollbackBeaconWithdrawalsCall wrap *gomock.Call
+type MockTransactionRollbackBeaconWithdrawalsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionRollbackBeaconWithdrawalsCall) Return(arg0 error) *MockTransactionRollbackBeaconWithdrawalsCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionRollbackBeaconWithdrawalsCall) Do(f func(context.Context, types.Level) error) *MockTransactionRollbackBeaconWithdrawalsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionRollbackBeaconWithdrawalsCall) DoAndReturn(f func(context.Context, types.Level) error) *MockTransactionRollbackBeaconWithdrawalsCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // RollbackBlock mocks base method.
 func (m *MockTransaction) RollbackBlock(ctx context.Context, height types.Level) error {
 	m.ctrl.T.Helper()
@@ -939,6 +977,49 @@ func (c *MockTransactionSaveBalancesCall) Do(f func(context.Context, ...*storage
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockTransactionSaveBalancesCall) DoAndReturn(f func(context.Context, ...*storage.Balance) error) *MockTransactionSaveBalancesCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// SaveBeaconWithdrawals mocks base method.
+func (m *MockTransaction) SaveBeaconWithdrawals(ctx context.Context, withdrawals ...*storage.BeaconWithdrawal) error {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx}
+	for _, a := range withdrawals {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SaveBeaconWithdrawals", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveBeaconWithdrawals indicates an expected call of SaveBeaconWithdrawals.
+func (mr *MockTransactionMockRecorder) SaveBeaconWithdrawals(ctx any, withdrawals ...any) *MockTransactionSaveBeaconWithdrawalsCall {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx}, withdrawals...)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveBeaconWithdrawals", reflect.TypeOf((*MockTransaction)(nil).SaveBeaconWithdrawals), varargs...)
+	return &MockTransactionSaveBeaconWithdrawalsCall{Call: call}
+}
+
+// MockTransactionSaveBeaconWithdrawalsCall wrap *gomock.Call
+type MockTransactionSaveBeaconWithdrawalsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionSaveBeaconWithdrawalsCall) Return(arg0 error) *MockTransactionSaveBeaconWithdrawalsCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionSaveBeaconWithdrawalsCall) Do(f func(context.Context, ...*storage.BeaconWithdrawal) error) *MockTransactionSaveBeaconWithdrawalsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionSaveBeaconWithdrawalsCall) DoAndReturn(f func(context.Context, ...*storage.BeaconWithdrawal) error) *MockTransactionSaveBeaconWithdrawalsCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

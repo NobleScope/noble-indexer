@@ -450,6 +450,46 @@ func (s *TransactionTestSuite) TestSaveProxyContracts() {
 	s.Require().EqualValues(3, *proxy.ImplementationID)
 }
 
+func (s *TransactionTestSuite) TestSaveBeaconWithdrawals() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	tx, err := BeginTransaction(ctx, s.storage.Transactable)
+	s.Require().NoError(err)
+
+	withdrawals := []*storage.BeaconWithdrawal{
+		{
+			Height:         123456,
+			Time:           time.Unix(1622548800, 0),
+			Index:          0,
+			ValidatorIndex: 100,
+			AddressId:      1,
+			Amount:         decimal.RequireFromString("32000000000"),
+		},
+	}
+
+	err = tx.SaveBeaconWithdrawals(ctx, withdrawals...)
+	s.Require().NoError(err)
+
+	s.Require().NoError(tx.Flush(ctx))
+	s.Require().NoError(tx.Close(ctx))
+
+	// Verify beacon withdrawals were saved
+	received, err := s.storage.BeaconWithdrawal.Filter(ctx, storage.BeaconWithdrawalListFilter{
+		Limit:  1,
+		Height: &withdrawals[0].Height,
+	})
+	s.Require().NoError(err)
+	s.Require().NotEmpty(received)
+
+	withdrawal := received[0]
+	s.Require().EqualValues(123456, withdrawal.Height)
+	s.Require().EqualValues(0, withdrawal.Index)
+	s.Require().EqualValues(100, withdrawal.ValidatorIndex)
+	s.Require().EqualValues(1, withdrawal.AddressId)
+	s.Require().Equal("32000000000", withdrawal.Amount.String())
+}
+
 func (s *TransactionTestSuite) TestRollbackBlock() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
@@ -631,6 +671,26 @@ func (s *TransactionTestSuite) TestRollbackContracts() {
 	err = s.storage.Connection().DB().NewSelect().Model(&contractsAfter).Where("height = ?", 100).Scan(ctx)
 	s.Require().NoError(err)
 	s.Require().Empty(contractsAfter)
+}
+
+func (s *TransactionTestSuite) TestRollbackBeaconWithdrawals() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	tx, err := BeginTransaction(ctx, s.storage.Transactable)
+	s.Require().NoError(err)
+
+	err = tx.RollbackBeaconWithdrawals(ctx, 100)
+	s.Require().NoError(err)
+
+	s.Require().NoError(tx.Flush(ctx))
+	s.Require().NoError(tx.Close(ctx))
+
+	// Verify beacon withdrawals were deleted
+	var beaconWithdrawalsAfter []storage.BeaconWithdrawal
+	err = s.storage.Connection().DB().NewSelect().Model(&beaconWithdrawalsAfter).Where("height = ?", 100).Scan(ctx)
+	s.Require().NoError(err)
+	s.Require().Empty(beaconWithdrawalsAfter)
 }
 
 func (s *TransactionTestSuite) TestDeleteBalances() {
