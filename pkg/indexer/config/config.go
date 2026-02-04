@@ -15,7 +15,7 @@ type Config struct {
 	ContractMetadataResolver MetadataResolver `yaml:"contract_resolver"`
 	TokenMetadataResolver    MetadataResolver `yaml:"token_resolver"`
 	Network                  string           `validate:"required"                                                yaml:"network"`
-	Networks                 NetworksConfig   `yaml:"networks,required"`
+	Networks                 NetworksConfig   `yaml:"networks"`
 }
 
 type Indexer struct {
