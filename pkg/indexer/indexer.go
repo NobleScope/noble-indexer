@@ -39,7 +39,7 @@ type Indexer struct {
 	log           zerolog.Logger
 }
 
-func New(ctx context.Context, cfg config.Config, stopperModule modules.Module) (Indexer, error) {
+func New(ctx context.Context, cfg config.Config, networkConfig config.Network, stopperModule modules.Module) (Indexer, error) {
 	pg, err := postgres.Create(ctx, cfg.Database, cfg.Indexer.ScriptsDir, true)
 	if err != nil {
 		return Indexer{}, errors.Wrap(err, "while creating pg context")
@@ -50,7 +50,7 @@ func New(ctx context.Context, cfg config.Config, stopperModule modules.Module) (
 		return Indexer{}, errors.Wrap(err, "while creating receiver module")
 	}
 
-	p, err := createParser(cfg.Indexer, r)
+	p, err := createParser(cfg.Indexer, networkConfig, r)
 	if err != nil {
 		return Indexer{}, errors.Wrap(err, "while creating parser module")
 	}
@@ -161,8 +161,8 @@ func createReceiver(ctx context.Context, cfg config.Config, pg postgres.Storage)
 	return nodeRpc, &receiverModule, nil
 }
 
-func createParser(cfg config.Indexer, receiverModule modules.Module) (*parser.Module, error) {
-	parserModule := parser.NewModule(cfg)
+func createParser(cfg config.Indexer, networkConfig config.Network, receiverModule modules.Module) (*parser.Module, error) {
+	parserModule := parser.NewModule(cfg, networkConfig)
 
 	if err := parserModule.AttachTo(receiverModule, receiver.BlocksOutput, parser.InputName); err != nil {
 		return nil, errors.Wrap(err, "while attaching parser to receiver")

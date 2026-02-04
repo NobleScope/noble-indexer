@@ -13,6 +13,7 @@ type Config struct {
 	Profiler                 *profiler.Config `validate:"omitempty"                                               yaml:"profiler"`
 	ContractMetadataResolver MetadataResolver `yaml:"contract_resolver"`
 	TokenMetadataResolver    MetadataResolver `yaml:"token_resolver"`
+	Network                  string           `validate:"required"                                                yaml:"network"`
 }
 
 type Indexer struct {

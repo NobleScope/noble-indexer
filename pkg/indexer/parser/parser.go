@@ -18,8 +18,10 @@ import (
 type Module struct {
 	modules.BaseModule
 
-	cfg config.Indexer
-	abi map[types.TokenType]*abi.ABI
+	cfg                  config.Indexer
+	networkConfig        config.Network
+	precompiledContracts map[string]struct{}
+	abi                  map[types.TokenType]*abi.ABI
 }
 
 var _ modules.Module = (*Module)(nil)
@@ -30,16 +32,22 @@ const (
 	StopOutput = "stop"
 )
 
-func NewModule(cfg config.Indexer) Module {
+func NewModule(cfg config.Indexer, networkConfig config.Network) Module {
 	m := Module{
-		BaseModule: modules.New("parser"),
-		cfg:        cfg,
-		abi:        make(map[types.TokenType]*abi.ABI),
+		BaseModule:           modules.New("parser"),
+		cfg:                  cfg,
+		networkConfig:        networkConfig,
+		precompiledContracts: make(map[string]struct{}, len(networkConfig.PrecompiledContracts)),
+		abi:                  make(map[types.TokenType]*abi.ABI),
 	}
 
 	err := m.createABIs()
 	if err != nil {
 		panic(err)
+	}
+
+	for _, addr := range networkConfig.PrecompiledContracts {
+		m.precompiledContracts[addr] = struct{}{}
 	}
 
 	m.CreateInputWithCapacity(InputName, 128)

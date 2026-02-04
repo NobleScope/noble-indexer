@@ -3,6 +3,7 @@ module github.com/baking-bad/noble-indexer
 go 1.25.1
 
 require (
+	github.com/cockroachdb/errors v1.11.3
 	github.com/dipdup-io/ipfs-tools v0.0.5
 	github.com/dipdup-io/workerpool v0.0.4
 	github.com/dipdup-net/go-lib v0.4.10
@@ -63,7 +64,6 @@ require (
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cockroachdb/crlib v0.0.0-20241112164430-1264a2edc35b // indirect
-	github.com/cockroachdb/errors v1.11.3 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
 	github.com/cockroachdb/pebble/v2 v2.1.0 // indirect
 	github.com/cockroachdb/redact v1.1.5 // indirect
