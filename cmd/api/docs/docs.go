@@ -2369,6 +2369,11 @@ const docTemplate = `{
                     "format": "string",
                     "example": "indexer"
                 },
+                "synced": {
+                    "type": "boolean",
+                    "format": "boolean",
+                    "example": true
+                },
                 "total_accounts": {
                     "type": "integer",
                     "format": "int64",
