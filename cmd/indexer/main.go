@@ -27,6 +27,7 @@ func main() {
 	if err = common.InitLogger(cfg.LogLevel); err != nil {
 		return
 	}
+
 	prscp, err := common.InitProfiler(cfg.Profiler, "indexer")
 	if err != nil {
 		return

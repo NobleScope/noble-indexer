@@ -2,6 +2,8 @@ version: 0.0.1
 
 log_level: ${LOG_LEVEL:-info}
 
+network: ${NETWORK:-noble-devnet}
+
 indexer:
   name: ${INDEXER_NAME:-noble_indexer}
   block_period: ${INDEXER_BLOCK_PERIOD:-1} # seconds
@@ -68,3 +70,10 @@ api:
 profiler:
   server: ${PROFILER_SERVER}
   project: noble
+
+networks:
+  noble-devnet:
+    precompiled_contracts:
+      - 0x6625300000000000000000000000000000000000
+  hoodi:
+    precompiled_contracts:

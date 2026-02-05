@@ -50,7 +50,12 @@ func New(ctx context.Context, cfg config.Config, stopperModule modules.Module) (
 		return Indexer{}, errors.Wrap(err, "while creating receiver module")
 	}
 
-	p, err := createParser(cfg.Indexer, r)
+	networkConfig, err := cfg.Networks.Get(cfg.Network)
+	if err != nil {
+		return Indexer{}, errors.Wrap(err, "while getting network config")
+	}
+
+	p, err := createParser(cfg.Indexer, networkConfig, r)
 	if err != nil {
 		return Indexer{}, errors.Wrap(err, "while creating parser module")
 	}
@@ -161,8 +166,8 @@ func createReceiver(ctx context.Context, cfg config.Config, pg postgres.Storage)
 	return nodeRpc, &receiverModule, nil
 }
 
-func createParser(cfg config.Indexer, receiverModule modules.Module) (*parser.Module, error) {
-	parserModule := parser.NewModule(cfg)
+func createParser(cfg config.Indexer, networkConfig config.Network, receiverModule modules.Module) (*parser.Module, error) {
+	parserModule := parser.NewModule(cfg, networkConfig)
 
 	if err := parserModule.AttachTo(receiverModule, receiver.BlocksOutput, parser.InputName); err != nil {
 		return nil, errors.Wrap(err, "while attaching parser to receiver")

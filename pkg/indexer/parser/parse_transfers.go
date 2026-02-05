@@ -7,6 +7,7 @@ import (
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/internal/storage/types"
 	dCtx "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
+	"github.com/baking-bad/noble-indexer/pkg/indexer/enum"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/erc1155"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/erc20"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/erc721"
@@ -154,17 +155,23 @@ func (p *Module) parseTransfers(ctx *dCtx.Context) error {
 
 			transfer.Type = transferType
 			ctx.Block.Txs[i].Transfers = append(ctx.Block.Txs[i].Transfers, transfer)
-			ctx.AddToken(&storage.Token{
-				TokenID:        transfer.TokenID,
-				Height:         ctx.Block.Height,
-				LastHeight:     ctx.Block.Height,
-				Type:           tokenType,
-				Status:         types.Pending,
-				Contract:       transfer.Contract,
-				TransfersCount: 1,
-				Supply:         getSupplyAmount(transfer.Amount, transfer.Type),
-			})
-			setTokenBalanceUpdates(ctx, transfer)
+
+			if _, isPrecompiled := p.precompiledContracts[log.Address.Hash.Hex()]; isPrecompiled {
+				updateBalances(transfer.FromAddress, enum.Sub, transfer.Amount)
+				updateBalances(transfer.ToAddress, enum.Add, transfer.Amount)
+			} else {
+				ctx.AddToken(&storage.Token{
+					TokenID:        transfer.TokenID,
+					Height:         ctx.Block.Height,
+					LastHeight:     ctx.Block.Height,
+					Type:           tokenType,
+					Status:         types.Pending,
+					Contract:       transfer.Contract,
+					TransfersCount: 1,
+					Supply:         getSupplyAmount(transfer.Amount, transfer.Type),
+				})
+				setTokenBalanceUpdates(ctx, transfer)
+			}
 		}
 	}
 
