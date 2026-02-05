@@ -26,11 +26,8 @@ func (tx Transaction) SaveTransactions(ctx context.Context, txs ...*models.Tx) e
 	case 1:
 		return tx.Add(ctx, txs[0])
 	default:
-		arr := make([]any, len(txs))
-		for i := range txs {
-			arr[i] = txs[i]
-		}
-		return tx.BulkSave(ctx, arr)
+		_, err := tx.Tx().NewInsert().Model(&txs).Returning("id").Exec(ctx)
+		return err
 	}
 }
 
@@ -41,11 +38,8 @@ func (tx Transaction) SaveLogs(ctx context.Context, logs ...*models.Log) error {
 	case 1:
 		return tx.Add(ctx, logs[0])
 	default:
-		arr := make([]any, len(logs))
-		for i := range logs {
-			arr[i] = logs[i]
-		}
-		return tx.BulkSave(ctx, arr)
+		_, err := tx.Tx().NewInsert().Model(&logs).Returning("id").Exec(ctx)
+		return err
 	}
 }
 
@@ -56,11 +50,8 @@ func (tx Transaction) SaveSources(ctx context.Context, sources ...*models.Source
 	case 1:
 		return tx.Add(ctx, sources[0])
 	default:
-		arr := make([]any, len(sources))
-		for i := range sources {
-			arr[i] = sources[i]
-		}
-		return tx.BulkSave(ctx, arr)
+		_, err := tx.Tx().NewInsert().Model(&sources).Returning("id").Exec(ctx)
+		return err
 	}
 }
 
@@ -172,11 +163,8 @@ func (tx Transaction) SaveTraces(ctx context.Context, traces ...*models.Trace) e
 	case 1:
 		return tx.Add(ctx, traces[0])
 	default:
-		arr := make([]any, len(traces))
-		for i := range traces {
-			arr[i] = traces[i]
-		}
-		return tx.BulkSave(ctx, arr)
+		_, err := tx.Tx().NewInsert().Model(&traces).Returning("id").Exec(ctx)
+		return err
 	}
 }
 
@@ -187,11 +175,8 @@ func (tx Transaction) SaveTransfers(ctx context.Context, transfers ...*models.Tr
 	case 1:
 		return tx.Add(ctx, transfers[0])
 	default:
-		arr := make([]any, len(transfers))
-		for i := range transfers {
-			arr[i] = transfers[i]
-		}
-		return tx.BulkSave(ctx, arr)
+		_, err := tx.Tx().NewInsert().Model(&transfers).Returning("id").Exec(ctx)
+		return err
 	}
 }
 
@@ -307,12 +292,18 @@ func (tx Transaction) SaveERC4337UserOps(ctx context.Context, userOps ...*models
 	case 1:
 		return tx.Add(ctx, userOps[0])
 	default:
-		arr := make([]any, len(userOps))
-		for i := range userOps {
-			arr[i] = userOps[i]
-		}
-		return tx.BulkSave(ctx, arr)
+		_, err := tx.Tx().NewInsert().Model(&userOps).Returning("id").Exec(ctx)
+		return err
 	}
+}
+
+func (tx Transaction) SaveBeaconWithdrawals(ctx context.Context, withdrawals ...*models.BeaconWithdrawal) error {
+	if len(withdrawals) == 0 {
+		return nil
+	}
+
+	_, err := tx.Tx().NewInsert().Model(&withdrawals).Returning("id").Exec(ctx)
+	return err
 }
 
 func (tx Transaction) RollbackBlock(ctx context.Context, height types.Level) error {
@@ -396,6 +387,14 @@ func (tx Transaction) RollbackContracts(ctx context.Context, height types.Level)
 func (tx Transaction) RollbackERC4337UserOps(ctx context.Context, height types.Level) (err error) {
 	_, err = tx.Tx().NewDelete().
 		Model((*models.ERC4337UserOp)(nil)).
+		Where("height = ?", height).
+		Exec(ctx)
+	return
+}
+
+func (tx Transaction) RollbackBeaconWithdrawals(ctx context.Context, height types.Level) (err error) {
+	_, err = tx.Tx().NewDelete().
+		Model((*models.BeaconWithdrawal)(nil)).
 		Where("height = ?", height).
 		Exec(ctx)
 	return

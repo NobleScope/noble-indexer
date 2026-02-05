@@ -155,6 +155,89 @@ const docTemplate = `{
                 }
             }
         },
+        "/beacon_withdrawals": {
+            "get": {
+                "description": "Returns a paginated list of beacon chain (consensus layer) withdrawals. Withdrawals represent ETH transferred from validators to execution layer addresses. Can be filtered by block height or recipient address.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "beacon"
+                ],
+                "summary": "List beacon chain withdrawals",
+                "operationId": "list-beacon-withdrawals",
+                "parameters": [
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Number of withdrawals to return (default: 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Number of withdrawals to skip (default: 0)",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "default": "asc",
+                        "description": "Sort order by block height (default: asc)",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "example": 12345,
+                        "description": "Filter by block height",
+                        "name": "height",
+                        "in": "query"
+                    },
+                    {
+                        "maxLength": 42,
+                        "minLength": 42,
+                        "type": "string",
+                        "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+                        "description": "Filter by recipient address (hexadecimal with 0x prefix)",
+                        "name": "address",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of beacon withdrawals",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/responses.BeaconWithdrawal"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/blocks": {
             "get": {
                 "description": "Returns a paginated list of blocks. Blocks can be sorted by height in ascending or descending order. Optionally includes statistics for each block.",
@@ -1981,6 +2064,36 @@ const docTemplate = `{
                 "value": {
                     "type": "string",
                     "example": "10000000000"
+                }
+            }
+        },
+        "responses.BeaconWithdrawal": {
+            "description": "Beacon chain withdrawal transferring ETH from a validator to an execution layer address",
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
+                },
+                "amount": {
+                    "type": "string",
+                    "example": "1000000000000000000"
+                },
+                "height": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "index": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "time": {
+                    "type": "string",
+                    "example": "2023-07-04T03:10:57+00:00"
+                },
+                "validator_index": {
+                    "type": "integer",
+                    "example": 100000
                 }
             }
         },

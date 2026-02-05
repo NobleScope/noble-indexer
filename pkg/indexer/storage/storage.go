@@ -222,6 +222,10 @@ func (module *Module) processBlockInTransaction(
 		return state, err
 	}
 
+	if err := saveBeaconWithdrawals(ctx, tx, dCtx.Block.Withdrawals, addrToId); err != nil {
+		return state, err
+	}
+
 	if err := updateState(block, totalAccounts, int64(len(block.Txs)), totalContracts, 0, totalTokens, &state); err != nil {
 		return state, err
 	}
