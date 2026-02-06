@@ -29,6 +29,7 @@ type ITrace interface {
 	storage.Table[*Trace]
 
 	Filter(ctx context.Context, filter TraceListFilter) (traces []*Trace, err error)
+	ByTxId(ctx context.Context, txId uint64) (traces []*Trace, err error)
 }
 
 // Trace -
