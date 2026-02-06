@@ -65,6 +65,7 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 	{
 		txGroup.GET("", txHandlers.List)
 		txGroup.GET("/:hash", txHandlers.Get)
+		txGroup.GET("/:hash/traces_tree", txHandlers.TxTracesTree)
 	}
 	v1.GET("/traces", txHandlers.Traces)
 
