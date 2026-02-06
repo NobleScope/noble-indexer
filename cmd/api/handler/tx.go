@@ -327,3 +327,44 @@ func (handler *TxHandler) getAddressByHash(c echo.Context, h string) (storage.Ad
 
 	return address, nil
 }
+
+// TxTracesTree godoc
+//
+//	@Summary		Get transaction execution trace tree
+//	@Description	Returns the execution trace tree for a specific transaction, showing all internal calls, contract creations, and EVM operations in a hierarchical structure. Each trace includes details such as type, gas used, value transferred, and any errors encountered during execution.
+//	@Tags			transactions
+//	@ID				get-transaction-trace-tree
+//	@Param			hash	path	string	true	"Transaction hash in hexadecimal with 0x prefix"	minlength(66)	maxlength(66)	example(0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef)
+//	@Produce		json
+//	@Success		200	{object}	responses.TraceTreeItem	"Execution trace tree for the transaction"
+//	@Success		204										"Transaction not found or no traces available"
+//	@Failure		400	{object}	Error					"Invalid transaction hash format"
+//	@Failure		500	{object}	Error					"Internal server error"
+//	@Router			/txs/{hash}/traces_tree [get]
+func (handler *TxHandler) TxTracesTree(c echo.Context) error {
+	req, err := bindAndValidate[getTxRequest](c)
+	if err != nil {
+		return badRequestError(c, err)
+	}
+
+	hash, err := types.HexFromString(req.Hash)
+	if err != nil {
+		return badRequestError(c, err)
+	}
+
+	tx, err := handler.tx.ByHash(c.Request().Context(), hash)
+	if err != nil {
+		return handleError(c, err, handler.tx)
+	}
+
+	traces, err := handler.trace.ByTxId(c.Request().Context(), tx.Id)
+	if err != nil {
+		return handleError(c, err, handler.trace)
+	}
+
+	response, err := responses.BuildTraceTree(traces)
+	if err != nil {
+		return handleError(c, err, handler.trace)
+	}
+	return c.JSON(http.StatusOK, response)
+}
