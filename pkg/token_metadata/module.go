@@ -39,10 +39,7 @@ type Module struct {
 func NewModule(pg postgres.Storage, cfg config.Config) *Module {
 	opts := make([]ipfs.Option, 0)
 	if cfg.Cache.URL != "" {
-		if cfg.Cache.TTL <= 0 {
-			cfg.Cache.TTL = 1800 // 30 minutes
-		}
-		cache, err := cache.NewValKey(cfg.Cache.URL, time.Duration(cfg.Cache.TTL)*time.Second)
+		cache, err := cache.NewValKey(cfg.Cache.URL, time.Hour*24)
 		if err != nil {
 			panic(err)
 		}
