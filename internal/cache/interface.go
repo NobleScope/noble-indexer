@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+// ICache is an interface for caching data with expiration.
+// It provides methods to get and set data, as well as to close the cache when it's no longer needed.
+//
+//go:generate mockgen -source=$GOFILE -destination=mock.go -package=cache -typed
 type ICache interface {
 	io.Closer
 

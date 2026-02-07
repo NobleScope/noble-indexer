@@ -74,9 +74,13 @@ func InitProfiler(cfg *profiler.Config, serviceName string) (*pyroscope.Profiler
 	return profiler.New(cfg, serviceName)
 }
 
-func InitCache(url string, ttl time.Duration) (cache.ICache, error) {
-	if url != "" {
-		return cache.NewValKey(url, ttl)
+func InitCache(cfg config.Cache) (cache.ICache, error) {
+	if cfg.URL != "" {
+		if cfg.TTL <= 0 {
+			cfg.TTL = 1800 // 30 minutes
+		}
+
+		return cache.NewValKey(cfg.URL, time.Duration(cfg.TTL)*time.Second)
 	}
 	return nil, nil
 }

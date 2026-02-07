@@ -118,7 +118,7 @@ func run(cfg *config.Config) error {
 		e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(rate.Limit(cfg.API.RateLimit))))
 	}
 
-	ttlCache, err := common.InitCache(cfg.API.Cache, time.Duration(cfg.API.CacheTTL)*time.Second)
+	ttlCache, err := common.InitCache(cfg.Cache)
 	if err != nil {
 		log.Panic().Err(err).Msg("initializing cache")
 	}
