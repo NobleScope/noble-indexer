@@ -28,6 +28,7 @@ require (
 	github.com/swaggo/swag v1.16.6
 	github.com/unpackdev/solgo v0.3.7
 	github.com/uptrace/bun v1.2.15
+	github.com/valkey-io/valkey-go v1.0.57
 	go.uber.org/mock v0.6.0
 	golang.org/x/sync v0.19.0
 	golang.org/x/time v0.14.0

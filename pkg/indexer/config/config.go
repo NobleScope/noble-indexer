@@ -34,6 +34,8 @@ type API struct {
 	RateLimit      int    `validate:"omitempty,min=0" yaml:"rate_limit"`
 	RequestTimeout int    `validate:"omitempty,min=1" yaml:"request_timeout"`
 	Websocket      bool   `validate:"omitempty"       yaml:"websocket"`
+	Cache          string `validate:"omitempty,url"   yaml:"cache"`
+	CacheTTL       int    `validate:"min=1"           yaml:"cache_ttl"`
 }
 
 type MetadataResolver struct {
