@@ -5,8 +5,10 @@ import (
 	"time"
 
 	"github.com/baking-bad/noble-indexer/cmd/api/bus"
+	apiCache "github.com/baking-bad/noble-indexer/cmd/api/cache"
 	"github.com/baking-bad/noble-indexer/cmd/api/handler"
 	"github.com/baking-bad/noble-indexer/cmd/api/handler/websocket"
+	"github.com/baking-bad/noble-indexer/internal/cache"
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/internal/storage/postgres"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
@@ -37,8 +39,10 @@ func initDatabase(cfg golibCfg.Database, viewsDir string) postgres.Storage {
 	return db
 }
 
-func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postgres.Storage) {
+func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postgres.Storage, ttlCache cache.ICache) {
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
+
+	defaultMiddlewareCache := apiCache.Middleware(ttlCache, nil, nil)
 
 	v1 := e.Group("v1")
 
@@ -46,7 +50,7 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 	v1.GET("/head", stateHandlers.Head)
 
 	constantsHandler := handler.NewConstantHandler()
-	v1.GET("/enums", constantsHandler.Enums)
+	v1.GET("/enums", constantsHandler.Enums, defaultMiddlewareCache)
 
 	blockHandlers := handler.NewBlockHandler(db.Blocks, db.BlockStats, db.Tx, db.State, cfg.Indexer.Name)
 	blockGroup := v1.Group("/blocks")
@@ -55,16 +59,16 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 		blockGroup.GET("/count", blockHandlers.Count)
 		heightGroup := blockGroup.Group("/:height")
 		{
-			heightGroup.GET("", blockHandlers.Get)
-			heightGroup.GET("/stats", blockHandlers.GetStats)
-			heightGroup.GET("/transactions", blockHandlers.TransactionsList)
+			heightGroup.GET("", blockHandlers.Get, defaultMiddlewareCache)
+			heightGroup.GET("/stats", blockHandlers.GetStats, defaultMiddlewareCache)
+			heightGroup.GET("/transactions", blockHandlers.TransactionsList, defaultMiddlewareCache)
 		}
 	}
 	txHandlers := handler.NewTxHandler(db.Tx, db.Trace, db.Addresses, cfg.Indexer.Name)
 	txGroup := v1.Group("/txs")
 	{
 		txGroup.GET("", txHandlers.List)
-		txGroup.GET("/:hash", txHandlers.Get)
+		txGroup.GET("/:hash", txHandlers.Get, defaultMiddlewareCache)
 	}
 	v1.GET("/traces", txHandlers.Traces)
 
@@ -88,7 +92,7 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 		hashGroup := contractsGroup.Group("/:hash")
 		{
 			hashGroup.GET("", contractHandlers.Get)
-			hashGroup.GET("/sources", contractHandlers.ContractSources)
+			hashGroup.GET("/sources", contractHandlers.ContractSources, defaultMiddlewareCache)
 		}
 	}
 
@@ -109,7 +113,7 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 	userOpsGroup := v1.Group("/user_ops")
 	{
 		userOpsGroup.GET("", userOpHandlers.List)
-		userOpsGroup.GET("/:hash", userOpHandlers.Get)
+		userOpsGroup.GET("/:hash", userOpHandlers.Get, defaultMiddlewareCache)
 	}
 
 	searchHandler := handler.NewSearchHandler(db.Search, db.Addresses, db.Blocks, db.Tx, db.Token)
@@ -124,7 +128,7 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 	statsHandler := handler.NewStatsHandler(db.State, db.BlockStats, cfg.Indexer.Name)
 	statsGroup := v1.Group("/stats")
 	{
-		statsGroup.GET("/block_time", statsHandler.AvgBlockTime)
+		statsGroup.GET("/block_time", statsHandler.AvgBlockTime, defaultMiddlewareCache)
 	}
 
 	if cfg.API.Websocket {
