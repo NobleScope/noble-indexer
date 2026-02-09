@@ -25,6 +25,7 @@ var Models = []any{
 	&Balance{},
 	&State{},
 	&ERC4337UserOp{},
+	&BeaconWithdrawal{},
 }
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
@@ -44,6 +45,7 @@ type Transaction interface {
 	SaveSources(ctx context.Context, sources ...*Source) error
 	SaveProxyContracts(ctx context.Context, contracts ...*ProxyContract) error
 	SaveERC4337UserOps(ctx context.Context, userOps ...*ERC4337UserOp) error
+	SaveBeaconWithdrawals(ctx context.Context, withdrawals ...*BeaconWithdrawal) error
 
 	RollbackBlock(ctx context.Context, height types.Level) error
 	RollbackBlockStats(ctx context.Context, height types.Level) (stats BlockStats, err error)
@@ -55,6 +57,7 @@ type Transaction interface {
 	RollbackTokens(ctx context.Context, height types.Level) (tokens []Token, err error)
 	RollbackContracts(ctx context.Context, height types.Level) error
 	RollbackERC4337UserOps(ctx context.Context, height types.Level) error
+	RollbackBeaconWithdrawals(ctx context.Context, height types.Level) error
 	DeleteBalances(ctx context.Context, ids []uint64) error
 	DeleteTokenBalances(ctx context.Context, tokenIds []string, contractIds []uint64, zeroBalances []*TokenBalance) error
 

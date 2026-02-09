@@ -457,6 +457,25 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			return err
 		}
 
+		// BeaconWithdrawal
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.BeaconWithdrawal)(nil)).
+			Index("beacon_withdrawal_height_idx").
+			Column("height").
+			Using("BRIN").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.BeaconWithdrawal)(nil)).
+			Index("beacon_withdrawal_address_id_idx").
+			Column("address_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+
 		return nil
 	})
 }

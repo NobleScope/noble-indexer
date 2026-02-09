@@ -127,6 +127,12 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 		statsGroup.GET("/block_time", statsHandler.AvgBlockTime)
 	}
 
+	beaconWithdrawalHandler := handler.NewBeaconWithdrawalHandler(db.BeaconWithdrawal, db.Addresses)
+	beaconWithdrawalsGroup := v1.Group("/beacon_withdrawals")
+	{
+		beaconWithdrawalsGroup.GET("", beaconWithdrawalHandler.List)
+	}
+
 	if cfg.API.Websocket {
 		initWebsocket(ctx, v1)
 	}

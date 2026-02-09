@@ -197,6 +197,10 @@ func (module *Module) rollbackBlock(ctx context.Context, block storage.Block) er
 		return tx.HandleError(ctx, err)
 	}
 
+	if err := tx.RollbackBeaconWithdrawals(ctx, height); err != nil {
+		return tx.HandleError(ctx, err)
+	}
+
 	if err := module.rollbackBalances(ctx, tx, block, txs, traces, transfers, tokens, addresses); err != nil {
 		return tx.HandleError(ctx, err)
 	}
