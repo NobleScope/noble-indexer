@@ -26,9 +26,9 @@ type IContract interface {
 	storage.Table[*Contract]
 
 	ByHash(ctx context.Context, hash pkgTypes.Hex) (Contract, error)
-	ById(ctx context.Context, id uint64) (Contract, error)
 	ListWithTx(ctx context.Context, filters ContractListFilter) ([]Contract, error)
 	PendingMetadata(ctx context.Context, delay time.Duration, limit int) ([]*Contract, error)
+	Code(ctx context.Context, hash pkgTypes.Hex) (pkgTypes.Hex, json.RawMessage, error)
 }
 
 // Contract -

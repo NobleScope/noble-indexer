@@ -141,15 +141,8 @@ definitions:
   responses.Contract:
     description: Noble contract information
     properties:
-      abi:
-        items:
-          type: integer
-        type: array
       address:
         example: "0x0000000000000000000000000000000000000001"
-        type: string
-      code:
-        example: 0x01234567890123456789012345678901234567890123456789
         type: string
       compiler_version:
         example: 0.1.1
@@ -185,6 +178,17 @@ definitions:
       verified:
         example: false
         type: boolean
+    type: object
+  responses.ContractCode:
+    description: Noble contract code information
+    properties:
+      abi:
+        items:
+          type: integer
+        type: array
+      code:
+        example: 0x01234567890123456789012345678901234567890123456789
+        type: string
     type: object
   responses.Enums:
     description: Available enum values for various entity types
@@ -1197,6 +1201,38 @@ paths:
           schema:
             $ref: '#/definitions/handler.Error'
       summary: Get contract by address
+      tags:
+      - contract
+  /contracts/{hash}/code:
+    get:
+      description: Returns the deployed bytecode of a specific smart contract.
+      operationId: get-contract-code
+      parameters:
+      - description: Contract address in hexadecimal format (e.g., 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
+        in: path
+        maxLength: 42
+        minLength: 42
+        name: hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Contract bytecode
+          schema:
+            $ref: '#/definitions/responses.ContractCode'
+        "204":
+          description: Contract not found or not verified
+        "400":
+          description: Invalid contract address format
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Get contract bytecode
       tags:
       - contract
   /contracts/{hash}/sources:

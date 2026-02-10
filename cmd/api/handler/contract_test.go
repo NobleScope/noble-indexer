@@ -14,6 +14,7 @@ import (
 	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/internal/storage/mock"
+	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
@@ -329,4 +330,28 @@ func (s *ContractTestSuite) TestContractListByDeployer() {
 	err = json.NewDecoder(rec.Body).Decode(&resp)
 	s.Require().NoError(err)
 	s.Require().Len(resp, 1)
+}
+
+func (s *ContractTestSuite) TestContractCode() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/contract/:hash/code")
+	c.SetParamNames("hash")
+	c.SetParamValues(testAddressHex1.Hex())
+
+	s.contract.EXPECT().
+		Code(gomock.Any(), testAddressHex1).
+		Return(pkgTypes.MustDecodeHex("0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"), []byte(`{"abi": "test"}`), nil).
+		Times(1)
+
+	err := s.handler.GetCode(c)
+	s.Require().NoError(err)
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var resp responses.ContractCode
+	err = json.NewDecoder(rec.Body).Decode(&resp)
+	s.Require().NoError(err)
+	s.Equal("0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef", resp.Code)
+	s.NotEmpty(resp.ABI)
 }

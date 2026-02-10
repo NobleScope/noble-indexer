@@ -656,6 +656,53 @@
                 }
             }
         },
+        "/contracts/{hash}/code": {
+            "get": {
+                "description": "Returns the deployed bytecode of a specific smart contract.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "contract"
+                ],
+                "summary": "Get contract bytecode",
+                "operationId": "get-contract-code",
+                "parameters": [
+                    {
+                        "maxLength": 42,
+                        "minLength": 42,
+                        "type": "string",
+                        "description": "Contract address in hexadecimal format (e.g., 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)",
+                        "name": "hash",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contract bytecode",
+                        "schema": {
+                            "$ref": "#/definitions/responses.ContractCode"
+                        }
+                    },
+                    "204": {
+                        "description": "Contract not found or not verified"
+                    },
+                    "400": {
+                        "description": "Invalid contract address format",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/contracts/{hash}/sources": {
             "get": {
                 "description": "Returns the verified source code files for a specific smart contract. Only available for verified contracts.",
@@ -2246,19 +2293,9 @@
             "description": "Noble contract information",
             "type": "object",
             "properties": {
-                "abi": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
                 "address": {
                     "type": "string",
                     "example": "0x0000000000000000000000000000000000000001"
-                },
-                "code": {
-                    "type": "string",
-                    "example": "0x01234567890123456789012345678901234567890123456789"
                 },
                 "compiler_version": {
                     "type": "string",
@@ -2305,6 +2342,22 @@
                 "verified": {
                     "type": "boolean",
                     "example": false
+                }
+            }
+        },
+        "responses.ContractCode": {
+            "description": "Noble contract code information",
+            "type": "object",
+            "properties": {
+                "abi": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "code": {
+                    "type": "string",
+                    "example": "0x01234567890123456789012345678901234567890123456789"
                 }
             }
         },
