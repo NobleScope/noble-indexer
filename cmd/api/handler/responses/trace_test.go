@@ -3,8 +3,8 @@ package responses
 import (
 	"testing"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/internal/storage/types"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/types"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/require"
 )

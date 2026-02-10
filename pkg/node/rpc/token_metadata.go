@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"net/url"
 
-	internalTypes "github.com/baking-bad/noble-indexer/internal/storage/types"
-	"github.com/baking-bad/noble-indexer/pkg/node/types"
-	tmTypes "github.com/baking-bad/noble-indexer/pkg/token_metadata/types"
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	internalTypes "github.com/NobleScope/noble-indexer/internal/storage/types"
+	"github.com/NobleScope/noble-indexer/pkg/node/types"
+	tmTypes "github.com/NobleScope/noble-indexer/pkg/token_metadata/types"
+	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/opus-domini/fast-shot/constant/header"
 )

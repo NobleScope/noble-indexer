@@ -13,7 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	types "github.com/baking-bad/noble-indexer/pkg/types"
+	types "github.com/NobleScope/noble-indexer/pkg/types"
 	gomock "go.uber.org/mock/gomock"
 )
 

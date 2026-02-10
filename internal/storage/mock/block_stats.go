@@ -14,8 +14,8 @@ import (
 	reflect "reflect"
 	time "time"
 
-	storage "github.com/baking-bad/noble-indexer/internal/storage"
-	types "github.com/baking-bad/noble-indexer/pkg/types"
+	storage "github.com/NobleScope/noble-indexer/internal/storage"
+	types "github.com/NobleScope/noble-indexer/pkg/types"
 	storage0 "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	gomock "go.uber.org/mock/gomock"
 )

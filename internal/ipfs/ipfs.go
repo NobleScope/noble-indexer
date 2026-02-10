@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/baking-bad/noble-indexer/internal/cache"
+	"github.com/NobleScope/noble-indexer/internal/cache"
 	"github.com/dipdup-io/ipfs-tools"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"

@@ -3,8 +3,8 @@ package storage
 import (
 	"context"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/internal/storage/postgres"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/postgres"
 	"github.com/pkg/errors"
 )
 

@@ -1,7 +1,7 @@
 package responses
 
 import (
-	"github.com/baking-bad/noble-indexer/internal/storage/types"
+	"github.com/NobleScope/noble-indexer/internal/storage/types"
 )
 
 // Params model info

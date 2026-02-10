@@ -3,8 +3,8 @@ package responses
 import (
 	"encoding/json"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 )
 
 // Contract model info

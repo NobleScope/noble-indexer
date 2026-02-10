@@ -4,7 +4,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/pkg/types"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/lib/pq"
 )

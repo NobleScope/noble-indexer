@@ -5,8 +5,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/baking-bad/noble-indexer/internal/pool"
-	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/pool"
+	"github.com/NobleScope/noble-indexer/internal/storage"
 )
 
 var logsPool = pool.New(func() []*storage.Log {

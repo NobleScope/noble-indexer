@@ -10,10 +10,10 @@ import (
 
 	"golang.org/x/time/rate"
 
-	_ "github.com/baking-bad/noble-indexer/cmd/api/docs"
-	"github.com/baking-bad/noble-indexer/cmd/api/handler"
-	"github.com/baking-bad/noble-indexer/cmd/common"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
+	_ "github.com/NobleScope/noble-indexer/cmd/api/docs"
+	"github.com/NobleScope/noble-indexer/cmd/api/handler"
+	"github.com/NobleScope/noble-indexer/cmd/common"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/config"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog/log"
@@ -26,11 +26,11 @@ import (
 //	@termsOfService	https://bakingbad.dev/terms
 
 //	@contact.name	API Support
-//	@contact.url	https://github.com/baking-bad/noble-indexer
+//	@contact.url	https://github.com/NobleScope/noble-indexer
 //	@contact.email	hello@bakingbad.dev
 
 //	@license.name	MIT
-//	@license.url	https://github.com/baking-bad/noble-indexer/blob/master/LICENSE
+//	@license.url	https://github.com/NobleScope/noble-indexer/blob/master/LICENSE
 
 //	@host		noble.dipdup.net
 //	@BasePath	/v1

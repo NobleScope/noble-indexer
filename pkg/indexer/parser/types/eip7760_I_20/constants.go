@@ -1,6 +1,6 @@
 package eip7760_I_20
 
-import pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+import pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 
 var (
 	Prefix  = pkgTypes.MustDecodeHex("0x3658146083573d3d3373")

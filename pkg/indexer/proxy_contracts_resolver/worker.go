@@ -4,7 +4,7 @@ import (
 	"context"
 	"slices"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage"
 )
 
 func (p *Module) dispatcher(ctx context.Context) ([][]*storage.ProxyContract, error) {

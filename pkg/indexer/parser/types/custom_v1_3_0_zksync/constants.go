@@ -1,6 +1,6 @@
 package custom_v1_3_0_zksync
 
-import pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+import pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 
 var (
 	Code = pkgTypes.MustDecodeHex("0x00040000000000020000000003010019000000600330027000000036043001970003000000410" +

@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/url"
 
-	"github.com/baking-bad/noble-indexer/pkg/node/types"
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/pkg/node/types"
+	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/opus-domini/fast-shot/constant/header"
 	"github.com/pkg/errors"
 )

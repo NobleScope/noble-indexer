@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/dipdup-io/workerpool"
 	"github.com/goccy/go-json"
 	"github.com/lib/pq"

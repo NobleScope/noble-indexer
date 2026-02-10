@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/baking-bad/noble-indexer/pkg/node"
-	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/pkg/node"
+	"github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 )

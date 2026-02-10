@@ -1,7 +1,7 @@
 package bus
 
 import (
-	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/dipdup-io/workerpool"
 )
 

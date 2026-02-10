@@ -3,10 +3,10 @@ package genesis
 import (
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	dCtx "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser"
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	dCtx "github.com/NobleScope/noble-indexer/pkg/indexer/decode/context"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser"
+	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 )
 
 type parsedData struct {

@@ -8,12 +8,12 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/baking-bad/noble-indexer/internal/cache"
-	"github.com/baking-bad/noble-indexer/internal/ipfs"
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/internal/storage/postgres"
-	"github.com/baking-bad/noble-indexer/internal/storage/types"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
+	"github.com/NobleScope/noble-indexer/internal/cache"
+	"github.com/NobleScope/noble-indexer/internal/ipfs"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/postgres"
+	"github.com/NobleScope/noble-indexer/internal/storage/types"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/config"
 	"github.com/dipdup-net/indexer-sdk/pkg/modules"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/pkg/errors"

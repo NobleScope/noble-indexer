@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/baking-bad/noble-indexer/pkg/node/types"
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/pkg/node/types"
+	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/pkg/errors"
 )
 

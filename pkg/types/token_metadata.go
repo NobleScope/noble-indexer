@@ -3,7 +3,7 @@ package types
 import (
 	"math/big"
 
-	internalTypes "github.com/baking-bad/noble-indexer/internal/storage/types"
+	internalTypes "github.com/NobleScope/noble-indexer/internal/storage/types"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 )
 

@@ -1,4 +1,4 @@
-module github.com/baking-bad/noble-indexer
+module github.com/NobleScope/noble-indexer
 
 go 1.25.1
 

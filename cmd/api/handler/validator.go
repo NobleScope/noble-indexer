@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/baking-bad/noble-indexer/internal/storage/types"
+	"github.com/NobleScope/noble-indexer/internal/storage/types"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )

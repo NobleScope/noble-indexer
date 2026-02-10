@@ -6,9 +6,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/baking-bad/noble-indexer/cmd/common"
-	"github.com/baking-bad/noble-indexer/internal/storage/postgres"
-	"github.com/baking-bad/noble-indexer/pkg/contract_metadata"
+	"github.com/NobleScope/noble-indexer/cmd/common"
+	"github.com/NobleScope/noble-indexer/internal/storage/postgres"
+	"github.com/NobleScope/noble-indexer/pkg/contract_metadata"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
