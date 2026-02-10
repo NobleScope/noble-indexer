@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/baking-bad/noble-indexer/internal/cache"
 	"github.com/baking-bad/noble-indexer/internal/ipfs"
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/internal/storage/postgres"
@@ -36,7 +37,15 @@ type Module struct {
 }
 
 func NewModule(pg postgres.Storage, cfg config.Config) *Module {
-	pool, err := ipfs.New(cfg.TokenMetadataResolver.MetadataGateways)
+	opts := make([]ipfs.Option, 0)
+	if cfg.Cache.URL != "" {
+		cache, err := cache.NewValKey(cfg.Cache.URL, time.Hour*24)
+		if err != nil {
+			panic(err)
+		}
+		opts = append(opts, ipfs.WithCache(cache))
+	}
+	pool, err := ipfs.New(cfg.TokenMetadataResolver.MetadataGateways, opts...)
 	if err != nil {
 		panic(err)
 	}

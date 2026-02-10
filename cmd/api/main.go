@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
-	"golang.org/x/time/rate"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"golang.org/x/time/rate"
 
 	_ "github.com/baking-bad/noble-indexer/cmd/api/docs"
 	"github.com/baking-bad/noble-indexer/cmd/api/handler"
@@ -117,9 +118,14 @@ func run(cfg *config.Config) error {
 		e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(rate.Limit(cfg.API.RateLimit))))
 	}
 
+	ttlCache, err := common.InitCache(cfg.Cache)
+	if err != nil {
+		log.Panic().Err(err).Msg("initializing cache")
+	}
+
 	db := initDatabase(cfg.Database, cfg.Indexer.ScriptsDir)
 	initDispatcher(ctx, db)
-	initHandlers(ctx, e, *cfg, db)
+	initHandlers(ctx, e, *cfg, db, ttlCache)
 
 	go func() {
 		log.Info().Str("bind", cfg.API.Bind).Msg("Starting API server")
@@ -140,6 +146,9 @@ func run(cfg *config.Config) error {
 	}
 	if err := db.Close(); err != nil {
 		log.Panic().Err(err).Msg("closing database")
+	}
+	if err := ttlCache.Close(); err != nil {
+		log.Panic().Err(err).Msg("closing cache")
 	}
 
 	log.Info().Msg("stopped")

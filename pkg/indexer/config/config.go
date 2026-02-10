@@ -11,6 +11,7 @@ type Config struct {
 	LogLevel                 string           `validate:"omitempty,oneof=debug trace info warn error fatal panic" yaml:"log_level"`
 	Indexer                  Indexer          `yaml:"indexer"`
 	API                      API              `yaml:"api"`
+	Cache                    Cache            `yaml:"cache"`
 	Profiler                 *profiler.Config `validate:"omitempty"                                               yaml:"profiler"`
 	ContractMetadataResolver MetadataResolver `yaml:"contract_resolver"`
 	TokenMetadataResolver    MetadataResolver `yaml:"token_resolver"`
@@ -34,6 +35,11 @@ type API struct {
 	RateLimit      int    `validate:"omitempty,min=0" yaml:"rate_limit"`
 	RequestTimeout int    `validate:"omitempty,min=1" yaml:"request_timeout"`
 	Websocket      bool   `validate:"omitempty"       yaml:"websocket"`
+}
+
+type Cache struct {
+	URL string `validate:"required,url" yaml:"url"`
+	TTL int    `validate:"min=1"        yaml:"ttl"`
 }
 
 type MetadataResolver struct {
