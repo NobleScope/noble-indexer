@@ -1827,6 +1827,54 @@ const docTemplate = `{
                 }
             }
         },
+        "/txs/{hash}/traces_tree": {
+            "get": {
+                "description": "Returns the execution trace tree for a specific transaction, showing all internal calls, contract creations, and EVM operations in a hierarchical structure. Each trace includes details such as type, gas used, value transferred, and any errors encountered during execution.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transactions"
+                ],
+                "summary": "Get transaction execution trace tree",
+                "operationId": "get-transaction-trace-tree",
+                "parameters": [
+                    {
+                        "maxLength": 66,
+                        "minLength": 66,
+                        "type": "string",
+                        "example": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                        "description": "Transaction hash in hexadecimal with 0x prefix",
+                        "name": "hash",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Execution trace tree for the transaction",
+                        "schema": {
+                            "$ref": "#/definitions/responses.TraceTreeItem"
+                        }
+                    },
+                    "204": {
+                        "description": "Transaction not found or no traces available"
+                    },
+                    "400": {
+                        "description": "Invalid transaction hash format",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/user_ops": {
             "get": {
                 "description": "Returns a paginated list of ERC-4337 user operations. Can be filtered by transaction, block height, time range, bundler, paymaster, or success status.",
@@ -2585,6 +2633,102 @@ const docTemplate = `{
                 "amount": {
                     "type": "string",
                     "example": "123456789123456789"
+                },
+                "contract": {
+                    "type": "string",
+                    "example": "0x0000000000000000000000000000000000000002"
+                },
+                "creation_method": {
+                    "type": "string",
+                    "example": "create"
+                },
+                "from_address": {
+                    "type": "string",
+                    "example": "0x0000000000000000000000000000000000000001"
+                },
+                "gas_limit": {
+                    "type": "string",
+                    "example": "2100"
+                },
+                "gas_used": {
+                    "type": "string",
+                    "example": "21000"
+                },
+                "height": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "init_hash": {
+                    "type": "string",
+                    "example": "0x6060604052341561000f57600080fd5b"
+                },
+                "input": {
+                    "type": "string",
+                    "example": "hex input data"
+                },
+                "output": {
+                    "type": "string",
+                    "example": "0x0"
+                },
+                "subtraces": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "time": {
+                    "type": "string",
+                    "example": "2023-07-04T03:10:57+00:00"
+                },
+                "to_address": {
+                    "type": "string",
+                    "example": "0x123456789abcdef123456789abcdef123456789abc"
+                },
+                "trace_address": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    },
+                    "example": [
+                        1,
+                        2,
+                        3
+                    ]
+                },
+                "tx_hash": {
+                    "type": "string",
+                    "example": "0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22"
+                },
+                "tx_position": {
+                    "type": "integer",
+                    "example": 123456789
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "call",
+                        "delegatecall",
+                        "staticcall",
+                        "create",
+                        "create2",
+                        "selfdestruct",
+                        "reward"
+                    ],
+                    "example": "call"
+                }
+            }
+        },
+        "responses.TraceTreeItem": {
+            "description": "Transaction execution trace tree item",
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "string",
+                    "example": "123456789123456789"
+                },
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
                 },
                 "contract": {
                     "type": "string",

@@ -557,3 +557,19 @@ func (s *StorageTestSuite) TestTraceFilterByAddressId() {
 		)
 	}
 }
+
+func (s *StorageTestSuite) TestTraceByTxId() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	txId := uint64(2)
+	traces, err := s.storage.Trace.ByTxId(ctx, txId)
+	s.Require().NoError(err)
+	s.Require().Len(traces, 6) // tx 2 has 6 traces
+
+	// All should have tx_id = 2
+	for _, trace := range traces {
+		s.Require().NotNil(trace.TxId)
+		s.Require().EqualValues(2, *trace.TxId)
+	}
+}
