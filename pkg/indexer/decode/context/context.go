@@ -117,7 +117,7 @@ func (ctx *Context) GetContracts() []*storage.Contract {
 }
 
 func (ctx *Context) GetTraces() []*storage.Trace {
-	traces := make([]*storage.Trace, 0)
+	traces := make([]*storage.Trace, 0) //nolint:prealloc
 	for _, ts := range ctx.Traces.Values() {
 		traces = append(traces, ts...)
 	}

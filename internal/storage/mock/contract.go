@@ -11,6 +11,7 @@ package mock
 
 import (
 	context "context"
+	json "encoding/json"
 	reflect "reflect"
 	time "time"
 
@@ -83,41 +84,42 @@ func (c *MockIContractByHashCall) DoAndReturn(f func(context.Context, types.Hex)
 	return c
 }
 
-// ById mocks base method.
-func (m *MockIContract) ById(ctx context.Context, id uint64) (storage.Contract, error) {
+// Code mocks base method.
+func (m *MockIContract) Code(ctx context.Context, hash types.Hex) (types.Hex, json.RawMessage, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ById", ctx, id)
-	ret0, _ := ret[0].(storage.Contract)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "Code", ctx, hash)
+	ret0, _ := ret[0].(types.Hex)
+	ret1, _ := ret[1].(json.RawMessage)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
-// ById indicates an expected call of ById.
-func (mr *MockIContractMockRecorder) ById(ctx, id any) *MockIContractByIdCall {
+// Code indicates an expected call of Code.
+func (mr *MockIContractMockRecorder) Code(ctx, hash any) *MockIContractCodeCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ById", reflect.TypeOf((*MockIContract)(nil).ById), ctx, id)
-	return &MockIContractByIdCall{Call: call}
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Code", reflect.TypeOf((*MockIContract)(nil).Code), ctx, hash)
+	return &MockIContractCodeCall{Call: call}
 }
 
-// MockIContractByIdCall wrap *gomock.Call
-type MockIContractByIdCall struct {
+// MockIContractCodeCall wrap *gomock.Call
+type MockIContractCodeCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockIContractByIdCall) Return(arg0 storage.Contract, arg1 error) *MockIContractByIdCall {
-	c.Call = c.Call.Return(arg0, arg1)
+func (c *MockIContractCodeCall) Return(arg0 types.Hex, arg1 json.RawMessage, arg2 error) *MockIContractCodeCall {
+	c.Call = c.Call.Return(arg0, arg1, arg2)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockIContractByIdCall) Do(f func(context.Context, uint64) (storage.Contract, error)) *MockIContractByIdCall {
+func (c *MockIContractCodeCall) Do(f func(context.Context, types.Hex) (types.Hex, json.RawMessage, error)) *MockIContractCodeCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockIContractByIdCall) DoAndReturn(f func(context.Context, uint64) (storage.Contract, error)) *MockIContractByIdCall {
+func (c *MockIContractCodeCall) DoAndReturn(f func(context.Context, types.Hex) (types.Hex, json.RawMessage, error)) *MockIContractCodeCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

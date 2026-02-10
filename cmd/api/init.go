@@ -94,6 +94,7 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 		{
 			hashGroup.GET("", contractHandlers.Get)
 			hashGroup.GET("/sources", contractHandlers.ContractSources, defaultMiddlewareCache)
+			hashGroup.GET("/code", contractHandlers.GetCode, defaultMiddlewareCache)
 		}
 	}
 

@@ -206,3 +206,35 @@ func (handler *ContractHandler) ContractSources(c echo.Context) error {
 
 	return returnArray(c, response)
 }
+
+// GetCode godoc
+//
+//	@Summary		Get contract bytecode
+//	@Description	Returns the deployed bytecode of a specific smart contract.
+//	@Tags			contract
+//	@ID				get-contract-code
+//	@Param			hash	path	string	true	"Contract address in hexadecimal format (e.g., 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)"	minlength(42)	maxlength(42)
+//	@Produce		json
+//	@Success		200	{object}	responses.ContractCode	"Contract bytecode"
+//	@Success		204									"Contract not found or not verified"
+//	@Failure		400	{object}	Error					"Invalid contract address format"
+//	@Failure		500	{object}	Error					"Internal server error"
+//	@Router			/contracts/{hash}/code [get]
+func (handler *ContractHandler) GetCode(c echo.Context) error {
+	req, err := bindAndValidate[getByHashRequest](c)
+	if err != nil {
+		return badRequestError(c, err)
+	}
+
+	hash, err := types.HexFromString(req.Hash)
+	if err != nil {
+		return badRequestError(c, err)
+	}
+
+	contract, abi, err := handler.contract.Code(c.Request().Context(), hash)
+	if err != nil {
+		return handleError(c, err, handler.contract)
+	}
+
+	return c.JSON(http.StatusOK, responses.NewContractCode(contract, abi))
+}
