@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"time"
 
 	models "github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/internal/storage/postgres/migrations"
@@ -51,20 +50,6 @@ func Create(ctx context.Context, cfg config.Database, scriptsDir string, withMig
 	if err != nil {
 		return Storage{}, err
 	}
-
-	sqldb := strg.Connection().DB().DB
-	if cfg.MaxOpenConnections <= 0 {
-		cfg.MaxOpenConnections = 100
-	}
-	if cfg.MaxIdleConnections <= 0 {
-		cfg.MaxIdleConnections = 100
-	}
-	if cfg.MaxLifetimeConnections < 0 {
-		cfg.MaxLifetimeConnections = 0
-	}
-	sqldb.SetMaxOpenConns(cfg.MaxOpenConnections)
-	sqldb.SetMaxIdleConns(cfg.MaxIdleConnections)
-	sqldb.SetConnMaxLifetime(time.Duration(cfg.MaxLifetimeConnections) * time.Second)
 
 	s := Storage{
 		cfg:              cfg,
