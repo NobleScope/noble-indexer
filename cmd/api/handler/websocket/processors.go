@@ -1,8 +1,8 @@
 package websocket
 
 import (
-	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
-	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/internal/storage"
 )
 
 func blockProcessor(block storage.Block) Notification[*responses.Block] {

@@ -3,7 +3,7 @@ package responses
 import (
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage"
 )
 
 // BeaconWithdrawal represents a beacon chain (consensus layer) withdrawal

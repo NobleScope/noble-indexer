@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/baking-bad/noble-indexer/internal/profiler"
+	"github.com/NobleScope/noble-indexer/internal/profiler"
 	"github.com/dipdup-net/go-lib/config"
 	"github.com/pkg/errors"
 )

@@ -14,7 +14,7 @@ import (
 	reflect "reflect"
 	time "time"
 
-	storage "github.com/baking-bad/noble-indexer/internal/storage"
+	storage "github.com/NobleScope/noble-indexer/internal/storage"
 	storage0 "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	decimal "github.com/shopspring/decimal"
 	gomock "go.uber.org/mock/gomock"

@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/hex"
 
-	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/pkg/types"
 )
 
 func (r *Module) sequencer(ctx context.Context) {

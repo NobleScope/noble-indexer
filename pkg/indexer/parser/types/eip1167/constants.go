@@ -1,6 +1,6 @@
 package eip1167
 
-import pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+import pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 
 const CodeLength = 45
 

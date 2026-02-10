@@ -3,11 +3,11 @@ package parser
 import (
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	storageType "github.com/baking-bad/noble-indexer/internal/storage/types"
-	dCtx "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/enum"
-	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	storageType "github.com/NobleScope/noble-indexer/internal/storage/types"
+	dCtx "github.com/NobleScope/noble-indexer/pkg/indexer/decode/context"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/enum"
+	"github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 )

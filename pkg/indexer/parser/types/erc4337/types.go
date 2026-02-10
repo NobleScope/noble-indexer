@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"strings"
 
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/ethereum/go-ethereum/common"
 )
 

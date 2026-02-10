@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 )
 
 const (

@@ -737,11 +737,11 @@ info:
   contact:
     email: hello@bakingbad.dev
     name: API Support
-    url: https://github.com/baking-bad/noble-indexer
+    url: https://github.com/NobleScope/noble-indexer
   description: API for Noble blockchain indexer
   license:
     name: MIT
-    url: https://github.com/baking-bad/noble-indexer/blob/master/LICENSE
+    url: https://github.com/NobleScope/noble-indexer/blob/master/LICENSE
   termsOfService: https://bakingbad.dev/terms
   title: Noble Indexer API
   version: "1.0"

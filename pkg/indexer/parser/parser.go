@@ -6,9 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/baking-bad/noble-indexer/internal/storage/types"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/erc4337"
+	"github.com/NobleScope/noble-indexer/internal/storage/types"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/config"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser/types/erc4337"
 	"github.com/pkg/errors"
 
 	"github.com/dipdup-net/indexer-sdk/pkg/modules"

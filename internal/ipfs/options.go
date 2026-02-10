@@ -1,6 +1,6 @@
 package ipfs
 
-import "github.com/baking-bad/noble-indexer/internal/cache"
+import "github.com/NobleScope/noble-indexer/internal/cache"
 
 type Option func(*Pool)
 

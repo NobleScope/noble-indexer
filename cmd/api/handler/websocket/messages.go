@@ -1,7 +1,7 @@
 package websocket
 
 import (
-	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
 	"github.com/goccy/go-json"
 )
 

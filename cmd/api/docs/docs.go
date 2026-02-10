@@ -12,12 +12,12 @@ const docTemplate = `{
         "termsOfService": "https://bakingbad.dev/terms",
         "contact": {
             "name": "API Support",
-            "url": "https://github.com/baking-bad/noble-indexer",
+            "url": "https://github.com/NobleScope/noble-indexer",
             "email": "hello@bakingbad.dev"
         },
         "license": {
             "name": "MIT",
-            "url": "https://github.com/baking-bad/noble-indexer/blob/master/LICENSE"
+            "url": "https://github.com/NobleScope/noble-indexer/blob/master/LICENSE"
         },
         "version": "{{.Version}}"
     },

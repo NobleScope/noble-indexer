@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/baking-bad/noble-indexer/internal/cache"
+	"github.com/NobleScope/noble-indexer/internal/cache"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/pkg/errors"

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/cache"
+	"github.com/NobleScope/noble-indexer/internal/cache"
 	"github.com/dipdup-io/ipfs-tools"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"

@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/cache"
-	"github.com/baking-bad/noble-indexer/internal/profiler"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
+	"github.com/NobleScope/noble-indexer/internal/cache"
+	"github.com/NobleScope/noble-indexer/internal/profiler"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/config"
 	goLibConfig "github.com/dipdup-net/go-lib/config"
 	"github.com/grafana/pyroscope-go"
 	"github.com/rs/zerolog"

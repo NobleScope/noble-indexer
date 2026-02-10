@@ -13,8 +13,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	storage "github.com/baking-bad/noble-indexer/internal/storage"
-	types "github.com/baking-bad/noble-indexer/pkg/types"
+	storage "github.com/NobleScope/noble-indexer/internal/storage"
+	types "github.com/NobleScope/noble-indexer/pkg/types"
 	storage0 "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	pq "github.com/lib/pq"
 	bun "github.com/uptrace/bun"

@@ -3,7 +3,7 @@ package handler
 import (
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/labstack/echo/v4"
 )
 
