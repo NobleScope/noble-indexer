@@ -34,6 +34,7 @@ type logListRequest struct {
 	Height  *uint64 `query:"height"  validate:"omitempty,min=0"`
 	TxHash  string  `query:"tx_hash" validate:"omitempty,tx_hash"`
 	Address string  `query:"address" validate:"omitempty,address"`
+	Decode  bool    `query:"decode"  validate:"omitempty"`
 
 	From int64 `example:"1692892095" query:"time_from" swaggertype:"integer" validate:"omitempty,min=1"`
 	To   int64 `example:"1692892095" query:"time_to"   swaggertype:"integer" validate:"omitempty,min=1"`
@@ -62,6 +63,7 @@ func (req *logListRequest) SetDefault() {
 //	@Param			time_from		query	integer	false	"Filter by timestamp from (Unix timestamp)"					minimum(1)	example(1692892095)
 //	@Param			time_to			query	integer	false	"Filter by timestamp to (Unix timestamp)"					minimum(1)	example(1692892095)
 //	@Param			sort			query	string	false	"Sort order by timestamp (default: desc)"					Enums(asc, desc)	default(desc)
+//	@Param			decode			query	boolean	false	"Decode log data and topics using contract ABI"				default(false)
 //	@Produce		json
 //	@Success		200	{array}		responses.Log	"List of event logs"
 //	@Failure		400	{object}	Error			"Invalid request parameters"
@@ -75,9 +77,10 @@ func (handler *LogHandler) List(c echo.Context) error {
 	req.SetDefault()
 
 	filters := storage.LogListFilter{
-		Limit:  req.Limit,
-		Offset: req.Offset,
-		Sort:   pgSort(req.Sort),
+		Limit:   req.Limit,
+		Offset:  req.Offset,
+		Sort:    pgSort(req.Sort),
+		WithABI: req.Decode,
 	}
 
 	if req.TxHash != "" {

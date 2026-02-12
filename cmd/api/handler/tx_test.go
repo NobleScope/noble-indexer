@@ -1132,7 +1132,7 @@ func (s *TxHandlerTestSuite) TestTxTracesTreeSuccess() {
 		Times(1)
 
 	s.trace.EXPECT().
-		ByTxId(gomock.Any(), testTxWithToAddress.Id).
+		ByTxId(gomock.Any(), testTxWithToAddress.Id, false).
 		Return([]*storage.Trace{&testTrace1}, nil).
 		Times(1)
 
@@ -1162,7 +1162,7 @@ func (s *TxHandlerTestSuite) TestTxTracesTreeWithHierarchy() {
 		Times(1)
 
 	s.trace.EXPECT().
-		ByTxId(gomock.Any(), testTxWithToAddress.Id).
+		ByTxId(gomock.Any(), testTxWithToAddress.Id, false).
 		Return([]*storage.Trace{
 			&testTraceRoot,
 			&testTraceChild0,
@@ -1211,7 +1211,7 @@ func (s *TxHandlerTestSuite) TestTxTracesTreeEmptyTraces() {
 		Times(1)
 
 	s.trace.EXPECT().
-		ByTxId(gomock.Any(), testTxWithToAddress.Id).
+		ByTxId(gomock.Any(), testTxWithToAddress.Id, false).
 		Return([]*storage.Trace{}, nil).
 		Times(1)
 
@@ -1302,7 +1302,7 @@ func (s *TxHandlerTestSuite) TestTxTracesTreeByTxIdError() {
 		Times(1)
 
 	s.trace.EXPECT().
-		ByTxId(gomock.Any(), testTxWithToAddress.Id).
+		ByTxId(gomock.Any(), testTxWithToAddress.Id, false).
 		Return(nil, sql.ErrNoRows).
 		Times(1)
 

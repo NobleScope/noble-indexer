@@ -30,6 +30,7 @@ type Trace struct {
 	Output         *string          `example:"0x0"                                                           json:"output,omitempty"          swaggertype:"string"`
 	Contract       *string          `example:"0x0000000000000000000000000000000000000002"                    json:"contract,omitempty"        swaggertype:"string"`
 	Subtraces      uint64           `example:"0"                                                             json:"subtraces"                 swaggertype:"integer"`
+	Decoded        *DecodedTrace    `json:"decoded,omitempty"                                                swaggertype:"object"`
 }
 
 func NewTrace(t *storage.Trace) Trace {
@@ -75,6 +76,11 @@ func NewTrace(t *storage.Trace) Trace {
 	}
 	if t.TxPosition != nil {
 		result.TxPosition = *t.TxPosition
+	}
+	if t.To != nil {
+		if parsedABI := parseABI(t.ToContractABI); parsedABI != nil {
+			result.Decoded = decodeTraceWithABI(parsedABI, t.Input)
+		}
 	}
 
 	return result

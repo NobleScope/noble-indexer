@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/NobleScope/noble-indexer/internal/storage/types"
@@ -22,6 +23,7 @@ type TraceListFilter struct {
 	AddressId     *uint64
 	ContractId    *uint64
 	Type          []types.TraceType
+	WithABI       bool
 }
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
@@ -29,7 +31,7 @@ type ITrace interface {
 	storage.Table[*Trace]
 
 	Filter(ctx context.Context, filter TraceListFilter) (traces []*Trace, err error)
-	ByTxId(ctx context.Context, txId uint64) (traces []*Trace, err error)
+	ByTxId(ctx context.Context, txId uint64, withABI bool) (traces []*Trace, err error)
 }
 
 // Trace -
@@ -64,6 +66,8 @@ type Trace struct {
 	ToAddress   *Address  `bun:"rel:belongs-to,join:to_address_id=id"`
 	Contract    *Contract `bun:"rel:belongs-to,join:contract_id=id"`
 	Tx          *Tx       `bun:"rel:belongs-to,join:tx_id=id"`
+
+	ToContractABI json.RawMessage `bun:"to_contract_abi,scanonly"`
 }
 
 // TableName -

@@ -43,18 +43,18 @@ func (m *MockITrace) EXPECT() *MockITraceMockRecorder {
 }
 
 // ByTxId mocks base method.
-func (m *MockITrace) ByTxId(ctx context.Context, txId uint64) ([]*storage.Trace, error) {
+func (m *MockITrace) ByTxId(ctx context.Context, txId uint64, withABI bool) ([]*storage.Trace, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ByTxId", ctx, txId)
+	ret := m.ctrl.Call(m, "ByTxId", ctx, txId, withABI)
 	ret0, _ := ret[0].([]*storage.Trace)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ByTxId indicates an expected call of ByTxId.
-func (mr *MockITraceMockRecorder) ByTxId(ctx, txId any) *MockITraceByTxIdCall {
+func (mr *MockITraceMockRecorder) ByTxId(ctx, txId, withABI any) *MockITraceByTxIdCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ByTxId", reflect.TypeOf((*MockITrace)(nil).ByTxId), ctx, txId)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ByTxId", reflect.TypeOf((*MockITrace)(nil).ByTxId), ctx, txId, withABI)
 	return &MockITraceByTxIdCall{Call: call}
 }
 
@@ -70,13 +70,13 @@ func (c *MockITraceByTxIdCall) Return(traces []*storage.Trace, err error) *MockI
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockITraceByTxIdCall) Do(f func(context.Context, uint64) ([]*storage.Trace, error)) *MockITraceByTxIdCall {
+func (c *MockITraceByTxIdCall) Do(f func(context.Context, uint64, bool) ([]*storage.Trace, error)) *MockITraceByTxIdCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockITraceByTxIdCall) DoAndReturn(f func(context.Context, uint64) ([]*storage.Trace, error)) *MockITraceByTxIdCall {
+func (c *MockITraceByTxIdCall) DoAndReturn(f func(context.Context, uint64, bool) ([]*storage.Trace, error)) *MockITraceByTxIdCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

@@ -910,6 +910,13 @@ const docTemplate = `{
                         "description": "Sort order by timestamp (default: desc)",
                         "name": "sort",
                         "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Decode log data and topics using contract ABI",
+                        "name": "decode",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1467,6 +1474,13 @@ const docTemplate = `{
                         "description": "Sort order (default: desc)",
                         "name": "sort",
                         "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Decode trace input using contract ABI",
+                        "name": "decode",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1895,6 +1909,13 @@ const docTemplate = `{
                         "name": "hash",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Decode trace input using contract ABI",
+                        "name": "decode",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2433,6 +2454,9 @@ const docTemplate = `{
                     "type": "string",
                     "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
                 },
+                "decoded": {
+                    "type": "object"
+                },
                 "height": {
                     "type": "integer",
                     "example": 100
@@ -2695,6 +2719,9 @@ const docTemplate = `{
                     "type": "string",
                     "example": "create"
                 },
+                "decoded": {
+                    "type": "object"
+                },
                 "from_address": {
                     "type": "string",
                     "example": "0x0000000000000000000000000000000000000001"
@@ -2790,6 +2817,9 @@ const docTemplate = `{
                 "creation_method": {
                     "type": "string",
                     "example": "create"
+                },
+                "decoded": {
+                    "type": "object"
                 },
                 "from_address": {
                     "type": "string",

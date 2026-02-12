@@ -79,6 +79,7 @@ type getTxTraces struct {
 	Height      *uint64     `query:"height"       validate:"omitempty,min=0"`
 	Type        StringArray `query:"type"         validate:"omitempty,dive,trace_type"`
 	Sort        string      `query:"sort"         validate:"omitempty,oneof=asc desc"`
+	Decode      bool        `query:"decode"       validate:"omitempty"`
 }
 
 func (req *getTxTraces) SetDefault() {
@@ -105,6 +106,7 @@ func (req *getTxTraces) SetDefault() {
 //	@Param			height			query	integer	false	"Filter by block height"									minimum(1)	example(12345)
 //	@Param			type			query	string	false	"Filter by trace type (comma-separated list)"				Enums(call, delegatecall, staticcall, create, create2, selfdestruct, reward, suicide)
 //	@Param			sort			query	string	false	"Sort order (default: desc)"								Enums(asc, desc)	default(desc)
+//	@Param			decode			query	boolean	false	"Decode trace input using contract ABI"						default(false)
 //	@Produce		json
 //	@Success		200	{array}		responses.Trace	"List of execution traces"
 //	@Failure		400	{object}	Error			"Invalid request parameters"
@@ -123,11 +125,12 @@ func (handler *TxHandler) Traces(c echo.Context) error {
 	}
 
 	filters := storage.TraceListFilter{
-		Limit:  req.Limit,
-		Offset: req.Offset,
-		Sort:   pgSort(req.Sort),
-		Type:   traceTypes,
-		Height: req.Height,
+		Limit:   req.Limit,
+		Offset:  req.Offset,
+		Sort:    pgSort(req.Sort),
+		Type:    traceTypes,
+		Height:  req.Height,
+		WithABI: req.Decode,
 	}
 
 	if req.TxHash != "" {
@@ -328,6 +331,11 @@ func (handler *TxHandler) getAddressByHash(c echo.Context, h string) (storage.Ad
 	return address, nil
 }
 
+type getTxTracesTreeRequest struct {
+	Hash   string `param:"hash"   validate:"required,tx_hash"`
+	Decode bool   `query:"decode" validate:"omitempty"`
+}
+
 // TxTracesTree godoc
 //
 //	@Summary		Get transaction execution trace tree
@@ -335,6 +343,7 @@ func (handler *TxHandler) getAddressByHash(c echo.Context, h string) (storage.Ad
 //	@Tags			transactions
 //	@ID				get-transaction-trace-tree
 //	@Param			hash	path	string	true	"Transaction hash in hexadecimal with 0x prefix"	minlength(66)	maxlength(66)	example(0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef)
+//	@Param			decode	query	boolean	false	"Decode trace input using contract ABI"				default(false)
 //	@Produce		json
 //	@Success		200	{object}	responses.TraceTreeItem	"Execution trace tree for the transaction"
 //	@Success		204										"Transaction not found or no traces available"
@@ -342,7 +351,7 @@ func (handler *TxHandler) getAddressByHash(c echo.Context, h string) (storage.Ad
 //	@Failure		500	{object}	Error					"Internal server error"
 //	@Router			/txs/{hash}/traces_tree [get]
 func (handler *TxHandler) TxTracesTree(c echo.Context) error {
-	req, err := bindAndValidate[getTxRequest](c)
+	req, err := bindAndValidate[getTxTracesTreeRequest](c)
 	if err != nil {
 		return badRequestError(c, err)
 	}
@@ -357,7 +366,7 @@ func (handler *TxHandler) TxTracesTree(c echo.Context) error {
 		return handleError(c, err, handler.tx)
 	}
 
-	traces, err := handler.trace.ByTxId(c.Request().Context(), tx.Id)
+	traces, err := handler.trace.ByTxId(c.Request().Context(), tx.Id, req.Decode)
 	if err != nil {
 		return handleError(c, err, handler.trace)
 	}
@@ -366,5 +375,6 @@ func (handler *TxHandler) TxTracesTree(c echo.Context) error {
 	if err != nil {
 		return handleError(c, err, handler.trace)
 	}
+
 	return c.JSON(http.StatusOK, response)
 }
