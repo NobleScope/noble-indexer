@@ -240,6 +240,8 @@ definitions:
       data:
         example: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         type: string
+      decoded:
+        type: object
       height:
         example: 100
         type: integer
@@ -438,6 +440,8 @@ definitions:
       creation_method:
         example: create
         type: string
+      decoded:
+        type: object
       from_address:
         example: "0x0000000000000000000000000000000000000001"
         type: string
@@ -510,6 +514,8 @@ definitions:
       creation_method:
         example: create
         type: string
+      decoded:
+        type: object
       from_address:
         example: "0x0000000000000000000000000000000000000001"
         type: string
@@ -1385,6 +1391,11 @@ paths:
         in: query
         name: sort
         type: string
+      - default: false
+        description: Decode log data and topics using contract ABI
+        in: query
+        name: decode
+        type: boolean
       produces:
       - application/json
       responses:
@@ -1800,6 +1811,11 @@ paths:
         in: query
         name: sort
         type: string
+      - default: false
+        description: Decode trace input using contract ABI
+        in: query
+        name: decode
+        type: boolean
       produces:
       - application/json
       responses:
@@ -2116,6 +2132,11 @@ paths:
         name: hash
         required: true
         type: string
+      - default: false
+        description: Decode trace input using contract ABI
+        in: query
+        name: decode
+        type: boolean
       produces:
       - application/json
       responses:
