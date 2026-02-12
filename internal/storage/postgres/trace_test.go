@@ -563,7 +563,7 @@ func (s *StorageTestSuite) TestTraceByTxId() {
 	defer ctxCancel()
 
 	txId := uint64(2)
-	traces, err := s.storage.Trace.ByTxId(ctx, txId)
+	traces, err := s.storage.Trace.ByTxId(ctx, txId, false)
 	s.Require().NoError(err)
 	s.Require().Len(traces, 6) // tx 2 has 6 traces
 
@@ -571,5 +571,42 @@ func (s *StorageTestSuite) TestTraceByTxId() {
 	for _, trace := range traces {
 		s.Require().NotNil(trace.TxId)
 		s.Require().EqualValues(2, *trace.TxId)
+	}
+}
+
+func (s *StorageTestSuite) TestTraceByTxIdWithABI() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	txId := uint64(1)
+	traces, err := s.storage.Trace.ByTxId(ctx, txId, true)
+	s.Require().NoError(err)
+	s.Require().Len(traces, 5)
+
+	for _, trace := range traces {
+		if trace.To != nil && *trace.To == 3 {
+			s.Require().NotNil(trace.ToContractABI)
+		}
+	}
+}
+
+func (s *StorageTestSuite) TestTraceFilterWithABI() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	addressId := uint64(3)
+	traces, err := s.storage.Trace.Filter(ctx, storage.TraceListFilter{
+		AddressId: &addressId,
+		Limit:     10,
+		Offset:    0,
+		WithABI:   true,
+	})
+	s.Require().NoError(err)
+	s.Require().Len(traces, 3)
+
+	for _, trace := range traces {
+		if trace.To != nil && *trace.To == 3 {
+			s.Require().NotNil(trace.ToContractABI)
+		}
 	}
 }

@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
@@ -18,6 +19,7 @@ type LogListFilter struct {
 	AddressId *uint64
 	TimeFrom  time.Time
 	TimeTo    time.Time
+	WithABI   bool
 }
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
@@ -44,6 +46,8 @@ type Log struct {
 
 	Address Address `bun:"rel:belongs-to,join:address_id=id"`
 	Tx      Tx      `bun:"rel:belongs-to,join:tx_id=id"`
+
+	ContractABI json.RawMessage `bun:"contract_abi,scanonly"`
 }
 
 // TableName -
