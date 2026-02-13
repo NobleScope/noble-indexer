@@ -358,7 +358,7 @@ func (s *UserOpHandlerTestSuite) TestListWithTxHash() {
 	c.SetPath("/user_ops")
 
 	s.tx.EXPECT().
-		ByHash(gomock.Any(), testTxHash).
+		ByHash(gomock.Any(), testTxHash, false).
 		Return(storage.Tx{Id: 1}, nil).
 		Times(1)
 
@@ -760,7 +760,7 @@ func (s *UserOpHandlerTestSuite) TestListTxNotFound() {
 	c.SetPath("/user_ops")
 
 	s.tx.EXPECT().
-		ByHash(gomock.Any(), testTxHash).
+		ByHash(gomock.Any(), testTxHash, false).
 		Return(storage.Tx{}, sql.ErrNoRows).
 		Times(1)
 
@@ -908,7 +908,7 @@ func (s *UserOpHandlerTestSuite) TestListWithAllFilters() {
 	c.SetPath("/user_ops")
 
 	s.tx.EXPECT().
-		ByHash(gomock.Any(), testTxHash).
+		ByHash(gomock.Any(), testTxHash, false).
 		Return(storage.Tx{Id: 1}, nil).
 		Times(1)
 

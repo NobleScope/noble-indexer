@@ -311,7 +311,7 @@ func (s *LogHandlerTestSuite) TestListWithTxHash() {
 	c.SetPath("/log")
 
 	s.tx.EXPECT().
-		ByHash(gomock.Any(), testTxHash).
+		ByHash(gomock.Any(), testTxHash, false).
 		Return(storage.Tx{Id: 1}, nil).
 		Times(1)
 
@@ -590,7 +590,7 @@ func (s *LogHandlerTestSuite) TestListTxNotFound() {
 	c.SetPath("/log")
 
 	s.tx.EXPECT().
-		ByHash(gomock.Any(), testTxHash).
+		ByHash(gomock.Any(), testTxHash, false).
 		Return(storage.Tx{}, sql.ErrNoRows).
 		Times(1)
 

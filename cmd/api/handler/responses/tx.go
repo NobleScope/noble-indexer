@@ -32,6 +32,7 @@ type Transaction struct {
 	LogsBloom         string          `example:"0x00000000000000000000000000000000000000000000"                     json:"logs_bloom"          swaggertype:"string"`
 	LogsCount         int             `example:"1234"                                                               json:"logs_count"          swaggertype:"integer"`
 	TracesCount       int             `example:"1488"                                                               json:"traces_count"        swaggertype:"integer"`
+	Decoded           *DecodedTrace   `json:"decoded,omitempty"                                                     swaggertype:"object"`
 }
 
 func NewTransaction(tx storage.Tx) Transaction {
@@ -60,6 +61,12 @@ func NewTransaction(tx storage.Tx) Transaction {
 	if tx.ToAddress != nil {
 		toAddr := tx.ToAddress.Hash.Hex()
 		result.ToAddress = &toAddr
+	}
+
+	if tx.ToAddressId != nil && tx.ToContractABI != nil {
+		if parsedABI := parseABI(tx.ToContractABI); parsedABI != nil {
+			result.Decoded = decodeTxArgs(parsedABI, tx.Input)
+		}
 	}
 
 	return result

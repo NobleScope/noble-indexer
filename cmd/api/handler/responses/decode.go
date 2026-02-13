@@ -66,8 +66,8 @@ func decodeLogWithABI(contractABI *abi.ABI, data []byte, topics []pkgTypes.Hex) 
 	}
 
 	topicHashes := make([]common.Hash, 0, len(topics)-1)
-	for i := 1; i < len(topics); i++ {
-		topicHashes = append(topicHashes, common.BytesToHash(topics[i]))
+	for _, t := range topics[1:] {
+		topicHashes = append(topicHashes, common.BytesToHash(t))
 	}
 
 	result := &DecodedLog{
@@ -76,7 +76,7 @@ func decodeLogWithABI(contractABI *abi.ABI, data []byte, topics []pkgTypes.Hex) 
 		Data:   make(map[string]any),
 	}
 
-	indexedValues := make(map[string]interface{})
+	indexedValues := make(map[string]any, len(indexedArgs))
 	if err := abi.ParseTopicsIntoMap(indexedValues, indexedArgs, topicHashes); err == nil {
 		for i := range indexedArgs {
 			if val, ok := indexedValues[indexedArgs[i].Name]; ok {
@@ -98,9 +98,9 @@ func decodeLogWithABI(contractABI *abi.ABI, data []byte, topics []pkgTypes.Hex) 
 	return result
 }
 
-// decodeTraceWithABI decodes a trace's input data using an already-parsed ABI.
+// decodeTxArgs decodes a trace's input data using an already-parsed ABI.
 // Returns nil if abi is nil, input is shorter than 4 bytes, or decoding fails.
-func decodeTraceWithABI(contractABI *abi.ABI, input []byte) *DecodedTrace {
+func decodeTxArgs(contractABI *abi.ABI, input []byte) *DecodedTrace {
 	if contractABI == nil || len(input) < 4 {
 		return nil
 	}

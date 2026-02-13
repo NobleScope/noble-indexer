@@ -116,7 +116,7 @@ func (s *ContractTestSuite) TestContractList_FilterByTxHash() {
 	c.SetPath("/contract")
 
 	s.tx.EXPECT().
-		ByHash(gomock.Any(), gomock.Any()).
+		ByHash(gomock.Any(), gomock.Any(), false).
 		Return(storage.Tx{Id: 77}, nil)
 
 	s.contract.EXPECT().
