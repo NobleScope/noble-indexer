@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/NobleScope/noble-indexer/internal/storage/types"
@@ -24,6 +25,7 @@ type TxListFilter struct {
 	ContractId    *uint64
 	TimeFrom      time.Time
 	TimeTo        time.Time
+	WithABI       bool
 }
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
@@ -31,7 +33,7 @@ type ITx interface {
 	storage.Table[*Tx]
 
 	ByHeight(ctx context.Context, height pkgTypes.Level, limit, offset int, order storage.SortOrder) ([]*Tx, error)
-	ByHash(ctx context.Context, hash pkgTypes.Hex) (Tx, error)
+	ByHash(ctx context.Context, hash pkgTypes.Hex, withABI bool) (Tx, error)
 	Filter(ctx context.Context, filter TxListFilter) ([]Tx, error)
 }
 
@@ -68,6 +70,8 @@ type Tx struct {
 	ToAddress   *Address    `bun:"rel:belongs-to,join:to_address_id=id"`
 	Logs        []*Log      `bun:"rel:has-many"`
 	Transfers   []*Transfer `bun:"rel:has-many"`
+
+	ToContractABI json.RawMessage `bun:"to_contract_abi,scanonly"`
 }
 
 // TableName -

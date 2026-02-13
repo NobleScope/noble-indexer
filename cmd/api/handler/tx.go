@@ -33,7 +33,8 @@ func NewTxHandler(
 }
 
 type getTxRequest struct {
-	Hash string `param:"hash" validate:"required,tx_hash"`
+	Hash   string `param:"hash"   validate:"required,tx_hash"`
+	Decode bool   `query:"decode" validate:"omitempty"`
 }
 
 // Get godoc
@@ -43,6 +44,7 @@ type getTxRequest struct {
 //	@Tags			transactions
 //	@ID				get-transaction
 //	@Param			hash	path	string	true	"Transaction hash in hexadecimal with 0x prefix"	minlength(66)	maxlength(66)	example(0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef)
+//	@Param			decode	query	boolean	false	"Decode transaction input using contract ABI"		default(false)
 //	@Produce		json
 //	@Success		200	{object}	responses.Transaction	"Transaction information"
 //	@Success		204										"Transaction not found"
@@ -60,7 +62,7 @@ func (handler *TxHandler) Get(c echo.Context) error {
 		return badRequestError(c, err)
 	}
 
-	tx, err := handler.tx.ByHash(c.Request().Context(), hash)
+	tx, err := handler.tx.ByHash(c.Request().Context(), hash, req.Decode)
 	if err != nil {
 		return handleError(c, err, handler.tx)
 	}
@@ -139,7 +141,7 @@ func (handler *TxHandler) Traces(c echo.Context) error {
 			return badRequestError(c, err)
 		}
 
-		tx, err := handler.tx.ByHash(c.Request().Context(), hash)
+		tx, err := handler.tx.ByHash(c.Request().Context(), hash, false)
 		if err != nil {
 			return handleError(c, err, handler.tx)
 		}
@@ -203,6 +205,7 @@ type listTxs struct {
 	Height      *uint64     `query:"height"       validate:"omitempty,min=0"`
 	Type        StringArray `query:"type"         validate:"omitempty,dive,tx_type"`
 	Status      StringArray `query:"status"       validate:"omitempty,dive,tx_status"`
+	Decode      bool        `query:"decode"       validate:"omitempty"`
 
 	From int64 `example:"1692892095" query:"time_from" swaggertype:"integer" validate:"omitempty,min=1"`
 	To   int64 `example:"1692892095" query:"time_to"   swaggertype:"integer" validate:"omitempty,min=1"`
@@ -234,6 +237,7 @@ func (req *listTxs) SetDefault() {
 //	@Param			time_from		query	integer	false	"Filter by timestamp from (Unix timestamp)"			minimum(1)	example(1692892095)
 //	@Param			time_to			query	integer	false	"Filter by timestamp to (Unix timestamp)"			minimum(1)	example(1692892095)
 //	@Param			sort			query	string	false	"Sort order by timestamp (default: desc)"			Enums(asc, desc)	default(desc)
+//	@Param			decode			query	boolean	false	"Decode transaction input using contract ABI"		default(false)
 //	@Produce		json
 //	@Success		200	{array}		responses.Transaction	"List of transactions"
 //	@Failure		400	{object}	Error					"Invalid request parameters"
@@ -257,12 +261,13 @@ func (handler *TxHandler) List(c echo.Context) error {
 	}
 
 	filters := storage.TxListFilter{
-		Limit:  req.Limit,
-		Offset: req.Offset,
-		Sort:   pgSort(req.Sort),
-		Type:   txTypes,
-		Status: txStatus,
-		Height: req.Height,
+		Limit:   req.Limit,
+		Offset:  req.Offset,
+		Sort:    pgSort(req.Sort),
+		Type:    txTypes,
+		Status:  txStatus,
+		Height:  req.Height,
+		WithABI: req.Decode,
 	}
 
 	if req.AddressFrom != "" {
@@ -361,7 +366,7 @@ func (handler *TxHandler) TxTracesTree(c echo.Context) error {
 		return badRequestError(c, err)
 	}
 
-	tx, err := handler.tx.ByHash(c.Request().Context(), hash)
+	tx, err := handler.tx.ByHash(c.Request().Context(), hash, false)
 	if err != nil {
 		return handleError(c, err, handler.tx)
 	}

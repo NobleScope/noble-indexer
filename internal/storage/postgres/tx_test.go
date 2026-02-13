@@ -442,7 +442,7 @@ func (s *StorageTestSuite) TestTxByHash() {
 	defer ctxCancel()
 
 	hash := pkgTypes.MustDecodeHex("90f5df4e03620cc55d3ea295bf8826f84465065340cb6d0d095166dd2465f283")
-	tx, err := s.storage.Tx.ByHash(ctx, hash)
+	tx, err := s.storage.Tx.ByHash(ctx, hash, false)
 	s.Require().NoError(err)
 	s.Require().EqualValues(1, tx.Id)
 	s.Require().EqualValues(hash, tx.Hash)
@@ -511,7 +511,7 @@ func (s *StorageTestSuite) TestTxByHashNonExistent() {
 	defer ctxCancel()
 
 	hash := pkgTypes.MustDecodeHex("0000000000000000000000000000000000000000000000000000000000000000")
-	_, err := s.storage.Tx.ByHash(ctx, hash)
+	_, err := s.storage.Tx.ByHash(ctx, hash, false)
 	s.Require().Error(err)
 }
 
@@ -559,4 +559,69 @@ func (s *StorageTestSuite) TestTxFilterByAddressId() {
 			(tx.ToAddressId != nil && *tx.ToAddressId == 2)
 		s.Require().True(hasAddress2, "tx %d should have address 2 as from or to", tx.Id)
 	}
+}
+
+// TestTxFilterWithABI tests Filter with WithABI flag
+func (s *StorageTestSuite) TestTxFilterWithABI() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	txs, err := s.storage.Tx.Filter(ctx, storage.TxListFilter{
+		Limit:   15,
+		Offset:  0,
+		Sort:    sdk.SortOrderAsc,
+		WithABI: true,
+	})
+	s.Require().NoError(err)
+	s.Require().NotEmpty(txs)
+
+	// Tx id=2 has to_address_id=3 which is a contract
+	for _, tx := range txs {
+		if tx.ToAddressId != nil && *tx.ToAddressId == 3 {
+			s.Require().NotNil(tx.ToContractABI, "tx %d should have ToContractABI populated", tx.Id)
+		}
+	}
+}
+
+// TestTxFilterWithoutABI tests Filter without WithABI flag does not populate ABI
+func (s *StorageTestSuite) TestTxFilterWithoutABI() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	txs, err := s.storage.Tx.Filter(ctx, storage.TxListFilter{
+		Limit:  15,
+		Offset: 0,
+		Sort:   sdk.SortOrderAsc,
+	})
+	s.Require().NoError(err)
+	s.Require().NotEmpty(txs)
+
+	for _, tx := range txs {
+		s.Require().Nil(tx.ToContractABI, "tx %d should not have ToContractABI when WithABI is false", tx.Id)
+	}
+}
+
+// TestTxByHashWithABI tests ByHash with ABI flag
+func (s *StorageTestSuite) TestTxByHashWithABI() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	// Tx id=2 has to_address_id=3 (a contract)
+	hash := pkgTypes.MustDecodeHex("31a714df244649c3f7e9297ad1c2f7aaa2ccea799d390e4b150c0e813c2af3c7")
+	tx, err := s.storage.Tx.ByHash(ctx, hash, true)
+	s.Require().NoError(err)
+	s.Require().EqualValues(2, tx.Id)
+	s.Require().NotNil(tx.ToContractABI)
+}
+
+// TestTxByHashWithoutABI tests ByHash without ABI flag
+func (s *StorageTestSuite) TestTxByHashWithoutABI() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	hash := pkgTypes.MustDecodeHex("31a714df244649c3f7e9297ad1c2f7aaa2ccea799d390e4b150c0e813c2af3c7")
+	tx, err := s.storage.Tx.ByHash(ctx, hash, false)
+	s.Require().NoError(err)
+	s.Require().EqualValues(2, tx.Id)
+	s.Require().Nil(tx.ToContractABI)
 }

@@ -88,7 +88,7 @@ func (handler *ContractHandler) List(c echo.Context) error {
 			return badRequestError(c, err)
 		}
 
-		tx, err := handler.tx.ByHash(c.Request().Context(), hash)
+		tx, err := handler.tx.ByHash(c.Request().Context(), hash, false)
 		if err != nil {
 			return handleError(c, err, handler.tx)
 		}

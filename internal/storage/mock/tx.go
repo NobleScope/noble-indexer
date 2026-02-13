@@ -44,18 +44,18 @@ func (m *MockITx) EXPECT() *MockITxMockRecorder {
 }
 
 // ByHash mocks base method.
-func (m *MockITx) ByHash(ctx context.Context, hash types.Hex) (storage.Tx, error) {
+func (m *MockITx) ByHash(ctx context.Context, hash types.Hex, withABI bool) (storage.Tx, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ByHash", ctx, hash)
+	ret := m.ctrl.Call(m, "ByHash", ctx, hash, withABI)
 	ret0, _ := ret[0].(storage.Tx)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ByHash indicates an expected call of ByHash.
-func (mr *MockITxMockRecorder) ByHash(ctx, hash any) *MockITxByHashCall {
+func (mr *MockITxMockRecorder) ByHash(ctx, hash, withABI any) *MockITxByHashCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ByHash", reflect.TypeOf((*MockITx)(nil).ByHash), ctx, hash)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ByHash", reflect.TypeOf((*MockITx)(nil).ByHash), ctx, hash, withABI)
 	return &MockITxByHashCall{Call: call}
 }
 
@@ -71,13 +71,13 @@ func (c *MockITxByHashCall) Return(arg0 storage.Tx, arg1 error) *MockITxByHashCa
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockITxByHashCall) Do(f func(context.Context, types.Hex) (storage.Tx, error)) *MockITxByHashCall {
+func (c *MockITxByHashCall) Do(f func(context.Context, types.Hex, bool) (storage.Tx, error)) *MockITxByHashCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockITxByHashCall) DoAndReturn(f func(context.Context, types.Hex) (storage.Tx, error)) *MockITxByHashCall {
+func (c *MockITxByHashCall) DoAndReturn(f func(context.Context, types.Hex, bool) (storage.Tx, error)) *MockITxByHashCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

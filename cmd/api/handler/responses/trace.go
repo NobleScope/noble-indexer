@@ -79,7 +79,7 @@ func NewTrace(t *storage.Trace) Trace {
 	}
 	if t.To != nil {
 		if parsedABI := parseABI(t.ToContractABI); parsedABI != nil {
-			result.Decoded = decodeTraceWithABI(parsedABI, t.Input)
+			result.Decoded = decodeTxArgs(parsedABI, t.Input)
 		}
 	}
 
