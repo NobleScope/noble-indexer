@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	storageTypes "github.com/baking-bad/noble-indexer/internal/storage/types"
@@ -12,6 +13,13 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 )
+
+const MaxFileSize = 10 * 1024 * 1024 // 10 MB
+
+type uploadedSourceFile struct {
+	name    string
+	content []byte
+}
 
 type ContractVerificationHandler struct {
 	contract storage.IContract
@@ -38,16 +46,17 @@ type verificationResponse struct {
 // ContractVerify godoc
 //
 //	@Summary		Creates a task to verify the specified contract
-//	@Description	Creates a task to verify the specified contract with source code file
+//	@Description	Creates a task to verify the specified contract with source code files. Multiple .sol files can be uploaded.
 //	@Tags			verification
 //	@ID				contract-verification
 //	@Param			contract_address	formData string true  "Contract address"
 //	@Param			contract_name       formData string true  "Contract name in Solidity source"
-//	@Param			source_code         formData file   true  "Source code file"
+//	@Param			source_code         formData file   true  "Source code files (.sol). Multiple files allowed."
 //	@Param			compiler_version    formData string true  "Compiler version"
-//	@Param			license_type		formData string true  "License type"
-//	@Param			optimization_enabled formData bool  false "Optimization enabled"
+//	@Param			license_type		formData string true  "License type"										Enums(none, unlicense, mit, gnu_gpl_v2, gnu_gpl_v3, gnu_lgpl_v2_1, gnu_lgpl_v3, bsd_2_clause, bsd_3_clause, mpl_2_0, osl_3_0, apache_2_0, gnu_agpl_v3, bsl_1_1)
+//	@Param			optimization_enabled formData bool   false "Optimization enabled"
 //	@Param			optimization_runs   formData int    false "Optimization runs"
+//	@Param			evm_version         formData string false "EVM version. Auto-detected if not specified."		Enums(homestead, tangerineWhistle, spuriousDragon, byzantium, constantinople, petersburg, istanbul, berlin, london, paris, shanghai, cancun, prague)
 //	@Accept			multipart/form-data
 //	@Produce		json
 //	@Success		200	{object}	verificationResponse
@@ -100,30 +109,64 @@ func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error
 		optimizationRuns = &optRuns
 	}
 
-	fileHeader, err := c.FormFile("source_code")
-	if err != nil {
-		return badRequestError(c, errors.New("source code file is required"))
+	var evmVersion *storageTypes.EVMVersion
+	if evmVersionStr := c.FormValue("evm_version"); evmVersionStr != "" {
+		v, err := storageTypes.ParseEVMVersion(evmVersionStr)
+		if err != nil {
+			return badRequestError(c, errors.Wrap(err, "invalid EVM version"))
+		}
+		evmVersion = &v
 	}
 
-	file, err := fileHeader.Open()
+	form, err := c.MultipartForm()
 	if err != nil {
-		return badRequestError(c, errors.Wrap(err, "failed to open source code file"))
+		return badRequestError(c, errors.New("failed to parse multipart form"))
 	}
-	defer func() {
+
+	fileHeaders := form.File["source_code"]
+	if len(fileHeaders) == 0 {
+		return badRequestError(c, errors.New("at least one source code file is required"))
+	}
+
+	sourceFiles := make([]uploadedSourceFile, 0, len(fileHeaders))
+	foundPragma := false
+
+	for _, fileHeader := range fileHeaders {
+		if !strings.HasSuffix(strings.ToLower(fileHeader.Filename), ".sol") {
+			return badRequestError(c, errors.Errorf("only .sol files are allowed: %s", fileHeader.Filename))
+		}
+
+		if fileHeader.Size > MaxFileSize {
+			return badRequestError(c, errors.Errorf("file %s is too large, maximum size is 10 MB", fileHeader.Filename))
+		}
+
+		file, err := fileHeader.Open()
+		if err != nil {
+			return badRequestError(c, errors.Wrapf(err, "failed to open file %s", fileHeader.Filename))
+		}
+
+		content, err := io.ReadAll(file)
 		_ = file.Close()
-	}()
+		if err != nil {
+			return badRequestError(c, errors.Wrapf(err, "failed to read file %s", fileHeader.Filename))
+		}
 
-	sourceCode, err := io.ReadAll(file)
-	if err != nil {
-		return badRequestError(c, errors.Wrap(err, "failed to read source code file"))
+		if len(content) == 0 {
+			return badRequestError(c, errors.Errorf("file %s is empty", fileHeader.Filename))
+		}
+
+		if bytes.Contains(content, []byte("pragma solidity")) {
+			foundPragma = true
+		}
+
+		sourceFiles = append(sourceFiles, uploadedSourceFile{
+			name:    fileHeader.Filename,
+			content: content,
+		})
 	}
 
-	if len(sourceCode) == 0 {
-		return badRequestError(c, errors.New("source code file is empty"))
-	}
-
-	if !bytes.Contains(sourceCode, []byte("pragma solidity")) {
-		return badRequestError(c, errors.New("the uploaded file is not the source code of the contract"))
+	if !foundPragma {
+		return badRequestError(c, errors.New("at least one file must contain 'pragma solidity'"))
 	}
 
 	hash, err := types.HexFromString(address)
@@ -139,14 +182,21 @@ func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error
 		return handleError(c, err, handler.contract)
 	}
 
-	task, err := handler.task.ByContractId(c.Request().Context(), contract.Id)
+	tasks, err := handler.task.ByContractId(c.Request().Context(), contract.Id)
 	if err != nil {
 		if !handler.task.IsNoRows(err) {
 			return handleError(c, err, handler.task)
 		}
 	}
-	if task.ContractId != 0 {
-		return badRequestError(c, errors.New("such a contract is already in the verification process"))
+
+	for i := range tasks {
+		if tasks[i].ContractId != 0 &&
+			(tasks[i].Status == storageTypes.VerificationStatusNew || tasks[i].Status == storageTypes.VerificationStatusPending) {
+			return badRequestError(c, errors.New("such a contract is already in the verification process"))
+		}
+		if tasks[i].ContractId != 0 && tasks[i].Status == storageTypes.VerificationStatusSuccess {
+			return badRequestError(c, errors.New("such a contract is already verified"))
+		}
 	}
 
 	newTask := storage.VerificationTask{
@@ -157,17 +207,23 @@ func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error
 		LicenseType:         licenseType,
 		OptimizationEnabled: optimizationEnabled,
 		OptimizationRuns:    optimizationRuns,
+		EVMVersion:          evmVersion,
 	}
 	err = handler.task.Save(c.Request().Context(), &newTask)
 	if err != nil {
 		return handleError(c, err, handler.task)
 	}
 
-	verificationFile := storage.VerificationFile{
-		File:               sourceCode,
-		VerificationTaskId: newTask.Id,
+	verificationFiles := make([]*storage.VerificationFile, 0, len(sourceFiles))
+	for i := range sourceFiles {
+		verificationFiles = append(verificationFiles, &storage.VerificationFile{
+			Name:               sourceFiles[i].name,
+			File:               sourceFiles[i].content,
+			VerificationTaskId: newTask.Id,
+		})
 	}
-	err = handler.file.Save(c.Request().Context(), &verificationFile)
+
+	err = handler.file.BulkSave(c.Request().Context(), verificationFiles...)
 	if err != nil {
 		return handleError(c, err, handler.file)
 	}

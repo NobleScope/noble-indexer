@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"net/url"
 	"time"
 
 	"github.com/dipdup-net/go-lib/config"
@@ -26,9 +27,14 @@ type API struct {
 }
 
 func NewApi(cfg config.DataSource, opts ...APIOption) API {
+	nodeURL, err := url.Parse(cfg.URL)
+	if err != nil {
+		panic(err)
+	}
+
 	api := API{
 		cfg:       cfg,
-		client:    fastshot.NewClient(cfg.URL).Build(),
+		client:    fastshot.NewClient(nodeURL.Scheme + "://" + nodeURL.Host).Build(),
 		rateLimit: rate.NewLimiter(rate.Every(time.Second/time.Duration(10)), 10),
 		timeout:   time.Second * 30,
 		log:       log.With().Str("module", "node rpc").Logger(),

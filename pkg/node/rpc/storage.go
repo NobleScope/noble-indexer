@@ -14,6 +14,12 @@ import (
 const pathStorage = "eth_getStorageAt"
 
 func (api *API) Storage(ctx context.Context, requestData []pkgTypes.StorageRequest) ([]pkgTypes.Hex, error) {
+	if api.rateLimit != nil {
+		if err := api.rateLimit.Wait(ctx); err != nil {
+			return nil, err
+		}
+	}
+
 	u, err := url.Parse(api.cfg.URL)
 	if err != nil {
 		return nil, err

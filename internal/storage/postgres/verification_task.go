@@ -33,11 +33,11 @@ func (t *VerificationTask) Latest(ctx context.Context) (task storage.Verificatio
 }
 
 // ByContractId -
-func (t *VerificationTask) ByContractId(ctx context.Context, contractId uint64) (task storage.VerificationTask, err error) {
+func (t *VerificationTask) ByContractId(ctx context.Context, contractId uint64) (tasks []storage.VerificationTask, err error) {
 	err = t.DB().NewSelect().
-		Model(&task).
+		Model(&tasks).
 		Where("contract_id = ?", contractId).
-		Scan(ctx, &task)
+		Scan(ctx, &tasks)
 
 	return
 }

@@ -29,3 +29,13 @@ func (f *VerificationFile) ByTaskId(ctx context.Context, id uint64) (files []sto
 
 	return
 }
+
+// BulkSave -
+func (f *VerificationFile) BulkSave(ctx context.Context, files ...*storage.VerificationFile) error {
+	if len(files) == 0 {
+		return nil
+	}
+	_, err := f.DB().NewInsert().Model(&files).Exec(ctx)
+
+	return err
+}

@@ -13,6 +13,12 @@ import (
 const pathHead = "eth_blockNumber"
 
 func (api *API) Head(ctx context.Context) (pkgTypes.Level, error) {
+	if api.rateLimit != nil {
+		if err := api.rateLimit.Wait(ctx); err != nil {
+			return 0, err
+		}
+	}
+
 	u, err := url.Parse(api.cfg.URL)
 	if err != nil {
 		return 0, err

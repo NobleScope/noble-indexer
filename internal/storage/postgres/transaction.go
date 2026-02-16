@@ -252,18 +252,19 @@ func (tx Transaction) SaveProxyContracts(ctx context.Context, contracts ...*mode
 
 func (tx Transaction) AddVerificationTask(ctx context.Context, task models.VerificationTask) error {
 	_, err := tx.Tx().NewInsert().Model(task).
-		Column("status", "creation_time", "contract_id").
-		On("CONFLICT ON CONSTRAINT verification_contract_id_idx DO NOTHING").
+		Column("status", "creation_time", "contract_id", "contract_name", "compiler_version", "license_type", "optimization_enabled", "optimization_runs", "evm_version").
 		Exec(ctx)
 
 	return err
 }
 
-func (tx Transaction) UpdateVerificationTask(ctx context.Context, task models.VerificationTask) error {
-	_, err := tx.Tx().NewInsert().Model(task).
-		On("CONFLICT ON CONSTRAINT verification_contract_id_idx DO UPDATE").
-		Set("status = EXCLUDED.status").
+func (tx Transaction) UpdateVerificationTask(ctx context.Context, task *models.VerificationTask) error {
+	_, err := tx.Tx().NewUpdate().
+		Model(task).
+		Set("status = ?", task.Status).
 		Set("completion_time = now()").
+		Set("error = ?", task.Error).
+		Where("id = ?", task.Id).
 		Exec(ctx)
 
 	return err
@@ -391,6 +392,14 @@ func (tx Transaction) DeleteTokenBalances(ctx context.Context, tokenIds []string
 
 	_, err := query.Exec(ctx)
 
+	return err
+}
+
+func (tx Transaction) DeleteVerificationFiles(ctx context.Context, taskId uint64) error {
+	_, err := tx.Tx().NewDelete().
+		Model((*models.VerificationFile)(nil)).
+		Where("verification_task_id = ?", taskId).
+		Exec(ctx)
 	return err
 }
 

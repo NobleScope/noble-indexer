@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	stdjson "encoding/json"
 	"net/url"
 
 	"github.com/baking-bad/noble-indexer/pkg/node/types"
@@ -17,6 +18,12 @@ const (
 )
 
 func (api *API) Block(ctx context.Context, level pkgTypes.Level) (pkgTypes.Block, error) {
+	if api.rateLimit != nil {
+		if err := api.rateLimit.Wait(ctx); err != nil {
+			return pkgTypes.Block{}, err
+		}
+	}
+
 	u, err := url.Parse(api.cfg.URL)
 	if err != nil {
 		return pkgTypes.Block{}, err
@@ -63,6 +70,11 @@ func (api *API) BlockBulk(ctx context.Context, levels ...pkgTypes.Level) ([]pkgT
 	if len(levels) == 0 {
 		return nil, nil
 	}
+	if api.rateLimit != nil {
+		if err := api.rateLimit.Wait(ctx); err != nil {
+			return nil, err
+		}
+	}
 
 	u, err := url.Parse(api.cfg.URL)
 	if err != nil {
@@ -72,19 +84,14 @@ func (api *API) BlockBulk(ctx context.Context, levels ...pkgTypes.Level) ([]pkgT
 	requestCtx, cancel := context.WithTimeout(ctx, api.timeout)
 	defer cancel()
 
-	responses := make([]any, len(levels)*3)
 	requests := make([]types.Request, len(levels)*3)
 
 	for i := range levels {
-		responses[i*3] = &types.Response[pkgTypes.Block]{}
-		responses[i*3+1] = &types.Response[[]pkgTypes.Receipt]{}
-		responses[i*3+2] = &types.Response[[]pkgTypes.Trace]{}
-
 		hexLevel := levels[i].Hex()
 		requests[i*3] = types.Request{
 			Method:  pathBlock,
 			JsonRpc: "2.0",
-			Id:      1,
+			Id:      int64(i * 3),
 			Params: []any{
 				hexLevel,
 				true,
@@ -93,7 +100,7 @@ func (api *API) BlockBulk(ctx context.Context, levels ...pkgTypes.Level) ([]pkgT
 		requests[i*3+1] = types.Request{
 			Method:  pathReceipts,
 			JsonRpc: "2.0",
-			Id:      1,
+			Id:      int64(i*3 + 1),
 			Params: []any{
 				hexLevel,
 			},
@@ -102,7 +109,7 @@ func (api *API) BlockBulk(ctx context.Context, levels ...pkgTypes.Level) ([]pkgT
 		requests[i*3+2] = types.Request{
 			Method:  pathTraces,
 			JsonRpc: "2.0",
-			Id:      1,
+			Id:      int64(i*3 + 2),
 			Params: []any{
 				hexLevel,
 			},
@@ -125,29 +132,46 @@ func (api *API) BlockBulk(ctx context.Context, levels ...pkgTypes.Level) ([]pkgT
 		return []pkgTypes.BlockData{}, errors.Errorf("invalid status: %d", resp.Status().Code())
 	}
 
-	err = json.NewDecoder(resp.Raw().Body).Decode(&responses)
+	var rawResponses []types.Response[stdjson.RawMessage]
+	err = json.NewDecoder(resp.Raw().Body).Decode(&rawResponses)
 	if err != nil {
 		return []pkgTypes.BlockData{}, err
 	}
 
 	var blockData = make([]pkgTypes.BlockData, len(levels))
-	for i := range responses {
-		switch typ := responses[i].(type) {
-		case *types.Response[pkgTypes.Block]:
-			if typ.Error != nil {
-				return nil, errors.Wrapf(types.ErrRequest, "request error: %s", typ.Error.Error())
+	for i := range rawResponses {
+		if rawResponses[i].Error != nil {
+			return nil, errors.Wrapf(types.ErrRequest, "request error: %s", rawResponses[i].Error.Error())
+		}
+
+		blockIdx := rawResponses[i].Id / 3
+		switch rawResponses[i].Id % 3 {
+		case 0:
+			var block pkgTypes.Block
+			if err := json.Unmarshal(rawResponses[i].Result, &block); err != nil {
+				return nil, errors.Wrap(err, "failed to unmarshal block")
 			}
-			blockData[i/3].Block = typ.Result
-		case *types.Response[[]pkgTypes.Receipt]:
-			if typ.Error != nil {
-				return nil, errors.Wrapf(types.ErrRequest, "request error: %s", typ.Error.Error())
+			blockData[blockIdx].Block = block
+		case 1:
+			if len(rawResponses[i].Result) == 0 {
+				blockData[blockIdx].Receipts = []pkgTypes.Receipt{}
+				continue
 			}
-			blockData[i/3].Receipts = typ.Result
-		case *types.Response[[]pkgTypes.Trace]:
-			if typ.Error != nil {
-				return nil, errors.Wrapf(types.ErrRequest, "request error: %s", typ.Error.Error())
+			var receipts []pkgTypes.Receipt
+			if err := json.Unmarshal(rawResponses[i].Result, &receipts); err != nil {
+				return nil, errors.Wrap(err, "failed to unmarshal receipts")
 			}
-			blockData[i/3].Traces = typ.Result
+			blockData[blockIdx].Receipts = receipts
+		case 2:
+			if len(rawResponses[i].Result) == 0 {
+				blockData[blockIdx].Traces = []pkgTypes.Trace{}
+				continue
+			}
+			var traces []pkgTypes.Trace
+			if err := json.Unmarshal(rawResponses[i].Result, &traces); err != nil {
+				return nil, errors.Wrap(err, "failed to unmarshal traces")
+			}
+			blockData[blockIdx].Traces = traces
 		}
 	}
 

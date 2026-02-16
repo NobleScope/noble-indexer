@@ -2,10 +2,12 @@ package contract_verifier
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/baking-bad/noble-indexer/internal/storage"
 	"github.com/baking-bad/noble-indexer/internal/storage/postgres"
+	"github.com/baking-bad/noble-indexer/internal/storage/types"
 	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
 	"github.com/dipdup-net/indexer-sdk/pkg/modules"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
@@ -69,16 +71,17 @@ func (m *Module) receive(ctx context.Context) {
 func (m *Module) sync(ctx context.Context) error {
 	task, err := m.pg.VerificationTasks.Latest(ctx)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			m.Log.Info().Msg("no tasks for contract verification")
+			return nil
+		}
 		return errors.Wrap(err, "get verification task")
 	}
-	if task.Id == 0 {
-		m.Log.Info().Msg("no tasks for contract verification")
-		return nil
-	}
+
 	m.Log.Info().
-		Uint64("contract id", task.ContractId).
-		Time("creation task time", task.CreationTime).
-		Msg("get verification task")
+		Uint64("contract_id", task.ContractId).
+		Time("creation_time", task.CreationTime).
+		Msg("processing verification task")
 
 	files, err := m.pg.VerificationFiles.ByTaskId(ctx, task.Id)
 	if err != nil {
@@ -87,42 +90,126 @@ func (m *Module) sync(ctx context.Context) error {
 
 	if len(files) == 0 {
 		m.Log.Warn().Uint64("task_id", task.Id).Msg("no files found for verification task")
-		return errors.New("no files found for verification task")
+		if err := m.handleVerificationFailure(ctx, task, "no files found for verification task"); err != nil {
+			return err
+		}
+		return nil
 	}
 
-	if err := m.verify(ctx, task, files); err != nil {
-		m.Log.Err(err).Msg("verify contract")
-		return errors.Wrap(err, "verify contract")
+	result, verifyErr := m.verify(ctx, task, files)
+	if verifyErr != nil {
+		m.Log.Err(verifyErr).Msg("verification failed")
+		if err := m.handleVerificationFailure(ctx, task, verifyErr.Error()); err != nil {
+			return err
+		}
+		return nil
 	}
 
-	//if err := m.save(ctx, contracts, sources); err != nil {
-	//	m.Log.Err(err).Msg("save")
-	//}
+	m.Log.Info().
+		Uint64("contract_id", task.ContractId).
+		Msg("contract verified successfully")
+
+	if err := m.handleVerificationSuccess(ctx, task, files, result); err != nil {
+		return err
+	}
 
 	return nil
 }
 
-func (m *Module) save(ctx context.Context, contracts []*storage.Contract, sources []*storage.Source) error {
+func (m *Module) handleVerificationSuccess(ctx context.Context, task storage.VerificationTask, files []storage.VerificationFile, result *VerificationResult) error {
 	tx, err := postgres.BeginTransaction(ctx, m.storage)
 	if err != nil {
 		return err
 	}
 	defer tx.Close(ctx)
 
-	err = tx.SaveContracts(ctx, contracts...)
+	contract, err := m.pg.Contracts.GetByID(ctx, task.ContractId)
 	if err != nil {
-		return errors.Wrap(err, "save contracts")
+		return errors.Wrap(err, "get contract")
 	}
-	m.Log.Info().Int("count", len(contracts)).Msg("contract metadata updated")
+
+	contract.Verified = true
+	contract.ABI = result.ABI
+	contract.CompilerVersion = result.CompilerVersion
+	contract.Language = result.Language
+	if task.OptimizationEnabled != nil {
+		contract.OptimizerEnabled = *task.OptimizationEnabled
+	}
+
+	sources := make([]*storage.Source, 0, len(files))
+	for _, file := range files {
+		sources = append(sources, &storage.Source{
+			Name:       file.Name,
+			License:    task.LicenseType.String(),
+			Content:    string(file.File),
+			ContractId: task.ContractId,
+		})
+	}
+
+	err = tx.SaveContracts(ctx, contract)
+	if err != nil {
+		return errors.Wrap(err, "save contract")
+	}
 
 	err = tx.SaveSources(ctx, sources...)
 	if err != nil {
 		return errors.Wrap(err, "save contract sources")
 	}
-	m.Log.Info().Int("count", len(sources)).Msg("contract sources saved")
+
+	task.Status = types.VerificationStatusSuccess
+	if err := tx.UpdateVerificationTask(ctx, &task); err != nil {
+		return errors.Wrap(err, "update task status")
+	}
+
+	if err := tx.DeleteVerificationFiles(ctx, task.Id); err != nil {
+		return errors.Wrap(err, "delete verification files")
+	}
+
+	if err := m.updateState(ctx); err != nil {
+		m.Log.Err(err).Msg("update state")
+	}
 
 	if err := tx.Flush(ctx); err != nil {
 		return tx.HandleError(ctx, err)
+	}
+
+	return nil
+}
+
+func (m *Module) handleVerificationFailure(ctx context.Context, task storage.VerificationTask, errorMsg string) error {
+	tx, err := postgres.BeginTransaction(ctx, m.storage)
+	if err != nil {
+		return err
+	}
+	defer tx.Close(ctx)
+
+	task.Status = types.VerificationStatusFailed
+	task.Error = errorMsg
+	if err := tx.UpdateVerificationTask(ctx, &task); err != nil {
+		return errors.Wrap(err, "update task status")
+	}
+
+	if err := tx.DeleteVerificationFiles(ctx, task.Id); err != nil {
+		return errors.Wrap(err, "delete verification files")
+	}
+
+	if err := tx.Flush(ctx); err != nil {
+		return tx.HandleError(ctx, err)
+	}
+
+	return nil
+}
+
+func (m *Module) updateState(ctx context.Context) error {
+	state, err := m.pg.State.ByName(ctx, m.cfg.Indexer.Name)
+	if err != nil {
+		return errors.Wrap(err, "get state")
+	}
+
+	state.TotalVerifiedContracts++
+
+	if err := m.pg.State.Update(ctx, &state); err != nil {
+		return errors.Wrap(err, "update state")
 	}
 
 	return nil

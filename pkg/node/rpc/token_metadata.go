@@ -24,6 +24,11 @@ func (api *API) TokenMetadataBulk(
 	ctx context.Context,
 	queries []pkgTypes.TokenMetadataRequest,
 ) (map[uint64]pkgTypes.TokenMetadata, error) {
+	if api.rateLimit != nil {
+		if err := api.rateLimit.Wait(ctx); err != nil {
+			return nil, err
+		}
+	}
 
 	u, err := url.Parse(api.cfg.URL)
 	if err != nil {
@@ -114,7 +119,10 @@ func (api *API) TokenMetadataBulk(
 
 	result := make(map[uint64]pkgTypes.TokenMetadata)
 	for _, r := range responses {
-		call := idToCall[r.Id]
+		call, ok := idToCall[r.Id]
+		if !ok {
+			return nil, fmt.Errorf("response ID %d not found in token call map", r.Id)
+		}
 		raw := r.Result.Bytes()
 
 		md := result[call.Query.Id]

@@ -112,6 +112,16 @@ func createTypes(ctx context.Context, conn *database.Bun) error {
 			return err
 		}
 
+		if _, err := tx.ExecContext(
+			ctx,
+			createTypeQuery,
+			"evm_version",
+			bun.Safe("evm_version"),
+			bun.In(types.EVMVersionValues()),
+		); err != nil {
+			return err
+		}
+
 		return nil
 	})
 }
