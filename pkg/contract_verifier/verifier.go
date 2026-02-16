@@ -32,6 +32,167 @@ type VerificationResult struct {
 	Language        string
 }
 
+func (m *Module) verify(ctx context.Context, task storage.VerificationTask, files []storage.VerificationFile) (*VerificationResult, error) {
+	if len(files) == 0 {
+		m.Log.Err(errors.New("verification files not found")).Uint64("contract_id", task.ContractId).Msg("verification contract does not contain any files")
+		return nil, errors.New("no source code files found for verification task")
+	}
+
+	contract, err := m.pg.Contracts.GetByID(ctx, task.ContractId)
+	if err != nil {
+		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("could not get contract")
+		return nil, errors.Wrap(err, "get contract by id")
+	}
+
+	var evmVersion string
+	if task.EVMVersion != nil {
+		evmVersion = task.EVMVersion.String()
+		m.Log.Info().Str("evm_version", evmVersion).Msg("using EVM version from task")
+	} else {
+		evmVersion = detectEVMVersion(contract.Code.Bytes()).String()
+		m.Log.Info().Str("evm_version", evmVersion).Msg("auto-detected EVM version from onchain bytecode")
+	}
+
+	compilerVersion := strings.TrimPrefix(task.CompilerVersion, "v")
+	if idx := strings.Index(compilerVersion, "+"); idx != -1 {
+		compilerVersion = compilerVersion[:idx]
+	}
+
+	compiler := solc.New(solc.Version(compilerVersion))
+
+	var opts []solc.Option
+	opts = append(opts, solc.WithEVMVersion(solc.EVMVersion(evmVersion)))
+
+	if task.OptimizationEnabled != nil && *task.OptimizationEnabled {
+		runs := uint64(defaultOptimizationRuns)
+		if task.OptimizationRuns != nil {
+			runs = uint64(*task.OptimizationRuns)
+		}
+		opts = append(opts, solc.WithOptimizer(&solc.Optimizer{
+			Enabled: true,
+			Runs:    runs,
+		}))
+	}
+
+	if task.ViaIR {
+		opts = append(opts, solc.WithViaIR(true))
+	}
+
+	tmpDir1, err := os.MkdirTemp("", "contract-verify-1-")
+	if err != nil {
+		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("could not create temporary directory")
+		return nil, errors.Wrap(err, "create temp directory for first compilation")
+	}
+	defer func() {
+		_ = os.RemoveAll(tmpDir1)
+	}()
+
+	mainContractFileName := task.ContractName + ".sol"
+	sources := buildSourceMap(files)
+
+	if err := writeSourceFiles(tmpDir1, sources); err != nil {
+		return nil, err
+	}
+
+	contract1, err := compiler.Compile(tmpDir1, task.ContractName, opts...)
+	if err != nil {
+		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("failed to compile contract")
+		return nil, errors.Wrap(err, "compile contract")
+	}
+
+	if len(contract1.Runtime) == 0 {
+		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("contract does not contain any runtimes")
+		return nil, errors.New("compilation produced no runtime bytecode")
+	}
+
+	m.Log.Info().
+		Uint64("task_id", task.Id).
+		Int("files_count", len(files)).
+		Msg("contract compiled successfully")
+
+	tmpDir2, err := os.MkdirTemp("", "contract-verify-2-")
+	if err != nil {
+		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("could not create temporary directory")
+		return nil, errors.Wrap(err, "create temp directory for second compilation")
+	}
+	defer func() {
+		_ = os.RemoveAll(tmpDir2)
+	}()
+
+	modifiedSources := make(map[string]string, len(sources))
+	for path, content := range sources {
+		if filepath.Base(path) == mainContractFileName {
+			content = content + "\n"
+		}
+		modifiedSources[path] = content
+	}
+
+	if err := writeSourceFiles(tmpDir2, modifiedSources); err != nil {
+		return nil, err
+	}
+
+	contract2, err := compiler.Compile(tmpDir2, task.ContractName, opts...)
+	if err != nil {
+		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("failed to compile modified contract")
+		return nil, errors.New("failed to compile modified contract for metadata detection")
+	}
+
+	runtimeParts := splitBytecode(contract1.Runtime, contract2.Runtime)
+	contractBytes := contract.Code.Bytes()
+	if len(contractBytes) < len(runtimeParts.main) {
+		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("onchain bytecode is shorter than compiled main part")
+		return nil, errors.Errorf("onchain bytecode is shorter than compiled main part: %d < %d",
+			len(contractBytes), len(runtimeParts.main))
+	}
+
+	contractMainPart := contractBytes[:len(runtimeParts.main)]
+	if !bytecodeEqualIgnoringImmutables(runtimeParts.main, contractMainPart) {
+		m.Log.Error().
+			Str("compiled_main", hex.EncodeToString(runtimeParts.main)).
+			Str("onchain_main", hex.EncodeToString(contractMainPart)).
+			Msg("main bytecode parts do not match")
+		return nil, errors.New("bytecode verification failed: main parts do not match")
+	}
+
+	m.Log.Info().
+		Uint64("contract_id", task.ContractId).
+		Msg("bytecode verification successfully: main parts match")
+
+	abiJSON, err := json.Marshal(contract1.ABI)
+	if err != nil {
+		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("failed to marshal ABI")
+		return nil, errors.Wrap(err, "marshal contract ABI")
+	}
+
+	parsedABI, err := abi.JSON(bytes.NewReader(abiJSON))
+	if err != nil {
+		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("failed to parse ABI")
+		return nil, errors.Wrap(err, "parse contract ABI")
+	}
+
+	if contract.TxId == nil {
+		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("deployment transaction ID should not be nil")
+		return nil, errors.New("deployment transaction not found")
+	}
+
+	deployTx, err := m.pg.Tx.GetByID(ctx, *contract.TxId)
+	if err != nil {
+		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("failed to get deployment transaction")
+		return nil, errors.Wrap(err, "get deployment transaction")
+	}
+
+	if err := m.verifyConstructorArgs(parsedABI, deployTx.Input, len(contract1.Constructor)); err != nil {
+		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("failed to verify contract constructor args")
+		return nil, errors.Wrap(err, "verify constructor arguments")
+	}
+
+	return &VerificationResult{
+		ABI:             abiJSON,
+		CompilerVersion: task.CompilerVersion,
+		Language:        "Solidity",
+	}, nil
+}
+
 // detectEVMVersion detects the minimum required EVM version based on opcodes present in bytecode.
 // It scans for opcodes introduced in different EVM upgrades and returns the newest required version.
 func detectEVMVersion(bytecode []byte) types.EVMVersion {
@@ -103,59 +264,37 @@ func detectEVMVersion(bytecode []byte) types.EVMVersion {
 func (m *Module) verifyConstructorArgs(
 	parsedABI abi.ABI,
 	deployInput []byte,
-	runtimeMainLen int,
+	compiledDeployLen int,
 ) error {
-	hasConstructorParams := len(parsedABI.Constructor.Inputs) > 0
 	deployInputLen := len(deployInput)
 
-	if hasConstructorParams {
-		// Try to decode constructor args from different positions
-		var decodedArgs []interface{}
-		var decodeErr error
-		decoded := false
-
-		minOffset := runtimeMainLen + 20 // runtime + some init code
-		for offset := minOffset; offset <= deployInputLen-32; offset++ {
-			candidate := deployInput[offset:]
-			decodedArgs, decodeErr = parsedABI.Constructor.Inputs.Unpack(candidate)
-			if decodeErr == nil && len(decodedArgs) > 0 {
-				decoded = true
-				m.Log.Info().
-					Int("arg_count", len(decodedArgs)).
-					Int("args_offset", offset).
-					Int("constructor_bytecode_len", offset).
-					Msg("constructor arguments decoded successfully")
-				break
-			}
-		}
-
-		if !decoded {
-			return errors.Wrap(decodeErr, "decode constructor arguments")
-		}
-	} else {
-		// CBOR metadata length is stored in last 2 bytes
-		if deployInputLen < 2 {
-			return errors.New("deployment input too short")
-		}
-
-		cborLen := int(deployInput[deployInputLen-2])<<8 | int(deployInput[deployInputLen-1])
-
-		// Validate CBOR length points to valid metadata start
-		// Metadata should start with 0xa1 or 0xa2 (CBOR map markers)
-		metadataStart := deployInputLen - 2 - cborLen
-		if metadataStart < 0 || metadataStart >= deployInputLen-2 {
-			return errors.Errorf("invalid CBOR metadata length: %d (deployInputLen=%d)", cborLen, deployInputLen)
-		}
-
-		metadataMarker := deployInput[metadataStart]
-		if metadataMarker != 0xa1 && metadataMarker != 0xa2 && metadataMarker != 0xa3 {
-			return errors.Errorf("invalid metadata marker at position %d: 0x%02x (expected 0xa1, 0xa2, or 0xa3)", metadataStart, metadataMarker)
-		}
-
-		m.Log.Info().Msg("no constructor parameters, CBOR metadata verified")
+	// If deploy input is shorter than compiled deploy code, the contract was likely deployed via a factory (CREATE/CREATE2)
+	if deployInputLen < compiledDeployLen {
+		m.Log.Info().
+			Int("deploy_input_len", deployInputLen).
+			Int("compiled_deploy_len", compiledDeployLen).
+			Msg("contract deployed via factory, skipping constructor args verification")
+		return nil
 	}
 
-	m.Log.Info().Msg("constructor args successfully verified")
+	hasConstructorParams := len(parsedABI.Constructor.Inputs) > 0
+
+	if hasConstructorParams {
+		constructorArgs := deployInput[compiledDeployLen:]
+		decodedArgs, err := parsedABI.Constructor.Inputs.Unpack(constructorArgs)
+		if err != nil {
+			return errors.Wrap(err, "decode constructor arguments")
+		}
+		m.Log.Info().
+			Int("arg_count", len(decodedArgs)).
+			Msg("constructor arguments decoded successfully")
+	} else {
+		extraBytes := deployInputLen - compiledDeployLen
+		if extraBytes >= 32 {
+			return errors.Errorf("deployment input has %d extra bytes after deploy code, but constructor has no parameters", extraBytes)
+		}
+		m.Log.Info().Msg("no constructor parameters verified")
+	}
 
 	return nil
 }
@@ -308,165 +447,4 @@ func writeSourceFiles(dir string, sources map[string]string) error {
 		}
 	}
 	return nil
-}
-
-func (m *Module) verify(ctx context.Context, task storage.VerificationTask, files []storage.VerificationFile) (*VerificationResult, error) {
-	if len(files) == 0 {
-		m.Log.Err(errors.New("verification files not found")).Uint64("contract_id", task.ContractId).Msg("verification contract does not contain any files")
-		return nil, errors.New("no source code files found for verification task")
-	}
-
-	contract, err := m.pg.Contracts.GetByID(ctx, task.ContractId)
-	if err != nil {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("could not get contract")
-		return nil, errors.Wrap(err, "get contract by id")
-	}
-
-	var evmVersion string
-	if task.EVMVersion != nil {
-		evmVersion = task.EVMVersion.String()
-		m.Log.Info().Str("evm_version", evmVersion).Msg("using EVM version from task")
-	} else {
-		evmVersion = detectEVMVersion(contract.Code.Bytes()).String()
-		m.Log.Info().Str("evm_version", evmVersion).Msg("auto-detected EVM version from onchain bytecode")
-	}
-
-	compilerVersion := strings.TrimPrefix(task.CompilerVersion, "v")
-	if idx := strings.Index(compilerVersion, "+"); idx != -1 {
-		compilerVersion = compilerVersion[:idx]
-	}
-
-	compiler := solc.New(solc.Version(compilerVersion))
-
-	var opts []solc.Option
-	opts = append(opts, solc.WithEVMVersion(solc.EVMVersion(evmVersion)))
-
-	if task.OptimizationEnabled != nil && *task.OptimizationEnabled {
-		runs := uint64(defaultOptimizationRuns)
-		if task.OptimizationRuns != nil {
-			runs = uint64(*task.OptimizationRuns)
-		}
-		opts = append(opts, solc.WithOptimizer(&solc.Optimizer{
-			Enabled: true,
-			Runs:    runs,
-		}))
-	}
-
-	if task.ViaIR {
-		opts = append(opts, solc.WithViaIR(true))
-	}
-
-	tmpDir1, err := os.MkdirTemp("", "contract-verify-1-")
-	if err != nil {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("could not create temporary directory")
-		return nil, errors.Wrap(err, "create temp directory for first compilation")
-	}
-	defer func() {
-		_ = os.RemoveAll(tmpDir1)
-	}()
-
-	mainContractFileName := task.ContractName + ".sol"
-	sources := buildSourceMap(files)
-
-	if err := writeSourceFiles(tmpDir1, sources); err != nil {
-		return nil, err
-	}
-
-	contract1, err := compiler.Compile(tmpDir1, task.ContractName, opts...)
-	if err != nil {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("failed to compile contract")
-		return nil, errors.Wrap(err, "compile contract")
-	}
-
-	if len(contract1.Runtime) == 0 {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("contract does not contain any runtimes")
-		return nil, errors.New("compilation produced no runtime bytecode")
-	}
-
-	m.Log.Info().
-		Uint64("task_id", task.Id).
-		Int("files_count", len(files)).
-		Msg("contract compiled successfully")
-
-	tmpDir2, err := os.MkdirTemp("", "contract-verify-2-")
-	if err != nil {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("could not create temporary directory")
-		return nil, errors.Wrap(err, "create temp directory for second compilation")
-	}
-	defer func() {
-		_ = os.RemoveAll(tmpDir2)
-	}()
-
-	modifiedSources := make(map[string]string, len(sources))
-	for path, content := range sources {
-		if filepath.Base(path) == mainContractFileName {
-			content = content + "\n"
-		}
-		modifiedSources[path] = content
-	}
-
-	if err := writeSourceFiles(tmpDir2, modifiedSources); err != nil {
-		return nil, err
-	}
-
-	contract2, err := compiler.Compile(tmpDir2, task.ContractName, opts...)
-	if err != nil {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("failed to compile modified contract")
-		return nil, errors.New("failed to compile modified contract for metadata detection")
-	}
-
-	runtimeParts := splitBytecode(contract1.Runtime, contract2.Runtime)
-	contractBytes := contract.Code.Bytes()
-	if len(contractBytes) < len(runtimeParts.main) {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("onchain bytecode is shorter than compiled main part")
-		return nil, errors.Errorf("onchain bytecode is shorter than compiled main part: %d < %d",
-			len(contractBytes), len(runtimeParts.main))
-	}
-
-	contractMainPart := contractBytes[:len(runtimeParts.main)]
-	if !bytecodeEqualIgnoringImmutables(runtimeParts.main, contractMainPart) {
-		m.Log.Error().
-			Str("compiled_main", hex.EncodeToString(runtimeParts.main)).
-			Str("onchain_main", hex.EncodeToString(contractMainPart)).
-			Msg("main bytecode parts do not match")
-		return nil, errors.New("bytecode verification failed: main parts do not match")
-	}
-
-	m.Log.Info().
-		Uint64("contract_id", task.ContractId).
-		Msg("bytecode verification successfully: main parts match")
-
-	abiJSON, err := json.Marshal(contract1.ABI)
-	if err != nil {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("failed to marshal ABI")
-		return nil, errors.Wrap(err, "marshal contract ABI")
-	}
-
-	parsedABI, err := abi.JSON(bytes.NewReader(abiJSON))
-	if err != nil {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("failed to parse ABI")
-		return nil, errors.Wrap(err, "parse contract ABI")
-	}
-
-	if contract.TxId == nil {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("deployment transaction ID should not be nil")
-		return nil, errors.New("deployment transaction not found")
-	}
-
-	deployTx, err := m.pg.Tx.GetByID(ctx, *contract.TxId)
-	if err != nil {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("failed to get deployment transaction")
-		return nil, errors.Wrap(err, "get deployment transaction")
-	}
-
-	if err := m.verifyConstructorArgs(parsedABI, deployTx.Input, len(runtimeParts.main)); err != nil {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("failed to verify contract constructor args")
-		return nil, errors.Wrap(err, "verify constructor arguments")
-	}
-
-	return &VerificationResult{
-		ABI:             abiJSON,
-		CompilerVersion: task.CompilerVersion,
-		Language:        "Solidity",
-	}, nil
 }
