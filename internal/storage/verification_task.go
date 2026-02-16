@@ -32,6 +32,7 @@ type VerificationTask struct {
 	OptimizationEnabled *bool                        `bun:"optimization_enabled"                            comment:"Optimization enabled"`
 	OptimizationRuns    *uint                        `bun:"optimization_runs"                               comment:"Optimization runs"`
 	EVMVersion          *types.EVMVersion            `bun:"evm_version,type:evm_version"                    comment:"EVM version"`
+	ViaIR               bool                         `bun:"via_ir"                                          comment:"Compile via Yul IR pipeline"`
 	Error               string                       `bun:"error"                                           comment:"Error message if verification failed"`
 }
 

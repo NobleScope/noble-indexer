@@ -57,6 +57,7 @@ type verificationResponse struct {
 //	@Param			optimization_enabled formData bool   false "Optimization enabled"
 //	@Param			optimization_runs   formData int    false "Optimization runs"
 //	@Param			evm_version         formData string false "EVM version. Auto-detected if not specified."		Enums(homestead, tangerineWhistle, spuriousDragon, byzantium, constantinople, petersburg, istanbul, berlin, london, paris, shanghai, cancun, prague)
+//	@Param			via_ir              formData bool   false "Compile via Yul IR pipeline"
 //	@Accept			multipart/form-data
 //	@Produce		json
 //	@Success		200	{object}	verificationResponse
@@ -116,6 +117,14 @@ func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error
 			return badRequestError(c, errors.Wrap(err, "invalid EVM version"))
 		}
 		evmVersion = &v
+	}
+
+	var viaIR bool
+	if viaIRStr := c.FormValue("via_ir"); viaIRStr != "" {
+		viaIR, err = strconv.ParseBool(viaIRStr)
+		if err != nil {
+			return badRequestError(c, errors.Wrap(err, "invalid via_ir value"))
+		}
 	}
 
 	form, err := c.MultipartForm()
@@ -208,6 +217,7 @@ func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error
 		OptimizationEnabled: optimizationEnabled,
 		OptimizationRuns:    optimizationRuns,
 		EVMVersion:          evmVersion,
+		ViaIR:               viaIR,
 	}
 	err = handler.task.Save(c.Request().Context(), &newTask)
 	if err != nil {

@@ -352,6 +352,10 @@ func (m *Module) verify(ctx context.Context, task storage.VerificationTask, file
 		}))
 	}
 
+	if task.ViaIR {
+		opts = append(opts, solc.WithViaIR(true))
+	}
+
 	tmpDir1, err := os.MkdirTemp("", "contract-verify-1-")
 	if err != nil {
 		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("could not create temporary directory")
