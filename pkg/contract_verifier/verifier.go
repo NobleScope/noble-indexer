@@ -144,6 +144,10 @@ func (m *Module) verify(ctx context.Context, task storage.VerificationTask, file
 	}
 
 	runtimeParts := splitBytecode(contract1.Runtime, contract2.Runtime)
+	if len(runtimeParts.main) == 0 {
+		return nil, errors.New("bytecode verification failed: compiled bytecodes diverge from byte 0, cannot determine main part")
+	}
+
 	contractBytes := contract.Code.Bytes()
 	if len(contractBytes) < len(runtimeParts.main) {
 		m.Log.Error().Uint64("contract_id", task.ContractId).Msg("onchain bytecode is shorter than compiled main part")
