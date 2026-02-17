@@ -1085,3 +1085,185 @@ func (s *TransactionTestSuite) TestSaveERC4337UserOpsEmpty() {
 
 	s.Require().NoError(tx.Close(ctx))
 }
+
+func (s *TransactionTestSuite) TestAddVerificationTask() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	tx, err := BeginTransaction(ctx, s.storage.Transactable)
+	s.Require().NoError(err)
+
+	optEnabled := true
+	optRuns := uint(200)
+	task := &storage.VerificationTask{
+		Status:              types.VerificationStatusNew,
+		ContractId:          3,
+		ContractName:        "NewContract",
+		CompilerVersion:     "v0.8.25+commit.b61c2a91",
+		LicenseType:         types.Mit,
+		OptimizationEnabled: &optEnabled,
+		OptimizationRuns:    &optRuns,
+		ViaIR:               true,
+	}
+
+	err = tx.AddVerificationTask(ctx, task)
+	s.Require().NoError(err)
+
+	s.Require().NoError(tx.Flush(ctx))
+	s.Require().NoError(tx.Close(ctx))
+
+	s.Require().Greater(task.Id, uint64(0))
+
+	// Verify task was saved
+	saved, err := s.storage.VerificationTasks.ByContractId(ctx, 3)
+	s.Require().NoError(err)
+
+	var found bool
+	for _, t := range saved {
+		if t.Id == task.Id {
+			found = true
+			s.Require().Equal(types.VerificationStatusNew, t.Status)
+			s.Require().Equal("NewContract", t.ContractName)
+			s.Require().Equal("v0.8.25+commit.b61c2a91", t.CompilerVersion)
+			s.Require().NotNil(t.OptimizationEnabled)
+			s.Require().True(*t.OptimizationEnabled)
+			s.Require().NotNil(t.OptimizationRuns)
+			s.Require().Equal(uint(200), *t.OptimizationRuns)
+			s.Require().True(t.ViaIR)
+			break
+		}
+	}
+	s.Require().True(found, "inserted task not found")
+}
+
+func (s *TransactionTestSuite) TestSaveVerificationFiles() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	tx, err := BeginTransaction(ctx, s.storage.Transactable)
+	s.Require().NoError(err)
+
+	files := []*storage.VerificationFile{
+		{
+			Name:               "ContractA.sol",
+			File:               []byte("pragma solidity ^0.8.20; contract A {}"),
+			VerificationTaskId: 1,
+		},
+		{
+			Name:               "ContractB.sol",
+			File:               []byte("pragma solidity ^0.8.20; contract B {}"),
+			VerificationTaskId: 1,
+		},
+	}
+
+	err = tx.SaveVerificationFiles(ctx, files...)
+	s.Require().NoError(err)
+
+	s.Require().NoError(tx.Flush(ctx))
+	s.Require().NoError(tx.Close(ctx))
+
+	// Verify files were saved
+	saved, err := s.storage.VerificationFiles.ByTaskId(ctx, 1)
+	s.Require().NoError(err)
+
+	names := make(map[string]bool)
+	for _, f := range saved {
+		names[f.Name] = true
+	}
+	s.Require().True(names["ContractA.sol"])
+	s.Require().True(names["ContractB.sol"])
+}
+
+func (s *TransactionTestSuite) TestSaveVerificationFilesEmpty() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	tx, err := BeginTransaction(ctx, s.storage.Transactable)
+	s.Require().NoError(err)
+
+	err = tx.SaveVerificationFiles(ctx)
+	s.Require().NoError(err)
+
+	s.Require().NoError(tx.Close(ctx))
+}
+
+func (s *TransactionTestSuite) TestUpdateVerificationTask() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	tx, err := BeginTransaction(ctx, s.storage.Transactable)
+	s.Require().NoError(err)
+
+	// Update task id=1 (status: New -> Failed)
+	task := &storage.VerificationTask{
+		Id:     1,
+		Status: types.VerificationStatusFailed,
+		Error:  "bytecode mismatch",
+	}
+
+	err = tx.UpdateVerificationTask(ctx, task)
+	s.Require().NoError(err)
+
+	s.Require().NoError(tx.Flush(ctx))
+	s.Require().NoError(tx.Close(ctx))
+
+	// Verify update
+	tasks, err := s.storage.VerificationTasks.ByContractId(ctx, 3)
+	s.Require().NoError(err)
+
+	var found bool
+	for _, t := range tasks {
+		if t.Id == 1 {
+			found = true
+			s.Require().Equal(types.VerificationStatusFailed, t.Status)
+			s.Require().Equal("bytecode mismatch", t.Error)
+			s.Require().False(t.CompletionTime.IsZero())
+			break
+		}
+	}
+	s.Require().True(found, "updated task not found")
+}
+
+func (s *TransactionTestSuite) TestDeleteVerificationFiles() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	// Verify files exist before delete (task_id=1 has 2 files in fixtures)
+	filesBefore, err := s.storage.VerificationFiles.ByTaskId(ctx, 1)
+	s.Require().NoError(err)
+	s.Require().NotEmpty(filesBefore)
+
+	tx, err := BeginTransaction(ctx, s.storage.Transactable)
+	s.Require().NoError(err)
+
+	err = tx.DeleteVerificationFiles(ctx, 1)
+	s.Require().NoError(err)
+
+	s.Require().NoError(tx.Flush(ctx))
+	s.Require().NoError(tx.Close(ctx))
+
+	// Verify files were deleted
+	filesAfter, err := s.storage.VerificationFiles.ByTaskId(ctx, 1)
+	s.Require().NoError(err)
+	s.Require().Empty(filesAfter)
+
+	// Verify files for other tasks were not affected
+	otherFiles, err := s.storage.VerificationFiles.ByTaskId(ctx, 2)
+	s.Require().NoError(err)
+	s.Require().NotEmpty(otherFiles)
+}
+
+func (s *TransactionTestSuite) TestDeleteVerificationFilesNoData() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	tx, err := BeginTransaction(ctx, s.storage.Transactable)
+	s.Require().NoError(err)
+
+	// Delete for non-existent task should not error
+	err = tx.DeleteVerificationFiles(ctx, 999999)
+	s.Require().NoError(err)
+
+	s.Require().NoError(tx.Flush(ctx))
+	s.Require().NoError(tx.Close(ctx))
+}

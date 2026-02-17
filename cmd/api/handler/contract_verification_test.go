@@ -26,6 +26,7 @@ type ContractVerificationTestSuite struct {
 	contract *mock.MockIContract
 	task     *mock.MockIVerificationTask
 	file     *mock.MockIVerificationFile
+	tx       *mock.MockTransaction
 	handler  *ContractVerificationHandler
 }
 
@@ -37,8 +38,12 @@ func (s *ContractVerificationTestSuite) SetupTest() {
 	s.contract = mock.NewMockIContract(s.ctrl)
 	s.task = mock.NewMockIVerificationTask(s.ctrl)
 	s.file = mock.NewMockIVerificationFile(s.ctrl)
+	s.tx = mock.NewMockTransaction(s.ctrl)
 
-	s.handler = NewContractVerificationHandler(s.contract, s.task, s.file)
+	s.handler = NewContractVerificationHandler(s.contract, s.task, s.file, nil)
+	s.handler.beginTx = func(_ context.Context) (storage.Transaction, error) {
+		return s.tx, nil
+	}
 }
 
 func (s *ContractVerificationTestSuite) TearDownTest() {
@@ -418,8 +423,8 @@ func (s *ContractVerificationTestSuite) TestContractVerify_Success() {
 		IsNoRows(sql.ErrNoRows).
 		Return(true)
 
-	s.task.EXPECT().
-		Save(gomock.Any(), gomock.Any()).
+	s.tx.EXPECT().
+		AddVerificationTask(gomock.Any(), gomock.Any()).
 		DoAndReturn(func(_ context.Context, task *storage.VerificationTask) error {
 			s.Require().Equal("TestContract", task.ContractName)
 			s.Require().Equal("0.8.20", task.CompilerVersion)
@@ -429,14 +434,17 @@ func (s *ContractVerificationTestSuite) TestContractVerify_Success() {
 			return nil
 		})
 
-	s.file.EXPECT().
-		BulkSave(gomock.Any(), gomock.Any()).
+	s.tx.EXPECT().
+		SaveVerificationFiles(gomock.Any(), gomock.Any()).
 		DoAndReturn(func(_ context.Context, files ...*storage.VerificationFile) error {
 			s.Require().Len(files, 1)
 			s.Require().Equal("TestContract.sol", files[0].Name)
 			s.Require().Equal(uint64(1), files[0].VerificationTaskId)
 			return nil
 		})
+
+	s.tx.EXPECT().Flush(gomock.Any()).Return(nil)
+	s.tx.EXPECT().Close(gomock.Any()).Return(nil)
 
 	err = s.handler.ContractVerify(c)
 	s.Require().NoError(err)
@@ -471,8 +479,8 @@ func (s *ContractVerificationTestSuite) TestContractVerify_SuccessWithOptionalPa
 		IsNoRows(sql.ErrNoRows).
 		Return(true)
 
-	s.task.EXPECT().
-		Save(gomock.Any(), gomock.Any()).
+	s.tx.EXPECT().
+		AddVerificationTask(gomock.Any(), gomock.Any()).
 		DoAndReturn(func(_ context.Context, task *storage.VerificationTask) error {
 			s.Require().NotNil(task.OptimizationEnabled)
 			s.Require().True(*task.OptimizationEnabled)
@@ -485,9 +493,12 @@ func (s *ContractVerificationTestSuite) TestContractVerify_SuccessWithOptionalPa
 			return nil
 		})
 
-	s.file.EXPECT().
-		BulkSave(gomock.Any(), gomock.Any()).
+	s.tx.EXPECT().
+		SaveVerificationFiles(gomock.Any(), gomock.Any()).
 		Return(nil)
+
+	s.tx.EXPECT().Flush(gomock.Any()).Return(nil)
+	s.tx.EXPECT().Close(gomock.Any()).Return(nil)
 
 	err = s.handler.ContractVerify(c)
 	s.Require().NoError(err)
@@ -531,19 +542,25 @@ func (s *ContractVerificationTestSuite) TestContractVerify_MultipleFiles() {
 		IsNoRows(sql.ErrNoRows).
 		Return(true)
 
-	s.task.EXPECT().
-		Save(gomock.Any(), gomock.Any()).
+	s.tx.EXPECT().
+		AddVerificationTask(gomock.Any(), gomock.Any()).
 		DoAndReturn(func(_ context.Context, task *storage.VerificationTask) error {
 			task.Id = 1
 			return nil
 		})
 
-	s.file.EXPECT().
-		BulkSave(gomock.Any(), gomock.Any()).
+	s.tx.EXPECT().
+		SaveVerificationFiles(gomock.Any(), gomock.Any(), gomock.Any()).
 		DoAndReturn(func(_ context.Context, files ...*storage.VerificationFile) error {
 			s.Require().Len(files, 2)
+			for _, f := range files {
+				s.Require().Equal(uint64(1), f.VerificationTaskId)
+			}
 			return nil
 		})
+
+	s.tx.EXPECT().Flush(gomock.Any()).Return(nil)
+	s.tx.EXPECT().Close(gomock.Any()).Return(nil)
 
 	err := s.handler.ContractVerify(c)
 	s.Require().NoError(err)
@@ -569,16 +586,19 @@ func (s *ContractVerificationTestSuite) TestContractVerify_FailedTaskExistsThenN
 			{ContractId: testContract.Id, Status: types.VerificationStatusFailed},
 		}, nil)
 
-	s.task.EXPECT().
-		Save(gomock.Any(), gomock.Any()).
+	s.tx.EXPECT().
+		AddVerificationTask(gomock.Any(), gomock.Any()).
 		DoAndReturn(func(_ context.Context, task *storage.VerificationTask) error {
 			task.Id = 2
 			return nil
 		})
 
-	s.file.EXPECT().
-		BulkSave(gomock.Any(), gomock.Any()).
+	s.tx.EXPECT().
+		SaveVerificationFiles(gomock.Any(), gomock.Any()).
 		Return(nil)
+
+	s.tx.EXPECT().Flush(gomock.Any()).Return(nil)
+	s.tx.EXPECT().Close(gomock.Any()).Return(nil)
 
 	err = s.handler.ContractVerify(c)
 	s.Require().NoError(err)

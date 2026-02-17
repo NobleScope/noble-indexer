@@ -12,7 +12,6 @@ type IVerificationFile interface {
 	storage.Table[*VerificationFile]
 
 	ByTaskId(ctx context.Context, id uint64) ([]VerificationFile, error)
-	BulkSave(ctx context.Context, files ...*VerificationFile) error
 }
 
 // VerificationFile -

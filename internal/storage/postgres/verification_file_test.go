@@ -4,8 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"time"
-
-	"github.com/NobleScope/noble-indexer/internal/storage"
 )
 
 func (s *StorageTestSuite) TestVerificationFileByTaskIdMultipleFiles() {
@@ -97,14 +95,6 @@ func (s *StorageTestSuite) TestVerificationFileGetByIDNotFound() {
 	s.Require().ErrorIs(err, sql.ErrNoRows)
 }
 
-func (s *StorageTestSuite) TestVerificationFileBulkSaveEmpty() {
-	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer ctxCancel()
-
-	err := s.storage.VerificationFiles.BulkSave(ctx)
-	s.Require().NoError(err)
-}
-
 func (s *StorageTestSuite) TestVerificationFileContentNotEmpty() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
@@ -143,32 +133,4 @@ func (s *StorageTestSuite) TestVerificationFileCountsByTask() {
 			s.Require().EqualValues(tc.expectedNames[i], f.Name, "task_id: %d, index: %d", tc.taskId, i)
 		}
 	}
-}
-
-func (s *StorageTestSuite) TestVerificationFileZBulkSaveAndRead() {
-	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer ctxCancel()
-
-	newFiles := []*storage.VerificationFile{
-		{
-			Name:               "NewContract.sol",
-			File:               []byte("pragma solidity ^0.8.20;\ncontract NewContract {}"),
-			VerificationTaskId: 1,
-		},
-		{
-			Name:               "Helper.sol",
-			File:               []byte("pragma solidity ^0.8.20;\nlibrary Helper {}"),
-			VerificationTaskId: 1,
-		},
-	}
-
-	err := s.storage.VerificationFiles.BulkSave(ctx, newFiles...)
-	s.Require().NoError(err)
-
-	s.Require().NotZero(newFiles[0].Id)
-	s.Require().NotZero(newFiles[1].Id)
-
-	files, err := s.storage.VerificationFiles.ByTaskId(ctx, 1)
-	s.Require().NoError(err)
-	s.Require().Len(files, 4)
 }

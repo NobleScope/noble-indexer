@@ -49,7 +49,8 @@ type Transaction interface {
 	SaveERC4337UserOps(ctx context.Context, userOps ...*ERC4337UserOp) error
 	SaveBeaconWithdrawals(ctx context.Context, withdrawals ...*BeaconWithdrawal) error
 	UpdateVerificationTask(ctx context.Context, task *VerificationTask) error
-	AddVerificationTask(ctx context.Context, task VerificationTask) error
+	AddVerificationTask(ctx context.Context, task *VerificationTask) error
+	SaveVerificationFiles(ctx context.Context, files ...*VerificationFile) error
 
 	RollbackBlock(ctx context.Context, height types.Level) error
 	RollbackBlockStats(ctx context.Context, height types.Level) (stats BlockStats, err error)

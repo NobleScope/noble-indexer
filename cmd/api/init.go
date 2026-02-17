@@ -139,7 +139,7 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 		beaconWithdrawalsGroup.GET("", beaconWithdrawalHandler.List)
 	}
 
-	contractVerificationHandler := handler.NewContractVerificationHandler(db.Contracts, db.VerificationTasks, db.VerificationFiles)
+	contractVerificationHandler := handler.NewContractVerificationHandler(db.Contracts, db.VerificationTasks, db.VerificationFiles, db.Transactable)
 	verificationGroup := v1.Group("/verification/code")
 	{
 		verificationGroup.POST("", contractVerificationHandler.ContractVerify)

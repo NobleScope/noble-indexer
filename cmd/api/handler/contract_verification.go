@@ -2,14 +2,17 @@ package handler
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/postgres"
 	storageTypes "github.com/NobleScope/noble-indexer/internal/storage/types"
 	"github.com/NobleScope/noble-indexer/pkg/types"
+	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 )
@@ -25,17 +28,22 @@ type ContractVerificationHandler struct {
 	contract storage.IContract
 	task     storage.IVerificationTask
 	file     storage.IVerificationFile
+	beginTx  func(context.Context) (storage.Transaction, error)
 }
 
 func NewContractVerificationHandler(
 	contract storage.IContract,
 	task storage.IVerificationTask,
 	file storage.IVerificationFile,
+	transactable sdk.Transactable,
 ) *ContractVerificationHandler {
 	return &ContractVerificationHandler{
 		contract: contract,
 		task:     task,
 		file:     file,
+		beginTx: func(ctx context.Context) (storage.Transaction, error) {
+			return postgres.BeginTransaction(ctx, transactable)
+		},
 	}
 }
 
@@ -219,23 +227,34 @@ func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error
 		EVMVersion:          evmVersion,
 		ViaIR:               viaIR,
 	}
-	err = handler.task.Save(c.Request().Context(), &newTask)
+
+	ctx := c.Request().Context()
+
+	tx, err := handler.beginTx(ctx)
 	if err != nil {
 		return handleError(c, err, handler.task)
 	}
+	defer tx.Close(ctx)
 
-	verificationFiles := make([]*storage.VerificationFile, 0, len(sourceFiles))
+	if err := tx.AddVerificationTask(ctx, &newTask); err != nil {
+		return handleError(c, err, handler.task)
+	}
+
+	files := make([]*storage.VerificationFile, 0, len(sourceFiles))
 	for i := range sourceFiles {
-		verificationFiles = append(verificationFiles, &storage.VerificationFile{
+		files[i] = &storage.VerificationFile{
 			Name:               sourceFiles[i].name,
 			File:               sourceFiles[i].content,
 			VerificationTaskId: newTask.Id,
-		})
+		}
 	}
 
-	err = handler.file.BulkSave(c.Request().Context(), verificationFiles...)
-	if err != nil {
+	if err := tx.SaveVerificationFiles(ctx, files...); err != nil {
 		return handleError(c, err, handler.file)
+	}
+
+	if err := tx.Flush(ctx); err != nil {
+		return handleError(c, err, handler.task)
 	}
 
 	return c.JSON(http.StatusOK, verificationResponse{Result: "success"})

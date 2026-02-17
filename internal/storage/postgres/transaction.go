@@ -306,11 +306,20 @@ func (tx Transaction) SaveBeaconWithdrawals(ctx context.Context, withdrawals ...
 	return err
 }
 
-func (tx Transaction) AddVerificationTask(ctx context.Context, task models.VerificationTask) error {
+func (tx Transaction) AddVerificationTask(ctx context.Context, task *models.VerificationTask) error {
 	_, err := tx.Tx().NewInsert().Model(task).
-		Column("status", "creation_time", "contract_id", "contract_name", "compiler_version", "license_type", "optimization_enabled", "optimization_runs", "evm_version").
+		Column("status", "creation_time", "contract_id", "contract_name", "compiler_version", "license_type", "optimization_enabled", "optimization_runs", "evm_version", "via_ir").
+		Returning("id").
 		Exec(ctx)
 
+	return err
+}
+
+func (tx Transaction) SaveVerificationFiles(ctx context.Context, files ...*models.VerificationFile) error {
+	if len(files) == 0 {
+		return nil
+	}
+	_, err := tx.Tx().NewInsert().Model(&files).Exec(ctx)
 	return err
 }
 
