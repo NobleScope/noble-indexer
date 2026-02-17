@@ -1,0 +1,29 @@
+- id: 1
+  name: 'Token.sol'
+  file: '// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\ncontract Token {}'
+  verification_task_id: 1
+
+- id: 2
+  name: 'IERC20.sol'
+  file: '// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\ninterface IERC20 {}'
+  verification_task_id: 1
+
+- id: 3
+  name: 'Proxy.sol'
+  file: '// SPDX-License-Identifier: Apache-2.0\npragma solidity ^0.8.19;\ncontract Proxy {}'
+  verification_task_id: 2
+
+- id: 4
+  name: 'Implementation.sol'
+  file: '// SPDX-License-Identifier: GPL-3.0\npragma solidity ^0.8.21;\ncontract Implementation {}'
+  verification_task_id: 3
+
+- id: 5
+  name: 'Vault.sol'
+  file: '// SPDX-License-Identifier: UNLICENSED\npragma solidity ^0.8.24;\ncontract Vault {}'
+  verification_task_id: 4
+
+- id: 6
+  name: 'VaultStorage.sol'
+  file: '// SPDX-License-Identifier: UNLICENSED\npragma solidity ^0.8.24;\ncontract VaultStorage {}'
+  verification_task_id: 4

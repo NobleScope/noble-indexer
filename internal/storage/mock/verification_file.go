@@ -42,6 +42,49 @@ func (m *MockIVerificationFile) EXPECT() *MockIVerificationFileMockRecorder {
 	return m.recorder
 }
 
+// BulkSave mocks base method.
+func (m *MockIVerificationFile) BulkSave(ctx context.Context, files ...*storage.VerificationFile) error {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx}
+	for _, a := range files {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "BulkSave", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// BulkSave indicates an expected call of BulkSave.
+func (mr *MockIVerificationFileMockRecorder) BulkSave(ctx any, files ...any) *MockIVerificationFileBulkSaveCall {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx}, files...)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BulkSave", reflect.TypeOf((*MockIVerificationFile)(nil).BulkSave), varargs...)
+	return &MockIVerificationFileBulkSaveCall{Call: call}
+}
+
+// MockIVerificationFileBulkSaveCall wrap *gomock.Call
+type MockIVerificationFileBulkSaveCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockIVerificationFileBulkSaveCall) Return(arg0 error) *MockIVerificationFileBulkSaveCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockIVerificationFileBulkSaveCall) Do(f func(context.Context, ...*storage.VerificationFile) error) *MockIVerificationFileBulkSaveCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockIVerificationFileBulkSaveCall) DoAndReturn(f func(context.Context, ...*storage.VerificationFile) error) *MockIVerificationFileBulkSaveCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // ByTaskId mocks base method.
 func (m *MockIVerificationFile) ByTaskId(ctx context.Context, id uint64) ([]storage.VerificationFile, error) {
 	m.ctrl.T.Helper()

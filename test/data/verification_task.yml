@@ -1,0 +1,47 @@
+- id: 1
+  status: 'VerificationStatusNew'
+  creation_time: '2024-01-01T10:00:00Z'
+  contract_id: 3
+  contract_name: 'Token'
+  compiler_version: 'v0.8.20+commit.a1b79de6'
+  license_type: 'mit'
+  optimization_enabled: true
+  optimization_runs: 200
+  via_ir: false
+
+- id: 2
+  status: 'VerificationStatusSuccess'
+  creation_time: '2024-01-02T10:00:00Z'
+  completion_time: '2024-01-02T10:05:00Z'
+  contract_id: 4
+  contract_name: 'Proxy'
+  compiler_version: 'v0.8.19+commit.7dd6d404'
+  license_type: 'apache_2_0'
+  optimization_enabled: false
+  via_ir: false
+
+- id: 3
+  status: 'VerificationStatusFailed'
+  creation_time: '2024-01-03T10:00:00Z'
+  completion_time: '2024-01-03T10:03:00Z'
+  contract_id: 5
+  contract_name: 'Implementation'
+  compiler_version: 'v0.8.21+commit.d9974bed'
+  license_type: 'gnu_gpl_v3'
+  optimization_enabled: true
+  optimization_runs: 500
+  evm_version: 'shanghai'
+  via_ir: true
+  error: 'bytecode verification failed: main parts do not match'
+
+- id: 4
+  status: 'VerificationStatusPending'
+  creation_time: '2024-01-04T10:00:00Z'
+  contract_id: 6
+  contract_name: 'Vault'
+  compiler_version: 'v0.8.24+commit.e11b9ed9'
+  license_type: 'unlicense'
+  optimization_enabled: true
+  optimization_runs: 1000
+  evm_version: 'cancun'
+  via_ir: false

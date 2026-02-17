@@ -43,10 +43,10 @@ func (m *MockIVerificationTask) EXPECT() *MockIVerificationTaskMockRecorder {
 }
 
 // ByContractId mocks base method.
-func (m *MockIVerificationTask) ByContractId(ctx context.Context, contractId uint64) (storage.VerificationTask, error) {
+func (m *MockIVerificationTask) ByContractId(ctx context.Context, contractId uint64) ([]storage.VerificationTask, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ByContractId", ctx, contractId)
-	ret0, _ := ret[0].(storage.VerificationTask)
+	ret0, _ := ret[0].([]storage.VerificationTask)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -64,19 +64,19 @@ type MockIVerificationTaskByContractIdCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockIVerificationTaskByContractIdCall) Return(arg0 storage.VerificationTask, arg1 error) *MockIVerificationTaskByContractIdCall {
+func (c *MockIVerificationTaskByContractIdCall) Return(arg0 []storage.VerificationTask, arg1 error) *MockIVerificationTaskByContractIdCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockIVerificationTaskByContractIdCall) Do(f func(context.Context, uint64) (storage.VerificationTask, error)) *MockIVerificationTaskByContractIdCall {
+func (c *MockIVerificationTaskByContractIdCall) Do(f func(context.Context, uint64) ([]storage.VerificationTask, error)) *MockIVerificationTaskByContractIdCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockIVerificationTaskByContractIdCall) DoAndReturn(f func(context.Context, uint64) (storage.VerificationTask, error)) *MockIVerificationTaskByContractIdCall {
+func (c *MockIVerificationTaskByContractIdCall) DoAndReturn(f func(context.Context, uint64) ([]storage.VerificationTask, error)) *MockIVerificationTaskByContractIdCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
