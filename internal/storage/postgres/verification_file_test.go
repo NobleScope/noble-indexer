@@ -145,7 +145,7 @@ func (s *StorageTestSuite) TestVerificationFileCountsByTask() {
 	}
 }
 
-func (s *StorageTestSuite) TestVerificationFileBulkSaveAndRead() {
+func (s *StorageTestSuite) TestVerificationFileZBulkSaveAndRead() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
 
