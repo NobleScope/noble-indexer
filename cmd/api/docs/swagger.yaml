@@ -5,6 +5,11 @@ definitions:
       message:
         type: string
     type: object
+  handler.verificationResponse:
+    properties:
+      result:
+        type: string
+    type: object
   responses.Address:
     description: Noble address information
     properties:
@@ -581,6 +586,8 @@ definitions:
       cumulative_gas_used:
         example: 21000
         type: integer
+      decoded:
+        type: object
       effective_gas_price:
         example: 1000000
         type: integer
@@ -2062,6 +2069,11 @@ paths:
         in: query
         name: sort
         type: string
+      - default: false
+        description: Decode transaction input using contract ABI
+        in: query
+        name: decode
+        type: boolean
       produces:
       - application/json
       responses:
@@ -2096,6 +2108,11 @@ paths:
         name: hash
         required: true
         type: string
+      - default: false
+        description: Decode transaction input using contract ABI
+        in: query
+        name: decode
+        type: boolean
       produces:
       - application/json
       responses:
@@ -2273,6 +2290,102 @@ paths:
       summary: Get user operation by hash
       tags:
       - user_ops
+  /verification/code:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Creates a task to verify the specified contract with source code
+        files. Multiple .sol files can be uploaded.
+      operationId: contract-verification
+      parameters:
+      - description: Contract address
+        in: formData
+        name: contract_address
+        required: true
+        type: string
+      - description: Contract name in Solidity source
+        in: formData
+        name: contract_name
+        required: true
+        type: string
+      - description: Source code files (.sol). Multiple files allowed.
+        in: formData
+        name: source_code
+        required: true
+        type: file
+      - description: Compiler version
+        in: formData
+        name: compiler_version
+        required: true
+        type: string
+      - description: License type
+        enum:
+        - none
+        - unlicense
+        - mit
+        - gnu_gpl_v2
+        - gnu_gpl_v3
+        - gnu_lgpl_v2_1
+        - gnu_lgpl_v3
+        - bsd_2_clause
+        - bsd_3_clause
+        - mpl_2_0
+        - osl_3_0
+        - apache_2_0
+        - gnu_agpl_v3
+        - bsl_1_1
+        in: formData
+        name: license_type
+        required: true
+        type: string
+      - description: Optimization enabled
+        in: formData
+        name: optimization_enabled
+        type: boolean
+      - description: Optimization runs
+        in: formData
+        name: optimization_runs
+        type: integer
+      - description: EVM version. Auto-detected if not specified.
+        enum:
+        - homestead
+        - tangerineWhistle
+        - spuriousDragon
+        - byzantium
+        - constantinople
+        - petersburg
+        - istanbul
+        - berlin
+        - london
+        - paris
+        - shanghai
+        - cancun
+        - prague
+        in: formData
+        name: evm_version
+        type: string
+      - description: Compile via Yul IR pipeline
+        in: formData
+        name: via_ir
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.verificationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Creates a task to verify the specified contract
+      tags:
+      - verification
   /ws:
     get:
       description: Establishes a WebSocket connection for real-time updates. Clients
