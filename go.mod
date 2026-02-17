@@ -10,12 +10,16 @@ require (
 	github.com/ethereum/go-ethereum v1.16.7
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/go-testfixtures/testfixtures/v3 v3.16.0
+	github.com/goccy/go-json v0.10.4
 	github.com/gorilla/websocket v1.5.3
 	github.com/grafana/pyroscope-go v1.2.7
 	github.com/json-iterator/go v1.1.12
 	github.com/labstack/echo/v4 v4.13.4
+	github.com/lib/pq v1.10.9
+	github.com/lmittmann/go-solc v0.5.0
 	github.com/opus-domini/fast-shot v1.1.4
 	github.com/pkg/errors v0.9.1
+	github.com/prometheus/client_golang v1.23.2
 	github.com/rs/zerolog v1.34.0
 	github.com/shopspring/decimal v1.4.0
 	github.com/spf13/cobra v1.10.1
@@ -110,7 +114,6 @@ require (
 	github.com/go-openapi/swag/yamlutils v0.25.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/goccy/go-json v0.10.4 // indirect
 	github.com/goccy/go-yaml v1.17.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
@@ -169,7 +172,6 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
-	github.com/lib/pq v1.10.9 // indirect
 	github.com/libdns/libdns v1.0.0-beta.1 // indirect
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
 	github.com/libp2p/go-cidranger v1.1.0 // indirect
@@ -189,7 +191,6 @@ require (
 	github.com/libp2p/go-reuseport v0.4.0 // indirect
 	github.com/libp2p/go-yamux/v5 v5.0.1 // indirect
 	github.com/libp2p/zeroconf/v2 v2.2.0 // indirect
-	github.com/lmittmann/go-solc v0.5.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/magiconair/properties v1.8.10 // indirect
 	github.com/marten-seemann/tcp v0.0.0-20210406111302-dfbc87cc63fd // indirect
@@ -251,7 +252,6 @@ require (
 	github.com/polydawn/refmt v0.89.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/probe-lab/go-libdht v0.3.0 // indirect
-	github.com/prometheus/client_golang v1.23.2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.66.1 // indirect
 	github.com/prometheus/procfs v0.17.0 // indirect
@@ -331,4 +331,4 @@ require (
 	lukechampine.com/blake3 v1.4.1 // indirect
 )
 
-replace github.com/lmittmann/go-solc => /Users/admin/Projects/go-solc
+replace github.com/lmittmann/go-solc => github.com/NobleScope/go-solc v0.0.0-20260216195524-dc4c0d8795fa
