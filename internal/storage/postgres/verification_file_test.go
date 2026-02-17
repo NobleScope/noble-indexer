@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage"
 )
 
 func (s *StorageTestSuite) TestVerificationFileByTaskIdMultipleFiles() {

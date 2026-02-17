@@ -10,9 +10,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/internal/storage/mock"
-	"github.com/baking-bad/noble-indexer/internal/storage/types"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/mock"
+	"github.com/NobleScope/noble-indexer/internal/storage/types"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/mock/gomock"

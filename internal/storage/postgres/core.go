@@ -37,8 +37,8 @@ type Storage struct {
 	Search            models.ISearch
 	VerificationTasks models.IVerificationTask
 	VerificationFiles models.IVerificationFile
-	ERC4337UserOps   models.IERC4337UserOps
-	BeaconWithdrawal models.IBeaconWithdrawal
+	ERC4337UserOps    models.IERC4337UserOps
+	BeaconWithdrawal  models.IBeaconWithdrawal
 	Notificator       *Notificator
 }
 
@@ -54,28 +54,28 @@ func Create(ctx context.Context, cfg config.Database, scriptsDir string, withMig
 	}
 
 	s := Storage{
-		cfg:              cfg,
-		scriptsDir:       scriptsDir,
-		Storage:          strg,
-		Blocks:           NewBlock(strg.Connection()),
-		BlockStats:       NewBlockStats(strg.Connection()),
-		Logs:             NewLog(strg.Connection()),
-		Tx:               NewTx(strg.Connection()),
-		Transfer:         NewTransfer(strg.Connection()),
-		Token:            NewToken(strg.Connection()),
-		TokenBalance:     NewTokenBalance(strg.Connection()),
-		Trace:            NewTrace(strg.Connection()),
-		Addresses:        NewAddress(strg.Connection()),
-		Contracts:        NewContract(strg.Connection()),
-		ProxyContracts:   NewProxyContract(strg.Connection()),
-		Sources:          NewSource(strg.Connection()),
-		State:            NewState(strg.Connection()),
-		Search:           NewSearch(strg.Connection()),
+		cfg:               cfg,
+		scriptsDir:        scriptsDir,
+		Storage:           strg,
+		Blocks:            NewBlock(strg.Connection()),
+		BlockStats:        NewBlockStats(strg.Connection()),
+		Logs:              NewLog(strg.Connection()),
+		Tx:                NewTx(strg.Connection()),
+		Transfer:          NewTransfer(strg.Connection()),
+		Token:             NewToken(strg.Connection()),
+		TokenBalance:      NewTokenBalance(strg.Connection()),
+		Trace:             NewTrace(strg.Connection()),
+		Addresses:         NewAddress(strg.Connection()),
+		Contracts:         NewContract(strg.Connection()),
+		ProxyContracts:    NewProxyContract(strg.Connection()),
+		Sources:           NewSource(strg.Connection()),
+		State:             NewState(strg.Connection()),
+		Search:            NewSearch(strg.Connection()),
 		VerificationTasks: NewVerificationTask(strg.Connection()),
 		VerificationFiles: NewVerificationFile(strg.Connection()),
-		ERC4337UserOps:   NewERC4337UserOps(strg.Connection()),
-		BeaconWithdrawal: NewBeaconWithdrawal(strg.Connection()),
-		Notificator:      NewNotificator(cfg, strg.Connection().DB()),
+		ERC4337UserOps:    NewERC4337UserOps(strg.Connection()),
+		BeaconWithdrawal:  NewBeaconWithdrawal(strg.Connection()),
+		Notificator:       NewNotificator(cfg, strg.Connection().DB()),
 	}
 
 	if err := s.createScripts(ctx, "functions", false); err != nil {
