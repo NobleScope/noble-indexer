@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/internal/storage/postgres"
-	"github.com/baking-bad/noble-indexer/internal/storage/types"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/postgres"
+	"github.com/NobleScope/noble-indexer/internal/storage/types"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/config"
 	"github.com/dipdup-net/indexer-sdk/pkg/modules"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/pkg/errors"
@@ -145,7 +145,7 @@ func (m *Module) handleVerificationSuccess(ctx context.Context, task storage.Ver
 		})
 	}
 
-	err = tx.SaveContracts(ctx, contract)
+	_, err = tx.SaveContracts(ctx, contract)
 	if err != nil {
 		return errors.Wrap(err, "save contract")
 	}

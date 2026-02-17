@@ -10,8 +10,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/internal/storage/types"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/types"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/lmittmann/go-solc"
 	"github.com/pkg/errors"

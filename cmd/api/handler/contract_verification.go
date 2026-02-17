@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	storageTypes "github.com/baking-bad/noble-indexer/internal/storage/types"
-	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	storageTypes "github.com/NobleScope/noble-indexer/internal/storage/types"
+	"github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 )

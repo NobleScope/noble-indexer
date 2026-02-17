@@ -6,9 +6,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/baking-bad/noble-indexer/cmd/common"
-	"github.com/baking-bad/noble-indexer/internal/storage/postgres"
-	"github.com/baking-bad/noble-indexer/pkg/contract_verifier"
+	"github.com/NobleScope/noble-indexer/cmd/common"
+	"github.com/NobleScope/noble-indexer/internal/storage/postgres"
+	"github.com/NobleScope/noble-indexer/pkg/contract_verifier"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -37,7 +37,7 @@ func main() {
 	notifyCtx, notifyCancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	defer notifyCancel()
 
-	pg, err := postgres.Create(ctx, cfg.Database, cfg.Indexer.ScriptsDir)
+	pg, err := postgres.Create(ctx, cfg.Database, cfg.Indexer.ScriptsDir, false)
 	if err != nil {
 		log.Panic().Err(err).Msg("can't create database connection")
 		return
