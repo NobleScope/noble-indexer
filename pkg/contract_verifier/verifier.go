@@ -107,7 +107,7 @@ func (m *Module) verify(ctx context.Context, task storage.VerificationTask, file
 	}
 
 	if len(contract1.Runtime) == 0 {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("contract does not contain any runtimes")
+		m.Log.Error().Uint64("contract_id", task.ContractId).Msg("contract does not contain any runtimes")
 		return nil, errors.New("compilation produced no runtime bytecode")
 	}
 
@@ -146,7 +146,7 @@ func (m *Module) verify(ctx context.Context, task storage.VerificationTask, file
 	runtimeParts := splitBytecode(contract1.Runtime, contract2.Runtime)
 	contractBytes := contract.Code.Bytes()
 	if len(contractBytes) < len(runtimeParts.main) {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("onchain bytecode is shorter than compiled main part")
+		m.Log.Error().Uint64("contract_id", task.ContractId).Msg("onchain bytecode is shorter than compiled main part")
 		return nil, errors.Errorf("onchain bytecode is shorter than compiled main part: %d < %d",
 			len(contractBytes), len(runtimeParts.main))
 	}
@@ -177,7 +177,7 @@ func (m *Module) verify(ctx context.Context, task storage.VerificationTask, file
 	}
 
 	if contract.TxId == nil {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("deployment transaction ID should not be nil")
+		m.Log.Error().Uint64("contract_id", task.ContractId).Msg("deployment transaction ID should not be nil")
 		return nil, errors.New("deployment transaction not found")
 	}
 
