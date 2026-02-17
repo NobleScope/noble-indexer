@@ -435,8 +435,12 @@ func buildSourceMap(files []storage.VerificationFile) map[string]string {
 }
 
 func writeSourceFiles(dir string, sources map[string]string) error {
+	cleanDir := filepath.Clean(dir) + string(os.PathSeparator)
 	for path, content := range sources {
 		filePath := filepath.Join(dir, path)
+		if !strings.HasPrefix(filePath, cleanDir) {
+			return errors.Errorf("path traversal detected: %s", path)
+		}
 		if subDir := filepath.Dir(filePath); subDir != dir {
 			if err := os.MkdirAll(subDir, 0755); err != nil {
 				return errors.Wrapf(err, "create directory for %s", path)
