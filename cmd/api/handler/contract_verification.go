@@ -242,11 +242,11 @@ func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error
 
 	files := make([]*storage.VerificationFile, 0, len(sourceFiles))
 	for i := range sourceFiles {
-		files[i] = &storage.VerificationFile{
+		files = append(files, &storage.VerificationFile{
 			Name:               sourceFiles[i].name,
 			File:               sourceFiles[i].content,
 			VerificationTaskId: newTask.Id,
-		}
+		})
 	}
 
 	if err := tx.SaveVerificationFiles(ctx, files...); err != nil {
