@@ -176,6 +176,38 @@ func (s *ContractVerificationTestSuite) TestContractVerify_InvalidLicenseType() 
 	s.Require().Equal(http.StatusBadRequest, rec.Code)
 }
 
+// --- Format validation ---
+
+func (s *ContractVerificationTestSuite) TestContractVerify_InvalidContractName() {
+	fields := s.validFields()
+	fields["contract_name"] = "Test;Contract"
+
+	req, err := createMultipartRequest(fields, s.validFiles())
+	s.Require().NoError(err)
+
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+
+	err = s.handler.ContractVerify(c)
+	s.Require().NoError(err)
+	s.Require().Equal(http.StatusBadRequest, rec.Code)
+}
+
+func (s *ContractVerificationTestSuite) TestContractVerify_InvalidCompilerVersion() {
+	fields := s.validFields()
+	fields["compiler_version"] = "0.8.20; rm -rf /"
+
+	req, err := createMultipartRequest(fields, s.validFiles())
+	s.Require().NoError(err)
+
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+
+	err = s.handler.ContractVerify(c)
+	s.Require().NoError(err)
+	s.Require().Equal(http.StatusBadRequest, rec.Code)
+}
+
 // --- Optional field validation ---
 
 func (s *ContractVerificationTestSuite) TestContractVerify_InvalidOptimizationEnabled() {

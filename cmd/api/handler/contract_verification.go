@@ -89,17 +89,17 @@ func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error
 		return badRequestError(c, errors.New("contract name is required"))
 	}
 	if !contractNameRe.MatchString(contractName) {
-		return badRequestError(c, erro
+		return badRequestError(c, errors.New("invalid contract name: must match [a-zA-Z_][a-zA-Z0-9_]*"))
+	}
 
 	compilerVersion := c.FormValue("compiler_version")
 	if compilerVersion == "" {
 		return badRequestError(c, errors.New("compiler version is required"))
 	}
-
-rn badRequestError(c, errors.New("compiler version is required"))
-	}
 	if !compilerVersionRe.MatchString(compilerVersion) {
-		return badReques
+		return badRequestError(c, errors.New("invalid compiler version: must be semver (e.g. 0.8.20)"))
+	}
+
 	licenseTypeStr := c.FormValue("license_type")
 	if licenseTypeStr == "" {
 		return badRequestError(c, errors.New("license type is required"))
@@ -165,19 +165,19 @@ rn badRequestError(c, errors.New("compiler version is required"))
 			return badRequestError(c, errors.Errorf("only .sol files are allowed: %s", fileHeader.Filename))
 		}
 
-		if fileHeader.Size > MaxFileSize {
-			return badRequestError(c, errors.Errorf("file %s is too large, maximum size is 10 MB", fileHeader.Filename))
-		}
-
 		file, err := fileHeader.Open()
 		if err != nil {
 			return badRequestError(c, errors.Wrapf(err, "failed to open file %s", fileHeader.Filename))
 		}
 
-		content, err := io.ReadAll(file)
+		content, err := io.ReadAll(io.LimitReader(file, MaxFileSize+1))
 		_ = file.Close()
 		if err != nil {
 			return badRequestError(c, errors.Wrapf(err, "failed to read file %s", fileHeader.Filename))
+		}
+
+		if len(content) > MaxFileSize {
+			return badRequestError(c, errors.Errorf("file %s is too large, maximum size is 10 MB", fileHeader.Filename))
 		}
 
 		if len(content) == 0 {
