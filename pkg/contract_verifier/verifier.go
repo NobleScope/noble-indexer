@@ -387,7 +387,13 @@ var importRe = regexp.MustCompile(`import\s[^"';]*["']([^"']+)["']`)
 func buildSourceMap(files []storage.VerificationFile) map[string]string {
 	contentByName := make(map[string]string)
 	for _, f := range files {
-		contentByName[filepath.Base(f.Name)] = string(f.File)
+		base := filepath.Base(f.Name)
+		if _, exists := contentByName[base]; exists {
+			// Duplicate basename — use full name to avoid silent overwrite
+			contentByName[f.Name] = string(f.File)
+			continue
+		}
+		contentByName[base] = string(f.File)
 	}
 
 	pathSets := make(map[string]map[string]struct{})
