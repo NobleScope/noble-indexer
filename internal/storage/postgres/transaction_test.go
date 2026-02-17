@@ -1217,7 +1217,7 @@ func (s *TransactionTestSuite) TestUpdateVerificationTask() {
 			found = true
 			s.Require().Equal(types.VerificationStatusFailed, t.Status)
 			s.Require().Equal("bytecode mismatch", t.Error)
-			s.Require().False(t.CompletionTime.IsZero())
+			s.Require().NotNil(t.CompletionTime)
 			break
 		}
 	}

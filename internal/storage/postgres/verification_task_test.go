@@ -74,7 +74,7 @@ func (s *StorageTestSuite) TestVerificationTaskByContractIdSuccessStatus() {
 	s.Require().EqualValues("Proxy", task.ContractName)
 	s.Require().EqualValues("v0.8.19+commit.7dd6d404", task.CompilerVersion)
 	s.Require().EqualValues(types.Apache20, task.LicenseType)
-	s.Require().False(task.CompletionTime.IsZero())
+	s.Require().NotNil(task.CompletionTime)
 }
 
 func (s *StorageTestSuite) TestVerificationTaskByContractIdFailed() {

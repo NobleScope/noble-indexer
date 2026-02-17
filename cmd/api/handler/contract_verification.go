@@ -22,7 +22,7 @@ const MaxFileSize = 10 * 1024 * 1024 // 10 MB
 
 var (
 	contractNameRe    = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
-	compilerVersionRe = regexp.MustCompile(`^\d+\.\d+\.\d+$`)
+	compilerVersionRe = regexp.MustCompile(`^v?\d+\.\d+\.\d+(\+commit\.[0-9a-f]+)?$`)
 )
 
 type uploadedSourceFile struct {

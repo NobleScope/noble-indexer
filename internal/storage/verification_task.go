@@ -24,7 +24,7 @@ type VerificationTask struct {
 	Id                  uint64                       `bun:",pk,autoincrement"                    comment:"Unique internal identity"`
 	Status              types.VerificationTaskStatus `bun:"status,type:verification_task_status" comment:"Verification task status"`
 	CreationTime        time.Time                    `bun:"creation_time,default:now()"          comment:"Task creation time"`
-	CompletionTime      time.Time                    `bun:"completion_time"                      comment:"Task completion time"`
+	CompletionTime      *time.Time                   `bun:"completion_time,nullzero"             comment:"Task completion time"`
 	ContractId          uint64                       `bun:"contract_id"                          comment:"Contract id"`
 	ContractName        string                       `bun:"contract_name,notnull"                comment:"Contract name in Solidity source"`
 	CompilerVersion     string                       `bun:"compiler_version,notnull"             comment:"Compiler version"`
