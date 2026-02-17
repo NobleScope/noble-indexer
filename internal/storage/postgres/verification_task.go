@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/types"
 	"github.com/dipdup-net/go-lib/database"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage/postgres"
 )
@@ -24,7 +25,7 @@ func NewVerificationTask(db *database.Bun) *VerificationTask {
 func (t *VerificationTask) Latest(ctx context.Context) (task storage.VerificationTask, err error) {
 	err = t.DB().NewSelect().
 		Model(&task).
-		Where("status = 'VerificationStatusNew'").
+		Where("status = ?", types.VerificationStatusNew).
 		Order("creation_time ASC").
 		Limit(1).
 		Scan(ctx, &task)
