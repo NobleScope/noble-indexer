@@ -14,8 +14,10 @@ import (
 	"github.com/NobleScope/noble-indexer/pkg/indexer/config"
 	golibCfg "github.com/dipdup-net/go-lib/config"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog/log"
 	echoSwagger "github.com/swaggo/echo-swagger"
+	"golang.org/x/time/rate"
 )
 
 var dispatcher *bus.Dispatcher
@@ -142,7 +144,8 @@ func initHandlers(ctx context.Context, e *echo.Echo, cfg config.Config, db postg
 	contractVerificationHandler := handler.NewContractVerificationHandler(db.Contracts, db.VerificationTasks, db.VerificationFiles, db.Transactable)
 	verificationGroup := v1.Group("/verification/code")
 	{
-		verificationGroup.POST("", contractVerificationHandler.ContractVerify)
+		verificationRateLimit := middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(rate.Limit(1)))
+		verificationGroup.POST("", contractVerificationHandler.ContractVerify, verificationRateLimit)
 	}
 
 	if cfg.API.Websocket {
