@@ -122,7 +122,7 @@ func (m *Module) verify(ctx context.Context, task storage.VerificationTask, file
 	modifiedSources := make(map[string]string, len(sources))
 	for path, content := range sources {
 		if filepath.Base(path) == mainContractFileName {
-			content = content + "\n"
+			content += "\n"
 		}
 		modifiedSources[path] = content
 	}
@@ -442,7 +442,7 @@ func writeSourceFiles(dir string, sources map[string]string) error {
 				return errors.Wrapf(err, "create directory for %s", path)
 			}
 		}
-		if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
+		if err := os.WriteFile(filePath, []byte(content), 0600); err != nil {
 			return errors.Wrapf(err, "write source file %s", path)
 		}
 	}

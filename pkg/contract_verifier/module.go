@@ -20,7 +20,6 @@ type Module struct {
 	pg         postgres.Storage
 	storage    sdk.Transactable
 	syncPeriod time.Duration
-	retryDelay time.Duration
 	cfg        config.Config
 }
 

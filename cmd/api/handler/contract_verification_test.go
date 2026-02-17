@@ -5,7 +5,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -612,5 +611,5 @@ func (s *ContractVerificationTestSuite) TestContractVerify_FileTooLarge() {
 
 	var resp Error
 	s.Require().NoError(json.NewDecoder(rec.Body).Decode(&resp))
-	s.Require().Contains(resp.Message, fmt.Sprintf("too large"))
+	s.Require().Contains(resp.Message, "too large")
 }
