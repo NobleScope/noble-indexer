@@ -3,8 +3,8 @@ package postgres
 import (
 	"context"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/dipdup-net/go-lib/database"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage/postgres"
 )
@@ -54,6 +54,7 @@ func (b *Block) Filter(ctx context.Context, fltrs storage.BlockListFilter) (bloc
 	query := b.DB().NewSelect().
 		Model(&blocks)
 
+	query = sortTimeIDScope(query, fltrs.Sort)
 	query = limitScope(query, fltrs.Limit)
 	query = query.Offset(fltrs.Offset)
 

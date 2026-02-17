@@ -3,10 +3,10 @@ package proxy_contracts_resolver
 import (
 	"context"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/internal/storage/types"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser"
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/types"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser"
+	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/pkg/errors"
 )
 

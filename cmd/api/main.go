@@ -6,11 +6,14 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
-	_ "github.com/baking-bad/noble-indexer/cmd/api/docs"
-	"github.com/baking-bad/noble-indexer/cmd/api/handler"
-	"github.com/baking-bad/noble-indexer/cmd/common"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
+	"golang.org/x/time/rate"
+
+	_ "github.com/NobleScope/noble-indexer/cmd/api/docs"
+	"github.com/NobleScope/noble-indexer/cmd/api/handler"
+	"github.com/NobleScope/noble-indexer/cmd/common"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/config"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog/log"
@@ -23,11 +26,11 @@ import (
 //	@termsOfService	https://bakingbad.dev/terms
 
 //	@contact.name	API Support
-//	@contact.url	https://github.com/baking-bad/noble-indexer
+//	@contact.url	https://github.com/NobleScope/noble-indexer
 //	@contact.email	hello@bakingbad.dev
 
 //	@license.name	MIT
-//	@license.url	https://github.com/baking-bad/noble-indexer/blob/master/LICENSE
+//	@license.url	https://github.com/NobleScope/noble-indexer/blob/master/LICENSE
 
 //	@host		noble.dipdup.net
 //	@BasePath	/v1
@@ -106,10 +109,23 @@ func run(cfg *config.Config) error {
 	e.Use(middleware.Secure())
 	e.Use(middleware.CORS())
 	e.Pre(middleware.RemoveTrailingSlash())
+	if cfg.API.RequestTimeout > 0 {
+		e.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
+			Timeout: time.Duration(cfg.API.RequestTimeout) * time.Second,
+		}))
+	}
+	if cfg.API.RateLimit > 0 {
+		e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(rate.Limit(cfg.API.RateLimit))))
+	}
+
+	ttlCache, err := common.InitCache(cfg.Cache)
+	if err != nil {
+		log.Panic().Err(err).Msg("initializing cache")
+	}
 
 	db := initDatabase(cfg.Database, cfg.Indexer.ScriptsDir)
 	initDispatcher(ctx, db)
-	initHandlers(ctx, e, *cfg, db)
+	initHandlers(ctx, e, *cfg, db, ttlCache)
 
 	go func() {
 		log.Info().Str("bind", cfg.API.Bind).Msg("Starting API server")
@@ -124,6 +140,15 @@ func run(cfg *config.Config) error {
 
 	if err := e.Shutdown(context.Background()); err != nil {
 		log.Panic().Err(err).Msg("stopping API server")
+	}
+	if err := dispatcher.Close(); err != nil {
+		log.Panic().Err(err).Msg("stopping dispatcher")
+	}
+	if err := db.Close(); err != nil {
+		log.Panic().Err(err).Msg("closing database")
+	}
+	if err := ttlCache.Close(); err != nil {
+		log.Panic().Err(err).Msg("closing cache")
 	}
 
 	log.Info().Msg("stopped")

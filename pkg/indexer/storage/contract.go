@@ -3,7 +3,7 @@ package storage
 import (
 	"context"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/pkg/errors"
 )
 
@@ -13,32 +13,39 @@ func saveContracts(
 	contracts []*storage.Contract,
 	txHashes map[string]uint64,
 	addresses map[string]uint64,
-) error {
+) (int64, error) {
 	if len(contracts) == 0 {
-		return nil
+		return 0, nil
 	}
 
-	for _, contract := range contracts {
-		id, ok := addresses[contract.Address.Hash.String()]
+	for i := range contracts {
+		id, ok := addresses[contracts[i].Address.Hash.String()]
 		if !ok {
-			return errors.Errorf("can't find contract key: %s", contract.Address.Hash.String())
+			return 0, errors.Errorf("can't find contract key: %s", contracts[i].Address.Hash.String())
 		}
-		contract.Id = id
-		if contract.Tx == nil {
-			continue
+		contracts[i].Id = id
+
+		if contracts[i].Deployer != nil {
+			deployerId, ok := addresses[contracts[i].Deployer.Hash.String()]
+			if !ok {
+				return 0, errors.Errorf("can't find deployer key: %s", contracts[i].Deployer.Hash.String())
+			}
+			contracts[i].DeployerId = &deployerId
 		}
 
-		txId, ok := txHashes[contract.Tx.Hash.String()]
-		if !ok {
-			return errors.Errorf("can't find tx hash: %s", contract.Tx.Hash.String())
+		if contracts[i].Tx != nil {
+			txId, ok := txHashes[contracts[i].Tx.Hash.String()]
+			if !ok {
+				return 0, errors.Errorf("can't find tx hash: %s", contracts[i].Tx.Hash.String())
+			}
+			contracts[i].TxId = &txId
 		}
-		contract.TxId = &txId
 	}
 
-	err := tx.SaveContracts(ctx, contracts...)
+	totalContracts, err := tx.SaveContracts(ctx, contracts...)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return err
+	return totalContracts, err
 }

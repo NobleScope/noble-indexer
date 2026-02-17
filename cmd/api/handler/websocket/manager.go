@@ -6,9 +6,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/baking-bad/noble-indexer/cmd/api/bus"
-	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
-	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/cmd/api/bus"
+	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/dipdup-io/workerpool"
 	"github.com/dipdup-net/indexer-sdk/pkg/sync"
 	"github.com/gorilla/websocket"

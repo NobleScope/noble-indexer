@@ -2,10 +2,11 @@ package storage
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/storage/types"
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/internal/storage/types"
+	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
@@ -19,8 +20,10 @@ type TraceListFilter struct {
 	TxId          *uint64
 	AddressFromId *uint64
 	AddressToId   *uint64
+	AddressId     *uint64
 	ContractId    *uint64
 	Type          []types.TraceType
+	WithABI       bool
 }
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
@@ -28,6 +31,7 @@ type ITrace interface {
 	storage.Table[*Trace]
 
 	Filter(ctx context.Context, filter TraceListFilter) (traces []*Trace, err error)
+	ByTxId(ctx context.Context, txId uint64, withABI bool) (traces []*Trace, err error)
 }
 
 // Trace -
@@ -55,12 +59,15 @@ type Trace struct {
 	Output     []byte          `bun:"output"                comment:"Output data"`
 	ContractId *uint64         `bun:"contract_id"           comment:"Address identity of the new contract"`
 
-	Subtraces uint64 `bun:"subtraces" comment:"Amount of subtraces"`
+	Error     *string `bun:"error"     comment:"Trace error message"`
+	Subtraces uint64  `bun:"subtraces" comment:"Amount of subtraces"`
 
 	FromAddress *Address  `bun:"rel:belongs-to,join:from_address_id=id"`
 	ToAddress   *Address  `bun:"rel:belongs-to,join:to_address_id=id"`
 	Contract    *Contract `bun:"rel:belongs-to,join:contract_id=id"`
 	Tx          *Tx       `bun:"rel:belongs-to,join:tx_id=id"`
+
+	ToContractABI json.RawMessage `bun:"to_contract_abi,scanonly"`
 }
 
 // TableName -

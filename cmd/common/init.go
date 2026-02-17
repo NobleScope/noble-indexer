@@ -3,9 +3,11 @@ package common
 import (
 	"os"
 	"strconv"
+	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/profiler"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
+	"github.com/NobleScope/noble-indexer/internal/cache"
+	"github.com/NobleScope/noble-indexer/internal/profiler"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/config"
 	goLibConfig "github.com/dipdup-net/go-lib/config"
 	"github.com/grafana/pyroscope-go"
 	"github.com/rs/zerolog"
@@ -70,4 +72,15 @@ func InitLogger(level string) error {
 
 func InitProfiler(cfg *profiler.Config, serviceName string) (*pyroscope.Profiler, error) {
 	return profiler.New(cfg, serviceName)
+}
+
+func InitCache(cfg config.Cache) (cache.ICache, error) {
+	if cfg.URL != "" {
+		if cfg.TTL <= 0 {
+			cfg.TTL = 1800 // 30 minutes
+		}
+
+		return cache.NewValKey(cfg.URL, time.Duration(cfg.TTL)*time.Second)
+	}
+	return nil, nil
 }

@@ -5,17 +5,17 @@ import (
 	"sync"
 	"time"
 
-	internalStorage "github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/internal/storage/postgres"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/genesis"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser"
-	proxy "github.com/baking-bad/noble-indexer/pkg/indexer/proxy_contracts_resolver"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/receiver"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/rollback"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/storage"
-	"github.com/baking-bad/noble-indexer/pkg/node"
-	"github.com/baking-bad/noble-indexer/pkg/node/rpc"
+	internalStorage "github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/postgres"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/config"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/genesis"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser"
+	proxy "github.com/NobleScope/noble-indexer/pkg/indexer/proxy_contracts_resolver"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/receiver"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/rollback"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/storage"
+	"github.com/NobleScope/noble-indexer/pkg/node"
+	"github.com/NobleScope/noble-indexer/pkg/node/rpc"
 	"github.com/dipdup-net/indexer-sdk/pkg/modules"
 	"github.com/dipdup-net/indexer-sdk/pkg/modules/stopper"
 	"github.com/gorilla/websocket"
@@ -40,7 +40,7 @@ type Indexer struct {
 }
 
 func New(ctx context.Context, cfg config.Config, stopperModule modules.Module) (Indexer, error) {
-	pg, err := postgres.Create(ctx, cfg.Database, cfg.Indexer.ScriptsDir)
+	pg, err := postgres.Create(ctx, cfg.Database, cfg.Indexer.ScriptsDir, true)
 	if err != nil {
 		return Indexer{}, errors.Wrap(err, "while creating pg context")
 	}
@@ -50,7 +50,12 @@ func New(ctx context.Context, cfg config.Config, stopperModule modules.Module) (
 		return Indexer{}, errors.Wrap(err, "while creating receiver module")
 	}
 
-	p, err := createParser(cfg.Indexer, r)
+	networkConfig, err := cfg.Networks.Get(cfg.Network)
+	if err != nil {
+		return Indexer{}, errors.Wrap(err, "while getting network config")
+	}
+
+	p, err := createParser(cfg.Indexer, networkConfig, r)
 	if err != nil {
 		return Indexer{}, errors.Wrap(err, "while creating parser module")
 	}
@@ -161,8 +166,8 @@ func createReceiver(ctx context.Context, cfg config.Config, pg postgres.Storage)
 	return nodeRpc, &receiverModule, nil
 }
 
-func createParser(cfg config.Indexer, receiverModule modules.Module) (*parser.Module, error) {
-	parserModule := parser.NewModule(cfg)
+func createParser(cfg config.Indexer, networkConfig config.Network, receiverModule modules.Module) (*parser.Module, error) {
+	parserModule := parser.NewModule(cfg, networkConfig)
 
 	if err := parserModule.AttachTo(receiverModule, receiver.BlocksOutput, parser.InputName); err != nil {
 		return nil, errors.Wrap(err, "while attaching parser to receiver")

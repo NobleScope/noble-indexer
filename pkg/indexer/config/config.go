@@ -1,8 +1,9 @@
 package config
 
 import (
-	"github.com/baking-bad/noble-indexer/internal/profiler"
+	"github.com/NobleScope/noble-indexer/internal/profiler"
 	"github.com/dipdup-net/go-lib/config"
+	"github.com/pkg/errors"
 )
 
 type Config struct {
@@ -10,10 +11,13 @@ type Config struct {
 	LogLevel                 string           `validate:"omitempty,oneof=debug trace info warn error fatal panic" yaml:"log_level"`
 	Indexer                  Indexer          `yaml:"indexer"`
 	API                      API              `yaml:"api"`
+	Cache                    Cache            `yaml:"cache"`
 	Profiler                 *profiler.Config `validate:"omitempty"                                               yaml:"profiler"`
 	ContractMetadataResolver MetadataResolver `yaml:"contract_resolver"`
 	TokenMetadataResolver    MetadataResolver `yaml:"token_resolver"`
 	ContractVerifier         ContractVerifier `yaml:"contract_verifier"`
+	Network                  string           `validate:"required"                                                yaml:"network"`
+	Networks                 NetworksConfig   `yaml:"networks"`
 }
 
 type Indexer struct {
@@ -22,6 +26,7 @@ type Indexer struct {
 	BlockPeriod     int64          `validate:"omitempty"     yaml:"block_period"`
 	ScriptsDir      string         `validate:"omitempty,dir" yaml:"scripts_dir"`
 	AssetsDir       string         `validate:"omitempty,dir" yaml:"assets_dir"`
+	GenesisFilename string         `validate:"omitempty"     yaml:"genesis_filename"`
 	RequestBulkSize int            `validate:"min=1"         yaml:"request_bulk_size"`
 	Proxy           ProxyContracts `yaml:"proxy_contracts"`
 }
@@ -31,6 +36,11 @@ type API struct {
 	RateLimit      int    `validate:"omitempty,min=0" yaml:"rate_limit"`
 	RequestTimeout int    `validate:"omitempty,min=1" yaml:"request_timeout"`
 	Websocket      bool   `validate:"omitempty"       yaml:"websocket"`
+}
+
+type Cache struct {
+	URL string `validate:"required,url" yaml:"url"`
+	TTL int    `validate:"min=1"        yaml:"ttl"`
 }
 
 type MetadataResolver struct {
@@ -59,4 +69,17 @@ func (c *Config) Substitute() error {
 		return err
 	}
 	return nil
+}
+
+type Network struct {
+	PrecompiledContracts []string `validate:"omitempty,dive,eth_addr" yaml:"precompiled_contracts,omitempty"`
+}
+
+type NetworksConfig map[string]Network
+
+func (nc NetworksConfig) Get(network string) (Network, error) {
+	if netCfg, ok := nc[network]; ok {
+		return netCfg, nil
+	}
+	return Network{}, errors.Errorf("network %s config not found", network)
 }

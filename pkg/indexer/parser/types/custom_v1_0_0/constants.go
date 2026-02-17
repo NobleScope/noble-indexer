@@ -1,6 +1,6 @@
 package custom_v1_0_0
 
-import pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+import pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 
 var (
 	Code = pkgTypes.MustDecodeHex("0x608060405273ffffffffffffffffffffffffffffffffffffffff60005416366000803760008" +

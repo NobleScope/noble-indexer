@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
@@ -51,10 +51,11 @@ type Block struct {
 	StateRootHash        pkgTypes.Hex `bun:"state_root_hash,type:bytea"        comment:"Hash of state root"`
 	TransactionsRootHash pkgTypes.Hex `bun:"transactions_root_hash,type:bytea" comment:"Hash of transactions root"`
 
-	Txs    []*Tx       `bun:"rel:has-many"                    json:"-"`
-	Traces []*Trace    `bun:"rel:has-many"                    json:"-"`
-	Miner  Address     `bun:"rel:belongs-to,join:miner_id=id"`
-	Stats  *BlockStats `bun:"rel:has-one,join:height=height"`
+	Txs         []*Tx               `bun:"rel:has-many"                    json:"-"`
+	Traces      []*Trace            `bun:"rel:has-many"                    json:"-"`
+	Withdrawals []*BeaconWithdrawal `bun:"rel:has-many"                    json:"-"`
+	Miner       Address             `bun:"rel:belongs-to,join:miner_id=id"`
+	Stats       *BlockStats         `bun:"rel:has-one,join:height=height"`
 }
 
 // TableName -

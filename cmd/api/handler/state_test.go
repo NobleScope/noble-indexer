@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/internal/storage/mock"
-	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/mock"
+	"github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/mock/gomock"
@@ -64,13 +64,15 @@ func (s *StateTestSuite) TestHead() {
 	s.state.EXPECT().
 		ByName(gomock.Any(), testIndexerName).
 		Return(storage.State{
-			Id:            1,
-			Name:          testIndexerName,
-			LastHeight:    100,
-			LastHash:      blockHashBytes,
-			LastTime:      testTime,
-			TotalTx:       1234,
-			TotalAccounts: 123,
+			Id:             1,
+			Name:           testIndexerName,
+			LastHeight:     100,
+			LastHash:       blockHashBytes,
+			LastTime:       testTime,
+			TotalTx:        1234,
+			TotalAccounts:  123,
+			TotalContracts: 321,
+			TotalTokens:    3,
 		}, nil).
 		Times(1)
 
@@ -87,6 +89,8 @@ func (s *StateTestSuite) TestHead() {
 	s.Require().Equal(testTime, state.LastTime)
 	s.Require().EqualValues(1234, state.TotalTx)
 	s.Require().EqualValues(123, state.TotalAccounts)
+	s.Require().EqualValues(321, state.TotalContracts)
+	s.Require().EqualValues(3, state.TotalTokens)
 }
 
 func (s *StateTestSuite) TestNoHead() {

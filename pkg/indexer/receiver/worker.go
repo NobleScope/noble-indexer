@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/baking-bad/noble-indexer/pkg/node"
-	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/pkg/node"
+	"github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 )
@@ -30,8 +30,8 @@ func NewWorker(api node.Api, log zerolog.Logger, blocks chan types.BlockData, ca
 		api:      api,
 		blocks:   blocks,
 		log:      log,
-		queue:    make([]types.Level, 0),
-		m:        make(map[types.Level]struct{}),
+		queue:    make([]types.Level, 0, capacity),
+		m:        make(map[types.Level]struct{}, capacity),
 		capacity: capacity,
 		mx:       new(sync.RWMutex),
 	}

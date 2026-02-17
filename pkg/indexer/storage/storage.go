@@ -4,10 +4,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/internal/storage/postgres"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
-	decodeContext "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
+	"github.com/NobleScope/noble-indexer/internal/pool"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/postgres"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/config"
+	decodeContext "github.com/NobleScope/noble-indexer/pkg/indexer/decode/context"
 	"github.com/dipdup-net/indexer-sdk/pkg/modules"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/goccy/go-json"
@@ -125,6 +126,10 @@ func (module *Module) saveBlock(ctx context.Context, dCtx *decodeContext.Context
 	return state, nil
 }
 
+var transfersPool = pool.New(func() []*storage.Transfer {
+	return make([]*storage.Transfer, 0, 100)
+})
+
 func (module *Module) processBlockInTransaction(
 	ctx context.Context,
 	tx storage.Transaction,
@@ -134,6 +139,9 @@ func (module *Module) processBlockInTransaction(
 	state, err := module.pg.State.ByName(ctx, module.indexerName)
 	if err != nil {
 		return state, err
+	}
+	if state.LastHeight > 0 {
+		block.Stats.BlockTime = uint64(block.Time.Sub(state.LastTime).Milliseconds())
 	}
 
 	addrToId, totalAccounts, err := saveAddresses(ctx, tx, dCtx.GetAddresses())
@@ -155,8 +163,16 @@ func (module *Module) processBlockInTransaction(
 		return state, err
 	}
 
-	txHashToId := make(map[string]uint64)
-	transfers := make([]*storage.Transfer, 0)
+	txHashToId := make(map[string]uint64, len(block.Txs))
+	transfers := transfersPool.Get()
+	defer func() {
+		for i := range transfers {
+			transfers[i] = nil
+		}
+		transfers = transfers[:0]
+		transfersPool.Put(transfers)
+	}()
+
 	for i := range block.Txs {
 		txHashToId[block.Txs[i].Hash.String()] = block.Txs[i].Id
 
@@ -166,7 +182,7 @@ func (module *Module) processBlockInTransaction(
 		transfers = append(transfers, block.Txs[i].Transfers...)
 	}
 
-	err = saveContracts(ctx, tx, dCtx.GetContracts(), txHashToId, addrToId)
+	totalContracts, err := saveContracts(ctx, tx, dCtx.GetContracts(), txHashToId, addrToId)
 	if err != nil {
 		return state, err
 	}
@@ -186,7 +202,7 @@ func (module *Module) processBlockInTransaction(
 		return state, err
 	}
 
-	err = saveTokens(ctx, tx, dCtx.GetTokens(), addrToId)
+	totalTokens, err := saveTokens(ctx, tx, dCtx.GetTokens(), addrToId)
 	if err != nil {
 		return state, err
 	}
@@ -201,7 +217,16 @@ func (module *Module) processBlockInTransaction(
 		return state, err
 	}
 
-	if err := updateState(block, totalAccounts, int64(len(block.Txs)), int64(dCtx.Contracts.Len()), 0, &state); err != nil {
+	err = saveERC4337UserOps(ctx, tx, dCtx.GetUserOps(), txHashToId, addrToId)
+	if err != nil {
+		return state, err
+	}
+
+	if err := saveBeaconWithdrawals(ctx, tx, dCtx.Block.Withdrawals, addrToId); err != nil {
+		return state, err
+	}
+
+	if err := updateState(block, totalAccounts, int64(len(block.Txs)), totalContracts, 0, totalTokens, &state); err != nil {
 		return state, err
 	}
 

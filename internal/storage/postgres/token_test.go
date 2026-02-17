@@ -6,8 +6,8 @@ import (
 
 	"github.com/shopspring/decimal"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/internal/storage/types"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/types"
 )
 
 // TestTokenGetBasic tests basic Get functionality

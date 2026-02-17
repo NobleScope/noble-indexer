@@ -4,7 +4,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/pkg/types"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/lib/pq"
 )
@@ -26,6 +26,8 @@ var Models = []any{
 	&State{},
 	&VerificationTask{},
 	&VerificationFile{},
+	&ERC4337UserOp{},
+	&BeaconWithdrawal{},
 }
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
@@ -37,13 +39,15 @@ type Transaction interface {
 	SaveTraces(ctx context.Context, traces ...*Trace) error
 	SaveAddresses(ctx context.Context, addresses ...*Address) (int64, error)
 	SaveBalances(ctx context.Context, balances ...*Balance) error
-	SaveContracts(ctx context.Context, addresses ...*Contract) error
+	SaveContracts(ctx context.Context, addresses ...*Contract) (int64, error)
 	SaveTransfers(ctx context.Context, transfers ...*Transfer) error
-	SaveTokens(ctx context.Context, tokens ...*Token) error
+	SaveTokens(ctx context.Context, tokens ...*Token) (int64, error)
 	SaveTokenBalances(ctx context.Context, tokenBalances ...*TokenBalance) (tb []TokenBalance, err error)
 	SaveTokenMetadata(ctx context.Context, tokens ...*Token) error
 	SaveSources(ctx context.Context, sources ...*Source) error
 	SaveProxyContracts(ctx context.Context, contracts ...*ProxyContract) error
+	SaveERC4337UserOps(ctx context.Context, userOps ...*ERC4337UserOp) error
+	SaveBeaconWithdrawals(ctx context.Context, withdrawals ...*BeaconWithdrawal) error
 	UpdateVerificationTask(ctx context.Context, task *VerificationTask) error
 	AddVerificationTask(ctx context.Context, task VerificationTask) error
 
@@ -56,6 +60,8 @@ type Transaction interface {
 	RollbackTransfers(ctx context.Context, height types.Level) (transfers []Transfer, err error)
 	RollbackTokens(ctx context.Context, height types.Level) (tokens []Token, err error)
 	RollbackContracts(ctx context.Context, height types.Level) error
+	RollbackERC4337UserOps(ctx context.Context, height types.Level) error
+	RollbackBeaconWithdrawals(ctx context.Context, height types.Level) error
 	DeleteBalances(ctx context.Context, ids []uint64) error
 	DeleteTokenBalances(ctx context.Context, tokenIds []string, contractIds []uint64, zeroBalances []*TokenBalance) error
 	DeleteVerificationFiles(ctx context.Context, taskId uint64) error
@@ -95,6 +101,6 @@ type SearchResult struct {
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
 type ISearch interface {
-	Search(ctx context.Context, query []byte) ([]SearchResult, error)
-	SearchText(ctx context.Context, text string) ([]SearchResult, error)
+	Search(ctx context.Context, query []byte, limit, offset int) ([]SearchResult, error)
+	SearchText(ctx context.Context, text string, limit, offset int) ([]SearchResult, error)
 }

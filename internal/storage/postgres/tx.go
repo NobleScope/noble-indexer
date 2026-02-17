@@ -3,8 +3,8 @@ package postgres
 import (
 	"context"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/dipdup-net/go-lib/database"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage/postgres"
@@ -52,19 +52,26 @@ func (t *Tx) ByHeight(
 }
 
 // ByHash -
-func (t *Tx) ByHash(ctx context.Context, hash pkgTypes.Hex) (tx storage.Tx, err error) {
+func (t *Tx) ByHash(ctx context.Context, hash pkgTypes.Hex, withABI bool) (tx storage.Tx, err error) {
 	subQuery := t.DB().NewSelect().
 		Model(&tx).
 		Where("tx.hash = ?", hash)
 
-	err = t.DB().NewSelect().
+	outerQuery := t.DB().NewSelect().
 		ColumnExpr("tx.*").
 		ColumnExpr("from_addr.id AS from_address__id, from_addr.first_height AS from_address__first_height, from_addr.last_height AS from_address__last_height, from_addr.hash AS from_address__hash, from_addr.is_contract AS from_address__is_contract").
 		ColumnExpr("to_addr.id AS to_address__id, to_addr.first_height AS to_address__first_height, to_addr.last_height AS to_address__last_height, to_addr.hash AS to_address__hash, to_addr.is_contract AS to_address__is_contract").
 		TableExpr("(?) AS tx", subQuery).
 		Join("INNER JOIN address AS from_addr ON from_addr.id = tx.from_address_id").
-		Join("LEFT JOIN address AS to_addr ON to_addr.id = tx.to_address_id").
-		Scan(ctx, &tx)
+		Join("LEFT JOIN address AS to_addr ON to_addr.id = tx.to_address_id")
+
+	if withABI {
+		outerQuery = outerQuery.
+			ColumnExpr("to_contract.abi AS to_contract_abi").
+			Join("LEFT JOIN contract AS to_contract ON to_contract.id = tx.to_address_id")
+	}
+
+	err = outerQuery.Scan(ctx, &tx)
 
 	return
 }
@@ -83,6 +90,12 @@ func (t *Tx) Filter(ctx context.Context, filter storage.TxListFilter) (txs []sto
 		TableExpr("(?) AS tx", query).
 		Join("LEFT JOIN address AS from_addr ON from_addr.id = tx.from_address_id").
 		Join("LEFT JOIN address AS to_addr ON to_addr.id = tx.to_address_id")
+
+	if filter.WithABI {
+		outerQuery = outerQuery.
+			ColumnExpr("to_contract.abi AS to_contract_abi").
+			Join("LEFT JOIN contract AS to_contract ON to_contract.id = tx.to_address_id")
+	}
 
 	outerQuery = sortTimeIDScope(outerQuery, filter.Sort)
 	err = outerQuery.Scan(ctx, &txs)

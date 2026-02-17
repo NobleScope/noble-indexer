@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/internal/storage/types"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/types"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/shopspring/decimal"
 )
@@ -31,6 +31,9 @@ func (s *StorageTestSuite) TestTransferFilterBasic() {
 	s.Require().EqualValues(1, *transfers[0].FromAddressId)
 	s.Require().NotNil(transfers[0].ToAddressId)
 	s.Require().EqualValues(2, *transfers[0].ToAddressId)
+	s.Require().EqualValues(1, transfers[0].TxID)
+	s.Require().True(transfers[0].TokenID.Equal(decimal.NewFromInt(0)))
+	s.Require().True(transfers[0].Amount.Equal(decimal.NewFromInt(1000000000000000000)))
 
 	// Check that JOIN fields are populated
 	s.Require().NotNil(transfers[0].Tx.Hash)
@@ -40,6 +43,13 @@ func (s *StorageTestSuite) TestTransferFilterBasic() {
 	s.Require().NotNil(transfers[0].ToAddress.Hash)
 	s.Require().NotNil(transfers[0].Contract.Address)
 	s.Require().NotNil(transfers[0].Contract.Address.Hash)
+	s.Require().NotNil(transfers[0].Token)
+	s.Require().NotNil(transfers[0].Token.Name)
+	s.Require().NotNil(transfers[0].Token.Symbol)
+	s.Require().NotNil(transfers[0].Token.Decimals)
+	s.Require().NotNil(transfers[0].Token.Type)
+	s.Require().NotNil(transfers[0].Token.Supply)
+	s.Require().NotNil(transfers[0].Token.TransfersCount)
 }
 
 // TestTransferFilterByTxId tests filtering by tx_id
@@ -513,4 +523,41 @@ func (s *StorageTestSuite) TestTransferFilterAmounts() {
 
 	// Check specific amount value for first transfer
 	s.Require().True(transfers[0].Amount.Equal(decimal.NewFromInt(1000000000000000000)))
+}
+
+// TestTransferFilterBasic tests basic Filter functionality
+func (s *StorageTestSuite) TestTransferGet() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	transfer, err := s.storage.Transfer.Get(ctx, 1)
+	s.Require().NoError(err)
+
+	// Check first transfer
+	s.Require().EqualValues(1, transfer.Id)
+	s.Require().EqualValues(100, transfer.Height)
+	s.Require().EqualValues(types.TransferType("transfer"), transfer.Type)
+	s.Require().NotNil(transfer.FromAddressId)
+	s.Require().EqualValues(1, *transfer.FromAddressId)
+	s.Require().NotNil(transfer.ToAddressId)
+	s.Require().EqualValues(2, *transfer.ToAddressId)
+	s.Require().EqualValues(1, transfer.TxID)
+	s.Require().True(transfer.TokenID.Equal(decimal.NewFromInt(0)))
+	s.Require().True(transfer.Amount.Equal(decimal.NewFromInt(1000000000000000000)))
+
+	// Check that JOIN fields are populated
+	s.Require().NotNil(transfer.Tx.Hash)
+	s.Require().NotNil(transfer.FromAddress)
+	s.Require().NotNil(transfer.FromAddress.Hash)
+	s.Require().NotNil(transfer.ToAddress)
+	s.Require().NotNil(transfer.ToAddress.Hash)
+	s.Require().NotNil(transfer.Contract.Address)
+	s.Require().NotNil(transfer.Contract.Address.Hash)
+	s.Require().NotNil(transfer.Token)
+	s.Require().NotNil(transfer.Token.Name)
+	s.Require().NotNil(transfer.Token.Symbol)
+	s.Require().NotNil(transfer.Token.Decimals)
+	s.Require().NotNil(transfer.Token.Type)
+	s.Require().NotNil(transfer.Token.Supply)
+	s.Require().NotNil(transfer.Token.TransfersCount)
 }

@@ -3,8 +3,8 @@ package responses
 import (
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/shopspring/decimal"
 )
 
@@ -30,6 +30,9 @@ type Transaction struct {
 	ToAddress         *string         `example:"0x0000000000000000000000000000000000000001"                         json:"to_address"          swaggertype:"string"`
 	Input             string          `example:"0x"                                                                 json:"input"               swaggertype:"string"`
 	LogsBloom         string          `example:"0x00000000000000000000000000000000000000000000"                     json:"logs_bloom"          swaggertype:"string"`
+	LogsCount         int             `example:"1234"                                                               json:"logs_count"          swaggertype:"integer"`
+	TracesCount       int             `example:"1488"                                                               json:"traces_count"        swaggertype:"integer"`
+	Decoded           *DecodedTrace   `json:"decoded,omitempty"                                                     swaggertype:"object"`
 }
 
 func NewTransaction(tx storage.Tx) Transaction {
@@ -51,11 +54,19 @@ func NewTransaction(tx storage.Tx) Transaction {
 		FromAddress:       tx.FromAddress.Hash.Hex(),
 		Input:             types.Hex(tx.Input).Hex(),
 		LogsBloom:         types.Hex(tx.LogsBloom).Hex(),
+		LogsCount:         tx.LogsCount,
+		TracesCount:       tx.TracesCount,
 	}
 
 	if tx.ToAddress != nil {
 		toAddr := tx.ToAddress.Hash.Hex()
 		result.ToAddress = &toAddr
+	}
+
+	if tx.ToAddressId != nil && tx.ToContractABI != nil {
+		if parsedABI := parseABI(tx.ToContractABI); parsedABI != nil {
+			result.Decoded = decodeTxArgs(parsedABI, tx.Input)
+		}
 	}
 
 	return result

@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/internal/storage/types"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/types"
 )
 
 // TestTraceFilterBasic tests basic Filter functionality
@@ -532,6 +532,81 @@ func (s *StorageTestSuite) TestTraceFilterMultipleHeights() {
 		// Verify all have correct height
 		for _, trace := range traces {
 			s.Require().EqualValues(tc.height, trace.Height)
+		}
+	}
+}
+
+func (s *StorageTestSuite) TestTraceFilterByAddressId() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	addressId := uint64(3)
+	traces, err := s.storage.Trace.Filter(ctx, storage.TraceListFilter{
+		AddressId: &addressId,
+		Limit:     10,
+		Offset:    0,
+	})
+	s.Require().NoError(err)
+	s.Require().Len(traces, 3)
+
+	// All should have from_address_id = 3 or to_address_id = 3
+	for _, trace := range traces {
+		s.Require().True(
+			(trace.From != nil && *trace.From == addressId) ||
+				(trace.To != nil && *trace.To == addressId),
+		)
+	}
+}
+
+func (s *StorageTestSuite) TestTraceByTxId() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	txId := uint64(2)
+	traces, err := s.storage.Trace.ByTxId(ctx, txId, false)
+	s.Require().NoError(err)
+	s.Require().Len(traces, 6) // tx 2 has 6 traces
+
+	// All should have tx_id = 2
+	for _, trace := range traces {
+		s.Require().NotNil(trace.TxId)
+		s.Require().EqualValues(2, *trace.TxId)
+	}
+}
+
+func (s *StorageTestSuite) TestTraceByTxIdWithABI() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	txId := uint64(1)
+	traces, err := s.storage.Trace.ByTxId(ctx, txId, true)
+	s.Require().NoError(err)
+	s.Require().Len(traces, 5)
+
+	for _, trace := range traces {
+		if trace.To != nil && *trace.To == 3 {
+			s.Require().NotNil(trace.ToContractABI)
+		}
+	}
+}
+
+func (s *StorageTestSuite) TestTraceFilterWithABI() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	addressId := uint64(3)
+	traces, err := s.storage.Trace.Filter(ctx, storage.TraceListFilter{
+		AddressId: &addressId,
+		Limit:     10,
+		Offset:    0,
+		WithABI:   true,
+	})
+	s.Require().NoError(err)
+	s.Require().Len(traces, 3)
+
+	for _, trace := range traces {
+		if trace.To != nil && *trace.To == 3 {
+			s.Require().NotNil(trace.ToContractABI)
 		}
 	}
 }

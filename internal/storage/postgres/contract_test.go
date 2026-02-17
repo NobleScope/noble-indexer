@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/internal/storage/types"
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/types"
+	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 )
 
@@ -41,6 +41,16 @@ func (s *StorageTestSuite) TestContractByHash() {
 
 	// No proxy implementation for this contract
 	s.Require().Nil(contract.Implementation)
+}
+
+func (s *StorageTestSuite) TestContractCode() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	contract, abi, err := s.storage.Contracts.Code(ctx, pkgTypes.MustDecodeHex("0x30f055506ba543ea0942dc8ca03f596ab75bc879"))
+	s.Require().NoError(err)
+	s.Require().NotEmpty(contract)
+	s.Require().NotEmpty(abi)
 }
 
 func (s *StorageTestSuite) TestContractByHashWithProxy() {
@@ -288,5 +298,27 @@ func (s *StorageTestSuite) TestContractPendingMetadataExcludesEmptyMetadataLink(
 	// Verify that all contracts have non-empty metadata_link
 	for _, contract := range contracts {
 		s.Require().NotEmpty(contract.MetadataLink)
+	}
+}
+
+func (s *StorageTestSuite) TestContractListByDeployerId() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	deployerId := uint64(1)
+	contracts, err := s.storage.Contracts.ListWithTx(ctx, storage.ContractListFilter{
+		Limit:      10,
+		Offset:     0,
+		Sort:       sdk.SortOrderAsc,
+		DeployerId: &deployerId,
+	})
+	s.Require().NoError(err)
+	s.Require().Len(contracts, 3)
+
+	for _, contract := range contracts {
+		s.Require().NotNil(contract.DeployerId)
+		s.Require().EqualValues(deployerId, *contract.DeployerId)
+		s.Require().NotNil(contract.Deployer)
+		s.Require().EqualValues("0xa63d581a7fdab643c09f0524904b046cdb9ad9d2", contract.Deployer.Hash.Hex())
 	}
 }

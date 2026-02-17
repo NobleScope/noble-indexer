@@ -1,7 +1,7 @@
 package postgres
 
 import (
-	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/uptrace/bun"
 )
@@ -50,7 +50,7 @@ func addressListFilter(query *bun.SelectQuery, fltrs storage.AddressListFilter) 
 	query = query.Offset(fltrs.Offset)
 
 	switch fltrs.SortField {
-	case "value", "first_height", "last_height":
+	case "last_height":
 		query = sortMultipleScope(query, []SortField{
 			{Field: fltrs.SortField, Order: fltrs.Sort},
 			{Field: "id", Order: fltrs.Sort},
@@ -80,6 +80,10 @@ func contractListFilter(query *bun.SelectQuery, fltrs storage.ContractListFilter
 		query = query.Where("verified = ?", true)
 	}
 
+	if fltrs.DeployerId != nil {
+		query = query.Where("deployer_id = ?", *fltrs.DeployerId)
+	}
+
 	query = limitScope(query, fltrs.Limit)
 	query = query.Offset(fltrs.Offset)
 
@@ -102,6 +106,11 @@ func traceListFilter(query *bun.SelectQuery, fltrs storage.TraceListFilter) *bun
 	}
 	if fltrs.AddressToId != nil {
 		query = query.Where("to_address_id = ?", *fltrs.AddressToId)
+	}
+	if fltrs.AddressId != nil {
+		query = query.WhereGroup("", func(sq *bun.SelectQuery) *bun.SelectQuery {
+			return sq.WhereOr("from_address_id = ?", *fltrs.AddressId).WhereOr("to_address_id = ?", *fltrs.AddressId)
+		})
 	}
 	if fltrs.ContractId != nil {
 		query = query.Where("contract_id = ?", *fltrs.ContractId)
@@ -219,12 +228,48 @@ func logListFilter(query *bun.SelectQuery, fltrs storage.LogListFilter) *bun.Sel
 	return query
 }
 
+func erc4337UserOpsListFilter(query *bun.SelectQuery, fltrs storage.ERC4337UserOpsListFilter) *bun.SelectQuery {
+	if fltrs.Height != nil {
+		query = query.Where("height = ?", *fltrs.Height)
+	}
+	if fltrs.TxId != nil {
+		query = query.Where("tx_id = ?", *fltrs.TxId)
+	}
+	if fltrs.BundlerId != nil {
+		query = query.Where("bundler_id = ?", *fltrs.BundlerId)
+	}
+	if fltrs.PaymasterId != nil {
+		query = query.Where("paymaster_id = ?", *fltrs.PaymasterId)
+	}
+	if fltrs.Success != nil {
+		query = query.Where("success = ?", *fltrs.Success)
+	}
+
+	if !fltrs.TimeFrom.IsZero() {
+		query = query.Where("time >= ?", fltrs.TimeFrom)
+	}
+	if !fltrs.TimeTo.IsZero() {
+		query = query.Where("time < ?", fltrs.TimeTo)
+	}
+
+	query = limitScope(query, fltrs.Limit)
+	query = query.Offset(fltrs.Offset)
+	query = sortTimeIDScope(query, fltrs.Sort)
+
+	return query
+}
+
 func txListFilter(query *bun.SelectQuery, fltrs storage.TxListFilter) *bun.SelectQuery {
 	if fltrs.AddressFromId != nil {
 		query = query.Where("from_address_id = ?", *fltrs.AddressFromId)
 	}
 	if fltrs.AddressToId != nil {
 		query = query.Where("to_address_id = ?", *fltrs.AddressToId)
+	}
+	if fltrs.AddressId != nil {
+		query = query.WhereGroup("", func(sq *bun.SelectQuery) *bun.SelectQuery {
+			return sq.WhereOr("from_address_id = ?", *fltrs.AddressId).WhereOr("to_address_id = ?", *fltrs.AddressId)
+		})
 	}
 	if fltrs.ContractId != nil {
 		query = query.Where("from_address_id = ?", *fltrs.ContractId).

@@ -3,7 +3,7 @@ package node
 import (
 	"context"
 
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 )
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed

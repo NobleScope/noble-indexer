@@ -8,8 +8,10 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/NobleScope/noble-indexer/internal/cache"
 	"github.com/dipdup-io/ipfs-tools"
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -61,6 +63,7 @@ type Source struct {
 	Keccak256 string   `json:"keccak256"`
 	License   string   `json:"license,omitempty"`
 	Urls      []string `json:"urls,omitempty"`
+	Content   string   `json:"content,omitempty"`
 }
 
 type Settings struct {
@@ -82,10 +85,11 @@ type OptimizerSettings struct {
 }
 
 type Pool struct {
-	ipfs *ipfs.Pool
+	ipfs  ipfs.IPool
+	cache cache.ICache
 }
 
-func New(gateways string) (Pool, error) {
+func New(gateways string, opts ...Option) (Pool, error) {
 	sources := strings.Split(gateways, ";")
 	p, err := ipfs.NewPool(
 		sources,
@@ -94,9 +98,12 @@ func New(gateways string) (Pool, error) {
 	if err != nil {
 		return Pool{}, errors.Wrap(err, "creating ipfs pool")
 	}
-
 	pool := Pool{
 		ipfs: p,
+	}
+
+	for _, opt := range opts {
+		opt(&pool)
 	}
 
 	return pool, nil
@@ -163,6 +170,26 @@ func (p Pool) TokenMetadata(ctx context.Context, cid string) (TokenMetadata, err
 	return md, err
 }
 
+func (p Pool) getFromCache(ctx context.Context, cid string) ([]byte, bool) {
+	if p.cache == nil {
+		return nil, false
+	}
+	val, ok := p.cache.Get(ctx, cid)
+	if !ok {
+		return nil, false
+	}
+	return []byte(val), true
+}
+
+func (p Pool) setToCache(ctx context.Context, cid string, data []byte) {
+	if p.cache == nil {
+		return
+	}
+	if err := p.cache.Set(ctx, cid, string(data), nil); err != nil {
+		log.Err(err).Msg("setting to cache") // not critical, just log
+	}
+}
+
 func (p Pool) LoadMetadata(ctx context.Context, cid string) ([]byte, error) {
 	parsed, err := url.ParseRequestURI(cid)
 	if err != nil {
@@ -171,6 +198,10 @@ func (p Pool) LoadMetadata(ctx context.Context, cid string) ([]byte, error) {
 
 	if err := p.ValidateURL(parsed); err != nil {
 		return nil, err
+	}
+
+	if data, ok := p.getFromCache(ctx, cid); ok {
+		return data, nil
 	}
 
 	path := ipfs.Path(cid)
@@ -183,6 +214,7 @@ func (p Pool) LoadMetadata(ctx context.Context, cid string) ([]byte, error) {
 		return nil, errors.New("empty metadata")
 	}
 
+	p.setToCache(ctx, cid, data.Raw)
 	return data.Raw, nil
 }
 

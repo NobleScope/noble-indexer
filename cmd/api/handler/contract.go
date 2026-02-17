@@ -3,13 +3,14 @@ package handler
 import (
 	"net/http"
 
-	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/labstack/echo/v4"
 )
 
 type ContractHandler struct {
+	address  storage.IAddress
 	contract storage.IContract
 	tx       storage.ITx
 	source   storage.ISource
@@ -17,11 +18,13 @@ type ContractHandler struct {
 
 func NewContractHandler(
 	contract storage.IContract,
+	address storage.IAddress,
 	tx storage.ITx,
 	source storage.ISource,
 ) *ContractHandler {
 	return &ContractHandler{
 		contract: contract,
+		address:  address,
 		tx:       tx,
 		source:   source,
 	}
@@ -34,6 +37,7 @@ type contractListRequest struct {
 	SortBy     string `query:"sort_by"     validate:"omitempty,oneof=id height"`
 	IsVerified bool   `query:"is_verified" validate:"omitempty"`
 	TxHash     string `query:"tx_hash"     validate:"omitempty,tx_hash"`
+	Deployer   string `query:"deployer"    validate:"omitempty,address"`
 }
 
 func (p *contractListRequest) SetDefault() {
@@ -57,6 +61,7 @@ func (p *contractListRequest) SetDefault() {
 //	@Param			sort_by		query	string	false	"Field to sort by (default: id)"											Enums(id, height)
 //	@Param			is_verified	query	boolean	false	"Filter to show only verified contracts (default: false)"					default(false)
 //	@Param			tx_hash		query	string	false	"Filter by deployment transaction hash (hexadecimal with 0x prefix)"		minlength(66)	maxlength(66)	example(0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef)
+//	@Param			deployer	query	string	false	"Filter by deployer address (hexadecimal with 0x prefix)"					minlength(42)	maxlength(42)
 //	@Produce		json
 //	@Success		200	{array}		responses.Contract	"List of smart contracts"
 //	@Failure		400	{object}	Error				"Invalid request parameters"
@@ -83,12 +88,24 @@ func (handler *ContractHandler) List(c echo.Context) error {
 			return badRequestError(c, err)
 		}
 
-		tx, err := handler.tx.ByHash(c.Request().Context(), hash)
+		tx, err := handler.tx.ByHash(c.Request().Context(), hash, false)
 		if err != nil {
 			return handleError(c, err, handler.tx)
 		}
 
 		filters.TxId = &tx.Id
+	}
+
+	if req.Deployer != "" {
+		hash, err := types.HexFromString(req.Deployer)
+		if err != nil {
+			return badRequestError(c, err)
+		}
+		address, err := handler.address.ByHash(c.Request().Context(), hash)
+		if err != nil {
+			return handleError(c, err, handler.address)
+		}
+		filters.DeployerId = &address.Id
 	}
 
 	contracts, err := handler.contract.ListWithTx(c.Request().Context(), filters)
@@ -188,4 +205,36 @@ func (handler *ContractHandler) ContractSources(c echo.Context) error {
 	}
 
 	return returnArray(c, response)
+}
+
+// GetCode godoc
+//
+//	@Summary		Get contract bytecode
+//	@Description	Returns the deployed bytecode of a specific smart contract.
+//	@Tags			contract
+//	@ID				get-contract-code
+//	@Param			hash	path	string	true	"Contract address in hexadecimal format (e.g., 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)"	minlength(42)	maxlength(42)
+//	@Produce		json
+//	@Success		200	{object}	responses.ContractCode	"Contract bytecode"
+//	@Success		204									"Contract not found or not verified"
+//	@Failure		400	{object}	Error					"Invalid contract address format"
+//	@Failure		500	{object}	Error					"Internal server error"
+//	@Router			/contracts/{hash}/code [get]
+func (handler *ContractHandler) GetCode(c echo.Context) error {
+	req, err := bindAndValidate[getByHashRequest](c)
+	if err != nil {
+		return badRequestError(c, err)
+	}
+
+	hash, err := types.HexFromString(req.Hash)
+	if err != nil {
+		return badRequestError(c, err)
+	}
+
+	contract, abi, err := handler.contract.Code(c.Request().Context(), hash)
+	if err != nil {
+		return handleError(c, err, handler.contract)
+	}
+
+	return c.JSON(http.StatusOK, responses.NewContractCode(contract, abi))
 }

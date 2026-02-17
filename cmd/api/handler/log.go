@@ -3,9 +3,9 @@ package handler
 import (
 	"time"
 
-	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/labstack/echo/v4"
 )
 
@@ -34,6 +34,7 @@ type logListRequest struct {
 	Height  *uint64 `query:"height"  validate:"omitempty,min=0"`
 	TxHash  string  `query:"tx_hash" validate:"omitempty,tx_hash"`
 	Address string  `query:"address" validate:"omitempty,address"`
+	Decode  bool    `query:"decode"  validate:"omitempty"`
 
 	From int64 `example:"1692892095" query:"time_from" swaggertype:"integer" validate:"omitempty,min=1"`
 	To   int64 `example:"1692892095" query:"time_to"   swaggertype:"integer" validate:"omitempty,min=1"`
@@ -59,9 +60,10 @@ func (req *logListRequest) SetDefault() {
 //	@Param			offset			query	integer	false	"Number of logs to skip (default: 0)"						minimum(0)	default(0)
 //	@Param			address			query	string	false	"Filter by contract address that emitted the log"			minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
 //	@Param			height			query	integer	false	"Filter by block height"									minimum(1)	example(12345)
-//	@Param			from			query	integer	false	"Filter by timestamp from (Unix timestamp)"					minimum(1)	example(1692892095)
-//	@Param			to				query	integer	false	"Filter by timestamp to (Unix timestamp)"					minimum(1)	example(1692892095)
+//	@Param			time_from		query	integer	false	"Filter by timestamp from (Unix timestamp)"					minimum(1)	example(1692892095)
+//	@Param			time_to			query	integer	false	"Filter by timestamp to (Unix timestamp)"					minimum(1)	example(1692892095)
 //	@Param			sort			query	string	false	"Sort order by timestamp (default: desc)"					Enums(asc, desc)	default(desc)
+//	@Param			decode			query	boolean	false	"Decode log data and topics using contract ABI"				default(false)
 //	@Produce		json
 //	@Success		200	{array}		responses.Log	"List of event logs"
 //	@Failure		400	{object}	Error			"Invalid request parameters"
@@ -75,9 +77,10 @@ func (handler *LogHandler) List(c echo.Context) error {
 	req.SetDefault()
 
 	filters := storage.LogListFilter{
-		Limit:  req.Limit,
-		Offset: req.Offset,
-		Sort:   pgSort(req.Sort),
+		Limit:   req.Limit,
+		Offset:  req.Offset,
+		Sort:    pgSort(req.Sort),
+		WithABI: req.Decode,
 	}
 
 	if req.TxHash != "" {
@@ -86,7 +89,7 @@ func (handler *LogHandler) List(c echo.Context) error {
 			return badRequestError(c, err)
 		}
 
-		tx, err := handler.tx.ByHash(c.Request().Context(), hash)
+		tx, err := handler.tx.ByHash(c.Request().Context(), hash, false)
 		if err != nil {
 			return handleError(c, err, handler.tx)
 		}

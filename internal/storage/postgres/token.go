@@ -5,7 +5,7 @@ import (
 	"github.com/shopspring/decimal"
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/dipdup-net/go-lib/database"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage/postgres"
 )
@@ -25,12 +25,18 @@ func NewToken(db *database.Bun) *Token {
 func (t *Token) PendingMetadata(ctx context.Context, retryDelay time.Duration, limit int) (tokens []*storage.Token, err error) {
 	threshold := time.Now().UTC().Add(-retryDelay)
 
-	err = t.DB().NewSelect().
-		Model(&tokens).
+	query := t.DB().NewSelect().
+		Model((*storage.Token)(nil)).
 		Where("status = 'pending' AND (updated_at < ? OR retry_count = 0)", threshold).
 		Order("id ASC").
-		Limit(limit).
-		Scan(ctx)
+		Limit(limit)
+
+	err = t.DB().NewSelect().TableExpr("(?) AS token", query).
+		ColumnExpr("token.*").
+		ColumnExpr("contract_address.hash AS contract__address__hash").
+		Join("LEFT JOIN contract ON contract.id = token.contract_id").
+		Join("LEFT JOIN address AS contract_address ON contract_address.id = contract.id").
+		Scan(ctx, &tokens)
 
 	return
 }

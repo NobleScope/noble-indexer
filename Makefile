@@ -16,4 +16,10 @@ test:
 api-docs:
 	cd cmd/api && swag init --parseDependency --parseInternal
 
-.PHONY: lint test api-docs
+generate:
+	go generate -v ./internal/storage ./internal/storage/types ./pkg/node ./internal/cache
+
+tagalign:
+	tagalign --fix ./...
+
+.PHONY: indexer api lint test api-docs generate tagalign

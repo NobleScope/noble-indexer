@@ -2,10 +2,16 @@ package storage
 
 import (
 	"context"
+
 	"github.com/pkg/errors"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/pool"
+	"github.com/NobleScope/noble-indexer/internal/storage"
 )
+
+var logsPool = pool.New(func() []*storage.Log {
+	return make([]*storage.Log, 0, 1024)
+})
 
 func saveLogs(
 	ctx context.Context,
@@ -13,7 +19,15 @@ func saveLogs(
 	transactions []*storage.Tx,
 	addresses map[string]uint64,
 ) error {
-	logs := make([]*storage.Log, 0)
+	logs := logsPool.Get()
+	defer func() {
+		for i := range logs {
+			logs[i] = nil
+		}
+		logs = logs[:0]
+		logsPool.Put(logs)
+	}()
+
 	for i := range transactions {
 		for j := range transactions[i].Logs {
 			transactions[i].Logs[j].TxId = transactions[i].Id

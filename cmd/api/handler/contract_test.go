@@ -1,17 +1,20 @@
 package handler
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
-	"go.uber.org/mock/gomock"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
 
-	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/internal/storage/mock"
+	"go.uber.org/mock/gomock"
+
+	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/mock"
+	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
@@ -23,6 +26,7 @@ type ContractTestSuite struct {
 	echo     *echo.Echo
 	ctrl     *gomock.Controller
 	contract *mock.MockIContract
+	address  *mock.MockIAddress
 	tx       *mock.MockITx
 	source   *mock.MockISource
 	handler  *ContractHandler
@@ -34,10 +38,11 @@ func (s *ContractTestSuite) SetupTest() {
 
 	s.ctrl = gomock.NewController(s.T())
 	s.contract = mock.NewMockIContract(s.ctrl)
+	s.address = mock.NewMockIAddress(s.ctrl)
 	s.tx = mock.NewMockITx(s.ctrl)
 	s.source = mock.NewMockISource(s.ctrl)
 
-	s.handler = NewContractHandler(s.contract, s.tx, s.source)
+	s.handler = NewContractHandler(s.contract, s.address, s.tx, s.source)
 }
 
 func (s *ContractTestSuite) TearDownTest() {
@@ -111,7 +116,7 @@ func (s *ContractTestSuite) TestContractList_FilterByTxHash() {
 	c.SetPath("/contract")
 
 	s.tx.EXPECT().
-		ByHash(gomock.Any(), gomock.Any()).
+		ByHash(gomock.Any(), gomock.Any(), false).
 		Return(storage.Tx{Id: 77}, nil)
 
 	s.contract.EXPECT().
@@ -292,4 +297,61 @@ func (s *ContractTestSuite) TestContractSources_Empty() {
 	err = json.NewDecoder(rec.Body).Decode(&resp)
 	s.Require().NoError(err)
 	s.Require().Len(resp, 0)
+}
+
+func (s *ContractTestSuite) TestContractListByDeployer() {
+	q := make(url.Values)
+	q.Set("deployer", testAddressHex1.Hex())
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/contracts")
+
+	s.address.EXPECT().
+		ByHash(gomock.Any(), testAddressHex1).
+		Return(testAddress1, nil).
+		Times(1)
+
+	s.contract.EXPECT().
+		ListWithTx(gomock.Any(), gomock.Any()).
+		Do(func(ctx context.Context, clf storage.ContractListFilter) ([]storage.Contract, error) {
+			s.Equal(uint64(1), *clf.DeployerId)
+			return nil, nil
+		}).
+		Return([]storage.Contract{testContract}, nil).
+		Times(1)
+
+	err := s.handler.List(c)
+	s.Require().NoError(err)
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var resp []responses.Contract
+	err = json.NewDecoder(rec.Body).Decode(&resp)
+	s.Require().NoError(err)
+	s.Require().Len(resp, 1)
+}
+
+func (s *ContractTestSuite) TestContractCode() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/contract/:hash/code")
+	c.SetParamNames("hash")
+	c.SetParamValues(testAddressHex1.Hex())
+
+	s.contract.EXPECT().
+		Code(gomock.Any(), testAddressHex1).
+		Return(pkgTypes.MustDecodeHex("0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"), []byte(`{"abi": "test"}`), nil).
+		Times(1)
+
+	err := s.handler.GetCode(c)
+	s.Require().NoError(err)
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var resp responses.ContractCode
+	err = json.NewDecoder(rec.Body).Decode(&resp)
+	s.Require().NoError(err)
+	s.Equal("0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef", resp.Code)
+	s.NotEmpty(resp.ABI)
 }

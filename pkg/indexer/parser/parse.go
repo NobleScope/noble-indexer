@@ -3,10 +3,11 @@ package parser
 import (
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	storageType "github.com/baking-bad/noble-indexer/internal/storage/types"
-	dCtx "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
-	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	storageType "github.com/NobleScope/noble-indexer/internal/storage/types"
+	dCtx "github.com/NobleScope/noble-indexer/pkg/indexer/decode/context"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/enum"
+	"github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 )
@@ -75,6 +76,7 @@ func (p *Module) parse(b types.BlockData) error {
 		TransactionsRootHash: b.TransactionsRoot,
 		Txs:                  make([]*storage.Tx, len(b.Transactions)),
 		Traces:               make([]*storage.Trace, len(b.Traces)),
+		Withdrawals:          make([]*storage.BeaconWithdrawal, len(b.Withdrawals)),
 		Stats: &storage.BlockStats{
 			Height:  types.Level(height),
 			Time:    blockTime,
@@ -125,11 +127,11 @@ func (p *Module) parse(b types.BlockData) error {
 		if err != nil {
 			return err
 		}
-		fee := cumulativeGasUsed.Mul(effectiveGasPrice)
 		txGasUsed, err := b.Receipts[i].GasUsed.Decimal()
 		if err != nil {
 			return err
 		}
+		fee := txGasUsed.Mul(effectiveGasPrice)
 		amount, err := tx.Value.Decimal()
 		if err != nil {
 			return err
@@ -230,7 +232,12 @@ func (p *Module) parse(b types.BlockData) error {
 			decodeCtx.AddAddress(&decodeCtx.Block.Txs[i].Logs[j].Address)
 		}
 
-		p.parseEIP1967Proxy(decodeCtx, decodeCtx.Block.Txs[i].Logs)
+		p.parseEIP1967Proxy(decodeCtx, decodeCtx.Block.Txs[i])
+
+		parseErr := p.parseERC4337(decodeCtx, decodeCtx.Block.Txs[i])
+		if parseErr != nil {
+			return parseErr
+		}
 	}
 
 	for i, trace := range b.Traces {
@@ -253,6 +260,7 @@ func (p *Module) parse(b types.BlockData) error {
 			Amount:         &value,
 			TraceAddress:   trace.TraceAddress,
 			Type:           typ,
+			Error:          trace.Error,
 			Subtraces:      trace.Subtraces,
 			InitHash:       trace.Action.Init,
 			CreationMethod: trace.Action.CreationMethod,
@@ -381,6 +389,7 @@ func (p *Module) parse(b types.BlockData) error {
 				Tx: &storage.Tx{
 					Hash: txHash,
 				},
+				Deployer: &deployerAddress,
 			}
 
 			newTrace.Contract = contract
@@ -409,6 +418,39 @@ func (p *Module) parse(b types.BlockData) error {
 
 	if err = p.parseTransfers(decodeCtx); err != nil {
 		return err
+	}
+
+	for i := range b.Withdrawals {
+		amount, err := b.Withdrawals[i].Amount.Decimal()
+		if err != nil {
+			return errors.Wrap(err, "parsing withdrawal amount")
+		}
+		validatorIdx, err := b.Withdrawals[i].ValidatorIndex.Int64()
+		if err != nil {
+			return errors.Wrap(err, "parsing withdrawal validator index")
+		}
+		index, err := b.Withdrawals[i].Index.Int64()
+		if err != nil {
+			return errors.Wrap(err, "parsing withdrawal index")
+		}
+
+		address := storage.Address{
+			Hash:        b.Withdrawals[i].Address,
+			FirstHeight: decodeCtx.Block.Height,
+			LastHeight:  decodeCtx.Block.Height,
+			Balance:     storage.EmptyBalance(),
+		}
+		decodeCtx.AddAddress(&address)
+		updateAddressBalance(decodeCtx, b.Withdrawals[i].Address.Hex(), enum.Add, amount)
+
+		decodeCtx.Block.Withdrawals[i] = &storage.BeaconWithdrawal{
+			Height:         decodeCtx.Block.Height,
+			Time:           decodeCtx.Block.Time,
+			ValidatorIndex: validatorIdx,
+			Amount:         amount,
+			Index:          index,
+			Address:        address,
+		}
 	}
 
 	output := p.MustOutput(OutputName)

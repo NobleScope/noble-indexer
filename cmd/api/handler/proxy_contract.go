@@ -3,10 +3,10 @@ package handler
 import (
 	"context"
 
-	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/internal/storage/types"
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/types"
+	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 )
@@ -66,7 +66,7 @@ func (req *listProxyContracts) ToFilters(
 		}
 		implementationAddress, err := address.ByHash(ctx, implementationHex)
 		if err != nil {
-			return filters, errors.Wrapf(err, "fetching implementation address by hash: %x", implementationAddress)
+			return filters, errors.Wrapf(err, "fetching implementation address by hash: %x", implementationHex)
 		}
 		filters.ImplementationId = implementationAddress.Id
 	}

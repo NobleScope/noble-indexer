@@ -3,9 +3,9 @@ package handler
 import (
 	"net/http"
 
-	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/labstack/echo/v4"
 )
 
@@ -33,7 +33,7 @@ func NewBlockHandler(
 	}
 }
 
-type getBlockByHeightRequest struct {
+type getBlockByHeightWithStatsRequest struct {
 	Height types.Level `param:"height" validate:"min=1"`
 	Stats  bool        `query:"stats"  validate:"omitempty"`
 }
@@ -53,7 +53,7 @@ type getBlockByHeightRequest struct {
 //	@Failure		500	{object}	Error			"Internal server error"
 //	@Router			/blocks/{height} [get]
 func (handler *BlockHandler) Get(c echo.Context) error {
-	req, err := bindAndValidate[getBlockByHeightRequest](c)
+	req, err := bindAndValidate[getBlockByHeightWithStatsRequest](c)
 	if err != nil {
 		return badRequestError(c, err)
 	}
@@ -142,6 +142,10 @@ func (handler *BlockHandler) Count(c echo.Context) error {
 		return handleError(c, err, handler.block)
 	}
 	return c.JSON(http.StatusOK, state.LastHeight+1) // + genesis block
+}
+
+type getBlockByHeightRequest struct {
+	Height types.Level `param:"height" validate:"min=1"`
 }
 
 // GetStats godoc

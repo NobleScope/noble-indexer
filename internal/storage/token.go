@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/storage/types"
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/internal/storage/types"
+	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
@@ -50,6 +50,7 @@ type Token struct {
 	Error          string               `bun:"error"                            comment:"Error"`
 	Metadata       []byte               `bun:"metadata,type:bytea"              comment:"Token metadata"`
 	UpdatedAt      time.Time            `bun:"updated_at,notnull,default:now()" comment:"last update time"`
+	Logo           string               `bun:"logo"                             comment:"Logo URL"`
 
 	Contract Contract `bun:"rel:belongs-to,join:contract_id=id"`
 }

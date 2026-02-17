@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/internal/storage/mock"
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/mock"
+	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
@@ -40,6 +40,7 @@ var (
 			Id:   1,
 			Hash: pkgTypes.Hex{0x01, 0x02, 0x03},
 		},
+		ContractABI: []byte("{}"),
 	}
 
 	testLog2 = storage.Log{
@@ -310,7 +311,7 @@ func (s *LogHandlerTestSuite) TestListWithTxHash() {
 	c.SetPath("/log")
 
 	s.tx.EXPECT().
-		ByHash(gomock.Any(), testTxHash).
+		ByHash(gomock.Any(), testTxHash, false).
 		Return(storage.Tx{Id: 1}, nil).
 		Times(1)
 
@@ -589,7 +590,7 @@ func (s *LogHandlerTestSuite) TestListTxNotFound() {
 	c.SetPath("/log")
 
 	s.tx.EXPECT().
-		ByHash(gomock.Any(), testTxHash).
+		ByHash(gomock.Any(), testTxHash, false).
 		Return(storage.Tx{}, sql.ErrNoRows).
 		Times(1)
 
@@ -714,4 +715,34 @@ func (s *LogHandlerTestSuite) TestListWithMultipleFilters() {
 	s.Require().NoError(err)
 	s.Require().Len(logs, 1)
 	s.Require().EqualValues(100, logs[0].Height)
+}
+
+func (s *LogHandlerTestSuite) TestListWithDecode() {
+	q := make(url.Values)
+	q.Set("decode", "true")
+	q.Set("limit", "5")
+	q.Set("sort", "asc")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/log")
+
+	s.log.EXPECT().
+		Filter(gomock.Any(), storage.LogListFilter{
+			Limit:   5,
+			Offset:  0,
+			Sort:    sdk.SortOrderAsc,
+			WithABI: true,
+		}).
+		Return([]storage.Log{testLog1}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var logs []responses.Log
+	err := json.NewDecoder(rec.Body).Decode(&logs)
+	s.Require().NoError(err)
+	s.Require().Len(logs, 1)
 }

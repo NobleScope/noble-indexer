@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	models "github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/pkg/types"
+	models "github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/uptrace/bun"
 )
@@ -26,11 +26,8 @@ func (tx Transaction) SaveTransactions(ctx context.Context, txs ...*models.Tx) e
 	case 1:
 		return tx.Add(ctx, txs[0])
 	default:
-		arr := make([]any, len(txs))
-		for i := range txs {
-			arr[i] = txs[i]
-		}
-		return tx.BulkSave(ctx, arr)
+		_, err := tx.Tx().NewInsert().Model(&txs).Returning("id").Exec(ctx)
+		return err
 	}
 }
 
@@ -41,11 +38,8 @@ func (tx Transaction) SaveLogs(ctx context.Context, logs ...*models.Log) error {
 	case 1:
 		return tx.Add(ctx, logs[0])
 	default:
-		arr := make([]any, len(logs))
-		for i := range logs {
-			arr[i] = logs[i]
-		}
-		return tx.BulkSave(ctx, arr)
+		_, err := tx.Tx().NewInsert().Model(&logs).Returning("id").Exec(ctx)
+		return err
 	}
 }
 
@@ -56,11 +50,8 @@ func (tx Transaction) SaveSources(ctx context.Context, sources ...*models.Source
 	case 1:
 		return tx.Add(ctx, sources[0])
 	default:
-		arr := make([]any, len(sources))
-		for i := range sources {
-			arr[i] = sources[i]
-		}
-		return tx.BulkSave(ctx, arr)
+		_, err := tx.Tx().NewInsert().Model(&sources).Returning("id").Exec(ctx)
+		return err
 	}
 }
 
@@ -118,27 +109,51 @@ func (tx Transaction) SaveBalances(ctx context.Context, balances ...*models.Bala
 	return err
 }
 
-func (tx Transaction) SaveContracts(ctx context.Context, contracts ...*models.Contract) error {
+type addedContract struct {
+	bun.BaseModel `bun:"contract"`
+	*models.Contract
+
+	Xmax uint64 `bun:"xmax"`
+}
+
+func (tx Transaction) SaveContracts(ctx context.Context, contracts ...*models.Contract) (int64, error) {
 	if len(contracts) == 0 {
-		return nil
+		return 0, nil
 	}
 
-	_, err := tx.Tx().NewInsert().Model(&contracts).
-		On("CONFLICT (id) DO UPDATE").
-		Set("verified = EXCLUDED.verified").
-		Set("abi = EXCLUDED.abi").
-		Set("compiler_version = EXCLUDED.compiler_version").
-		Set("metadata_link = EXCLUDED.metadata_link").
-		Set("language = EXCLUDED.language").
-		Set("optimizer_enabled = EXCLUDED.optimizer_enabled").
-		Set("tags = EXCLUDED.tags").
-		Set("status = EXCLUDED.status").
-		Set("retry_count = EXCLUDED.retry_count").
-		Set("error = EXCLUDED.error").
-		Set("updated_at = now()").
-		Exec(ctx)
+	cs := make([]addedContract, len(contracts))
+	for i := range contracts {
+		cs[i].Contract = contracts[i]
+	}
 
-	return err
+	_, err := tx.Tx().NewInsert().Model(&cs).
+		Column("id", "height", "code", "verified", "tx_id", "abi", "compiler_version", "metadata_link", "language", "optimizer_enabled", "tags", "status", "retry_count", "error", "updated_at", "deployer_id").
+		On("CONFLICT (id) DO UPDATE").
+		Set("verified = CASE WHEN EXCLUDED.verified THEN EXCLUDED.verified ELSE added_contract.verified END").
+		Set("abi = CASE WHEN EXCLUDED.abi IS NOT NULL THEN EXCLUDED.abi ELSE added_contract.abi END").
+		Set("compiler_version = CASE WHEN EXCLUDED.compiler_version != '' THEN EXCLUDED.compiler_version ELSE added_contract.compiler_version END").
+		Set("metadata_link = CASE WHEN EXCLUDED.metadata_link != '' THEN EXCLUDED.metadata_link ELSE added_contract.metadata_link END").
+		Set("language = CASE WHEN EXCLUDED.language != '' THEN EXCLUDED.language ELSE added_contract.language END").
+		Set("optimizer_enabled = CASE WHEN EXCLUDED.optimizer_enabled THEN EXCLUDED.optimizer_enabled ELSE added_contract.optimizer_enabled END").
+		Set("tags = CASE WHEN EXCLUDED.tags IS NOT NULL THEN EXCLUDED.tags ELSE added_contract.tags END").
+		Set("status = CASE WHEN EXCLUDED.status IS NOT NULL THEN EXCLUDED.status ELSE added_contract.status END").
+		Set("retry_count = CASE WHEN EXCLUDED.retry_count != 0 THEN EXCLUDED.retry_count ELSE added_contract.retry_count END").
+		Set("error = CASE WHEN EXCLUDED.error != '' THEN EXCLUDED.error ELSE added_contract.error END").
+		Set("updated_at = now()").
+		Returning("xmax, id").
+		Exec(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	var count int64
+	for i := range cs {
+		if cs[i].Xmax == 0 {
+			count++
+		}
+	}
+
+	return count, err
 }
 
 func (tx Transaction) SaveTraces(ctx context.Context, traces ...*models.Trace) error {
@@ -148,11 +163,8 @@ func (tx Transaction) SaveTraces(ctx context.Context, traces ...*models.Trace) e
 	case 1:
 		return tx.Add(ctx, traces[0])
 	default:
-		arr := make([]any, len(traces))
-		for i := range traces {
-			arr[i] = traces[i]
-		}
-		return tx.BulkSave(ctx, arr)
+		_, err := tx.Tx().NewInsert().Model(&traces).Returning("id").Exec(ctx)
+		return err
 	}
 }
 
@@ -163,27 +175,48 @@ func (tx Transaction) SaveTransfers(ctx context.Context, transfers ...*models.Tr
 	case 1:
 		return tx.Add(ctx, transfers[0])
 	default:
-		arr := make([]any, len(transfers))
-		for i := range transfers {
-			arr[i] = transfers[i]
-		}
-		return tx.BulkSave(ctx, arr)
+		_, err := tx.Tx().NewInsert().Model(&transfers).Returning("id").Exec(ctx)
+		return err
 	}
 }
 
-func (tx Transaction) SaveTokens(ctx context.Context, tokens ...*models.Token) error {
+type addedToken struct {
+	bun.BaseModel `bun:"token"`
+	*models.Token
+
+	Xmax uint64 `bun:"xmax"`
+}
+
+func (tx Transaction) SaveTokens(ctx context.Context, tokens ...*models.Token) (int64, error) {
 	if len(tokens) == 0 {
-		return nil
+		return 0, nil
 	}
 
-	_, err := tx.Tx().NewInsert().Model(&tokens).
-		On("CONFLICT (token_id, contract_id) DO UPDATE").
-		Set("transfers_count = token.transfers_count + EXCLUDED.transfers_count").
-		Set("supply = token.supply + EXCLUDED.supply").
-		Set("last_height = EXCLUDED.last_height").
-		Exec(ctx)
+	ts := make([]addedToken, len(tokens))
+	for i := range tokens {
+		ts[i].Token = tokens[i]
+	}
 
-	return err
+	_, err := tx.Tx().NewInsert().Model(&ts).
+		Column("token_id", "contract_id", "type", "height", "last_height", "name", "symbol", "decimals", "transfers_count", "supply", "metadata_link", "status", "retry_count", "error", "metadata", "updated_at", "logo").
+		On("CONFLICT (token_id, contract_id) DO UPDATE").
+		Set("transfers_count = added_token.transfers_count + EXCLUDED.transfers_count").
+		Set("supply = added_token.supply + EXCLUDED.supply").
+		Set("last_height = EXCLUDED.last_height").
+		Returning("xmax, id").
+		Exec(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	var count int64
+	for i := range ts {
+		if ts[i].Xmax == 0 {
+			count++
+		}
+	}
+
+	return count, err
 }
 
 func (tx Transaction) SaveTokenMetadata(ctx context.Context, tokens ...*models.Token) error {
@@ -192,15 +225,17 @@ func (tx Transaction) SaveTokenMetadata(ctx context.Context, tokens ...*models.T
 	}
 
 	_, err := tx.Tx().NewInsert().Model(&tokens).
+		Column("token_id", "contract_id", "name", "symbol", "decimals", "status", "metadata_link", "metadata", "retry_count", "error", "updated_at", "logo").
 		On("CONFLICT (token_id, contract_id) DO UPDATE").
-		Set("name = EXCLUDED.name").
-		Set("symbol = EXCLUDED.symbol").
-		Set("decimals = EXCLUDED.decimals").
-		Set("status = EXCLUDED.status").
-		Set("metadata_link = EXCLUDED.metadata_link").
-		Set("metadata = EXCLUDED.metadata").
-		Set("retry_count = EXCLUDED.retry_count").
-		Set("error = EXCLUDED.error").
+		Set("name = CASE WHEN EXCLUDED.name != '' THEN EXCLUDED.name ELSE token.name END").
+		Set("symbol = CASE WHEN EXCLUDED.symbol != '' THEN EXCLUDED.symbol ELSE token.symbol END").
+		Set("decimals = CASE WHEN EXCLUDED.decimals != 0 THEN EXCLUDED.decimals ELSE token.decimals END").
+		Set("status = CASE WHEN EXCLUDED.status IS NOT NULL THEN EXCLUDED.status ELSE token.status END").
+		Set("metadata_link = CASE WHEN EXCLUDED.metadata_link != '' THEN EXCLUDED.metadata_link ELSE token.metadata_link END").
+		Set("logo = CASE WHEN EXCLUDED.logo != '' THEN EXCLUDED.logo ELSE token.logo END").
+		Set("metadata = CASE WHEN EXCLUDED.metadata IS NOT NULL THEN EXCLUDED.metadata ELSE token.metadata END").
+		Set("retry_count = CASE WHEN EXCLUDED.retry_count != 0 THEN EXCLUDED.retry_count ELSE token.retry_count END").
+		Set("error = CASE WHEN EXCLUDED.error != '' THEN EXCLUDED.error ELSE token.error END").
 		Set("updated_at = now()").
 		Exec(ctx)
 
@@ -250,6 +285,27 @@ func (tx Transaction) SaveProxyContracts(ctx context.Context, contracts ...*mode
 	return err
 }
 
+func (tx Transaction) SaveERC4337UserOps(ctx context.Context, userOps ...*models.ERC4337UserOp) error {
+	switch len(userOps) {
+	case 0:
+		return nil
+	case 1:
+		return tx.Add(ctx, userOps[0])
+	default:
+		_, err := tx.Tx().NewInsert().Model(&userOps).Returning("id").Exec(ctx)
+		return err
+	}
+}
+
+func (tx Transaction) SaveBeaconWithdrawals(ctx context.Context, withdrawals ...*models.BeaconWithdrawal) error {
+	if len(withdrawals) == 0 {
+		return nil
+	}
+
+	_, err := tx.Tx().NewInsert().Model(&withdrawals).Returning("id").Exec(ctx)
+	return err
+}
+
 func (tx Transaction) AddVerificationTask(ctx context.Context, task models.VerificationTask) error {
 	_, err := tx.Tx().NewInsert().Model(task).
 		Column("status", "creation_time", "contract_id", "contract_name", "compiler_version", "license_type", "optimization_enabled", "optimization_runs", "evm_version").
@@ -290,7 +346,7 @@ func (tx Transaction) RollbackBlockStats(ctx context.Context, height types.Level
 func (tx Transaction) RollbackAddresses(ctx context.Context, height types.Level) (address []models.Address, err error) {
 	_, err = tx.Tx().NewDelete().
 		Model(&address).
-		Where("height = ?", height).
+		Where("first_height = ?", height).
 		Returning("*").
 		Exec(ctx)
 	return
@@ -343,6 +399,22 @@ func (tx Transaction) RollbackTokens(ctx context.Context, height types.Level) (t
 func (tx Transaction) RollbackContracts(ctx context.Context, height types.Level) (err error) {
 	_, err = tx.Tx().NewDelete().
 		Model((*models.Contract)(nil)).
+		Where("height = ?", height).
+		Exec(ctx)
+	return
+}
+
+func (tx Transaction) RollbackERC4337UserOps(ctx context.Context, height types.Level) (err error) {
+	_, err = tx.Tx().NewDelete().
+		Model((*models.ERC4337UserOp)(nil)).
+		Where("height = ?", height).
+		Exec(ctx)
+	return
+}
+
+func (tx Transaction) RollbackBeaconWithdrawals(ctx context.Context, height types.Level) (err error) {
+	_, err = tx.Tx().NewDelete().
+		Model((*models.BeaconWithdrawal)(nil)).
 		Where("height = ?", height).
 		Exec(ctx)
 	return

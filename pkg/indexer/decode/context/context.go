@@ -1,8 +1,8 @@
 package context
 
 import (
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/dipdup-net/indexer-sdk/pkg/sync"
 )
 
@@ -12,6 +12,7 @@ type Context struct {
 	Tokens         *sync.Map[string, *storage.Token]
 	TokenBalances  *sync.Map[string, *storage.TokenBalance]
 	ProxyContracts *sync.Map[string, *storage.ProxyContract]
+	ERC4337UserOps *sync.Map[string, *storage.ERC4337UserOp]
 	Traces         *sync.Map[string, []*storage.Trace]
 
 	Block *storage.Block
@@ -24,6 +25,7 @@ func NewContext() *Context {
 		Tokens:         sync.NewMap[string, *storage.Token](),
 		TokenBalances:  sync.NewMap[string, *storage.TokenBalance](),
 		ProxyContracts: sync.NewMap[string, *storage.ProxyContract](),
+		ERC4337UserOps: sync.NewMap[string, *storage.ERC4337UserOp](),
 		Traces:         sync.NewMap[string, []*storage.Trace](),
 	}
 }
@@ -36,6 +38,11 @@ func (ctx *Context) AddAddress(address *storage.Address) {
 		addr.Interactions += address.Interactions
 		addr.TxsCount += address.TxsCount
 		addr.ContractsCount += address.ContractsCount
+		address.Balance = addr.Balance
+		if address.IsContract {
+			addr.IsContract = true
+		}
+
 	} else {
 		ctx.Addresses.Set(address.String(), address)
 	}
@@ -92,22 +99,25 @@ func (ctx *Context) AddProxyContract(proxyContract *storage.ProxyContract) {
 	}
 }
 
-func (ctx *Context) GetAddresses() []*storage.Address {
-	addresses := make([]*storage.Address, 0)
-	addresses = append(addresses, ctx.Addresses.Values()...)
+func (ctx *Context) AddUserOp(userOp *storage.ERC4337UserOp) {
+	if userOp == nil {
+		return
+	}
+	if _, ok := ctx.ERC4337UserOps.Get(userOp.String()); !ok {
+		ctx.ERC4337UserOps.Set(userOp.String(), userOp)
+	}
+}
 
-	return addresses
+func (ctx *Context) GetAddresses() []*storage.Address {
+	return ctx.Addresses.Values()
 }
 
 func (ctx *Context) GetContracts() []*storage.Contract {
-	contracts := make([]*storage.Contract, 0)
-	contracts = append(contracts, ctx.Contracts.Values()...)
-
-	return contracts
+	return ctx.Contracts.Values()
 }
 
 func (ctx *Context) GetTraces() []*storage.Trace {
-	traces := make([]*storage.Trace, 0)
+	traces := make([]*storage.Trace, 0) //nolint:prealloc
 	for _, ts := range ctx.Traces.Values() {
 		traces = append(traces, ts...)
 	}
@@ -122,19 +132,17 @@ func (ctx *Context) GetTracesByTxHash(txHash types.Hex) []*storage.Trace {
 }
 
 func (ctx *Context) GetTokens() []*storage.Token {
-	tokens := make([]*storage.Token, 0)
-	tokens = append(tokens, ctx.Tokens.Values()...)
-
-	return tokens
+	return ctx.Tokens.Values()
 }
 
 func (ctx *Context) GetTokenBalances() []*storage.TokenBalance {
-	tokenBalances := make([]*storage.TokenBalance, 0)
-	tokenBalances = append(tokenBalances, ctx.TokenBalances.Values()...)
-
-	return tokenBalances
+	return ctx.TokenBalances.Values()
 }
 
 func (ctx *Context) GetProxyContracts() []*storage.ProxyContract {
 	return ctx.ProxyContracts.Values()
+}
+
+func (ctx *Context) GetUserOps() []*storage.ERC4337UserOp {
+	return ctx.ERC4337UserOps.Values()
 }

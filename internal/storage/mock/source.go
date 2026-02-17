@@ -13,7 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	storage "github.com/baking-bad/noble-indexer/internal/storage"
+	storage "github.com/NobleScope/noble-indexer/internal/storage"
 	storage0 "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	gomock "go.uber.org/mock/gomock"
 )

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 )
 
@@ -484,5 +484,24 @@ func (s *StorageTestSuite) TestLogFilterHeightAndTimeRange() {
 		s.Require().EqualValues(300, log.Height)
 		s.Require().True(log.Time.Equal(timeFrom) || log.Time.After(timeFrom))
 		s.Require().True(log.Time.Before(timeTo))
+	}
+}
+
+func (s *StorageTestSuite) TestLogFilterWithABI() {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer ctxCancel()
+
+	logs, err := s.storage.Logs.Filter(ctx, storage.LogListFilter{
+		Limit:     10,
+		Offset:    0,
+		Sort:      sdk.SortOrderAsc,
+		WithABI:   true,
+		AddressId: uint64Ptr(3),
+	})
+	s.Require().NoError(err)
+	s.Require().Len(logs, 1)
+
+	for _, log := range logs {
+		s.Require().NotNil(log.ContractABI)
 	}
 }

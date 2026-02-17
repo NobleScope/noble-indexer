@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"context"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/internal/storage/postgres"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/config"
-	"github.com/baking-bad/noble-indexer/pkg/node"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/postgres"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/config"
+	"github.com/NobleScope/noble-indexer/pkg/node"
 	"github.com/dipdup-net/indexer-sdk/pkg/modules"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/pkg/errors"
@@ -92,6 +92,7 @@ func (module *Module) rollback(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
+			return nil
 		default:
 			lastBlock, err := module.blocks.Last(ctx)
 			if err != nil {
@@ -188,6 +189,15 @@ func (module *Module) rollbackBlock(ctx context.Context, block storage.Block) er
 
 	tokens, err := tx.RollbackTokens(ctx, height)
 	if err != nil {
+		return tx.HandleError(ctx, err)
+	}
+
+	err = tx.RollbackERC4337UserOps(ctx, height)
+	if err != nil {
+		return tx.HandleError(ctx, err)
+	}
+
+	if err := tx.RollbackBeaconWithdrawals(ctx, height); err != nil {
 		return tx.HandleError(ctx, err)
 	}
 

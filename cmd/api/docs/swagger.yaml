@@ -42,6 +42,29 @@ definitions:
         example: "10000000000"
         type: string
     type: object
+  responses.BeaconWithdrawal:
+    description: Beacon chain withdrawal transferring ETH from a validator to an execution
+      layer address
+    properties:
+      address:
+        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+        type: string
+      amount:
+        example: "1000000000000000000"
+        type: string
+      height:
+        example: 100
+        type: integer
+      index:
+        example: 1
+        type: integer
+      time:
+        example: "2023-07-04T03:10:57+00:00"
+        type: string
+      validator_index:
+        example: 100000
+        type: integer
+    type: object
   responses.Block:
     description: Noble block information
     properties:
@@ -118,18 +141,14 @@ definitions:
   responses.Contract:
     description: Noble contract information
     properties:
-      abi:
-        items:
-          type: integer
-        type: array
       address:
         example: "0x0000000000000000000000000000000000000001"
         type: string
-      code:
-        example: 0x01234567890123456789012345678901234567890123456789
-        type: string
       compiler_version:
         example: 0.1.1
+        type: string
+      deployer:
+        example: "0x0000000000000000000000000000000000000003"
         type: string
       error:
         example: Error string
@@ -159,6 +178,17 @@ definitions:
       verified:
         example: false
         type: boolean
+    type: object
+  responses.ContractCode:
+    description: Noble contract code information
+    properties:
+      abi:
+        items:
+          type: integer
+        type: array
+      code:
+        example: 0x01234567890123456789012345678901234567890123456789
+        type: string
     type: object
   responses.Enums:
     description: Available enum values for various entity types
@@ -210,6 +240,8 @@ definitions:
       data:
         example: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         type: string
+      decoded:
+        type: object
       height:
         example: 100
         type: integer
@@ -325,8 +357,20 @@ definitions:
         example: indexer
         format: string
         type: string
+      synced:
+        example: true
+        format: boolean
+        type: boolean
       total_accounts:
         example: 43
+        format: int64
+        type: integer
+      total_contracts:
+        example: 1488
+        format: int64
+        type: integer
+      total_tokens:
+        example: 1742
         format: int64
         type: integer
       total_tx:
@@ -346,6 +390,9 @@ definitions:
       id:
         example: 0
         type: integer
+      logo:
+        example: http://site.com/image.png
+        type: string
       metadata:
         items:
           type: integer
@@ -358,6 +405,9 @@ definitions:
         type: string
       symbol:
         example: USD
+        type: string
+      token_id:
+        example: "0"
         type: string
       transfers_count:
         example: 123
@@ -372,12 +422,8 @@ definitions:
       address:
         example: "0x0000000000000000000000000000000000000001"
         type: string
-      contract:
-        example: 0xdAC17F958D2ee523a2206206994597C13D831ec7
-        type: string
-      token_id:
-        example: "0"
-        type: string
+      token:
+        $ref: '#/definitions/responses.Token'
       value:
         example: "123456789"
         type: string
@@ -386,7 +432,7 @@ definitions:
     description: Transaction execution trace information
     properties:
       amount:
-        example: "1000000000000000000"
+        example: "123456789123456789"
         type: string
       contract:
         example: "0x0000000000000000000000000000000000000002"
@@ -394,11 +440,13 @@ definitions:
       creation_method:
         example: create
         type: string
+      decoded:
+        type: object
       from_address:
-        example: "0x0000000000000000000000000000000000000000"
+        example: "0x0000000000000000000000000000000000000001"
         type: string
       gas_limit:
-        example: "21000"
+        example: "2100"
         type: string
       gas_used:
         example: "21000"
@@ -410,7 +458,7 @@ definitions:
         example: 0x6060604052341561000f57600080fd5b
         type: string
       input:
-        example: "0x0"
+        example: hex input data
         type: string
       output:
         example: "0x0"
@@ -422,12 +470,13 @@ definitions:
         example: "2023-07-04T03:10:57+00:00"
         type: string
       to_address:
-        example: "0x0000000000000000000000000000000000000001"
+        example: 0x123456789abcdef123456789abcdef123456789abc
         type: string
       trace_address:
         example:
-        - 0
         - 1
+        - 2
+        - 3
         items:
           type: integer
         type: array
@@ -435,7 +484,81 @@ definitions:
         example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22
         type: string
       tx_position:
+        example: 123456789
+        type: integer
+      type:
+        enum:
+        - call
+        - delegatecall
+        - staticcall
+        - create
+        - create2
+        - selfdestruct
+        - reward
+        example: call
+        type: string
+    type: object
+  responses.TraceTreeItem:
+    description: Transaction execution trace tree item
+    properties:
+      amount:
+        example: "123456789123456789"
+        type: string
+      children:
+        items:
+          type: object
+        type: array
+      contract:
+        example: "0x0000000000000000000000000000000000000002"
+        type: string
+      creation_method:
+        example: create
+        type: string
+      decoded:
+        type: object
+      from_address:
+        example: "0x0000000000000000000000000000000000000001"
+        type: string
+      gas_limit:
+        example: "2100"
+        type: string
+      gas_used:
+        example: "21000"
+        type: string
+      height:
+        example: 100
+        type: integer
+      init_hash:
+        example: 0x6060604052341561000f57600080fd5b
+        type: string
+      input:
+        example: hex input data
+        type: string
+      output:
+        example: "0x0"
+        type: string
+      subtraces:
         example: 0
+        type: integer
+      time:
+        example: "2023-07-04T03:10:57+00:00"
+        type: string
+      to_address:
+        example: 0x123456789abcdef123456789abcdef123456789abc
+        type: string
+      trace_address:
+        example:
+        - 1
+        - 2
+        - 3
+        items:
+          type: integer
+        type: array
+      tx_hash:
+        example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22
+        type: string
+      tx_position:
+        example: 123456789
         type: integer
       type:
         enum:
@@ -491,6 +614,9 @@ definitions:
       logs_bloom:
         example: "0x00000000000000000000000000000000000000000000"
         type: string
+      logs_count:
+        example: 1234
+        type: integer
       nonce:
         example: 1
         type: integer
@@ -506,6 +632,9 @@ definitions:
       to_address:
         example: "0x0000000000000000000000000000000000000001"
         type: string
+      traces_count:
+        example: 1488
+        type: integer
       type:
         enum:
         - TxTypeUnknown
@@ -521,9 +650,6 @@ definitions:
     properties:
       amount:
         example: "123456789"
-        type: string
-      contract:
-        example: 0xdAC17F958D2ee523a2206206994597C13D831ec7
         type: string
       from:
         example: "0x0000000000000000000000000000000000000001"
@@ -541,9 +667,8 @@ definitions:
       to:
         example: "0x0000000000000000000000000000000000000002"
         type: string
-      token_id:
-        example: "0"
-        type: string
+      token:
+        $ref: '#/definitions/responses.Token'
       tx_hash:
         example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d
         type: string
@@ -551,16 +676,78 @@ definitions:
         example: transfer
         type: string
     type: object
+  responses.UserOp:
+    description: ERC-4337 user operation information
+    properties:
+      account_gas_limits:
+        example: 0x
+        type: string
+      actual_gas_cost:
+        example: "21000"
+        type: string
+      actual_gas_used:
+        example: "21000"
+        type: string
+      bundler:
+        example: "0x0000000000000000000000000000000000000003"
+        type: string
+      call_data:
+        example: 0x
+        type: string
+      gas_fees:
+        example: 0x
+        type: string
+      hash:
+        example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d
+        type: string
+      height:
+        example: 100
+        type: integer
+      id:
+        example: 1
+        type: integer
+      init_code:
+        example: 0x
+        type: string
+      nonce:
+        example: "1"
+        type: string
+      paymaster:
+        example: "0x0000000000000000000000000000000000000002"
+        type: string
+      paymaster_and_data:
+        example: 0x
+        type: string
+      pre_verification_gas:
+        example: "21000"
+        type: string
+      sender:
+        example: "0x0000000000000000000000000000000000000001"
+        type: string
+      signature:
+        example: 0x
+        type: string
+      success:
+        example: true
+        type: boolean
+      time:
+        example: "2026-01-01T01:01:01+00:00"
+        format: date-time
+        type: string
+      tx_hash:
+        example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d
+        type: string
+    type: object
 host: noble.dipdup.net
 info:
   contact:
     email: hello@bakingbad.dev
     name: API Support
-    url: https://github.com/baking-bad/noble-indexer
+    url: https://github.com/NobleScope/noble-indexer
   description: API for Noble blockchain indexer
   license:
     name: MIT
-    url: https://github.com/baking-bad/noble-indexer/blob/master/LICENSE
+    url: https://github.com/NobleScope/noble-indexer/blob/master/LICENSE
   termsOfService: https://bakingbad.dev/terms
   title: Noble Indexer API
   version: "1.0"
@@ -596,7 +783,6 @@ paths:
         enum:
         - id
         - value
-        - first_height
         - last_height
         in: query
         name: sort_by
@@ -660,6 +846,67 @@ paths:
       summary: Get address by hash
       tags:
       - address
+  /beacon_withdrawals:
+    get:
+      description: Returns a paginated list of beacon chain (consensus layer) withdrawals.
+        Withdrawals represent ETH transferred from validators to execution layer addresses.
+        Can be filtered by block height or recipient address.
+      operationId: list-beacon-withdrawals
+      parameters:
+      - default: 10
+        description: 'Number of withdrawals to return (default: 10)'
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - default: 0
+        description: 'Number of withdrawals to skip (default: 0)'
+        in: query
+        minimum: 0
+        name: offset
+        type: integer
+      - default: asc
+        description: 'Sort order by block height (default: asc)'
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Filter by block height
+        example: 12345
+        in: query
+        minimum: 0
+        name: height
+        type: integer
+      - description: Filter by recipient address (hexadecimal with 0x prefix)
+        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: address
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of beacon withdrawals
+          schema:
+            items:
+              $ref: '#/definitions/responses.BeaconWithdrawal'
+            type: array
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: List beacon chain withdrawals
+      tags:
+      - beacon
   /blocks:
     get:
       description: Returns a paginated list of blocks. Blocks can be sorted by height
@@ -903,6 +1150,12 @@ paths:
         minLength: 66
         name: tx_hash
         type: string
+      - description: Filter by deployer address (hexadecimal with 0x prefix)
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: deployer
+        type: string
       produces:
       - application/json
       responses:
@@ -954,6 +1207,38 @@ paths:
           schema:
             $ref: '#/definitions/handler.Error'
       summary: Get contract by address
+      tags:
+      - contract
+  /contracts/{hash}/code:
+    get:
+      description: Returns the deployed bytecode of a specific smart contract.
+      operationId: get-contract-code
+      parameters:
+      - description: Contract address in hexadecimal format (e.g., 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
+        in: path
+        maxLength: 42
+        minLength: 42
+        name: hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Contract bytecode
+          schema:
+            $ref: '#/definitions/responses.ContractCode'
+        "204":
+          description: Contract not found or not verified
+        "400":
+          description: Invalid contract address format
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Get contract bytecode
       tags:
       - contract
   /contracts/{hash}/sources:
@@ -1090,13 +1375,13 @@ paths:
         example: 1692892095
         in: query
         minimum: 1
-        name: from
+        name: time_from
         type: integer
       - description: Filter by timestamp to (Unix timestamp)
         example: 1692892095
         in: query
         minimum: 1
-        name: to
+        name: time_to
         type: integer
       - default: desc
         description: 'Sort order by timestamp (default: desc)'
@@ -1106,6 +1391,11 @@ paths:
         in: query
         name: sort
         type: string
+      - default: false
+        description: Decode log data and topics using contract ABI
+        in: query
+        name: decode
+        type: boolean
       produces:
       - application/json
       responses:
@@ -1223,6 +1513,16 @@ paths:
         name: query
         required: true
         type: string
+      - description: 'Maximum number of results to return (default: 10, max: 100)'
+        example: 10
+        in: query
+        name: limit
+        type: integer
+      - description: 'Number of results to skip for pagination (default: 0)'
+        example: 0
+        in: query
+        name: offset
+        type: integer
       produces:
       - application/json
       responses:
@@ -1246,6 +1546,25 @@ paths:
       summary: Universal search
       tags:
       - search
+  /stats/block_time:
+    get:
+      description: Returns the average block time over a specified period. Useful
+        for analyzing blockchain performance and trends.
+      operationId: avg-block-time
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Average block time response
+          schema:
+            type: float
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Get average block time
+      tags:
+      - stats
   /token_balances:
     get:
       description: Returns a paginated list of token balances showing how many tokens
@@ -1458,12 +1777,12 @@ paths:
         minLength: 42
         name: address_to
         type: string
-      - description: Filter by called contract address
+      - description: Filter by address (from or to)
         example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
         in: query
         maxLength: 42
         minLength: 42
-        name: contract
+        name: address
         type: string
       - description: Filter by block height
         example: 12345
@@ -1492,6 +1811,11 @@ paths:
         in: query
         name: sort
         type: string
+      - default: false
+        description: Decode trace input using contract ABI
+        in: query
+        name: decode
+        type: boolean
       produces:
       - application/json
       responses:
@@ -1550,13 +1874,13 @@ paths:
         example: 1692892095
         in: query
         minimum: 1
-        name: from
+        name: time_from
         type: integer
       - description: Filter by timestamp to (Unix timestamp)
         example: 1692892095
         in: query
         minimum: 1
-        name: to
+        name: time_to
         type: integer
       - description: Filter by transfer type (comma-separated list)
         enum:
@@ -1722,13 +2046,13 @@ paths:
         example: 1692892095
         in: query
         minimum: 1
-        name: from
+        name: time_from
         type: integer
       - description: Filter by timestamp to (Unix timestamp)
         example: 1692892095
         in: query
         minimum: 1
-        name: to
+        name: time_to
         type: integer
       - default: desc
         description: 'Sort order by timestamp (default: desc)'
@@ -1792,6 +2116,163 @@ paths:
       summary: Get transaction by hash
       tags:
       - transactions
+  /txs/{hash}/traces_tree:
+    get:
+      description: Returns the execution trace tree for a specific transaction, showing
+        all internal calls, contract creations, and EVM operations in a hierarchical
+        structure. Each trace includes details such as type, gas used, value transferred,
+        and any errors encountered during execution.
+      operationId: get-transaction-trace-tree
+      parameters:
+      - description: Transaction hash in hexadecimal with 0x prefix
+        example: 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        in: path
+        maxLength: 66
+        minLength: 66
+        name: hash
+        required: true
+        type: string
+      - default: false
+        description: Decode trace input using contract ABI
+        in: query
+        name: decode
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Execution trace tree for the transaction
+          schema:
+            $ref: '#/definitions/responses.TraceTreeItem'
+        "204":
+          description: Transaction not found or no traces available
+        "400":
+          description: Invalid transaction hash format
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Get transaction execution trace tree
+      tags:
+      - transactions
+  /user_ops:
+    get:
+      description: Returns a paginated list of ERC-4337 user operations. Can be filtered
+        by transaction, block height, time range, bundler, paymaster, or success status.
+      operationId: list-user-ops
+      parameters:
+      - description: Filter by transaction hash (hexadecimal with 0x prefix)
+        in: query
+        maxLength: 66
+        minLength: 66
+        name: tx
+        type: string
+      - default: 10
+        description: 'Number of user operations to return (default: 10)'
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - default: 0
+        description: 'Number of user operations to skip (default: 0)'
+        in: query
+        minimum: 0
+        name: offset
+        type: integer
+      - description: Filter by block height
+        in: query
+        minimum: 0
+        name: height
+        type: integer
+      - description: Filter by bundler address
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: bundler
+        type: string
+      - description: Filter by paymaster address
+        in: query
+        maxLength: 42
+        minLength: 42
+        name: paymaster
+        type: string
+      - description: Filter by success status
+        in: query
+        name: success
+        type: boolean
+      - description: Filter by timestamp from (Unix timestamp)
+        in: query
+        minimum: 1
+        name: from
+        type: integer
+      - description: Filter by timestamp to (Unix timestamp)
+        in: query
+        minimum: 1
+        name: to
+        type: integer
+      - default: desc
+        description: 'Sort order by timestamp (default: desc)'
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of user operations
+          schema:
+            items:
+              $ref: '#/definitions/responses.UserOp'
+            type: array
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: List ERC-4337 user operations
+      tags:
+      - user_ops
+  /user_ops/{hash}:
+    get:
+      description: Returns detailed information about a specific ERC-4337 user operation
+      operationId: get-user-op
+      parameters:
+      - description: User operation hash in hexadecimal with 0x prefix
+        in: path
+        maxLength: 66
+        minLength: 66
+        name: hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User operation information
+          schema:
+            $ref: '#/definitions/responses.UserOp'
+        "204":
+          description: User operation not found
+        "400":
+          description: Invalid user operation hash format
+          schema:
+            $ref: '#/definitions/handler.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handler.Error'
+      summary: Get user operation by hash
+      tags:
+      - user_ops
   /ws:
     get:
       description: Establishes a WebSocket connection for real-time updates. Clients

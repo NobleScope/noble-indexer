@@ -6,21 +6,18 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/pkg/types"
 )
 
 func (r *Module) receiveGenesis(ctx context.Context) error {
 	r.Log.Info().Msg("receiving genesis")
-	file, err := readGenesisFile(r.cfg.AssetsDir)
+	file, err := readGenesisFile(r.cfg.AssetsDir, r.cfg.GenesisFilename)
 	if err != nil {
 		return err
 	}
 
 	var genesis types.Genesis
 	if err = json.Unmarshal(file, &genesis); err != nil {
-		return err
-	}
-	if err != nil {
 		return err
 	}
 
@@ -38,9 +35,9 @@ func (r *Module) receiveGenesis(ctx context.Context) error {
 	}
 }
 
-func readGenesisFile(path string) ([]byte, error) {
+func readGenesisFile(path, filename string) ([]byte, error) {
 	wd, _ := os.Getwd()
-	p := filepath.Join(wd, path, "genesis.json")
+	p := filepath.Join(wd, path, filename)
 	data, err := os.ReadFile(p)
 	if err != nil {
 		return nil, err

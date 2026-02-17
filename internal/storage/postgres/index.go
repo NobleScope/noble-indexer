@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/dipdup-net/go-lib/database"
 	"github.com/rs/zerolog/log"
 	"github.com/uptrace/bun"
@@ -156,6 +156,15 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			Exec(ctx); err != nil {
 			return err
 		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Contract)(nil)).
+			Index("contract_pending_idx").
+			Column("status", "metadata_link", "updated_at").
+			Where("status = 'pending'").
+			Exec(ctx); err != nil {
+			return err
+		}
 
 		// Trace
 		if _, err := tx.NewCreateIndex().
@@ -254,6 +263,24 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			return err
 		}
 
+		// TokenBalance
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.TokenBalance)(nil)).
+			Index("token_balance_token_idx").
+			Column("contract_id", "token_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.TokenBalance)(nil)).
+			Index("token_balance_address_idx").
+			Column("address_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+
 		// Transfer
 		if _, err := tx.NewCreateIndex().
 			IfNotExists().
@@ -293,6 +320,14 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			Model((*storage.Transfer)(nil)).
 			Index("transfer_contract_id_idx").
 			Column("contract_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Transfer)(nil)).
+			Index("transfer_token_idx").
+			Column("contract_id", "token_id").
 			Exec(ctx); err != nil {
 			return err
 		}
@@ -340,6 +375,15 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			Exec(ctx); err != nil {
 			return err
 		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Token)(nil)).
+			Index("token_pending_idx").
+			Column("status", "updated_at").
+			Where("status = 'pending'").
+			Exec(ctx); err != nil {
+			return err
+		}
 
 		// Source
 		if _, err := tx.NewCreateIndex().
@@ -366,6 +410,68 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			Model((*storage.ProxyContract)(nil)).
 			Index("proxy_contract_implementation_idx").
 			Column("implementation_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+
+		// ERC4337UserOps
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.ERC4337UserOp)(nil)).
+			Index("erc4337_user_ops_hash_idx").
+			Column("hash").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.ERC4337UserOp)(nil)).
+			Index("erc4337_user_ops_height_idx").
+			Column("height").
+			Using("BRIN").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.ERC4337UserOp)(nil)).
+			Index("erc4337_user_ops_tx_id_idx").
+			Column("tx_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.ERC4337UserOp)(nil)).
+			Index("erc4337_user_ops_bundler_id_idx").
+			Column("bundler_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.ERC4337UserOp)(nil)).
+			Index("erc4337_user_ops_paymaster_id_idx").
+			Column("paymaster_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+
+		// BeaconWithdrawal
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.BeaconWithdrawal)(nil)).
+			Index("beacon_withdrawal_height_idx").
+			Column("height").
+			Using("BRIN").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.BeaconWithdrawal)(nil)).
+			Index("beacon_withdrawal_address_id_idx").
+			Column("address_id").
 			Exec(ctx); err != nil {
 			return err
 		}

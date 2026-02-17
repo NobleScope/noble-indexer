@@ -10,6 +10,8 @@
   status: 'success'
   retry_count: 0
   updated_at: '2024-01-01T00:00:00Z'
+  deployer_id: 1
+  abi: {}
 
 - id: 4
   height: 200
@@ -21,6 +23,7 @@
   status: 'pending'
   retry_count: 0
   updated_at: '2024-01-02T00:00:00Z'
+  deployer_id: 2
 
 - id: 5
   height: 300
@@ -32,6 +35,7 @@
   status: 'pending'
   retry_count: 2
   updated_at: '2024-01-01T00:00:00Z'
+  deployer_id: 4
 
 - id: 6
   height: 400
@@ -44,6 +48,7 @@
   status: 'success'
   retry_count: 0
   updated_at: '2024-01-04T00:00:00Z'
+  deployer_id: 1
 
 - id: 7
   height: 500
@@ -55,3 +60,4 @@
   retry_count: 5
   error: 'Failed to fetch metadata'
   updated_at: '2024-01-05T00:00:00Z'
+  deployer_id: 1

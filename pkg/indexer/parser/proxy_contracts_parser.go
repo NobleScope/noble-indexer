@@ -3,28 +3,28 @@ package parser
 import (
 	"bytes"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/internal/storage/types"
-	dCtx "github.com/baking-bad/noble-indexer/pkg/indexer/decode/context"
-	clone "github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/clone_with_immutable_args"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/custom_v1_0_0"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/custom_v1_1_1"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/custom_v1_3_0"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/custom_v1_3_0_zksync"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/custom_v1_4_1"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/custom_v1_4_1_zksync"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/custom_v1_5_0"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/eip1167"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/eip1967"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/eip7760_I_14"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/eip7760_I_20"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/eip7760_basic14"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/eip7760_basic20"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/eip7760_beacon"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/eip7760_beacon_I"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/eip7760_uups"
-	"github.com/baking-bad/noble-indexer/pkg/indexer/parser/types/eip7760_uups_I"
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/types"
+	dCtx "github.com/NobleScope/noble-indexer/pkg/indexer/decode/context"
+	clone "github.com/NobleScope/noble-indexer/pkg/indexer/parser/types/clone_with_immutable_args"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser/types/custom_v1_0_0"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser/types/custom_v1_1_1"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser/types/custom_v1_3_0"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser/types/custom_v1_3_0_zksync"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser/types/custom_v1_4_1"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser/types/custom_v1_4_1_zksync"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser/types/custom_v1_5_0"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser/types/eip1167"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser/types/eip1967"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser/types/eip7760_I_14"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser/types/eip7760_I_20"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser/types/eip7760_basic14"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser/types/eip7760_basic20"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser/types/eip7760_beacon"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser/types/eip7760_beacon_I"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser/types/eip7760_uups"
+	"github.com/NobleScope/noble-indexer/pkg/indexer/parser/types/eip7760_uups_I"
+	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 )
 
 func (p *Module) parseProxyContract(ctx *dCtx.Context, contract *storage.Contract) error {
@@ -91,8 +91,12 @@ func (p *Module) parseProxyContract(ctx *dCtx.Context, contract *storage.Contrac
 	return nil
 }
 
-func (p *Module) parseEIP1967Proxy(ctx *dCtx.Context, logs []*storage.Log) {
-	eip1967Contracts := getEIP1967Proxy(logs)
+func (p *Module) parseEIP1967Proxy(ctx *dCtx.Context, tx *storage.Tx) {
+	if tx.Status != types.TxStatusSuccess {
+		return
+	}
+
+	eip1967Contracts := getEIP1967Proxy(tx.Logs)
 	for proxyAddress, implementationAddress := range eip1967Contracts {
 		storageImplementationAddress := storage.Address{
 			Hash:       implementationAddress,

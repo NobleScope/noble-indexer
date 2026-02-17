@@ -1,6 +1,6 @@
 package clone_with_immutable_args
 
-import pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+import pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 
 var (
 	First = pkgTypes.MustDecodeHex("0x3d3d3d3d363d3d3761")

@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/baking-bad/noble-indexer/internal/storage/types"
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/internal/storage/types"
+	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/uptrace/bun"
 )
@@ -18,6 +18,7 @@ type ContractListFilter struct {
 	SortField  string
 	IsVerified bool
 	TxId       *uint64
+	DeployerId *uint64
 }
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
@@ -27,6 +28,7 @@ type IContract interface {
 	ByHash(ctx context.Context, hash pkgTypes.Hex) (Contract, error)
 	ListWithTx(ctx context.Context, filters ContractListFilter) ([]Contract, error)
 	PendingMetadata(ctx context.Context, delay time.Duration, limit int) ([]*Contract, error)
+	Code(ctx context.Context, hash pkgTypes.Hex) (pkgTypes.Hex, json.RawMessage, error)
 }
 
 // Contract -
@@ -38,6 +40,7 @@ type Contract struct {
 	Code             pkgTypes.Hex         `bun:"code,type:bytea"                  comment:"Contract code"`
 	Verified         bool                 `bun:"verified,default:false,notnull"   comment:"Verified or not"`
 	TxId             *uint64              `bun:"tx_id"                            comment:"Transaction in which this contract was deployed"`
+	DeployerId       *uint64              `bun:"deployer_id"                      comment:"Deployer account internal identity"`
 	ABI              json.RawMessage      `bun:"abi,type:jsonb,nullzero"          comment:"Contract ABI"`
 	CompilerVersion  string               `bun:"compiler_version,notnull"         comment:"Compiler version"`
 	MetadataLink     string               `bun:"metadata_link"                    comment:"Metadata link"`
@@ -52,6 +55,7 @@ type Contract struct {
 	Address        Address       `bun:"rel:belongs-to,join:id=id"`
 	Tx             *Tx           `bun:"tx,scanonly"`
 	Implementation *pkgTypes.Hex `bun:"implementation,scanonly"`
+	Deployer       *Address      `bun:"deployer,scanonly"`
 }
 
 // TableName -

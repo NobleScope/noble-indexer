@@ -6,8 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/baking-bad/noble-indexer/cmd/common"
-	"github.com/baking-bad/noble-indexer/pkg/indexer"
+	"github.com/NobleScope/noble-indexer/cmd/common"
+	"github.com/NobleScope/noble-indexer/pkg/indexer"
 	"github.com/dipdup-net/indexer-sdk/pkg/modules/stopper"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -27,6 +27,7 @@ func main() {
 	if err = common.InitLogger(cfg.LogLevel); err != nil {
 		return
 	}
+
 	prscp, err := common.InitProfiler(cfg.Profiler, "indexer")
 	if err != nil {
 		return

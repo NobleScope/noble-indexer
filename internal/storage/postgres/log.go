@@ -3,7 +3,7 @@ package postgres
 import (
 	"context"
 
-	"github.com/baking-bad/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/dipdup-net/go-lib/database"
 	"github.com/dipdup-net/indexer-sdk/pkg/storage/postgres"
 )
@@ -33,6 +33,12 @@ func (l *Log) Filter(ctx context.Context, filter storage.LogListFilter) (logs []
 		TableExpr("(?) AS log", query).
 		Join("LEFT JOIN tx ON tx.id = log.tx_id").
 		Join("LEFT JOIN address ON address.id = log.address_id")
+
+	if filter.WithABI {
+		outerQuery = outerQuery.
+			ColumnExpr("log_contract.abi AS contract_abi").
+			Join("LEFT JOIN contract AS log_contract ON log_contract.id = log.address_id")
+	}
 
 	if filter.Sort != "" {
 		outerQuery = sortTimeIDScope(outerQuery, filter.Sort)

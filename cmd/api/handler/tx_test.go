@@ -9,11 +9,11 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	"github.com/baking-bad/noble-indexer/internal/storage/mock"
-	"github.com/baking-bad/noble-indexer/internal/storage/types"
-	pkgTypes "github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	"github.com/NobleScope/noble-indexer/internal/storage/mock"
+	"github.com/NobleScope/noble-indexer/internal/storage/types"
+	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/labstack/echo/v4"
 	"github.com/shopspring/decimal"
@@ -70,7 +70,7 @@ func (s *TxHandlerTestSuite) TestGetSuccess() {
 	c.SetParamValues(testTxHash.Hex())
 
 	s.tx.EXPECT().
-		ByHash(gomock.Any(), testTxHash).
+		ByHash(gomock.Any(), testTxHash, false).
 		Return(testTxWithToAddress, nil).
 		Times(1)
 
@@ -107,7 +107,7 @@ func (s *TxHandlerTestSuite) TestGetContractCreation() {
 	c.SetParamValues(txHash)
 
 	s.tx.EXPECT().
-		ByHash(gomock.Any(), hashBytes).
+		ByHash(gomock.Any(), hashBytes, false).
 		Return(testTxContractCreation, nil).
 		Times(1)
 
@@ -143,7 +143,7 @@ func (s *TxHandlerTestSuite) TestGetContractCall() {
 	c.SetParamValues(txHash)
 
 	s.tx.EXPECT().
-		ByHash(gomock.Any(), hashBytes).
+		ByHash(gomock.Any(), hashBytes, false).
 		Return(testTxContractCall, nil).
 		Times(1)
 
@@ -180,7 +180,7 @@ func (s *TxHandlerTestSuite) TestGetNoContent() {
 	c.SetParamValues(txHash)
 
 	s.tx.EXPECT().
-		ByHash(gomock.Any(), hashBytes).
+		ByHash(gomock.Any(), hashBytes, false).
 		Return(storage.Tx{}, sql.ErrNoRows).
 		Times(1)
 
@@ -598,6 +598,45 @@ func (s *TxHandlerTestSuite) TestListNegativeOffset() {
 	s.Require().NotEmpty(e.Message)
 }
 
+func (s *TxHandlerTestSuite) TestListByAddressId() {
+	q := make(url.Values)
+	q.Set("address", testAddressHex1.Hex())
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/tx")
+
+	s.address.EXPECT().
+		ByHash(gomock.Any(), testAddressHex1).
+		Return(testFromAddress, nil).
+		Times(1)
+
+	addressId := testFromAddress.Id
+	s.tx.EXPECT().
+		Filter(gomock.Any(), storage.TxListFilter{
+			Limit:     10,
+			Offset:    0,
+			Sort:      sdk.SortOrderDesc,
+			Type:      []types.TxType{},
+			Status:    []types.TxStatus{},
+			AddressId: &addressId,
+		}).
+		Return([]storage.Tx{
+			testTxWithToAddress,
+			testTxContractCreation,
+		}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var txs []responses.Transaction
+	err := json.NewDecoder(rec.Body).Decode(&txs)
+	s.Require().NoError(err)
+	s.Require().Len(txs, 2)
+}
+
 // ====================================
 // Traces Tests
 // ====================================
@@ -714,7 +753,7 @@ func (s *TxHandlerTestSuite) TestTracesWithTxHash() {
 	c.SetPath("/traces")
 
 	s.tx.EXPECT().
-		ByHash(gomock.Any(), testTxHash).
+		ByHash(gomock.Any(), testTxHash, false).
 		Return(testTxWithToAddress, nil).
 		Times(1)
 
@@ -800,6 +839,41 @@ func (s *TxHandlerTestSuite) TestTracesWithAddressTo() {
 			Sort:        sdk.SortOrderDesc,
 			Type:        []types.TraceType{},
 			AddressToId: &toId,
+		}).
+		Return([]*storage.Trace{&testTrace1, &testTrace3}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.Traces(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var traces []responses.Trace
+	err := json.NewDecoder(rec.Body).Decode(&traces)
+	s.Require().NoError(err)
+	s.Require().Len(traces, 2)
+}
+
+func (s *TxHandlerTestSuite) TestTracesWithAddress() {
+	q := make(url.Values)
+	q.Set("address", testToAddress.Hash.Hex())
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/traces")
+
+	s.address.EXPECT().
+		ByHash(gomock.Any(), testToAddress.Hash).
+		Return(testToAddress, nil).
+		Times(1)
+
+	addressId := testToAddress.Id
+	s.trace.EXPECT().
+		Filter(gomock.Any(), storage.TraceListFilter{
+			Limit:     10,
+			Offset:    0,
+			Sort:      sdk.SortOrderDesc,
+			Type:      []types.TraceType{},
+			AddressId: &addressId,
 		}).
 		Return([]*storage.Trace{&testTrace1, &testTrace3}, nil).
 		Times(1)
@@ -951,6 +1025,389 @@ func (s *TxHandlerTestSuite) TestTracesEmptyResult() {
 	err := json.NewDecoder(rec.Body).Decode(&traces)
 	s.Require().NoError(err)
 	s.Require().Len(traces, 0)
+}
+
+// ====================================
+// TxTracesTree Tests
+// ====================================
+
+var (
+	testTraceRoot = storage.Trace{
+		Id:           10,
+		Height:       100,
+		Time:         testTxWithToAddress.Time,
+		TxId:         uint64Ptr(1),
+		From:         uint64Ptr(1),
+		To:           uint64Ptr(2),
+		GasLimit:     decimal.NewFromInt(100000),
+		Amount:       &testTxWithToAddress.Amount,
+		Input:        []byte{0xa9, 0x05, 0x9c, 0xbb},
+		TxPosition:   uint64Ptr(0),
+		TraceAddress: []uint64{},
+		Type:         types.Call,
+		GasUsed:      decimal.NewFromInt(80000),
+		Output:       []byte{0x00, 0x01},
+		Subtraces:    2,
+		FromAddress:  &testFromAddress,
+		ToAddress:    &testToAddress,
+		Tx:           &testTxWithToAddress,
+	}
+
+	testTraceChild0 = storage.Trace{
+		Id:           11,
+		Height:       100,
+		Time:         testTxWithToAddress.Time,
+		TxId:         uint64Ptr(1),
+		From:         uint64Ptr(2),
+		To:           uint64Ptr(1),
+		GasLimit:     decimal.NewFromInt(50000),
+		Amount:       nil,
+		Input:        []byte{0x70, 0xa0, 0x82, 0x31},
+		TxPosition:   uint64Ptr(0),
+		TraceAddress: []uint64{0},
+		Type:         types.Call,
+		GasUsed:      decimal.NewFromInt(30000),
+		Output:       []byte{0x00},
+		Subtraces:    1,
+		FromAddress:  &testToAddress,
+		ToAddress:    &testFromAddress,
+		Tx:           &testTxWithToAddress,
+	}
+
+	testTraceChild1 = storage.Trace{
+		Id:           12,
+		Height:       100,
+		Time:         testTxWithToAddress.Time,
+		TxId:         uint64Ptr(1),
+		From:         uint64Ptr(2),
+		To:           uint64Ptr(1),
+		GasLimit:     decimal.NewFromInt(30000),
+		Amount:       nil,
+		Input:        []byte{},
+		TxPosition:   uint64Ptr(0),
+		TraceAddress: []uint64{1},
+		Type:         types.Delegatecall,
+		GasUsed:      decimal.NewFromInt(20000),
+		Output:       []byte{},
+		Subtraces:    0,
+		FromAddress:  &testToAddress,
+		ToAddress:    &testFromAddress,
+		Tx:           &testTxWithToAddress,
+	}
+
+	testTraceGrandchild = storage.Trace{
+		Id:           13,
+		Height:       100,
+		Time:         testTxWithToAddress.Time,
+		TxId:         uint64Ptr(1),
+		From:         uint64Ptr(1),
+		To:           uint64Ptr(2),
+		GasLimit:     decimal.NewFromInt(10000),
+		Amount:       nil,
+		Input:        []byte{0x01, 0x02},
+		TxPosition:   uint64Ptr(0),
+		TraceAddress: []uint64{0, 0},
+		Type:         types.Staticcall,
+		GasUsed:      decimal.NewFromInt(5000),
+		Output:       []byte{0x01},
+		Subtraces:    0,
+		FromAddress:  &testFromAddress,
+		ToAddress:    &testToAddress,
+		Tx:           &testTxWithToAddress,
+	}
+)
+
+// TestTxTracesTreeSuccess tests successful retrieval of a flat trace tree (single root)
+func (s *TxHandlerTestSuite) TestTxTracesTreeSuccess() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/txs/:hash/traces_tree")
+	c.SetParamNames("hash")
+	c.SetParamValues(testTxHash.Hex())
+
+	s.tx.EXPECT().
+		ByHash(gomock.Any(), testTxHash, false).
+		Return(testTxWithToAddress, nil).
+		Times(1)
+
+	s.trace.EXPECT().
+		ByTxId(gomock.Any(), testTxWithToAddress.Id, false).
+		Return([]*storage.Trace{&testTrace1}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.TxTracesTree(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var tree responses.TraceTreeItem
+	err := json.NewDecoder(rec.Body).Decode(&tree)
+	s.Require().NoError(err)
+	s.Require().NotNil(tree.Trace)
+	s.Require().Equal("call", tree.Type)
+	s.Require().Len(tree.Children, 0)
+}
+
+// TestTxTracesTreeWithHierarchy tests trace tree with nested children
+func (s *TxHandlerTestSuite) TestTxTracesTreeWithHierarchy() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/txs/:hash/traces_tree")
+	c.SetParamNames("hash")
+	c.SetParamValues(testTxHash.Hex())
+
+	s.tx.EXPECT().
+		ByHash(gomock.Any(), testTxHash, false).
+		Return(testTxWithToAddress, nil).
+		Times(1)
+
+	s.trace.EXPECT().
+		ByTxId(gomock.Any(), testTxWithToAddress.Id, false).
+		Return([]*storage.Trace{
+			&testTraceRoot,
+			&testTraceChild0,
+			&testTraceGrandchild,
+			&testTraceChild1,
+		}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.TxTracesTree(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var tree responses.TraceTreeItem
+	err := json.NewDecoder(rec.Body).Decode(&tree)
+	s.Require().NoError(err)
+
+	// root
+	s.Require().NotNil(tree.Trace)
+	s.Require().Equal("call", tree.Type)
+
+	// root has 2 children
+	s.Require().Len(tree.Children, 2)
+	s.Require().Equal("call", tree.Children[0].Type)
+	s.Require().Equal("delegatecall", tree.Children[1].Type)
+
+	// first child has 1 grandchild
+	s.Require().Len(tree.Children[0].Children, 1)
+	s.Require().Equal("staticcall", tree.Children[0].Children[0].Type)
+	s.Require().Len(tree.Children[0].Children[0].Children, 0)
+
+	// second child has no children
+	s.Require().Len(tree.Children[1].Children, 0)
+}
+
+// TestTxTracesTreeEmptyTraces tests when transaction has no traces
+func (s *TxHandlerTestSuite) TestTxTracesTreeEmptyTraces() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/txs/:hash/traces_tree")
+	c.SetParamNames("hash")
+	c.SetParamValues(testTxHash.Hex())
+
+	s.tx.EXPECT().
+		ByHash(gomock.Any(), testTxHash, false).
+		Return(testTxWithToAddress, nil).
+		Times(1)
+
+	s.trace.EXPECT().
+		ByTxId(gomock.Any(), testTxWithToAddress.Id, false).
+		Return([]*storage.Trace{}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.TxTracesTree(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var tree *responses.TraceTreeItem
+	err := json.NewDecoder(rec.Body).Decode(&tree)
+	s.Require().NoError(err)
+	s.Require().Nil(tree)
+}
+
+// TestTxTracesTreeTxNotFound tests when transaction is not found
+func (s *TxHandlerTestSuite) TestTxTracesTreeTxNotFound() {
+	txHash := "0xaabbccddee000000000000000000000000000000000000000000000000000000"
+	hashBytes, err := pkgTypes.HexFromString(txHash)
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/txs/:hash/traces_tree")
+	c.SetParamNames("hash")
+	c.SetParamValues(txHash)
+
+	s.tx.EXPECT().
+		ByHash(gomock.Any(), hashBytes, false).
+		Return(storage.Tx{}, sql.ErrNoRows).
+		Times(1)
+
+	s.tx.EXPECT().
+		IsNoRows(sql.ErrNoRows).
+		Return(true).
+		Times(1)
+
+	s.Require().NoError(s.handler.TxTracesTree(c))
+	s.Require().Equal(http.StatusNoContent, rec.Code)
+}
+
+// TestTxTracesTreeInvalidHash tests handling of invalid transaction hash
+func (s *TxHandlerTestSuite) TestTxTracesTreeInvalidHash() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/txs/:hash/traces_tree")
+	c.SetParamNames("hash")
+	c.SetParamValues("invalid_hash")
+
+	s.Require().NoError(s.handler.TxTracesTree(c))
+	s.Require().Equal(http.StatusBadRequest, rec.Code)
+
+	var e Error
+	err := json.NewDecoder(rec.Body).Decode(&e)
+	s.Require().NoError(err)
+	s.Require().NotEmpty(e.Message)
+}
+
+// TestTxTracesTreeMissingHash tests handling of missing hash parameter
+func (s *TxHandlerTestSuite) TestTxTracesTreeMissingHash() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/txs/:hash/traces_tree")
+	c.SetParamNames("hash")
+	c.SetParamValues("")
+
+	s.Require().NoError(s.handler.TxTracesTree(c))
+	s.Require().Equal(http.StatusBadRequest, rec.Code)
+
+	var e Error
+	err := json.NewDecoder(rec.Body).Decode(&e)
+	s.Require().NoError(err)
+	s.Require().NotEmpty(e.Message)
+}
+
+// TestTxTracesTreeByTxIdError tests error from ByTxId storage call
+func (s *TxHandlerTestSuite) TestTxTracesTreeByTxIdError() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/txs/:hash/traces_tree")
+	c.SetParamNames("hash")
+	c.SetParamValues(testTxHash.Hex())
+
+	s.tx.EXPECT().
+		ByHash(gomock.Any(), testTxHash, false).
+		Return(testTxWithToAddress, nil).
+		Times(1)
+
+	s.trace.EXPECT().
+		ByTxId(gomock.Any(), testTxWithToAddress.Id, false).
+		Return(nil, sql.ErrNoRows).
+		Times(1)
+
+	s.trace.EXPECT().
+		IsNoRows(sql.ErrNoRows).
+		Return(true).
+		Times(1)
+
+	s.Require().NoError(s.handler.TxTracesTree(c))
+	s.Require().Equal(http.StatusNoContent, rec.Code)
+}
+
+// TestGetWithDecode tests successful retrieval of a transaction with decoded input
+func (s *TxHandlerTestSuite) TestGetWithDecode() {
+	q := make(url.Values)
+	q.Set("decode", "true")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/tx/:hash")
+	c.SetParamNames("hash")
+	c.SetParamValues(testTxHash.Hex())
+
+	txWithABI := testTxWithToAddress
+	// transfer(address,uint256) selector + encoded args
+	txWithABI.Input = pkgTypes.MustDecodeHex(
+		"a9059cbb" +
+			"000000000000000000000000dead000000000000000000000000000000000000" +
+			"00000000000000000000000000000000000000000000000000000000000003e8",
+	)
+	txWithABI.ToContractABI = []byte(`[{"inputs":[{"name":"to","type":"address"},{"name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}]`)
+
+	s.tx.EXPECT().
+		ByHash(gomock.Any(), testTxHash, true).
+		Return(txWithABI, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.Get(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var tx responses.Transaction
+	err := json.NewDecoder(rec.Body).Decode(&tx)
+	s.Require().NoError(err)
+	s.Require().NotNil(tx.Decoded)
+	s.Require().Equal("transfer", tx.Decoded.Method)
+	s.Require().Contains(tx.Decoded.Args, "to")
+	s.Require().Contains(tx.Decoded.Args, "amount")
+}
+
+// TestGetWithDecodeNoABI tests that decode returns nil when no ABI is available
+func (s *TxHandlerTestSuite) TestGetWithDecodeNoABI() {
+	q := make(url.Values)
+	q.Set("decode", "true")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/tx/:hash")
+	c.SetParamNames("hash")
+	c.SetParamValues(testTxHash.Hex())
+
+	s.tx.EXPECT().
+		ByHash(gomock.Any(), testTxHash, true).
+		Return(testTxWithToAddress, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.Get(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var tx responses.Transaction
+	err := json.NewDecoder(rec.Body).Decode(&tx)
+	s.Require().NoError(err)
+	s.Require().Nil(tx.Decoded)
+}
+
+// TestListWithDecode tests list with decode parameter
+func (s *TxHandlerTestSuite) TestListWithDecode() {
+	q := make(url.Values)
+	q.Set("decode", "true")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/tx")
+
+	s.tx.EXPECT().
+		Filter(gomock.Any(), storage.TxListFilter{
+			Limit:   10,
+			Offset:  0,
+			Sort:    sdk.SortOrderDesc,
+			Type:    []types.TxType{},
+			Status:  []types.TxStatus{},
+			WithABI: true,
+		}).
+		Return([]storage.Tx{testTxWithToAddress}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var txs []responses.Transaction
+	err := json.NewDecoder(rec.Body).Decode(&txs)
+	s.Require().NoError(err)
+	s.Require().Len(txs, 1)
 }
 
 // TestTracesInvalidLimit tests traces with invalid limit parameter

@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/mock/gomock"

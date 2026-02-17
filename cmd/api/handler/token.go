@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/baking-bad/noble-indexer/cmd/api/handler/responses"
-	"github.com/baking-bad/noble-indexer/internal/storage"
-	internalTypes "github.com/baking-bad/noble-indexer/internal/storage/types"
-	"github.com/baking-bad/noble-indexer/pkg/types"
+	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/internal/storage"
+	internalTypes "github.com/NobleScope/noble-indexer/internal/storage/types"
+	"github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/labstack/echo/v4"
 	"github.com/shopspring/decimal"
 )
@@ -161,7 +161,7 @@ type transferListRequest struct {
 	Sort        string      `query:"sort"         validate:"omitempty,oneof=asc desc"`
 	Height      *uint64     `query:"height"       validate:"omitempty,min=0"`
 	TxHash      string      `query:"tx_hash"      validate:"omitempty,tx_hash"`
-	Type        StringArray `query:"type"         validate:"omitempty"`
+	Type        StringArray `query:"type"         validate:"omitempty,dive,transfer_type"`
 	AddressFrom string      `query:"address_from" validate:"omitempty,address"`
 	AddressTo   string      `query:"address_to"   validate:"omitempty,address"`
 	Contract    string      `query:"contract"     validate:"omitempty,address"`
@@ -190,8 +190,8 @@ func (p *transferListRequest) SetDefault() {
 //	@Param			offset			query	integer	false	"Number of transfers to skip (default: 0)"					minimum(0)	default(0)
 //	@Param			sort			query	string	false	"Sort order by timestamp (default: asc)"					Enums(asc, desc)	default(asc)
 //	@Param			height			query	integer	false	"Filter by block height"									minimum(0)	example(12345)
-//	@Param			from			query	integer	false	"Filter by timestamp from (Unix timestamp)"					minimum(1)	example(1692892095)
-//	@Param			to				query	integer	false	"Filter by timestamp to (Unix timestamp)"					minimum(1)	example(1692892095)
+//	@Param			time_from		query	integer	false	"Filter by timestamp from (Unix timestamp)"					minimum(1)	example(1692892095)
+//	@Param			time_to			query	integer	false	"Filter by timestamp to (Unix timestamp)"					minimum(1)	example(1692892095)
 //	@Param			type			query	string	false	"Filter by transfer type (comma-separated list)"			Enums(burn, mint, transfer, unknown)
 //	@Param			tx_hash			query	string	false	"Filter by transaction hash (hexadecimal with 0x prefix)"	minlength(66)	maxlength(66)	example(0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef)
 //	@Param			address_from	query	string	false	"Filter by sender address"									minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
@@ -260,15 +260,11 @@ func (handler *TokenHandler) TransferList(c echo.Context) error {
 		if err != nil {
 			return badRequestError(c, err)
 		}
-		tx, err := handler.tx.ByHash(c.Request().Context(), hash)
+		tx, err := handler.tx.ByHash(c.Request().Context(), hash, false)
 		if err != nil {
 			return handleError(c, err, handler.tx)
 		}
 		filters.TxId = &tx.Id
-	}
-
-	if req.Height != nil {
-		filters.Height = req.Height
 	}
 
 	if req.From > 0 {
