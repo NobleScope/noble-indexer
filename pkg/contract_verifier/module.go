@@ -24,12 +24,17 @@ type Module struct {
 }
 
 func NewModule(pg postgres.Storage, cfg config.Config) *Module {
+	syncPeriod := time.Second * time.Duration(cfg.ContractVerifier.SyncPeriod)
+	if syncPeriod <= 0 {
+		syncPeriod = 30 * time.Second
+	}
+
 	module := &Module{
 		BaseModule: modules.New("contract_verifier"),
 		pg:         pg,
 		storage:    pg.Transactable,
 		cfg:        cfg,
-		syncPeriod: time.Second * time.Duration(cfg.ContractVerifier.SyncPeriod),
+		syncPeriod: syncPeriod,
 	}
 
 	return module
