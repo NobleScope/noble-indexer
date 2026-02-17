@@ -206,7 +206,16 @@ func detectEVMVersion(bytecode []byte) types.EVMVersion {
 
 	// Opcode -> minimum EVM version that introduced it
 	// We check from newest to oldest, so we can break early
-	for _, b := range bytecode {
+	for i := 0; i < len(bytecode); {
+		b := bytecode[i]
+
+		// Skip PUSH operands: PUSH1 (0x60) to PUSH32 (0x7f) are followed by 1-32 bytes of data
+		if b >= 0x60 && b <= 0x7f {
+			i += int(b-0x60) + 2
+			continue
+		}
+		i++
+
 		switch b {
 		// Cancun opcodes (EIP-1153, EIP-5656, EIP-4844)
 		case 0x5c, 0x5d: // TLOAD, TSTORE
