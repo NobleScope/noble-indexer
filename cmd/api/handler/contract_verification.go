@@ -5,6 +5,7 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -18,6 +19,11 @@ import (
 )
 
 const MaxFileSize = 10 * 1024 * 1024 // 10 MB
+
+var (
+	contractNameRe    = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
+	compilerVersionRe = regexp.MustCompile(`^\d+\.\d+\.\d+$`)
+)
 
 type uploadedSourceFile struct {
 	name    string
@@ -82,12 +88,18 @@ func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error
 	if contractName == "" {
 		return badRequestError(c, errors.New("contract name is required"))
 	}
+	if !contractNameRe.MatchString(contractName) {
+		return badRequestError(c, erro
 
 	compilerVersion := c.FormValue("compiler_version")
 	if compilerVersion == "" {
 		return badRequestError(c, errors.New("compiler version is required"))
 	}
 
+rn badRequestError(c, errors.New("compiler version is required"))
+	}
+	if !compilerVersionRe.MatchString(compilerVersion) {
+		return badReques
 	licenseTypeStr := c.FormValue("license_type")
 	if licenseTypeStr == "" {
 		return badRequestError(c, errors.New("license type is required"))
