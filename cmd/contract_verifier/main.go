@@ -50,7 +50,11 @@ func main() {
 	cancel()
 
 	if err := verifier.Close(); err != nil {
-		log.Panic().Err(err).Msg("stopping metadata resolver")
+		log.Panic().Err(err).Msg("stopping contract verifier")
+	}
+
+	if err := pg.Close(); err != nil {
+		log.Panic().Err(err).Msg("closing database connection")
 	}
 
 	if prscp != nil {
