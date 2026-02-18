@@ -5,7 +5,6 @@ import (
 	"context"
 	"io"
 	"net/http"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -19,11 +18,6 @@ import (
 )
 
 const MaxFileSize = 10 * 1024 * 1024 // 10 MB
-
-var (
-	contractNameRe    = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
-	compilerVersionRe = regexp.MustCompile(`^v?\d+\.\d+\.\d+(\+commit\.[0-9a-f]+)?$`)
-)
 
 type uploadedSourceFile struct {
 	name    string
@@ -88,7 +82,7 @@ func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error
 	if contractName == "" {
 		return badRequestError(c, errors.New("contract name is required"))
 	}
-	if !contractNameRe.MatchString(contractName) {
+	if !storageTypes.ContractNameRe.MatchString(contractName) {
 		return badRequestError(c, errors.New("invalid contract name: must match [a-zA-Z_][a-zA-Z0-9_]*"))
 	}
 
@@ -96,7 +90,7 @@ func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error
 	if compilerVersion == "" {
 		return badRequestError(c, errors.New("compiler version is required"))
 	}
-	if !compilerVersionRe.MatchString(compilerVersion) {
+	if !storageTypes.CompilerVersionRe.MatchString(compilerVersion) {
 		return badRequestError(c, errors.New("invalid compiler version: must be semver (e.g. 0.8.20)"))
 	}
 

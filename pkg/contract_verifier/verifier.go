@@ -21,8 +21,6 @@ const (
 	defaultOptimizationRuns = 200
 )
 
-var contractNameRe = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
-
 type BytecodeParts struct {
 	main     []byte
 	metadata []byte
@@ -40,7 +38,7 @@ func (m *Module) verify(ctx context.Context, task storage.VerificationTask, file
 		return nil, errors.New("no source code files found for verification task")
 	}
 
-	if !contractNameRe.MatchString(task.ContractName) {
+	if !types.ContractNameRe.MatchString(task.ContractName) {
 		return nil, errors.Errorf("invalid contract name: %s", task.ContractName)
 	}
 
