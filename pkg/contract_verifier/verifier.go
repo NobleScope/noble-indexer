@@ -82,27 +82,14 @@ func (m *Module) verify(ctx context.Context, task storage.VerificationTask, file
 		opts = append(opts, solc.WithViaIR(true))
 	}
 
-	tmpDir1, err := os.MkdirTemp("", "contract-verify-1-")
-	if err != nil {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("could not create temporary directory")
-		return nil, errors.Wrap(err, "create temp directory for first compilation")
-	}
-	defer func() {
-		_ = os.RemoveAll(tmpDir1)
-	}()
-
 	mainContractFileName := task.ContractName + ".sol"
 	sources := buildSourceMap(files)
 
-	if err := writeSourceFiles(tmpDir1, sources); err != nil {
+	contract1, clean1, err := compileFromSources(compiler, sources, task.ContractName, opts, mainContractFileName, false)
+	if err != nil {
 		return nil, err
 	}
-
-	contract1, err := compiler.Compile(tmpDir1, task.ContractName, opts...)
-	if err != nil {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("failed to compile contract")
-		return nil, errors.Wrap(err, "compile contract")
-	}
+	defer clean1()
 
 	if len(contract1.Runtime) == 0 {
 		m.Log.Error().Uint64("contract_id", task.ContractId).Msg("contract does not contain any runtimes")
@@ -114,32 +101,11 @@ func (m *Module) verify(ctx context.Context, task storage.VerificationTask, file
 		Int("files_count", len(files)).
 		Msg("contract compiled successfully")
 
-	tmpDir2, err := os.MkdirTemp("", "contract-verify-2-")
+	contract2, clean2, err := compileFromSources(compiler, sources, task.ContractName, opts, mainContractFileName, true)
 	if err != nil {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("could not create temporary directory")
-		return nil, errors.Wrap(err, "create temp directory for second compilation")
-	}
-	defer func() {
-		_ = os.RemoveAll(tmpDir2)
-	}()
-
-	modifiedSources := make(map[string]string, len(sources))
-	for path, content := range sources {
-		if filepath.Base(path) == mainContractFileName {
-			content += "\n"
-		}
-		modifiedSources[path] = content
-	}
-
-	if err := writeSourceFiles(tmpDir2, modifiedSources); err != nil {
 		return nil, err
 	}
-
-	contract2, err := compiler.Compile(tmpDir2, task.ContractName, opts...)
-	if err != nil {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("failed to compile modified contract")
-		return nil, errors.New("failed to compile modified contract for metadata detection")
-	}
+	defer clean2()
 
 	runtimeParts := splitBytecode(contract1.Runtime, contract2.Runtime)
 	if len(runtimeParts.main) == 0 {
@@ -455,6 +421,38 @@ func buildSourceMap(files []storage.VerificationFile) map[string]string {
 		}
 	}
 	return sources
+}
+
+func compileFromSources(compiler *solc.Compiler, sources map[string]string, contractName string, opts []solc.Option, mainFileName string, appendNewline bool) (*solc.Contract, func(), error) {
+	tmpDir, err := os.MkdirTemp("", "contract-verify-")
+	if err != nil {
+		return nil, func() {}, errors.Wrap(err, "create temp directory")
+	}
+	cleanup := func() { _ = os.RemoveAll(tmpDir) }
+
+	writeSources := sources
+	if appendNewline {
+		writeSources = make(map[string]string, len(sources))
+		for path, content := range sources {
+			if filepath.Base(path) == mainFileName {
+				content += "\n"
+			}
+			writeSources[path] = content
+		}
+	}
+
+	if err := writeSourceFiles(tmpDir, writeSources); err != nil {
+		cleanup()
+		return nil, func() {}, err
+	}
+
+	contract, err := compiler.Compile(tmpDir, contractName, opts...)
+	if err != nil {
+		cleanup()
+		return nil, func() {}, errors.Wrap(err, "compile contract")
+	}
+
+	return contract, cleanup, nil
 }
 
 func writeSourceFiles(dir string, sources map[string]string) error {
