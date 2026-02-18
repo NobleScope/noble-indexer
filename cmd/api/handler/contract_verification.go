@@ -5,7 +5,6 @@ import (
 	"context"
 	"io"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/NobleScope/noble-indexer/internal/storage"
@@ -47,6 +46,17 @@ func NewContractVerificationHandler(
 	}
 }
 
+type verificationRequest struct {
+	ContractAddress     string  `form:"contract_address"     validate:"required,address"`
+	ContractName        string  `form:"contract_name"        validate:"required,contract_name"`
+	CompilerVersion     string  `form:"compiler_version"     validate:"required,compiler_version"`
+	LicenseType         string  `form:"license_type"         validate:"required,license_type"`
+	OptimizationEnabled *bool   `form:"optimization_enabled"`
+	OptimizationRuns    *uint   `form:"optimization_runs"`
+	EVMVersion          *string `form:"evm_version"          validate:"omitempty,evm_version"`
+	ViaIR               bool    `form:"via_ir"`
+}
+
 type verificationResponse struct {
 	Result string `json:"result"`
 }
@@ -73,72 +83,23 @@ type verificationResponse struct {
 //	@Failure		500	{object}	Error
 //	@Router			/verification/code [post]
 func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error {
-	address := c.FormValue("contract_address")
-	if address == "" {
-		return badRequestError(c, errors.New("contract address is required"))
+	req, err := bindAndValidate[verificationRequest](c)
+	if err != nil {
+		return badRequestError(c, err)
 	}
 
-	contractName := c.FormValue("contract_name")
-	if contractName == "" {
-		return badRequestError(c, errors.New("contract name is required"))
-	}
-	if !storageTypes.ContractNameRe.MatchString(contractName) {
-		return badRequestError(c, errors.New("invalid contract name: must match [a-zA-Z_][a-zA-Z0-9_]*"))
-	}
-
-	compilerVersion := c.FormValue("compiler_version")
-	if compilerVersion == "" {
-		return badRequestError(c, errors.New("compiler version is required"))
-	}
-	if !storageTypes.CompilerVersionRe.MatchString(compilerVersion) {
-		return badRequestError(c, errors.New("invalid compiler version: must be semver (e.g. 0.8.20)"))
-	}
-
-	licenseTypeStr := c.FormValue("license_type")
-	if licenseTypeStr == "" {
-		return badRequestError(c, errors.New("license type is required"))
-	}
-
-	licenseType, err := storageTypes.ParseLicenseType(licenseTypeStr)
+	licenseType, err := storageTypes.ParseLicenseType(req.LicenseType)
 	if err != nil {
 		return badRequestError(c, errors.Wrap(err, "invalid license type"))
 	}
 
-	var optimizationEnabled *bool
-	var optimizationRuns *uint
-
-	if optEnabledStr := c.FormValue("optimization_enabled"); optEnabledStr != "" {
-		optEnabled, err := strconv.ParseBool(optEnabledStr)
-		if err != nil {
-			return badRequestError(c, errors.Wrap(err, "invalid optimization_enabled value"))
-		}
-		optimizationEnabled = &optEnabled
-	}
-
-	if optRunsStr := c.FormValue("optimization_runs"); optRunsStr != "" {
-		optRuns64, err := strconv.ParseUint(optRunsStr, 10, 32)
-		if err != nil {
-			return badRequestError(c, errors.Wrap(err, "invalid optimization_runs value"))
-		}
-		optRuns := uint(optRuns64)
-		optimizationRuns = &optRuns
-	}
-
 	var evmVersion *storageTypes.EVMVersion
-	if evmVersionStr := c.FormValue("evm_version"); evmVersionStr != "" {
-		v, err := storageTypes.ParseEVMVersion(evmVersionStr)
+	if req.EVMVersion != nil {
+		v, err := storageTypes.ParseEVMVersion(*req.EVMVersion)
 		if err != nil {
 			return badRequestError(c, errors.Wrap(err, "invalid EVM version"))
 		}
 		evmVersion = &v
-	}
-
-	var viaIR bool
-	if viaIRStr := c.FormValue("via_ir"); viaIRStr != "" {
-		viaIR, err = strconv.ParseBool(viaIRStr)
-		if err != nil {
-			return badRequestError(c, errors.Wrap(err, "invalid via_ir value"))
-		}
 	}
 
 	form, err := c.MultipartForm()
@@ -192,7 +153,7 @@ func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error
 		return badRequestError(c, errors.New("at least one file must contain 'pragma solidity'"))
 	}
 
-	hash, err := types.HexFromString(address)
+	hash, err := types.HexFromString(req.ContractAddress)
 	if err != nil {
 		return badRequestError(c, err)
 	}
@@ -225,13 +186,13 @@ func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error
 	newTask := storage.VerificationTask{
 		Status:              storageTypes.VerificationStatusNew,
 		ContractId:          contract.Id,
-		ContractName:        contractName,
-		CompilerVersion:     compilerVersion,
+		ContractName:        req.ContractName,
+		CompilerVersion:     req.CompilerVersion,
 		LicenseType:         licenseType,
-		OptimizationEnabled: optimizationEnabled,
-		OptimizationRuns:    optimizationRuns,
+		OptimizationEnabled: req.OptimizationEnabled,
+		OptimizationRuns:    req.OptimizationRuns,
 		EVMVersion:          evmVersion,
-		ViaIR:               viaIR,
+		ViaIR:               req.ViaIR,
 	}
 
 	ctx := c.Request().Context()
