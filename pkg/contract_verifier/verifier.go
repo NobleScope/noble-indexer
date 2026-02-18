@@ -144,20 +144,21 @@ func (m *Module) verify(ctx context.Context, task storage.VerificationTask, file
 		return nil, errors.Wrap(err, "parse contract ABI")
 	}
 
-	if contract.TxId == nil {
-		m.Log.Error().Uint64("contract_id", task.ContractId).Msg("deployment transaction ID should not be nil")
+	if contract.TxId == nil && contract.Height > 0 {
 		return nil, errors.New("deployment transaction not found")
 	}
 
-	deployTx, err := m.pg.Tx.GetByID(ctx, *contract.TxId)
-	if err != nil {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("failed to get deployment transaction")
-		return nil, errors.Wrap(err, "get deployment transaction")
-	}
+	if contract.TxId != nil {
+		deployTx, err := m.pg.Tx.GetByID(ctx, *contract.TxId)
+		if err != nil {
+			m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("failed to get deployment transaction")
+			return nil, errors.Wrap(err, "get deployment transaction")
+		}
 
-	if err := m.verifyConstructorArgs(parsedABI, deployTx.Input, len(contract1.Constructor)); err != nil {
-		m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("failed to verify contract constructor args")
-		return nil, errors.Wrap(err, "verify constructor arguments")
+		if err := m.verifyConstructorArgs(parsedABI, deployTx.Input, len(contract1.Constructor)); err != nil {
+			m.Log.Err(err).Uint64("contract_id", task.ContractId).Msg("failed to verify contract constructor args")
+			return nil, errors.Wrap(err, "verify constructor arguments")
+		}
 	}
 
 	return &VerificationResult{
