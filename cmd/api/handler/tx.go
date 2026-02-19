@@ -80,6 +80,7 @@ type getTxTraces struct {
 	Contract    string      `query:"contract"     validate:"omitempty,address"`
 	Height      *uint64     `query:"height"       validate:"omitempty,min=0"`
 	Type        StringArray `query:"type"         validate:"omitempty,dive,trace_type"`
+	CallType    StringArray `query:"call_type"    validate:"omitempty,dive,call_type"`
 	Sort        string      `query:"sort"         validate:"omitempty,oneof=asc desc"`
 	Decode      bool        `query:"decode"       validate:"omitempty"`
 }
@@ -106,7 +107,8 @@ func (req *getTxTraces) SetDefault() {
 //	@Param			address_to		query	string	false	"Filter by target address"									minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
 //	@Param			address			query	string	false	"Filter by address (from or to)"							minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
 //	@Param			height			query	integer	false	"Filter by block height"									minimum(1)	example(12345)
-//	@Param			type			query	string	false	"Filter by trace type (comma-separated list)"				Enums(call, delegatecall, staticcall, create, create2, selfdestruct, reward, suicide)
+//	@Param			type			query	string	false	"Filter by trace type (comma-separated list)"				Enums(call, create, create2, selfdestruct, reward, suicide)
+//	@Param			call_type		query	string	false	"Filter by call type (comma-separated list)"				Enums(call, delegatecall, staticcall, callcode)
 //	@Param			sort			query	string	false	"Sort order (default: desc)"								Enums(asc, desc)	default(desc)
 //	@Param			decode			query	boolean	false	"Decode trace input using contract ABI"						default(false)
 //	@Produce		json
@@ -126,13 +128,19 @@ func (handler *TxHandler) Traces(c echo.Context) error {
 		traceTypes[i] = internalTypes.TraceType(req.Type[i])
 	}
 
+	callTypes := make([]internalTypes.CallType, len(req.CallType))
+	for i := range callTypes {
+		callTypes[i] = internalTypes.CallType(req.CallType[i])
+	}
+
 	filters := storage.TraceListFilter{
-		Limit:   req.Limit,
-		Offset:  req.Offset,
-		Sort:    pgSort(req.Sort),
-		Type:    traceTypes,
-		Height:  req.Height,
-		WithABI: req.Decode,
+		Limit:    req.Limit,
+		Offset:   req.Offset,
+		Sort:     pgSort(req.Sort),
+		Type:     traceTypes,
+		CallType: callTypes,
+		Height:   req.Height,
+		WithABI:  req.Decode,
 	}
 
 	if req.TxHash != "" {

@@ -42,16 +42,16 @@ func TestBuildTraceTree_TwoLevels(t *testing.T) {
 	// root -> [child0, child1]
 	traces := []*storage.Trace{
 		newTrace([]uint64{}, 2, "call"),
-		newTrace([]uint64{0}, 0, "staticcall"),
-		newTrace([]uint64{1}, 0, "delegatecall"),
+		newTrace([]uint64{0}, 0, "call"),
+		newTrace([]uint64{1}, 0, "call"),
 	}
 
 	root, err := BuildTraceTree(traces)
 	require.NoError(t, err)
 	require.NotNil(t, root)
 	require.Len(t, root.Children, 2)
-	require.Equal(t, "staticcall", root.Children[0].Type)
-	require.Equal(t, "delegatecall", root.Children[1].Type)
+	require.Equal(t, "call", root.Children[0].Type)
+	require.Equal(t, "call", root.Children[1].Type)
 }
 
 func TestBuildTraceTree_ThreeLevels(t *testing.T) {
@@ -59,7 +59,7 @@ func TestBuildTraceTree_ThreeLevels(t *testing.T) {
 	traces := []*storage.Trace{
 		newTrace([]uint64{}, 1, "call"),
 		newTrace([]uint64{0}, 1, "call"),
-		newTrace([]uint64{0, 0}, 0, "staticcall"),
+		newTrace([]uint64{0, 0}, 0, "call"),
 	}
 
 	root, err := BuildTraceTree(traces)
@@ -67,7 +67,7 @@ func TestBuildTraceTree_ThreeLevels(t *testing.T) {
 	require.NotNil(t, root)
 	require.Len(t, root.Children, 1)
 	require.Len(t, root.Children[0].Children, 1)
-	require.Equal(t, "staticcall", root.Children[0].Children[0].Type)
+	require.Equal(t, "call", root.Children[0].Children[0].Type)
 }
 
 func TestBuildTraceTree_ErrorNoRoot(t *testing.T) {
