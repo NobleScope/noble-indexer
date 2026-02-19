@@ -4,8 +4,6 @@ package types
 /*
 	ENUM(
 		call,
-		delegatecall,
-		staticcall,
 		create,
 		create2,
 		selfdestruct,

@@ -193,6 +193,13 @@ definitions:
   responses.Enums:
     description: Available enum values for various entity types
     properties:
+      call_type:
+        example:
+        - call
+        - delegatecall
+        items:
+          type: string
+        type: array
       token_type:
         example:
         - ERC20
@@ -434,6 +441,14 @@ definitions:
       amount:
         example: "123456789123456789"
         type: string
+      call_type:
+        enum:
+        - call
+        - delegatecall
+        - staticcall
+        - callcode
+        example: delegatecall
+        type: string
       contract:
         example: "0x0000000000000000000000000000000000000002"
         type: string
@@ -489,12 +504,11 @@ definitions:
       type:
         enum:
         - call
-        - delegatecall
-        - staticcall
         - create
         - create2
         - selfdestruct
         - reward
+        - suicide
         example: call
         type: string
     type: object
@@ -503,6 +517,14 @@ definitions:
     properties:
       amount:
         example: "123456789123456789"
+        type: string
+      call_type:
+        enum:
+        - call
+        - delegatecall
+        - staticcall
+        - callcode
+        example: delegatecall
         type: string
       children:
         items:
@@ -563,12 +585,11 @@ definitions:
       type:
         enum:
         - call
-        - delegatecall
-        - staticcall
         - create
         - create2
         - selfdestruct
         - reward
+        - suicide
         example: call
         type: string
     type: object
@@ -581,6 +602,8 @@ definitions:
       cumulative_gas_used:
         example: 21000
         type: integer
+      decoded:
+        type: object
       effective_gas_price:
         example: 1000000
         type: integer
@@ -1793,8 +1816,6 @@ paths:
       - description: Filter by trace type (comma-separated list)
         enum:
         - call
-        - delegatecall
-        - staticcall
         - create
         - create2
         - selfdestruct
@@ -1802,6 +1823,15 @@ paths:
         - suicide
         in: query
         name: type
+        type: string
+      - description: Filter by call type (comma-separated list)
+        enum:
+        - call
+        - delegatecall
+        - staticcall
+        - callcode
+        in: query
+        name: call_type
         type: string
       - default: desc
         description: 'Sort order (default: desc)'
@@ -2062,6 +2092,11 @@ paths:
         in: query
         name: sort
         type: string
+      - default: false
+        description: Decode transaction input using contract ABI
+        in: query
+        name: decode
+        type: boolean
       produces:
       - application/json
       responses:
@@ -2096,6 +2131,11 @@ paths:
         name: hash
         required: true
         type: string
+      - default: false
+        description: Decode transaction input using contract ABI
+        in: query
+        name: decode
+        type: boolean
       produces:
       - application/json
       responses:

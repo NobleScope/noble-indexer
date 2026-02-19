@@ -28,6 +28,10 @@ var (
 	}
 )
 
+func callTypePtr(v types.CallType) *types.CallType {
+	return &v
+}
+
 // TxHandlerTestSuite -
 type TxHandlerTestSuite struct {
 	suite.Suite
@@ -720,10 +724,11 @@ func (s *TxHandlerTestSuite) TestTracesSuccess() {
 
 	s.trace.EXPECT().
 		Filter(gomock.Any(), storage.TraceListFilter{
-			Limit:  10,
-			Offset: 0,
-			Sort:   sdk.SortOrderDesc,
-			Type:   []types.TraceType{},
+			Limit:    10,
+			Offset:   0,
+			Sort:     sdk.SortOrderDesc,
+			Type:     []types.TraceType{},
+			CallType: []types.CallType{},
 		}).
 		Return([]*storage.Trace{&testTrace1, &testTrace2, &testTrace3}, nil).
 		Times(1)
@@ -760,11 +765,12 @@ func (s *TxHandlerTestSuite) TestTracesWithTxHash() {
 	txId := testTxWithToAddress.Id
 	s.trace.EXPECT().
 		Filter(gomock.Any(), storage.TraceListFilter{
-			Limit:  10,
-			Offset: 0,
-			Sort:   sdk.SortOrderDesc,
-			Type:   []types.TraceType{},
-			TxId:   &txId,
+			Limit:    10,
+			Offset:   0,
+			Sort:     sdk.SortOrderDesc,
+			Type:     []types.TraceType{},
+			CallType: []types.CallType{},
+			TxId:     &txId,
 		}).
 		Return([]*storage.Trace{&testTrace1}, nil).
 		Times(1)
@@ -802,6 +808,7 @@ func (s *TxHandlerTestSuite) TestTracesWithAddressFrom() {
 			Offset:        0,
 			Sort:          sdk.SortOrderDesc,
 			Type:          []types.TraceType{},
+			CallType:      []types.CallType{},
 			AddressFromId: &fromId,
 		}).
 		Return([]*storage.Trace{&testTrace1, &testTrace2, &testTrace3}, nil).
@@ -838,6 +845,7 @@ func (s *TxHandlerTestSuite) TestTracesWithAddressTo() {
 			Offset:      0,
 			Sort:        sdk.SortOrderDesc,
 			Type:        []types.TraceType{},
+			CallType:    []types.CallType{},
 			AddressToId: &toId,
 		}).
 		Return([]*storage.Trace{&testTrace1, &testTrace3}, nil).
@@ -873,6 +881,7 @@ func (s *TxHandlerTestSuite) TestTracesWithAddress() {
 			Offset:    0,
 			Sort:      sdk.SortOrderDesc,
 			Type:      []types.TraceType{},
+			CallType:  []types.CallType{},
 			AddressId: &addressId,
 		}).
 		Return([]*storage.Trace{&testTrace1, &testTrace3}, nil).
@@ -899,10 +908,11 @@ func (s *TxHandlerTestSuite) TestTracesWithType() {
 
 	s.trace.EXPECT().
 		Filter(gomock.Any(), storage.TraceListFilter{
-			Limit:  10,
-			Offset: 0,
-			Sort:   sdk.SortOrderDesc,
-			Type:   []types.TraceType{types.Call, types.Create},
+			Limit:    10,
+			Offset:   0,
+			Sort:     sdk.SortOrderDesc,
+			Type:     []types.TraceType{types.Call, types.Create},
+			CallType: []types.CallType{},
 		}).
 		Return([]*storage.Trace{&testTrace1, &testTrace2, &testTrace3}, nil).
 		Times(1)
@@ -929,11 +939,12 @@ func (s *TxHandlerTestSuite) TestTracesWithHeight() {
 	height := uint64(100)
 	s.trace.EXPECT().
 		Filter(gomock.Any(), storage.TraceListFilter{
-			Limit:  10,
-			Offset: 0,
-			Sort:   sdk.SortOrderDesc,
-			Type:   []types.TraceType{},
-			Height: &height,
+			Limit:    10,
+			Offset:   0,
+			Sort:     sdk.SortOrderDesc,
+			Type:     []types.TraceType{},
+			CallType: []types.CallType{},
+			Height:   &height,
 		}).
 		Return([]*storage.Trace{&testTrace1, &testTrace2, &testTrace3}, nil).
 		Times(1)
@@ -960,10 +971,11 @@ func (s *TxHandlerTestSuite) TestTracesWithLimitAndOffset() {
 
 	s.trace.EXPECT().
 		Filter(gomock.Any(), storage.TraceListFilter{
-			Limit:  5,
-			Offset: 2,
-			Sort:   sdk.SortOrderDesc,
-			Type:   []types.TraceType{},
+			Limit:    5,
+			Offset:   2,
+			Sort:     sdk.SortOrderDesc,
+			Type:     []types.TraceType{},
+			CallType: []types.CallType{},
 		}).
 		Return([]*storage.Trace{&testTrace3}, nil).
 		Times(1)
@@ -989,10 +1001,11 @@ func (s *TxHandlerTestSuite) TestTracesWithSortAsc() {
 
 	s.trace.EXPECT().
 		Filter(gomock.Any(), storage.TraceListFilter{
-			Limit:  10,
-			Offset: 0,
-			Sort:   sdk.SortOrderAsc,
-			Type:   []types.TraceType{},
+			Limit:    10,
+			Offset:   0,
+			Sort:     sdk.SortOrderAsc,
+			Type:     []types.TraceType{},
+			CallType: []types.CallType{},
 		}).
 		Return([]*storage.Trace{&testTrace1, &testTrace2, &testTrace3}, nil).
 		Times(1)
@@ -1086,7 +1099,8 @@ var (
 		Input:        []byte{},
 		TxPosition:   uint64Ptr(0),
 		TraceAddress: []uint64{1},
-		Type:         types.Delegatecall,
+		Type:         types.Call,
+		CallType:     callTypePtr(types.CallTypeDelegatecall),
 		GasUsed:      decimal.NewFromInt(20000),
 		Output:       []byte{},
 		Subtraces:    0,
@@ -1107,7 +1121,8 @@ var (
 		Input:        []byte{0x01, 0x02},
 		TxPosition:   uint64Ptr(0),
 		TraceAddress: []uint64{0, 0},
-		Type:         types.Staticcall,
+		Type:         types.Call,
+		CallType:     callTypePtr(types.CallTypeStaticcall),
 		GasUsed:      decimal.NewFromInt(5000),
 		Output:       []byte{0x01},
 		Subtraces:    0,
@@ -1185,11 +1200,15 @@ func (s *TxHandlerTestSuite) TestTxTracesTreeWithHierarchy() {
 	// root has 2 children
 	s.Require().Len(tree.Children, 2)
 	s.Require().Equal("call", tree.Children[0].Type)
-	s.Require().Equal("delegatecall", tree.Children[1].Type)
+	s.Require().Equal("call", tree.Children[1].Type)
+	s.Require().NotNil(tree.Children[1].CallType)
+	s.Require().Equal("delegatecall", *tree.Children[1].CallType)
 
 	// first child has 1 grandchild
 	s.Require().Len(tree.Children[0].Children, 1)
-	s.Require().Equal("staticcall", tree.Children[0].Children[0].Type)
+	s.Require().Equal("call", tree.Children[0].Children[0].Type)
+	s.Require().NotNil(tree.Children[0].Children[0].CallType)
+	s.Require().Equal("staticcall", *tree.Children[0].Children[0].CallType)
 	s.Require().Len(tree.Children[0].Children[0].Children, 0)
 
 	// second child has no children

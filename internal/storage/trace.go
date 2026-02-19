@@ -23,6 +23,7 @@ type TraceListFilter struct {
 	AddressId     *uint64
 	ContractId    *uint64
 	Type          []types.TraceType
+	CallType      []types.CallType
 	WithABI       bool
 }
 
@@ -52,6 +53,7 @@ type Trace struct {
 	TxPosition     *uint64          `bun:"tx_position"            comment:"Transaction position"`
 	TraceAddress   []uint64         `bun:"trace_address"          comment:"Trace position in the call tree"`
 	Type           types.TraceType  `bun:"type"                   comment:"Trace type"`
+	CallType       *types.CallType  `bun:"call_type,nullzero"     comment:"Call type"`
 	InitHash       *pkgTypes.Hex    `bun:"init_hash,type:bytea"   comment:"Code of the contract being created"`
 	CreationMethod *string          `bun:"creation_method"        comment:"Creation method"`
 
