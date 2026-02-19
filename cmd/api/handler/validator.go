@@ -45,6 +45,18 @@ func NewApiValidator() *ApiValidator {
 	if err := v.RegisterValidation("proxy_contract_status", proxyContractStatusValidator()); err != nil {
 		panic(err)
 	}
+	if err := v.RegisterValidation("contract_name", contractNameValidator()); err != nil {
+		panic(err)
+	}
+	if err := v.RegisterValidation("compiler_version", compilerVersionValidator()); err != nil {
+		panic(err)
+	}
+	if err := v.RegisterValidation("license_type", licenseTypeValidator()); err != nil {
+		panic(err)
+	}
+	if err := v.RegisterValidation("evm_version", evmVersionValidator()); err != nil {
+		panic(err)
+	}
 	if err := v.RegisterValidation("call_type", callTypeValidator()); err != nil {
 		panic(err)
 	}
@@ -123,6 +135,32 @@ func callTypeValidator() validator.Func {
 func proxyContractStatusValidator() validator.Func {
 	return func(fl validator.FieldLevel) bool {
 		_, err := types.ParseProxyStatus(fl.Field().String())
+		return err == nil
+	}
+}
+
+func contractNameValidator() validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		return types.ContractNameRe.MatchString(fl.Field().String())
+	}
+}
+
+func compilerVersionValidator() validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		return types.CompilerVersionRe.MatchString(fl.Field().String())
+	}
+}
+
+func licenseTypeValidator() validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		_, err := types.ParseLicenseType(fl.Field().String())
+		return err == nil
+	}
+}
+
+func evmVersionValidator() validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		_, err := types.ParseEVMVersion(fl.Field().String())
 		return err == nil
 	}
 }

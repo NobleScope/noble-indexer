@@ -2,8 +2,8 @@ package storage
 
 import (
 	"context"
-
 	"fmt"
+
 	"github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"

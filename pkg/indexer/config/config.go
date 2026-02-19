@@ -15,6 +15,7 @@ type Config struct {
 	Profiler                 *profiler.Config `validate:"omitempty"                                               yaml:"profiler"`
 	ContractMetadataResolver MetadataResolver `yaml:"contract_resolver"`
 	TokenMetadataResolver    MetadataResolver `yaml:"token_resolver"`
+	ContractVerifier         ContractVerifier `yaml:"contract_verifier"`
 	Network                  string           `validate:"required"                                                yaml:"network"`
 	Networks                 NetworksConfig   `yaml:"networks"`
 }
@@ -56,6 +57,10 @@ type ProxyContracts struct {
 	SyncPeriodSeconds    int  `validate:"min=1" yaml:"sync_period_seconds"`
 	BatchSize            int  `validate:"min=1" yaml:"node_batch_size"`
 	MaxResolvingAttempts uint `validate:"min=1" yaml:"max_resolving_attempts"`
+}
+
+type ContractVerifier struct {
+	SyncPeriod int64 `validate:"min=1" yaml:"sync_period"`
 }
 
 // Substitute -

@@ -484,6 +484,34 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			return err
 		}
 
+		// Verification files
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.VerificationFile)(nil)).
+			Index("verification_file_verification_task_id_idx").
+			Column("verification_task_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+
+		// Verification task
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.VerificationTask)(nil)).
+			Index("verification_task_contract_id_idx").
+			Column("contract_id").
+			Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.VerificationTask)(nil)).
+			Index("verification_task_status_creation_time_idx").
+			Column("status", "creation_time").
+			Exec(ctx); err != nil {
+			return err
+		}
+
 		return nil
 	})
 }

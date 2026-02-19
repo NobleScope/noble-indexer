@@ -21,23 +21,25 @@ type Storage struct {
 	cfg        config.Database
 	scriptsDir string
 
-	Blocks           models.IBlock
-	BlockStats       models.IBlockStats
-	Tx               models.ITx
-	Transfer         models.ITransfer
-	Token            models.IToken
-	TokenBalance     models.ITokenBalance
-	Trace            models.ITrace
-	Logs             models.ILog
-	Addresses        models.IAddress
-	Contracts        models.IContract
-	ProxyContracts   models.IProxyContract
-	Sources          models.ISource
-	State            models.IState
-	Search           models.ISearch
-	ERC4337UserOps   models.IERC4337UserOps
-	BeaconWithdrawal models.IBeaconWithdrawal
-	Notificator      *Notificator
+	Blocks            models.IBlock
+	BlockStats        models.IBlockStats
+	Tx                models.ITx
+	Transfer          models.ITransfer
+	Token             models.IToken
+	TokenBalance      models.ITokenBalance
+	Trace             models.ITrace
+	Logs              models.ILog
+	Addresses         models.IAddress
+	Contracts         models.IContract
+	ProxyContracts    models.IProxyContract
+	Sources           models.ISource
+	State             models.IState
+	Search            models.ISearch
+	VerificationTasks models.IVerificationTask
+	VerificationFiles models.IVerificationFile
+	ERC4337UserOps    models.IERC4337UserOps
+	BeaconWithdrawal  models.IBeaconWithdrawal
+	Notificator       *Notificator
 }
 
 // Create -
@@ -52,26 +54,28 @@ func Create(ctx context.Context, cfg config.Database, scriptsDir string, withMig
 	}
 
 	s := Storage{
-		cfg:              cfg,
-		scriptsDir:       scriptsDir,
-		Storage:          strg,
-		Blocks:           NewBlock(strg.Connection()),
-		BlockStats:       NewBlockStats(strg.Connection()),
-		Logs:             NewLog(strg.Connection()),
-		Tx:               NewTx(strg.Connection()),
-		Transfer:         NewTransfer(strg.Connection()),
-		Token:            NewToken(strg.Connection()),
-		TokenBalance:     NewTokenBalance(strg.Connection()),
-		Trace:            NewTrace(strg.Connection()),
-		Addresses:        NewAddress(strg.Connection()),
-		Contracts:        NewContract(strg.Connection()),
-		ProxyContracts:   NewProxyContract(strg.Connection()),
-		Sources:          NewSource(strg.Connection()),
-		State:            NewState(strg.Connection()),
-		Search:           NewSearch(strg.Connection()),
-		ERC4337UserOps:   NewERC4337UserOps(strg.Connection()),
-		BeaconWithdrawal: NewBeaconWithdrawal(strg.Connection()),
-		Notificator:      NewNotificator(cfg, strg.Connection().DB()),
+		cfg:               cfg,
+		scriptsDir:        scriptsDir,
+		Storage:           strg,
+		Blocks:            NewBlock(strg.Connection()),
+		BlockStats:        NewBlockStats(strg.Connection()),
+		Logs:              NewLog(strg.Connection()),
+		Tx:                NewTx(strg.Connection()),
+		Transfer:          NewTransfer(strg.Connection()),
+		Token:             NewToken(strg.Connection()),
+		TokenBalance:      NewTokenBalance(strg.Connection()),
+		Trace:             NewTrace(strg.Connection()),
+		Addresses:         NewAddress(strg.Connection()),
+		Contracts:         NewContract(strg.Connection()),
+		ProxyContracts:    NewProxyContract(strg.Connection()),
+		Sources:           NewSource(strg.Connection()),
+		State:             NewState(strg.Connection()),
+		Search:            NewSearch(strg.Connection()),
+		VerificationTasks: NewVerificationTask(strg.Connection()),
+		VerificationFiles: NewVerificationFile(strg.Connection()),
+		ERC4337UserOps:    NewERC4337UserOps(strg.Connection()),
+		BeaconWithdrawal:  NewBeaconWithdrawal(strg.Connection()),
+		Notificator:       NewNotificator(cfg, strg.Connection().DB()),
 	}
 
 	if err := s.createScripts(ctx, "functions", false); err != nil {

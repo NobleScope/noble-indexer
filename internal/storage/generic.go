@@ -24,6 +24,8 @@ var Models = []any{
 	&Trace{},
 	&Balance{},
 	&State{},
+	&VerificationTask{},
+	&VerificationFile{},
 	&ERC4337UserOp{},
 	&BeaconWithdrawal{},
 }
@@ -46,6 +48,9 @@ type Transaction interface {
 	SaveProxyContracts(ctx context.Context, contracts ...*ProxyContract) error
 	SaveERC4337UserOps(ctx context.Context, userOps ...*ERC4337UserOp) error
 	SaveBeaconWithdrawals(ctx context.Context, withdrawals ...*BeaconWithdrawal) error
+	UpdateVerificationTask(ctx context.Context, task *VerificationTask) error
+	AddVerificationTask(ctx context.Context, task *VerificationTask) error
+	SaveVerificationFiles(ctx context.Context, files ...*VerificationFile) error
 
 	RollbackBlock(ctx context.Context, height types.Level) error
 	RollbackBlockStats(ctx context.Context, height types.Level) (stats BlockStats, err error)
@@ -60,6 +65,7 @@ type Transaction interface {
 	RollbackBeaconWithdrawals(ctx context.Context, height types.Level) error
 	DeleteBalances(ctx context.Context, ids []uint64) error
 	DeleteTokenBalances(ctx context.Context, tokenIds []string, contractIds []uint64, zeroBalances []*TokenBalance) error
+	DeleteVerificationFiles(ctx context.Context, taskId uint64) error
 
 	State(ctx context.Context, name string) (state State, err error)
 	LastBlock(ctx context.Context) (block Block, err error)

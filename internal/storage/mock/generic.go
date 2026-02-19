@@ -83,6 +83,87 @@ func (c *MockTransactionAddCall) DoAndReturn(f func(context.Context, any) error)
 	return c
 }
 
+// AddVerificationTask mocks base method.
+func (m *MockTransaction) AddVerificationTask(ctx context.Context, task *storage.VerificationTask) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddVerificationTask", ctx, task)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddVerificationTask indicates an expected call of AddVerificationTask.
+func (mr *MockTransactionMockRecorder) AddVerificationTask(ctx, task any) *MockTransactionAddVerificationTaskCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddVerificationTask", reflect.TypeOf((*MockTransaction)(nil).AddVerificationTask), ctx, task)
+	return &MockTransactionAddVerificationTaskCall{Call: call}
+}
+
+// MockTransactionAddVerificationTaskCall wrap *gomock.Call
+type MockTransactionAddVerificationTaskCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionAddVerificationTaskCall) Return(arg0 error) *MockTransactionAddVerificationTaskCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionAddVerificationTaskCall) Do(f func(context.Context, *storage.VerificationTask) error) *MockTransactionAddVerificationTaskCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionAddVerificationTaskCall) DoAndReturn(f func(context.Context, *storage.VerificationTask) error) *MockTransactionAddVerificationTaskCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// SaveVerificationFiles mocks base method.
+func (m *MockTransaction) SaveVerificationFiles(ctx context.Context, files ...*storage.VerificationFile) error {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx}
+	for _, a := range files {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SaveVerificationFiles", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveVerificationFiles indicates an expected call of SaveVerificationFiles.
+func (mr *MockTransactionMockRecorder) SaveVerificationFiles(ctx any, files ...any) *MockTransactionSaveVerificationFilesCall {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx}, files...)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveVerificationFiles", reflect.TypeOf((*MockTransaction)(nil).SaveVerificationFiles), varargs...)
+	return &MockTransactionSaveVerificationFilesCall{Call: call}
+}
+
+// MockTransactionSaveVerificationFilesCall wrap *gomock.Call
+type MockTransactionSaveVerificationFilesCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionSaveVerificationFilesCall) Return(arg0 error) *MockTransactionSaveVerificationFilesCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionSaveVerificationFilesCall) Do(f func(context.Context, ...*storage.VerificationFile) error) *MockTransactionSaveVerificationFilesCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionSaveVerificationFilesCall) DoAndReturn(f func(context.Context, ...*storage.VerificationFile) error) *MockTransactionSaveVerificationFilesCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // BulkSave mocks base method.
 func (m *MockTransaction) BulkSave(ctx context.Context, models []any) error {
 	m.ctrl.T.Helper()
@@ -269,6 +350,44 @@ func (c *MockTransactionDeleteTokenBalancesCall) Do(f func(context.Context, []st
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockTransactionDeleteTokenBalancesCall) DoAndReturn(f func(context.Context, []string, []uint64, []*storage.TokenBalance) error) *MockTransactionDeleteTokenBalancesCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// DeleteVerificationFiles mocks base method.
+func (m *MockTransaction) DeleteVerificationFiles(ctx context.Context, taskId uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteVerificationFiles", ctx, taskId)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteVerificationFiles indicates an expected call of DeleteVerificationFiles.
+func (mr *MockTransactionMockRecorder) DeleteVerificationFiles(ctx, taskId any) *MockTransactionDeleteVerificationFilesCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteVerificationFiles", reflect.TypeOf((*MockTransaction)(nil).DeleteVerificationFiles), ctx, taskId)
+	return &MockTransactionDeleteVerificationFilesCall{Call: call}
+}
+
+// MockTransactionDeleteVerificationFilesCall wrap *gomock.Call
+type MockTransactionDeleteVerificationFilesCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionDeleteVerificationFilesCall) Return(arg0 error) *MockTransactionDeleteVerificationFilesCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionDeleteVerificationFilesCall) Do(f func(context.Context, uint64) error) *MockTransactionDeleteVerificationFilesCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionDeleteVerificationFilesCall) DoAndReturn(f func(context.Context, uint64) error) *MockTransactionDeleteVerificationFilesCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1611,6 +1730,44 @@ func (c *MockTransactionUpdateCall) Do(f func(context.Context, any) error) *Mock
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockTransactionUpdateCall) DoAndReturn(f func(context.Context, any) error) *MockTransactionUpdateCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// UpdateVerificationTask mocks base method.
+func (m *MockTransaction) UpdateVerificationTask(ctx context.Context, task *storage.VerificationTask) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateVerificationTask", ctx, task)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateVerificationTask indicates an expected call of UpdateVerificationTask.
+func (mr *MockTransactionMockRecorder) UpdateVerificationTask(ctx, task any) *MockTransactionUpdateVerificationTaskCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateVerificationTask", reflect.TypeOf((*MockTransaction)(nil).UpdateVerificationTask), ctx, task)
+	return &MockTransactionUpdateVerificationTaskCall{Call: call}
+}
+
+// MockTransactionUpdateVerificationTaskCall wrap *gomock.Call
+type MockTransactionUpdateVerificationTaskCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionUpdateVerificationTaskCall) Return(arg0 error) *MockTransactionUpdateVerificationTaskCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionUpdateVerificationTaskCall) Do(f func(context.Context, *storage.VerificationTask) error) *MockTransactionUpdateVerificationTaskCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionUpdateVerificationTaskCall) DoAndReturn(f func(context.Context, *storage.VerificationTask) error) *MockTransactionUpdateVerificationTaskCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

@@ -16,6 +16,7 @@ require (
 	github.com/json-iterator/go v1.1.12
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/lib/pq v1.10.9
+	github.com/lmittmann/go-solc v0.5.0
 	github.com/opus-domini/fast-shot v1.1.4
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.23.2
@@ -347,3 +348,5 @@ require (
 )
 
 tool github.com/abice/go-enum
+
+replace github.com/lmittmann/go-solc => github.com/NobleScope/go-solc v0.0.0-20260216195524-dc4c0d8795fa

@@ -92,6 +92,36 @@ func createTypes(ctx context.Context, conn *database.Bun) error {
 			return err
 		}
 
+		if _, err := tx.ExecContext(
+			ctx,
+			createTypeQuery,
+			"verification_task_status",
+			bun.Safe("verification_task_status"),
+			bun.In(types.VerificationTaskStatusValues()),
+		); err != nil {
+			return err
+		}
+
+		if _, err := tx.ExecContext(
+			ctx,
+			createTypeQuery,
+			"license_type",
+			bun.Safe("license_type"),
+			bun.In(types.LicenseTypeValues()),
+		); err != nil {
+			return err
+		}
+
+		if _, err := tx.ExecContext(
+			ctx,
+			createTypeQuery,
+			"evm_version",
+			bun.Safe("evm_version"),
+			bun.In(types.EVMVersionValues()),
+		); err != nil {
+			return err
+		}
+
 		return nil
 	})
 }

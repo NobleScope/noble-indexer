@@ -44,6 +44,9 @@ token_resolver:
   request_bulk_size: ${TOKEN_RESOLVER_REQUEST_BULK_SIZE:-10}
   retry_count: ${TOKEN_RESOLVER_RETRY_COUNT:-7}
   retry_delay: ${TOKEN_RESOLVER_RETRY_DELAY:-30} # minutes
+  
+contract_verifier:
+  sync_period: ${CONTRACT_VERIFIER_SYNC_PERIOD:-60} # seconds
 
 datasources:
   node_rpc:

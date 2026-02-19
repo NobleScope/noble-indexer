@@ -306,6 +306,35 @@ func (tx Transaction) SaveBeaconWithdrawals(ctx context.Context, withdrawals ...
 	return err
 }
 
+func (tx Transaction) AddVerificationTask(ctx context.Context, task *models.VerificationTask) error {
+	_, err := tx.Tx().NewInsert().Model(task).
+		Column("status", "creation_time", "contract_id", "contract_name", "compiler_version", "license_type", "optimization_enabled", "optimization_runs", "evm_version", "via_ir").
+		Returning("id").
+		Exec(ctx)
+
+	return err
+}
+
+func (tx Transaction) SaveVerificationFiles(ctx context.Context, files ...*models.VerificationFile) error {
+	if len(files) == 0 {
+		return nil
+	}
+	_, err := tx.Tx().NewInsert().Model(&files).Exec(ctx)
+	return err
+}
+
+func (tx Transaction) UpdateVerificationTask(ctx context.Context, task *models.VerificationTask) error {
+	_, err := tx.Tx().NewUpdate().
+		Model(task).
+		Set("status = ?", task.Status).
+		Set("completion_time = now()").
+		Set("error = ?", task.Error).
+		Where("id = ?", task.Id).
+		Exec(ctx)
+
+	return err
+}
+
 func (tx Transaction) RollbackBlock(ctx context.Context, height types.Level) error {
 	_, err := tx.Tx().NewDelete().
 		Model((*models.Block)(nil)).
@@ -444,6 +473,14 @@ func (tx Transaction) DeleteTokenBalances(ctx context.Context, tokenIds []string
 
 	_, err := query.Exec(ctx)
 
+	return err
+}
+
+func (tx Transaction) DeleteVerificationFiles(ctx context.Context, taskId uint64) error {
+	_, err := tx.Tx().NewDelete().
+		Model((*models.VerificationFile)(nil)).
+		Where("verification_task_id = ?", taskId).
+		Exec(ctx)
 	return err
 }
 

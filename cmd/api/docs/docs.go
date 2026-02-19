@@ -2131,6 +2131,135 @@ const docTemplate = `{
                 }
             }
         },
+        "/verification/code": {
+            "post": {
+                "description": "Creates a task to verify the specified contract with source code files. Multiple .sol files can be uploaded.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "verification"
+                ],
+                "summary": "Creates a task to verify the specified contract",
+                "operationId": "contract-verification",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Contract address",
+                        "name": "contract_address",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Contract name in Solidity source",
+                        "name": "contract_name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Source code files (.sol). Multiple files allowed.",
+                        "name": "source_code",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Compiler version",
+                        "name": "compiler_version",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "none",
+                            "unlicense",
+                            "mit",
+                            "gnu_gpl_v2",
+                            "gnu_gpl_v3",
+                            "gnu_lgpl_v2_1",
+                            "gnu_lgpl_v3",
+                            "bsd_2_clause",
+                            "bsd_3_clause",
+                            "mpl_2_0",
+                            "osl_3_0",
+                            "apache_2_0",
+                            "gnu_agpl_v3",
+                            "bsl_1_1"
+                        ],
+                        "type": "string",
+                        "description": "License type",
+                        "name": "license_type",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Optimization enabled",
+                        "name": "optimization_enabled",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Optimization runs",
+                        "name": "optimization_runs",
+                        "in": "formData"
+                    },
+                    {
+                        "enum": [
+                            "homestead",
+                            "tangerineWhistle",
+                            "spuriousDragon",
+                            "byzantium",
+                            "constantinople",
+                            "petersburg",
+                            "istanbul",
+                            "berlin",
+                            "london",
+                            "paris",
+                            "shanghai",
+                            "cancun",
+                            "prague",
+                            "osaka"
+                        ],
+                        "type": "string",
+                        "description": "EVM version. Auto-detected if not specified.",
+                        "name": "evm_version",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Compile via Yul IR pipeline",
+                        "name": "via_ir",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.verificationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/ws": {
             "get": {
                 "description": "Establishes a WebSocket connection for real-time updates. Clients can subscribe to channels to receive notifications about new blocks and head state changes.",
@@ -2152,6 +2281,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.verificationResponse": {
+            "type": "object",
+            "properties": {
+                "result": {
                     "type": "string"
                 }
             }
@@ -2422,6 +2559,59 @@ const docTemplate = `{
                         "delegatecall"
                     ]
                 },
+                "evm_version": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "shanghai",
+                        "cancun",
+                        "prague"
+                    ]
+                },
+                "license_type": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "mit",
+                        "apache_2_0",
+                        "gnu_gpl_v3"
+                    ]
+                },
+                "metadata_status": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "new",
+                        "success",
+                        "failed"
+                    ]
+                },
+                "proxy_status": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "resolved",
+                        "unresolved"
+                    ]
+                },
+                "proxy_type": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "eip1167",
+                        "eip1967"
+                    ]
+                },
                 "token_type": {
                     "type": "array",
                     "items": {
@@ -2472,6 +2662,18 @@ const docTemplate = `{
                     "example": [
                         "legacy",
                         "dynamic_fee"
+                    ]
+                },
+                "verification_task_status": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "new",
+                        "pending",
+                        "success",
+                        "failed"
                     ]
                 }
             }
