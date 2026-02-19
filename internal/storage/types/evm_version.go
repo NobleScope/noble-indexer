@@ -16,6 +16,7 @@ package types
 		shanghai
 		cancun
 		prague
+		osaka
 	)
 */
 //go:generate go-enum --marshal --sql --values --noprefix --names

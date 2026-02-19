@@ -198,6 +198,44 @@ definitions:
   responses.Enums:
     description: Available enum values for various entity types
     properties:
+      evm_version:
+        example:
+        - shanghai
+        - cancun
+        - prague
+        items:
+          type: string
+        type: array
+      license_type:
+        example:
+        - mit
+        - apache_2_0
+        - gnu_gpl_v3
+        items:
+          type: string
+        type: array
+      metadata_status:
+        example:
+        - new
+        - success
+        - failed
+        items:
+          type: string
+        type: array
+      proxy_status:
+        example:
+        - resolved
+        - unresolved
+        items:
+          type: string
+        type: array
+      proxy_type:
+        example:
+        - eip1167
+        - eip1967
+        items:
+          type: string
+        type: array
       token_type:
         example:
         - ERC20
@@ -232,6 +270,15 @@ definitions:
         example:
         - legacy
         - dynamic_fee
+        items:
+          type: string
+        type: array
+      verification_task_status:
+        example:
+        - new
+        - pending
+        - success
+        - failed
         items:
           type: string
         type: array
@@ -2361,6 +2408,7 @@ paths:
         - shanghai
         - cancun
         - prague
+        - osaka
         in: formData
         name: evm_version
         type: string

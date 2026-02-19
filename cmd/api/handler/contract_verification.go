@@ -74,7 +74,7 @@ type verificationResponse struct {
 //	@Param			license_type		formData string true  "License type"										Enums(none, unlicense, mit, gnu_gpl_v2, gnu_gpl_v3, gnu_lgpl_v2_1, gnu_lgpl_v3, bsd_2_clause, bsd_3_clause, mpl_2_0, osl_3_0, apache_2_0, gnu_agpl_v3, bsl_1_1)
 //	@Param			optimization_enabled formData bool   false "Optimization enabled"
 //	@Param			optimization_runs   formData int    false "Optimization runs"
-//	@Param			evm_version         formData string false "EVM version. Auto-detected if not specified."		Enums(homestead, tangerineWhistle, spuriousDragon, byzantium, constantinople, petersburg, istanbul, berlin, london, paris, shanghai, cancun, prague)
+//	@Param			evm_version         formData string false "EVM version. Auto-detected if not specified."		Enums(homestead, tangerineWhistle, spuriousDragon, byzantium, constantinople, petersburg, istanbul, berlin, london, paris, shanghai, cancun, prague, osaka)
 //	@Param			via_ir              formData bool   false "Compile via Yul IR pipeline"
 //	@Accept			multipart/form-data
 //	@Produce		json

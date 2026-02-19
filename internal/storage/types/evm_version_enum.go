@@ -40,6 +40,8 @@ const (
 	Cancun EVMVersion = "cancun"
 	// Prague is a EVMVersion of type prague.
 	Prague EVMVersion = "prague"
+	// Osaka is a EVMVersion of type osaka.
+	Osaka EVMVersion = "osaka"
 )
 
 var ErrInvalidEVMVersion = fmt.Errorf("not a valid EVMVersion, try [%s]", strings.Join(_EVMVersionNames, ", "))
@@ -58,6 +60,7 @@ var _EVMVersionNames = []string{
 	string(Shanghai),
 	string(Cancun),
 	string(Prague),
+	string(Osaka),
 }
 
 // EVMVersionNames returns a list of possible string values of EVMVersion.
@@ -83,6 +86,7 @@ func EVMVersionValues() []EVMVersion {
 		Shanghai,
 		Cancun,
 		Prague,
+		Osaka,
 	}
 }
 
@@ -112,6 +116,7 @@ var _EVMVersionValue = map[string]EVMVersion{
 	"shanghai":         Shanghai,
 	"cancun":           Cancun,
 	"prague":           Prague,
+	"osaka":            Osaka,
 }
 
 // ParseEVMVersion attempts to convert a string to a EVMVersion.

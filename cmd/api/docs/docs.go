@@ -2213,7 +2213,8 @@ const docTemplate = `{
                             "paris",
                             "shanghai",
                             "cancun",
-                            "prague"
+                            "prague",
+                            "osaka"
                         ],
                         "type": "string",
                         "description": "EVM version. Auto-detected if not specified.",
@@ -2538,6 +2539,59 @@ const docTemplate = `{
             "description": "Available enum values for various entity types",
             "type": "object",
             "properties": {
+                "evm_version": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "shanghai",
+                        "cancun",
+                        "prague"
+                    ]
+                },
+                "license_type": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "mit",
+                        "apache_2_0",
+                        "gnu_gpl_v3"
+                    ]
+                },
+                "metadata_status": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "new",
+                        "success",
+                        "failed"
+                    ]
+                },
+                "proxy_status": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "resolved",
+                        "unresolved"
+                    ]
+                },
+                "proxy_type": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "eip1167",
+                        "eip1967"
+                    ]
+                },
                 "token_type": {
                     "type": "array",
                     "items": {
@@ -2588,6 +2642,18 @@ const docTemplate = `{
                     "example": [
                         "legacy",
                         "dynamic_fee"
+                    ]
+                },
+                "verification_task_status": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "new",
+                        "pending",
+                        "success",
+                        "failed"
                     ]
                 }
             }
