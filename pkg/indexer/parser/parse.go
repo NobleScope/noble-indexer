@@ -284,6 +284,14 @@ func (p *Module) parse(b types.BlockData) error {
 			continue
 		}
 
+		if trace.Action.CallType != nil {
+			ct, err := storageType.ParseCallType(*trace.Action.CallType)
+			if err != nil {
+				return err
+			}
+			newTrace.CallType = &ct
+		}
+
 		var (
 			gl, gu decimal.Decimal
 		)

@@ -198,6 +198,13 @@ definitions:
   responses.Enums:
     description: Available enum values for various entity types
     properties:
+      call_type:
+        example:
+        - call
+        - delegatecall
+        items:
+          type: string
+        type: array
       evm_version:
         example:
         - shanghai
@@ -486,6 +493,14 @@ definitions:
       amount:
         example: "123456789123456789"
         type: string
+      call_type:
+        enum:
+        - call
+        - delegatecall
+        - staticcall
+        - callcode
+        example: delegatecall
+        type: string
       contract:
         example: "0x0000000000000000000000000000000000000002"
         type: string
@@ -541,12 +556,11 @@ definitions:
       type:
         enum:
         - call
-        - delegatecall
-        - staticcall
         - create
         - create2
         - selfdestruct
         - reward
+        - suicide
         example: call
         type: string
     type: object
@@ -555,6 +569,14 @@ definitions:
     properties:
       amount:
         example: "123456789123456789"
+        type: string
+      call_type:
+        enum:
+        - call
+        - delegatecall
+        - staticcall
+        - callcode
+        example: delegatecall
         type: string
       children:
         items:
@@ -615,12 +637,11 @@ definitions:
       type:
         enum:
         - call
-        - delegatecall
-        - staticcall
         - create
         - create2
         - selfdestruct
         - reward
+        - suicide
         example: call
         type: string
     type: object
@@ -1847,8 +1868,6 @@ paths:
       - description: Filter by trace type (comma-separated list)
         enum:
         - call
-        - delegatecall
-        - staticcall
         - create
         - create2
         - selfdestruct
@@ -1856,6 +1875,15 @@ paths:
         - suicide
         in: query
         name: type
+        type: string
+      - description: Filter by call type (comma-separated list)
+        enum:
+        - call
+        - delegatecall
+        - staticcall
+        - callcode
+        in: query
+        name: call_type
         type: string
       - default: desc
         description: 'Sort order (default: desc)'

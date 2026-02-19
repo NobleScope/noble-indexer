@@ -216,6 +216,14 @@ func createIndices(ctx context.Context, conn *database.Bun) error {
 			Exec(ctx); err != nil {
 			return err
 		}
+		if _, err := tx.NewCreateIndex().
+			IfNotExists().
+			Model((*storage.Trace)(nil)).
+			Index("trace_call_type_idx").
+			Column("call_type").
+			Exec(ctx); err != nil {
+			return err
+		}
 
 		// Address
 		if _, err := tx.NewCreateIndex().

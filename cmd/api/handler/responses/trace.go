@@ -13,24 +13,25 @@ import (
 //
 //	@Description	Transaction execution trace information
 type Trace struct {
-	Height         uint64           `example:"100"                                                           json:"height"                    swaggertype:"integer"`
-	Time           time.Time        `example:"2023-07-04T03:10:57+00:00"                                     json:"time"                      swaggertype:"string"`
-	TxHash         *string          `example:"0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22"              json:"tx_hash,omitempty"         swaggertype:"string"`
-	FromAddress    *string          `example:"0x0000000000000000000000000000000000000001"                    json:"from_address,omitempty"    swaggertype:"string"`
-	ToAddress      *string          `example:"0x123456789abcdef123456789abcdef123456789abc"                  json:"to_address,omitempty"      swaggertype:"string"`
-	GasLimit       decimal.Decimal  `example:"2100"                                                          json:"gas_limit"                 swaggertype:"string"`
-	Amount         *decimal.Decimal `example:"123456789123456789"                                            json:"amount,omitempty"          swaggertype:"string"`
-	Input          *string          `example:"hex input data"                                                json:"input,omitempty"           swaggertype:"string"`
-	TxPosition     uint64           `example:"123456789"                                                     json:"tx_position"               swaggertype:"integer"`
-	TraceAddress   []uint64         `example:"1,2,3"                                                         json:"trace_address"             swaggertype:"array,integer"`
-	Type           string           `enums:"call,delegatecall,staticcall,create,create2,selfdestruct,reward" example:"call"                   json:"type"                 swaggertype:"string"`
-	InitHash       *string          `example:"0x6060604052341561000f57600080fd5b"                            json:"init_hash,omitempty"       swaggertype:"string"`
-	CreationMethod *string          `example:"create"                                                        json:"creation_method,omitempty" swaggertype:"string"`
-	GasUsed        decimal.Decimal  `example:"21000"                                                         json:"gas_used"                  swaggertype:"string"`
-	Output         *string          `example:"0x0"                                                           json:"output,omitempty"          swaggertype:"string"`
-	Contract       *string          `example:"0x0000000000000000000000000000000000000002"                    json:"contract,omitempty"        swaggertype:"string"`
-	Subtraces      uint64           `example:"0"                                                             json:"subtraces"                 swaggertype:"integer"`
-	Decoded        *DecodedTrace    `json:"decoded,omitempty"                                                swaggertype:"object"`
+	Height         uint64           `example:"100"                                              json:"height"                    swaggertype:"integer"`
+	Time           time.Time        `example:"2023-07-04T03:10:57+00:00"                        json:"time"                      swaggertype:"string"`
+	TxHash         *string          `example:"0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22" json:"tx_hash,omitempty"         swaggertype:"string"`
+	FromAddress    *string          `example:"0x0000000000000000000000000000000000000001"       json:"from_address,omitempty"    swaggertype:"string"`
+	ToAddress      *string          `example:"0x123456789abcdef123456789abcdef123456789abc"     json:"to_address,omitempty"      swaggertype:"string"`
+	GasLimit       decimal.Decimal  `example:"2100"                                             json:"gas_limit"                 swaggertype:"string"`
+	Amount         *decimal.Decimal `example:"123456789123456789"                               json:"amount,omitempty"          swaggertype:"string"`
+	Input          *string          `example:"hex input data"                                   json:"input,omitempty"           swaggertype:"string"`
+	TxPosition     uint64           `example:"123456789"                                        json:"tx_position"               swaggertype:"integer"`
+	TraceAddress   []uint64         `example:"1,2,3"                                            json:"trace_address"             swaggertype:"array,integer"`
+	Type           string           `enums:"call,create,create2,selfdestruct,reward,suicide"    example:"call"                   json:"type"                 swaggertype:"string"`
+	CallType       *string          `enums:"call,delegatecall,staticcall,callcode"              example:"delegatecall"           json:"call_type,omitempty"  swaggertype:"string"`
+	InitHash       *string          `example:"0x6060604052341561000f57600080fd5b"               json:"init_hash,omitempty"       swaggertype:"string"`
+	CreationMethod *string          `example:"create"                                           json:"creation_method,omitempty" swaggertype:"string"`
+	GasUsed        decimal.Decimal  `example:"21000"                                            json:"gas_used"                  swaggertype:"string"`
+	Output         *string          `example:"0x0"                                              json:"output,omitempty"          swaggertype:"string"`
+	Contract       *string          `example:"0x0000000000000000000000000000000000000002"       json:"contract,omitempty"        swaggertype:"string"`
+	Subtraces      uint64           `example:"0"                                                json:"subtraces"                 swaggertype:"integer"`
+	Decoded        *DecodedTrace    `json:"decoded,omitempty"                                   swaggertype:"object"`
 }
 
 func NewTrace(t *storage.Trace) Trace {
@@ -40,7 +41,7 @@ func NewTrace(t *storage.Trace) Trace {
 		GasLimit:       t.GasLimit,
 		Amount:         t.Amount,
 		TraceAddress:   t.TraceAddress,
-		Type:           string(t.Type),
+		Type:           t.Type.String(),
 		CreationMethod: t.CreationMethod,
 		GasUsed:        t.GasUsed,
 		Subtraces:      t.Subtraces,
@@ -81,6 +82,10 @@ func NewTrace(t *storage.Trace) Trace {
 		if parsedABI := parseABI(t.ToContractABI); parsedABI != nil {
 			result.Decoded = decodeTxArgs(parsedABI, t.Input)
 		}
+	}
+	if t.CallType != nil {
+		ct := t.CallType.String()
+		result.CallType = &ct
 	}
 
 	return result

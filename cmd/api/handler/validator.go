@@ -57,6 +57,9 @@ func NewApiValidator() *ApiValidator {
 	if err := v.RegisterValidation("evm_version", evmVersionValidator()); err != nil {
 		panic(err)
 	}
+	if err := v.RegisterValidation("call_type", callTypeValidator()); err != nil {
+		panic(err)
+	}
 	return &ApiValidator{validator: v}
 }
 
@@ -118,6 +121,13 @@ func txStatusValidator() validator.Func {
 func proxyContractTypeValidator() validator.Func {
 	return func(fl validator.FieldLevel) bool {
 		_, err := types.ParseProxyType(fl.Field().String())
+		return err == nil
+	}
+}
+
+func callTypeValidator() validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		_, err := types.ParseCallType(fl.Field().String())
 		return err == nil
 	}
 }

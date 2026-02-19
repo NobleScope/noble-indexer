@@ -1451,8 +1451,6 @@ const docTemplate = `{
                     {
                         "enum": [
                             "call",
-                            "delegatecall",
-                            "staticcall",
                             "create",
                             "create2",
                             "selfdestruct",
@@ -1462,6 +1460,18 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Filter by trace type (comma-separated list)",
                         "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "call",
+                            "delegatecall",
+                            "staticcall",
+                            "callcode"
+                        ],
+                        "type": "string",
+                        "description": "Filter by call type (comma-separated list)",
+                        "name": "call_type",
                         "in": "query"
                     },
                     {
@@ -2539,6 +2549,16 @@ const docTemplate = `{
             "description": "Available enum values for various entity types",
             "type": "object",
             "properties": {
+                "call_type": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "call",
+                        "delegatecall"
+                    ]
+                },
                 "evm_version": {
                     "type": "array",
                     "items": {
@@ -2927,6 +2947,16 @@ const docTemplate = `{
                     "type": "string",
                     "example": "123456789123456789"
                 },
+                "call_type": {
+                    "type": "string",
+                    "enum": [
+                        "call",
+                        "delegatecall",
+                        "staticcall",
+                        "callcode"
+                    ],
+                    "example": "delegatecall"
+                },
                 "contract": {
                     "type": "string",
                     "example": "0x0000000000000000000000000000000000000002"
@@ -3001,12 +3031,11 @@ const docTemplate = `{
                     "type": "string",
                     "enum": [
                         "call",
-                        "delegatecall",
-                        "staticcall",
                         "create",
                         "create2",
                         "selfdestruct",
-                        "reward"
+                        "reward",
+                        "suicide"
                     ],
                     "example": "call"
                 }
@@ -3019,6 +3048,16 @@ const docTemplate = `{
                 "amount": {
                     "type": "string",
                     "example": "123456789123456789"
+                },
+                "call_type": {
+                    "type": "string",
+                    "enum": [
+                        "call",
+                        "delegatecall",
+                        "staticcall",
+                        "callcode"
+                    ],
+                    "example": "delegatecall"
                 },
                 "children": {
                     "type": "array",
@@ -3100,12 +3139,11 @@ const docTemplate = `{
                     "type": "string",
                     "enum": [
                         "call",
-                        "delegatecall",
-                        "staticcall",
                         "create",
                         "create2",
                         "selfdestruct",
-                        "reward"
+                        "reward",
+                        "suicide"
                     ],
                     "example": "call"
                 }

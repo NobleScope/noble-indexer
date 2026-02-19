@@ -122,6 +122,9 @@ func traceListFilter(query *bun.SelectQuery, fltrs storage.TraceListFilter) *bun
 	if len(fltrs.Type) > 0 {
 		query = query.Where("type IN (?)", bun.In(fltrs.Type))
 	}
+	if len(fltrs.CallType) > 0 {
+		query = query.Where("call_type IN (?)", bun.In(fltrs.CallType))
+	}
 	query = limitScope(query, fltrs.Limit)
 	query = query.Offset(fltrs.Offset)
 	query = sortTimeIDScope(query, fltrs.Sort)
