@@ -14,7 +14,6 @@ import (
 const (
 	pathBlock    = "eth_getBlockByNumber"
 	pathReceipts = "eth_getBlockReceipts"
-	pathTraces   = "trace_block"
 )
 
 func (api *API) Block(ctx context.Context, level pkgTypes.Level) (pkgTypes.Block, error) {
@@ -107,12 +106,10 @@ func (api *API) BlockBulk(ctx context.Context, levels ...pkgTypes.Level) ([]pkgT
 		}
 
 		requests[i*3+2] = types.Request{
-			Method:  pathTraces,
+			Method:  api.traceProvider.Method(),
 			JsonRpc: "2.0",
 			Id:      int64(i*3 + 2),
-			Params: []any{
-				hexLevel,
-			},
+			Params:  api.traceProvider.Params(hexLevel),
 		}
 	}
 
@@ -167,9 +164,9 @@ func (api *API) BlockBulk(ctx context.Context, levels ...pkgTypes.Level) ([]pkgT
 				blockData[blockIdx].Traces = []pkgTypes.Trace{}
 				continue
 			}
-			var traces []pkgTypes.Trace
-			if err := json.Unmarshal(rawResponses[i].Result, &traces); err != nil {
-				return nil, errors.Wrap(err, "failed to unmarshal traces")
+			traces, err := api.traceProvider.ParseTraces(rawResponses[i].Result)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to parse traces")
 			}
 			blockData[blockIdx].Traces = traces
 		}

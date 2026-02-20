@@ -45,14 +45,14 @@ func New(ctx context.Context, cfg config.Config, stopperModule modules.Module) (
 		return Indexer{}, errors.Wrap(err, "while creating pg context")
 	}
 
-	api, r, err := createReceiver(ctx, cfg, pg)
-	if err != nil {
-		return Indexer{}, errors.Wrap(err, "while creating receiver module")
-	}
-
 	networkConfig, err := cfg.Networks.Get(cfg.Network)
 	if err != nil {
 		return Indexer{}, errors.Wrap(err, "while getting network config")
+	}
+
+	api, r, err := createReceiver(ctx, cfg, networkConfig, pg)
+	if err != nil {
+		return Indexer{}, errors.Wrap(err, "while creating receiver module")
 	}
 
 	p, err := createParser(cfg.Indexer, networkConfig, r)
@@ -141,7 +141,7 @@ func (i *Indexer) Close() error {
 	return nil
 }
 
-func createReceiver(ctx context.Context, cfg config.Config, pg postgres.Storage) (rpc.API, *receiver.Module, error) {
+func createReceiver(ctx context.Context, cfg config.Config, networkConfig config.Network, pg postgres.Storage) (rpc.API, *receiver.Module, error) {
 	state, err := loadState(pg, ctx, cfg.Indexer.Name)
 	if err != nil {
 		return rpc.API{}, nil, errors.Wrap(err, "while loading state")
@@ -153,7 +153,11 @@ func createReceiver(ctx context.Context, cfg config.Config, pg postgres.Storage)
 	)
 
 	if ds, ok := cfg.DataSources["node_rpc"]; ok && ds.URL != "" {
-		nodeRpc = rpc.NewApi(ds, rpc.WithTimeout(time.Second*time.Duration(ds.Timeout)), rpc.WithRateLimit(ds.RequestsPerSecond))
+		nodeRpc = rpc.NewApi(ds,
+			rpc.WithTimeout(time.Second*time.Duration(ds.Timeout)),
+			rpc.WithRateLimit(ds.RequestsPerSecond),
+			rpc.WithTraceMethod(networkConfig.GetTraceMethod()),
+		)
 	}
 	if ds, ok := cfg.DataSources["node_ws"]; ok && ds.URL != "" && ds.Credentials.ApiKey != nil {
 		ws, _, err = websocket.DefaultDialer.Dial(ds.URL, nil)
