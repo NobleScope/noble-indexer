@@ -85,5 +85,10 @@ networks:
   noble-devnet:
     precompiled_contracts:
       - 0x6625300000000000000000000000000000000000
+    trace_method: trace_block
   hoodi:
     precompiled_contracts:
+    trace_method: trace_block
+  shadownet:
+    precompiled_contracts:
+    trace_method: debug_traceBlockByNumber
