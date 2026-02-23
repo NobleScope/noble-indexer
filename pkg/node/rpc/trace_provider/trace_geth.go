@@ -89,7 +89,7 @@ func (g *GethDebugTraceProvider) ParseTraces(raw stdjson.RawMessage) ([]pkgTypes
 		return nil, errors.Wrap(err, "unmarshal geth trace results")
 	}
 
-	var traces []pkgTypes.Trace
+	traces := make([]pkgTypes.Trace, 0)
 	for txPos, result := range results {
 		txPosition := uint64(txPos)
 		txHash := result.TxHash
