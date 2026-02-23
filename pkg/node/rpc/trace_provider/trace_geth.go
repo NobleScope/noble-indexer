@@ -137,6 +137,11 @@ func flattenGethCallFrame(frame GethCallResponse, txHash *pkgTypes.Hex, txPositi
 		}
 	}
 
+	if traceType == gethTraceTypeSelfdestruct || traceType == gethTraceTypeSuicide {
+		trace.Action.Gas = nil
+		trace.Action.Input = nil
+	}
+
 	result := []pkgTypes.Trace{trace}
 
 	for i, child := range frame.Calls {

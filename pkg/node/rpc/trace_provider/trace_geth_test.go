@@ -178,6 +178,32 @@ func TestFlattenGethCallFrame_CreateTrace(t *testing.T) {
 	require.Equal(t, bytecode, *tr.Result.Code)
 }
 
+func TestFlattenGethCallFrame_SelfdestructTrace(t *testing.T) {
+	txHash := mustHex("0xdead")
+	txPos := uint64(0)
+
+	frame := GethCallResponse{
+		Type:  "SELFDESTRUCT",
+		From:  mustHex("0x1111111111111111111111111111111111111111"),
+		To:    hexPtr("0x2222222222222222222222222222222222222222"),
+		Value: hexPtr("0x1bc16d674ec80000"),
+	}
+
+	traces := flattenGethCallFrame(frame, &txHash, &txPos, []uint64{})
+
+	require.Len(t, traces, 1)
+	tr := traces[0]
+
+	require.Equal(t, "selfdestruct", tr.Type)
+	require.Nil(t, tr.Action.CallType)
+	require.NotNil(t, tr.Action.From)
+	require.NotNil(t, tr.Action.To)
+	require.NotNil(t, tr.Action.Value)
+	require.Nil(t, tr.Action.Gas)
+	require.Nil(t, tr.Action.Input)
+	require.Equal(t, uint64(0), tr.Subtraces)
+}
+
 func TestFlattenGethCallFrame_ErrorTrace(t *testing.T) {
 	txHash := mustHex("0xbeef")
 	txPos := uint64(0)
