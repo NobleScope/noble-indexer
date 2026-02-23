@@ -72,7 +72,15 @@ func (c *Config) Substitute() error {
 }
 
 type Network struct {
-	PrecompiledContracts []string `validate:"omitempty,dive,eth_addr" yaml:"precompiled_contracts,omitempty"`
+	PrecompiledContracts []string `validate:"omitempty,dive,eth_addr"                              yaml:"precompiled_contracts,omitempty"`
+	TraceMethod          string   `validate:"omitempty,oneof=trace_block debug_traceBlockByNumber" yaml:"trace_method,omitempty"`
+}
+
+func (n Network) GetTraceMethod() string {
+	if n.TraceMethod == "" {
+		return "trace_block"
+	}
+	return n.TraceMethod
 }
 
 type NetworksConfig map[string]Network
