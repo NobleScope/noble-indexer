@@ -284,6 +284,62 @@ func (p *Module) parse(b types.BlockData) error {
 			continue
 		}
 
+		if trace.TxPosition != nil {
+			newTrace.TxPosition = trace.TxPosition
+		}
+		if trace.TxHash != nil {
+			newTrace.Tx = &storage.Tx{
+				Hash: *trace.TxHash,
+			}
+		}
+
+		if typ == storageType.Selfdestruct || typ == storageType.Suicide {
+			if trace.Action.Value == nil && trace.Action.Balance != nil {
+				balance, err := trace.Action.Balance.Decimal()
+				if err != nil {
+					return err
+				}
+				newTrace.Amount = &balance
+			}
+
+			from := trace.Action.From
+			if from == nil {
+				from = trace.Action.Address
+			}
+			if from != nil {
+				newTrace.FromAddress = &storage.Address{
+					Hash:         *from,
+					FirstHeight:  decodeCtx.Block.Height,
+					LastHeight:   decodeCtx.Block.Height,
+					Interactions: 1,
+					Balance:      storage.EmptyBalance(),
+				}
+				decodeCtx.AddAddress(newTrace.FromAddress)
+			}
+
+			to := trace.Action.To
+			if to == nil {
+				to = trace.Action.RefundAddress
+			}
+			if to != nil {
+				newTrace.ToAddress = &storage.Address{
+					Hash:         *to,
+					FirstHeight:  decodeCtx.Block.Height,
+					LastHeight:   decodeCtx.Block.Height,
+					Interactions: 1,
+					Balance:      storage.EmptyBalance(),
+				}
+				if from != nil && from.String() != to.String() {
+					newTrace.ToAddress.Interactions = 0
+				}
+				decodeCtx.AddAddress(newTrace.ToAddress)
+			}
+
+			decodeCtx.Block.Traces[i] = newTrace
+			decodeCtx.AddTrace(newTrace)
+			continue
+		}
+
 		if trace.Action.CallType != nil {
 			ct, err := storageType.ParseCallType(*trace.Action.CallType)
 			if err != nil {
@@ -312,16 +368,6 @@ func (p *Module) parse(b types.BlockData) error {
 			}
 
 			newTrace.GasUsed = gu
-		}
-
-		if trace.TxPosition != nil {
-			newTrace.TxPosition = trace.TxPosition
-		}
-
-		if trace.TxHash != nil {
-			newTrace.Tx = &storage.Tx{
-				Hash: *trace.TxHash,
-			}
 		}
 
 		if trace.Action.From != nil {

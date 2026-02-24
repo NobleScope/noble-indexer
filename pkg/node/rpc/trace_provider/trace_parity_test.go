@@ -232,6 +232,48 @@ func TestParityTraceProvider_ParseTraces_ErrorTrace(t *testing.T) {
 	require.Equal(t, "execution reverted", *tr.Error)
 }
 
+func TestParityTraceProvider_ParseTraces_SuicideTrace(t *testing.T) {
+	raw := stdjson.RawMessage(`[
+		{
+			"action": {
+				"address": "0x0020000000000000000000000000000000000000",
+				"balance": "0x300",
+				"refundAddress": "0x0000000000000999000000000000000000000000"
+			},
+			"blockHash": "0xaaaa",
+			"blockNumber": 600,
+			"result": null,
+			"subtraces": 0,
+			"traceAddress": [0],
+			"transactionHash": "0xeeee",
+			"transactionPosition": 0,
+			"type": "suicide"
+		}
+	]`)
+
+	provider := &ParityTraceProvider{}
+	traces, err := provider.ParseTraces(raw)
+	require.NoError(t, err)
+	require.Len(t, traces, 1)
+
+	tr := traces[0]
+	require.Equal(t, "suicide", tr.Type)
+	// Parity uses address/refundAddress/balance (not from/to/value)
+	require.NotNil(t, tr.Action.Address)
+	require.Equal(t, mustHex("0x0020000000000000000000000000000000000000"), *tr.Action.Address)
+	require.NotNil(t, tr.Action.RefundAddress)
+	require.Equal(t, mustHex("0x0000000000000999000000000000000000000000"), *tr.Action.RefundAddress)
+	require.NotNil(t, tr.Action.Balance)
+	require.Equal(t, mustHex("0x300"), *tr.Action.Balance)
+	// from/to/value should be nil for Parity selfdestruct
+	require.Nil(t, tr.Action.From)
+	require.Nil(t, tr.Action.To)
+	require.Nil(t, tr.Action.Value)
+	require.Nil(t, tr.Action.Gas)
+	require.Nil(t, tr.Action.Input)
+	require.Nil(t, tr.Action.CallType)
+}
+
 func TestParityTraceProvider_ParseTraces_EmptyArray(t *testing.T) {
 	raw := stdjson.RawMessage(`[]`)
 
