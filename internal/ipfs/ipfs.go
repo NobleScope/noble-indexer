@@ -224,6 +224,9 @@ func (p Pool) ContractText(ctx context.Context, urls []string) (contract string,
 		if ipfsHash == "" {
 			continue
 		}
+		if _, err := ipfs.Hash(url); err != nil {
+			return "", errors.Wrap(ErrInvalidURI, fmt.Sprintf("invalid IPFS hash in URL: %s", url))
+		}
 
 		data, err := p.ipfs.Get(ctx, ipfsHash)
 		if err != nil {
