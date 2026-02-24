@@ -16,7 +16,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-const MaxFileSize = 10 * 1024 * 1024 // 10 MB
+const (
+	MaxFileSize  = 10 * 1024 * 1024 // 10 MB
+	MaxFileCount = 100
+)
 
 type uploadedSourceFile struct {
 	name    string
@@ -110,6 +113,9 @@ func (handler *ContractVerificationHandler) ContractVerify(c echo.Context) error
 	fileHeaders := form.File["source_code"]
 	if len(fileHeaders) == 0 {
 		return badRequestError(c, errors.New("at least one source code file is required"))
+	}
+	if len(fileHeaders) > MaxFileCount {
+		return badRequestError(c, errors.Errorf("too many files, maximum is %d", MaxFileCount))
 	}
 
 	sourceFiles := make([]uploadedSourceFile, 0, len(fileHeaders))
