@@ -76,6 +76,22 @@ services:
     networks:
       - noble-network
 
+  contract_verifier:
+    image: ghcr.io/noblescope/noble-indexer/contract-verifier:master
+    build:
+      dockerfile: build/contract_verifier/Dockerfile
+      context: .
+    env_file:
+      - .env
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    depends_on:
+      - db
+    logging: *indexer-logging
+    networks:
+      - noble-network
+
   api:
     image: ghcr.io/noble-indexer/api:${TAG:-master}
     build:
