@@ -6,11 +6,13 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/rs/zerolog/log"
 )
 
 var (
-	errInvalidAddress = errors.New("invalid address")
-	errCancelRequest  = "pq: canceling statement due to user request"
+	errInvalidAddress      = errors.New("invalid address")
+	errCancelRequest       = "pq: canceling statement due to user request"
+	errInternalServerError = "Internal Server Error"
 )
 
 type NoRows interface {
@@ -28,8 +30,9 @@ func badRequestError(c echo.Context, err error) error {
 }
 
 func internalServerError(c echo.Context, err error) error {
+	log.Err(err).Msg(c.Path())
 	return c.JSON(http.StatusInternalServerError, Error{
-		Message: err.Error(),
+		Message: errInternalServerError,
 	})
 }
 
