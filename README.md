@@ -29,7 +29,8 @@ This indexer requires an Ethereum execution client with specific RPC methods ena
 | `eth_getBlockReceipts` | Get transaction receipts for a block | Receipt indexing (batched) |
 | `eth_getStorageAt` | Read contract storage slots | Proxy contract resolution |
 | `eth_call` | Execute contract calls | Token metadata (name, symbol, decimals, URI) |
-| `trace_block` | Get execution traces for a block | Internal transaction indexing (batched) |
+| `trace_block` | Get execution traces for a block (Parity/Erigon style) | Internal transaction indexing (batched) |
+| `debug_traceBlockByNumber` | Get execution traces for a block (Geth style) | Internal transaction indexing (batched)|
 
 ### WebSocket Requirements
 
