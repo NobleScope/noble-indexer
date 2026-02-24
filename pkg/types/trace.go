@@ -24,6 +24,9 @@ type Action struct {
 	Input          *Hex    `json:"input"`
 	Author         *Hex    `json:"author"`
 	RewardType     *string `json:"rewardType"`
+	Address        *Hex    `json:"address"`
+	RefundAddress  *Hex    `json:"refundAddress"`
+	Balance        *Hex    `json:"balance"`
 }
 
 type TraceResult struct {
