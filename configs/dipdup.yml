@@ -50,21 +50,21 @@ contract_verifier:
 
 datasources:
   node_rpc:
-    kind: noble_node_rpc
-    url: ${NOBLE_NODE_URL}
-    rps: ${NOBLE_NODE_RPS:-5}
-    timeout: ${NOBLE_NODE_TIMEOUT:-10}
+    kind: evm_node_rpc
+    url: ${EVM_NODE_URL}
+    rps: ${EVM_NODE_RPS:-5}
+    timeout: ${EVM_NODE_TIMEOUT:-10}
     credentials:
       api_key:
         header: apikey
-        key: ${NOBLE_API_KEY}
+        key: ${EVM_NODE_API_KEY}
   node_ws:
-    kind: noble_node_ws
-    url: ${NOBLE_NODE_WS_URL}
+    kind: evm_node_ws
+    url: ${EVM_NODE_WS_URL}
     credentials:
       api_key:
         header: apikey
-        key: ${NOBLE_API_KEY}
+        key: ${EVM_NODE_API_KEY}
 
 api:
   bind: ${API_HOST:-0.0.0.0}:${API_PORT:-9876}
@@ -79,7 +79,7 @@ cache:
 
 profiler:
   server: ${PROFILER_SERVER}
-  project: noble
+  project: evm-indexer
 
 networks:
   noble-devnet:
