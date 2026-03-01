@@ -4,6 +4,7 @@ import (
 	"context"
 	stdjson "encoding/json"
 	"net/url"
+	"sort"
 
 	"github.com/NobleScope/noble-indexer/pkg/node/types"
 	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
@@ -148,6 +149,7 @@ func (api *API) BlockBulk(ctx context.Context, levels ...pkgTypes.Level) ([]pkgT
 			if err := json.Unmarshal(rawResponses[i].Result, &block); err != nil {
 				return nil, errors.Wrap(err, "failed to unmarshal block")
 			}
+			sortTransactionsByIndex(block.Transactions)
 			blockData[blockIdx].Block = block
 		case 1:
 			if len(rawResponses[i].Result) == 0 {
@@ -173,4 +175,12 @@ func (api *API) BlockBulk(ctx context.Context, levels ...pkgTypes.Level) ([]pkgT
 	}
 
 	return blockData, nil
+}
+
+func sortTransactionsByIndex(txs []pkgTypes.Tx) {
+	sort.Slice(txs, func(i, j int) bool {
+		a, _ := txs[i].TransactionIndex.Uint64()
+		b, _ := txs[j].TransactionIndex.Uint64()
+		return a < b
+	})
 }
