@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/cmd/api/helpers"
 	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/NobleScope/noble-indexer/internal/storage/mock"
 	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
@@ -137,8 +138,13 @@ func (s *LogHandlerTestSuite) TestListSuccess() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var logs []responses.Log
-	err := json.NewDecoder(rec.Body).Decode(&logs)
+	var body struct {
+		Result []responses.Log `json:"result"`
+		Cursor string          `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	logs := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(logs, 3)
 
@@ -171,8 +177,13 @@ func (s *LogHandlerTestSuite) TestListWithLimit() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var logs []responses.Log
-	err := json.NewDecoder(rec.Body).Decode(&logs)
+	var body struct {
+		Result []responses.Log `json:"result"`
+		Cursor string          `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	logs := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(logs, 1)
 }
@@ -200,8 +211,13 @@ func (s *LogHandlerTestSuite) TestListWithOffset() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var logs []responses.Log
-	err := json.NewDecoder(rec.Body).Decode(&logs)
+	var body struct {
+		Result []responses.Log `json:"result"`
+		Cursor string          `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	logs := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(logs, 1)
 	s.Require().EqualValues(2, logs[0].Id)
@@ -230,8 +246,13 @@ func (s *LogHandlerTestSuite) TestListWithLimitAndOffset() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var logs []responses.Log
-	err := json.NewDecoder(rec.Body).Decode(&logs)
+	var body struct {
+		Result []responses.Log `json:"result"`
+		Cursor string          `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	logs := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(logs, 2)
 	s.Require().EqualValues(2, logs[0].Id)
@@ -260,8 +281,13 @@ func (s *LogHandlerTestSuite) TestListAscOrder() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var logs []responses.Log
-	err := json.NewDecoder(rec.Body).Decode(&logs)
+	var body struct {
+		Result []responses.Log `json:"result"`
+		Cursor string          `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	logs := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(logs, 3)
 	s.Require().EqualValues(1, logs[0].Id)
@@ -291,8 +317,13 @@ func (s *LogHandlerTestSuite) TestListDescOrder() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var logs []responses.Log
-	err := json.NewDecoder(rec.Body).Decode(&logs)
+	var body struct {
+		Result []responses.Log `json:"result"`
+		Cursor string          `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	logs := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(logs, 3)
 	s.Require().EqualValues(3, logs[0].Id)
@@ -329,8 +360,13 @@ func (s *LogHandlerTestSuite) TestListWithTxHash() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var logs []responses.Log
-	err := json.NewDecoder(rec.Body).Decode(&logs)
+	var body struct {
+		Result []responses.Log `json:"result"`
+		Cursor string          `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	logs := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(logs, 1)
 	s.Require().EqualValues(1, logs[0].Id)
@@ -365,8 +401,13 @@ func (s *LogHandlerTestSuite) TestListWithAddress() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var logs []responses.Log
-	err := json.NewDecoder(rec.Body).Decode(&logs)
+	var body struct {
+		Result []responses.Log `json:"result"`
+		Cursor string          `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	logs := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(logs, 2)
 	s.Require().EqualValues(1, logs[0].Id)
@@ -397,8 +438,13 @@ func (s *LogHandlerTestSuite) TestListWithHeight() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var logs []responses.Log
-	err := json.NewDecoder(rec.Body).Decode(&logs)
+	var body struct {
+		Result []responses.Log `json:"result"`
+		Cursor string          `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	logs := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(logs, 1)
 	s.Require().EqualValues(100, logs[0].Height)
@@ -430,8 +476,13 @@ func (s *LogHandlerTestSuite) TestListWithTimeRange() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var logs []responses.Log
-	err := json.NewDecoder(rec.Body).Decode(&logs)
+	var body struct {
+		Result []responses.Log `json:"result"`
+		Cursor string          `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	logs := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(logs, 2)
 }
@@ -455,8 +506,13 @@ func (s *LogHandlerTestSuite) TestListEmptyResult() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var logs []responses.Log
-	err := json.NewDecoder(rec.Body).Decode(&logs)
+	var body struct {
+		Result []responses.Log `json:"result"`
+		Cursor string          `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	logs := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(logs, 0)
 }
@@ -710,8 +766,13 @@ func (s *LogHandlerTestSuite) TestListWithMultipleFilters() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var logs []responses.Log
-	err := json.NewDecoder(rec.Body).Decode(&logs)
+	var body struct {
+		Result []responses.Log `json:"result"`
+		Cursor string          `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	logs := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(logs, 1)
 	s.Require().EqualValues(100, logs[0].Height)
@@ -741,8 +802,88 @@ func (s *LogHandlerTestSuite) TestListWithDecode() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var logs []responses.Log
-	err := json.NewDecoder(rec.Body).Decode(&logs)
+	var body struct {
+		Result []responses.Log `json:"result"`
+		Cursor string          `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	logs := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(logs, 1)
+}
+
+// TestListWithCursor tests cursor-based pagination for log list
+func (s *LogHandlerTestSuite) TestListWithCursor() {
+	q := make(url.Values)
+	q.Set("cursor", helpers.EncodeTimeIDCursor(testTime, 1))
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/log")
+
+	s.log.EXPECT().
+		Filter(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(ctx context.Context, filter storage.LogListFilter) ([]storage.Log, error) {
+			s.Require().EqualValues(1, filter.CursorID)
+			s.Require().False(filter.CursorTime.IsZero())
+			return []storage.Log{testLog1, testLog2}, nil
+		}).
+		Times(1)
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var body struct {
+		Result []responses.Log `json:"result"`
+		Cursor string          `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	s.Require().Len(body.Result, 2)
+	s.Require().NotEmpty(body.Cursor)
+
+	cursorTime, cursorID, err := helpers.DecodeTimeIDCursor(body.Cursor)
+	s.Require().NoError(err)
+	s.Require().EqualValues(testLog2.Id, cursorID)
+	s.Require().Equal(testLog2.Time.UTC(), cursorTime.UTC())
+}
+
+// TestListInvalidCursor tests handling of invalid cursor for log list
+func (s *LogHandlerTestSuite) TestListInvalidCursor() {
+	q := make(url.Values)
+	q.Set("cursor", "not-valid-base64!!!")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/log")
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusBadRequest, rec.Code)
+}
+
+// TestListEmptyCursorOnEmpty tests that empty result returns empty cursor
+func (s *LogHandlerTestSuite) TestListEmptyCursorOnEmpty() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/log")
+
+	s.log.EXPECT().
+		Filter(gomock.Any(), gomock.Any()).
+		Return([]storage.Log{}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var body struct {
+		Result []responses.Log `json:"result"`
+		Cursor string          `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	s.Require().Empty(body.Cursor)
 }

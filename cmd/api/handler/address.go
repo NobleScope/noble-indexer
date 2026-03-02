@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/cmd/api/helpers"
 	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/labstack/echo/v4"
@@ -27,6 +28,7 @@ type addressListRequest struct {
 	Sort          string `query:"sort"           validate:"omitempty,oneof=asc desc"`
 	SortBy        string `query:"sort_by"        validate:"omitempty,oneof=id value first_height last_height"`
 	OnlyContracts bool   `query:"only_contracts" validate:"omitempty"`
+	Cursor        string `query:"cursor"         validate:"omitempty"`
 }
 
 func (p *addressListRequest) SetDefault() {
@@ -49,8 +51,9 @@ func (p *addressListRequest) SetDefault() {
 //	@Param			sort			query	string	false	"Sort order (default: asc)"													Enums(asc, desc)	default(asc)
 //	@Param			sort_by			query	string	false	"Field to sort by (default: id)"											Enums(id, value, last_height)
 //	@Param			only_contracts	query	boolean	false	"If true, return only addresses that are smart contracts (default: false)"	default(false)
+//	@Param			cursor			query	string	false	"Cursor for pagination (from previous response)"
 //	@Produce		json
-//	@Success		200	{array}		responses.Address	"List of addresses with their balances"
+//	@Success		200	{object}	CursorResponse	"List of addresses with their balances"
 //	@Failure		400	{object}	Error				"Invalid request parameters"
 //	@Failure		500	{object}	Error				"Internal server error"
 //	@Router			/addresses [get]
@@ -69,6 +72,14 @@ func (handler *AddressHandler) List(c echo.Context) error {
 		OnlyContracts: req.OnlyContracts,
 	}
 
+	if req.Cursor != "" && (req.SortBy == "" || req.SortBy == "id") {
+		cursorID, err := helpers.DecodeIDCursor(req.Cursor)
+		if err != nil {
+			return badRequestError(c, err)
+		}
+		filters.CursorID = cursorID
+	}
+
 	addresses, err := handler.address.ListWithBalance(c.Request().Context(), filters)
 	if err != nil {
 		return handleError(c, err, handler.address)
@@ -79,7 +90,13 @@ func (handler *AddressHandler) List(c echo.Context) error {
 		response[i] = responses.NewAddress(addresses[i])
 	}
 
-	return returnArray(c, response)
+	var cursor string
+	if len(addresses) > 0 && (req.SortBy == "" || req.SortBy == "id") {
+		last := addresses[len(addresses)-1]
+		cursor = helpers.EncodeIDCursor(last.Id)
+	}
+
+	return returnCursorList(c, response, cursor)
 }
 
 type getAddressRequest struct {

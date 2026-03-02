@@ -31,3 +31,22 @@ func (s *Source) ByContractId(ctx context.Context, id uint64, limit, offset int)
 
 	return
 }
+
+// Filter -
+func (s *Source) Filter(ctx context.Context, filter storage.SourceListFilter) (sources []storage.Source, err error) {
+	query := s.DB().NewSelect().
+		Model((*storage.Source)(nil)).
+		Where("contract_id = ?", filter.ContractId)
+
+	if filter.CursorID > 0 {
+		filter.Offset = 0
+		query = cursorIDScope(query, filter.Sort, filter.CursorID)
+	}
+
+	query = limitScope(query, filter.Limit)
+	query = query.Offset(filter.Offset)
+	query = sortScope(query, "id", filter.Sort)
+
+	err = query.Scan(ctx, &sources)
+	return
+}

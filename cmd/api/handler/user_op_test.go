@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/cmd/api/helpers"
 	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/NobleScope/noble-indexer/internal/storage/mock"
 	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
@@ -153,8 +154,13 @@ func (s *UserOpHandlerTestSuite) TestListSuccess() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var ops []responses.UserOp
-	err := json.NewDecoder(rec.Body).Decode(&ops)
+	var body struct {
+		Result []responses.UserOp `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	ops := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(ops, 2)
 
@@ -191,8 +197,13 @@ func (s *UserOpHandlerTestSuite) TestListWithLimit() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var ops []responses.UserOp
-	err := json.NewDecoder(rec.Body).Decode(&ops)
+	var body struct {
+		Result []responses.UserOp `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	ops := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 }
@@ -220,8 +231,13 @@ func (s *UserOpHandlerTestSuite) TestListWithOffset() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var ops []responses.UserOp
-	err := json.NewDecoder(rec.Body).Decode(&ops)
+	var body struct {
+		Result []responses.UserOp `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	ops := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 	s.Require().EqualValues(2, ops[0].Id)
@@ -250,8 +266,13 @@ func (s *UserOpHandlerTestSuite) TestListWithLimitAndOffset() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var ops []responses.UserOp
-	err := json.NewDecoder(rec.Body).Decode(&ops)
+	var body struct {
+		Result []responses.UserOp `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	ops := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 }
@@ -278,8 +299,13 @@ func (s *UserOpHandlerTestSuite) TestListAscOrder() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var ops []responses.UserOp
-	err := json.NewDecoder(rec.Body).Decode(&ops)
+	var body struct {
+		Result []responses.UserOp `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	ops := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(ops, 2)
 	s.Require().EqualValues(1, ops[0].Id)
@@ -308,8 +334,13 @@ func (s *UserOpHandlerTestSuite) TestListDescOrder() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var ops []responses.UserOp
-	err := json.NewDecoder(rec.Body).Decode(&ops)
+	var body struct {
+		Result []responses.UserOp `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	ops := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(ops, 2)
 	s.Require().EqualValues(2, ops[0].Id)
@@ -340,8 +371,13 @@ func (s *UserOpHandlerTestSuite) TestListWithHeight() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var ops []responses.UserOp
-	err := json.NewDecoder(rec.Body).Decode(&ops)
+	var body struct {
+		Result []responses.UserOp `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	ops := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 	s.Require().EqualValues(100, ops[0].Height)
@@ -376,8 +412,13 @@ func (s *UserOpHandlerTestSuite) TestListWithTxHash() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var ops []responses.UserOp
-	err := json.NewDecoder(rec.Body).Decode(&ops)
+	var body struct {
+		Result []responses.UserOp `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	ops := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 	s.Require().EqualValues(1, ops[0].Id)
@@ -412,8 +453,13 @@ func (s *UserOpHandlerTestSuite) TestListWithBundler() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var ops []responses.UserOp
-	err := json.NewDecoder(rec.Body).Decode(&ops)
+	var body struct {
+		Result []responses.UserOp `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	ops := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 	s.Require().EqualValues(1, ops[0].Id)
@@ -448,8 +494,13 @@ func (s *UserOpHandlerTestSuite) TestListWithPaymaster() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var ops []responses.UserOp
-	err := json.NewDecoder(rec.Body).Decode(&ops)
+	var body struct {
+		Result []responses.UserOp `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	ops := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 	s.Require().NotNil(ops[0].Paymaster)
@@ -479,8 +530,13 @@ func (s *UserOpHandlerTestSuite) TestListWithSuccessTrue() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var ops []responses.UserOp
-	err := json.NewDecoder(rec.Body).Decode(&ops)
+	var body struct {
+		Result []responses.UserOp `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	ops := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 	s.Require().True(ops[0].Success)
@@ -510,8 +566,13 @@ func (s *UserOpHandlerTestSuite) TestListWithSuccessFalse() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var ops []responses.UserOp
-	err := json.NewDecoder(rec.Body).Decode(&ops)
+	var body struct {
+		Result []responses.UserOp `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	ops := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 	s.Require().False(ops[0].Success)
@@ -543,8 +604,13 @@ func (s *UserOpHandlerTestSuite) TestListWithTimeRange() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var ops []responses.UserOp
-	err := json.NewDecoder(rec.Body).Decode(&ops)
+	var body struct {
+		Result []responses.UserOp `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	ops := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 }
@@ -568,8 +634,13 @@ func (s *UserOpHandlerTestSuite) TestListEmptyResult() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var ops []responses.UserOp
-	err := json.NewDecoder(rec.Body).Decode(&ops)
+	var body struct {
+		Result []responses.UserOp `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	ops := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(ops, 0)
 }
@@ -881,8 +952,13 @@ func (s *UserOpHandlerTestSuite) TestListWithMultipleFilters() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var ops []responses.UserOp
-	err := json.NewDecoder(rec.Body).Decode(&ops)
+	var body struct {
+		Result []responses.UserOp `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	ops := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 	s.Require().EqualValues(100, ops[0].Height)
@@ -947,8 +1023,13 @@ func (s *UserOpHandlerTestSuite) TestListWithAllFilters() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var ops []responses.UserOp
-	err := json.NewDecoder(rec.Body).Decode(&ops)
+	var body struct {
+		Result []responses.UserOp `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	ops := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 }
@@ -1189,8 +1270,13 @@ func (s *UserOpHandlerTestSuite) TestListResponseFields() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var ops []responses.UserOp
-	err := json.NewDecoder(rec.Body).Decode(&ops)
+	var body struct {
+		Result []responses.UserOp `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	ops := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 
@@ -1210,4 +1296,79 @@ func (s *UserOpHandlerTestSuite) TestListResponseFields() {
 	s.Require().True(op.ActualGasUsed.Equal(decimal.NewFromInt(50000)))
 	s.Require().True(op.PreVerificationGas.Equal(decimal.NewFromInt(21000)))
 	s.Require().NotEmpty(op.Signature)
+}
+
+// TestListWithCursor tests cursor-based pagination for user op list
+func (s *UserOpHandlerTestSuite) TestListWithCursor() {
+	q := make(url.Values)
+	q.Set("cursor", helpers.EncodeTimeIDCursor(testTime, 1))
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/user_ops")
+
+	s.userOps.EXPECT().
+		Filter(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(ctx context.Context, filter storage.ERC4337UserOpsListFilter) ([]storage.ERC4337UserOp, error) {
+			s.Require().EqualValues(1, filter.CursorID)
+			s.Require().False(filter.CursorTime.IsZero())
+			return []storage.ERC4337UserOp{testUserOp2}, nil
+		}).
+		Times(1)
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var body struct {
+		Result []responses.UserOp `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	s.Require().Len(body.Result, 1)
+	s.Require().NotEmpty(body.Cursor)
+
+	cursorTime, cursorID, err := helpers.DecodeTimeIDCursor(body.Cursor)
+	s.Require().NoError(err)
+	s.Require().EqualValues(testUserOp2.Id, cursorID)
+	s.Require().Equal(testUserOp2.Time.UTC(), cursorTime.UTC())
+}
+
+// TestListInvalidCursor tests handling of invalid cursor for user op list
+func (s *UserOpHandlerTestSuite) TestListInvalidCursor() {
+	q := make(url.Values)
+	q.Set("cursor", "not-valid-base64!!!")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/user_ops")
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusBadRequest, rec.Code)
+}
+
+// TestListEmptyCursorOnEmpty tests that empty result returns empty cursor
+func (s *UserOpHandlerTestSuite) TestListEmptyCursorOnEmpty() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/user_ops")
+
+	s.userOps.EXPECT().
+		Filter(gomock.Any(), gomock.Any()).
+		Return([]storage.ERC4337UserOp{}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var body struct {
+		Result []responses.UserOp `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	s.Require().Empty(body.Cursor)
 }

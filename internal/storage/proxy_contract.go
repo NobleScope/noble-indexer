@@ -17,6 +17,7 @@ type ListProxyFilters struct {
 	ImplementationId uint64
 	Type             []types.ProxyType
 	Status           []types.ProxyStatus
+	CursorID         uint64
 }
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed

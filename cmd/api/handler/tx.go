@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/cmd/api/helpers"
 	"github.com/NobleScope/noble-indexer/internal/storage"
 	internalTypes "github.com/NobleScope/noble-indexer/internal/storage/types"
 	"github.com/NobleScope/noble-indexer/pkg/types"
@@ -83,6 +84,7 @@ type getTxTraces struct {
 	CallType    StringArray `query:"call_type"    validate:"omitempty,dive,call_type"`
 	Sort        string      `query:"sort"         validate:"omitempty,oneof=asc desc"`
 	Decode      bool        `query:"decode"       validate:"omitempty"`
+	Cursor      string      `query:"cursor"       validate:"omitempty"`
 }
 
 func (req *getTxTraces) SetDefault() {
@@ -111,8 +113,9 @@ func (req *getTxTraces) SetDefault() {
 //	@Param			call_type		query	string	false	"Filter by call type (comma-separated list)"				Enums(call, delegatecall, staticcall, callcode)
 //	@Param			sort			query	string	false	"Sort order (default: desc)"								Enums(asc, desc)	default(desc)
 //	@Param			decode			query	boolean	false	"Decode trace input using contract ABI"						default(false)
+//	@Param			cursor			query	string	false	"Cursor for pagination (from previous response)"
 //	@Produce		json
-//	@Success		200	{array}		responses.Trace	"List of execution traces"
+//	@Success		200	{object}	CursorResponse	"List of execution traces"
 //	@Failure		400	{object}	Error			"Invalid request parameters"
 //	@Failure		500	{object}	Error			"Internal server error"
 //	@Router			/traces [get]
@@ -141,6 +144,15 @@ func (handler *TxHandler) Traces(c echo.Context) error {
 		CallType: callTypes,
 		Height:   req.Height,
 		WithABI:  req.Decode,
+	}
+
+	if req.Cursor != "" {
+		cursorTime, cursorID, err := helpers.DecodeTimeIDCursor(req.Cursor)
+		if err != nil {
+			return badRequestError(c, err)
+		}
+		filters.CursorTime = cursorTime
+		filters.CursorID = cursorID
 	}
 
 	if req.TxHash != "" {
@@ -199,7 +211,13 @@ func (handler *TxHandler) Traces(c echo.Context) error {
 		response[i] = responses.NewTrace(traces[i])
 	}
 
-	return returnArray(c, response)
+	var cursor string
+	if len(traces) > 0 {
+		last := traces[len(traces)-1]
+		cursor = helpers.EncodeTimeIDCursor(last.Time, last.Id)
+	}
+
+	return returnCursorList(c, response, cursor)
 }
 
 type listTxs struct {
@@ -214,6 +232,7 @@ type listTxs struct {
 	Type        StringArray `query:"type"         validate:"omitempty,dive,tx_type"`
 	Status      StringArray `query:"status"       validate:"omitempty,dive,tx_status"`
 	Decode      bool        `query:"decode"       validate:"omitempty"`
+	Cursor      string      `query:"cursor"       validate:"omitempty"`
 
 	From int64 `example:"1692892095" query:"time_from" swaggertype:"integer" validate:"omitempty,min=1"`
 	To   int64 `example:"1692892095" query:"time_to"   swaggertype:"integer" validate:"omitempty,min=1"`
@@ -246,8 +265,9 @@ func (req *listTxs) SetDefault() {
 //	@Param			time_to			query	integer	false	"Filter by timestamp to (Unix timestamp)"			minimum(1)	example(1692892095)
 //	@Param			sort			query	string	false	"Sort order by timestamp (default: desc)"			Enums(asc, desc)	default(desc)
 //	@Param			decode			query	boolean	false	"Decode transaction input using contract ABI"		default(false)
+//	@Param			cursor			query	string	false	"Cursor for pagination (from previous response)"
 //	@Produce		json
-//	@Success		200	{array}		responses.Transaction	"List of transactions"
+//	@Success		200	{object}	CursorResponse	"List of transactions"
 //	@Failure		400	{object}	Error					"Invalid request parameters"
 //	@Failure		500	{object}	Error					"Internal server error"
 //	@Router			/txs [get]
@@ -276,6 +296,15 @@ func (handler *TxHandler) List(c echo.Context) error {
 		Status:  txStatus,
 		Height:  req.Height,
 		WithABI: req.Decode,
+	}
+
+	if req.Cursor != "" {
+		cursorTime, cursorID, err := helpers.DecodeTimeIDCursor(req.Cursor)
+		if err != nil {
+			return badRequestError(c, err)
+		}
+		filters.CursorTime = cursorTime
+		filters.CursorID = cursorID
 	}
 
 	if req.AddressFrom != "" {
@@ -327,7 +356,13 @@ func (handler *TxHandler) List(c echo.Context) error {
 		response[i] = responses.NewTransaction(txs[i])
 	}
 
-	return returnArray(c, response)
+	var cursor string
+	if len(txs) > 0 {
+		last := txs[len(txs)-1]
+		cursor = helpers.EncodeTimeIDCursor(last.Time, last.Id)
+	}
+
+	return returnCursorList(c, response, cursor)
 }
 
 func (handler *TxHandler) getAddressByHash(c echo.Context, h string) (storage.Address, error) {

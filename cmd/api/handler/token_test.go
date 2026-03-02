@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/cmd/api/helpers"
 	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/NobleScope/noble-indexer/internal/storage/mock"
 	"github.com/NobleScope/noble-indexer/internal/storage/types"
@@ -204,8 +205,13 @@ func (s *TokenHandlerTestSuite) TestListSuccess() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var tokens []responses.Token
-	err := json.NewDecoder(rec.Body).Decode(&tokens)
+	var body struct {
+		Result []responses.Token `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	tokens := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(tokens, 3)
 
@@ -238,8 +244,13 @@ func (s *TokenHandlerTestSuite) TestListWithLimit() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var tokens []responses.Token
-	err := json.NewDecoder(rec.Body).Decode(&tokens)
+	var body struct {
+		Result []responses.Token `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	tokens := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(tokens, 1)
 }
@@ -267,8 +278,13 @@ func (s *TokenHandlerTestSuite) TestListWithOffset() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var tokens []responses.Token
-	err := json.NewDecoder(rec.Body).Decode(&tokens)
+	var body struct {
+		Result []responses.Token `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	tokens := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(tokens, 2)
 }
@@ -327,8 +343,13 @@ func (s *TokenHandlerTestSuite) TestListWithContract() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var tokens []responses.Token
-	err := json.NewDecoder(rec.Body).Decode(&tokens)
+	var body struct {
+		Result []responses.Token `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	tokens := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(tokens, 2)
 }
@@ -357,8 +378,13 @@ func (s *TokenHandlerTestSuite) TestListWithType() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var tokens []responses.Token
-	err := json.NewDecoder(rec.Body).Decode(&tokens)
+	var body struct {
+		Result []responses.Token `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	tokens := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(tokens, 2)
 }
@@ -378,8 +404,13 @@ func (s *TokenHandlerTestSuite) TestListEmptyResult() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var tokens []responses.Token
-	err := json.NewDecoder(rec.Body).Decode(&tokens)
+	var body struct {
+		Result []responses.Token `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	tokens := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(tokens, 0)
 }
@@ -557,8 +588,13 @@ func (s *TokenHandlerTestSuite) TestTransferListSuccess() {
 	s.Require().NoError(s.handler.TransferList(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var transfers []responses.Transfer
-	err := json.NewDecoder(rec.Body).Decode(&transfers)
+	var body struct {
+		Result []responses.Transfer `json:"result"`
+		Cursor string               `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	transfers := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(transfers, 3)
 }
@@ -591,8 +627,13 @@ func (s *TokenHandlerTestSuite) TestTransferListWithFilters() {
 	s.Require().NoError(s.handler.TransferList(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var transfers []responses.Transfer
-	err := json.NewDecoder(rec.Body).Decode(&transfers)
+	var body struct {
+		Result []responses.Transfer `json:"result"`
+		Cursor string               `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	transfers := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(transfers, 2)
 }
@@ -806,8 +847,13 @@ func (s *TokenHandlerTestSuite) TestTokenBalanceListSuccess() {
 	s.Require().NoError(s.handler.TokenBalanceList(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var balances []responses.TokenBalance
-	err := json.NewDecoder(rec.Body).Decode(&balances)
+	var body struct {
+		Result []responses.TokenBalance `json:"result"`
+		Cursor string                   `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	balances := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(balances, 3)
 }
@@ -840,8 +886,13 @@ func (s *TokenHandlerTestSuite) TestTokenBalanceListWithAddress() {
 	s.Require().NoError(s.handler.TokenBalanceList(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var balances []responses.TokenBalance
-	err := json.NewDecoder(rec.Body).Decode(&balances)
+	var body struct {
+		Result []responses.TokenBalance `json:"result"`
+		Cursor string                   `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	balances := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(balances, 2)
 }
@@ -874,8 +925,13 @@ func (s *TokenHandlerTestSuite) TestTokenBalanceListWithContract() {
 	s.Require().NoError(s.handler.TokenBalanceList(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var balances []responses.TokenBalance
-	err := json.NewDecoder(rec.Body).Decode(&balances)
+	var body struct {
+		Result []responses.TokenBalance `json:"result"`
+		Cursor string                   `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	balances := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(balances, 2)
 }
@@ -902,8 +958,13 @@ func (s *TokenHandlerTestSuite) TestTokenBalanceListWithTokenId() {
 	s.Require().NoError(s.handler.TokenBalanceList(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var balances []responses.TokenBalance
-	err := json.NewDecoder(rec.Body).Decode(&balances)
+	var body struct {
+		Result []responses.TokenBalance `json:"result"`
+		Cursor string                   `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	balances := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(balances, 1)
 }
@@ -956,8 +1017,13 @@ func (s *TokenHandlerTestSuite) TestTokenBalanceListEmptyResult() {
 	s.Require().NoError(s.handler.TokenBalanceList(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var balances []responses.TokenBalance
-	err := json.NewDecoder(rec.Body).Decode(&balances)
+	var body struct {
+		Result []responses.TokenBalance `json:"result"`
+		Cursor string                   `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	balances := body.Result
 	s.Require().NoError(err)
 	s.Require().Len(balances, 0)
 }
@@ -989,5 +1055,296 @@ func (s *TokenHandlerTestSuite) TestTokenBalanceListNegativeOffset() {
 	c.SetPath("/token_balance")
 
 	s.Require().NoError(s.handler.TokenBalanceList(c))
+	s.Require().Equal(http.StatusBadRequest, rec.Code)
+}
+
+// TestTokenBalanceListWithCursor tests cursor-based pagination
+func (s *TokenHandlerTestSuite) TestTokenBalanceListWithCursor() {
+	q := make(url.Values)
+	q.Set("cursor", "AAAAAAAAAAU")
+	q.Set("token_id", "0")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/token_balance")
+
+	tokenId := decimal.NewFromInt(0)
+	s.tbs.EXPECT().
+		Filter(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(ctx context.Context, filter storage.TokenBalanceListFilter) ([]storage.TokenBalance, error) {
+			s.Require().Equal(10, filter.Limit)
+			s.Require().Equal(0, filter.Offset)
+			s.Require().Equal(sdk.SortOrderAsc, filter.Sort)
+			s.Require().EqualValues(5, filter.CursorID)
+			s.Require().NotNil(filter.TokenId)
+			s.Require().Equal("0", filter.TokenId.String())
+			return []storage.TokenBalance{testTokenBalance1, testTokenBalance2}, nil
+		}).
+		Times(1)
+
+	_ = tokenId
+
+	s.Require().NoError(s.handler.TokenBalanceList(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var body struct {
+		Result []responses.TokenBalance `json:"result"`
+		Cursor string                   `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	s.Require().Len(body.Result, 2)
+	s.Require().NotEmpty(body.Cursor)
+}
+
+// TestTokenBalanceListCursorInResponse tests that cursor is returned in response
+func (s *TokenHandlerTestSuite) TestTokenBalanceListCursorInResponse() {
+	q := make(url.Values)
+	q.Set("token_id", "0")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/token_balance")
+
+	s.tbs.EXPECT().
+		Filter(gomock.Any(), gomock.Any()).
+		Return([]storage.TokenBalance{testTokenBalance1, testTokenBalance2, testTokenBalance3}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.TokenBalanceList(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var body struct {
+		Result []responses.TokenBalance `json:"result"`
+		Cursor string                   `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	s.Require().Len(body.Result, 3)
+
+	// cursor should encode the last element's id (testTokenBalance3.Id = 3)
+	s.Require().NotEmpty(body.Cursor)
+	decodedID, err := helpers.DecodeIDCursor(body.Cursor)
+	s.Require().NoError(err)
+	s.Require().EqualValues(testTokenBalance3.Id, decodedID)
+}
+
+// TestTokenBalanceListEmptyCursorOnEmptyResult tests that cursor is empty when no results
+func (s *TokenHandlerTestSuite) TestTokenBalanceListEmptyCursorOnEmptyResult() {
+	q := make(url.Values)
+	q.Set("token_id", "0")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/token_balance")
+
+	s.tbs.EXPECT().
+		Filter(gomock.Any(), gomock.Any()).
+		Return([]storage.TokenBalance{}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.TokenBalanceList(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var body struct {
+		Result []responses.TokenBalance `json:"result"`
+		Cursor string                   `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	s.Require().Len(body.Result, 0)
+	s.Require().Empty(body.Cursor)
+}
+
+// TestTokenBalanceListInvalidCursor tests handling of invalid cursor
+func (s *TokenHandlerTestSuite) TestTokenBalanceListInvalidCursor() {
+	q := make(url.Values)
+	q.Set("cursor", "not-valid-base64!!!")
+	q.Set("token_id", "0")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/token_balance")
+
+	s.Require().NoError(s.handler.TokenBalanceList(c))
+	s.Require().Equal(http.StatusBadRequest, rec.Code)
+}
+
+// TestTokenBalanceListCursorWithFilters tests cursor combined with address filter
+func (s *TokenHandlerTestSuite) TestTokenBalanceListCursorWithFilters() {
+	q := make(url.Values)
+	q.Set("cursor", "AAAAAAAAAAI")
+	q.Set("address", testAddressHex1.Hex())
+	q.Set("token_id", "0")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/token_balance")
+
+	s.address.EXPECT().
+		ByHash(gomock.Any(), testAddressHex1).
+		Return(storage.Address{Id: 1}, nil).
+		Times(1)
+
+	s.tbs.EXPECT().
+		Filter(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(ctx context.Context, filter storage.TokenBalanceListFilter) ([]storage.TokenBalance, error) {
+			s.Require().EqualValues(2, filter.CursorID)
+			s.Require().NotNil(filter.AddressId)
+			s.Require().EqualValues(1, *filter.AddressId)
+			return []storage.TokenBalance{testTokenBalance3}, nil
+		}).
+		Times(1)
+
+	s.Require().NoError(s.handler.TokenBalanceList(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var body struct {
+		Result []responses.TokenBalance `json:"result"`
+		Cursor string                   `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	s.Require().Len(body.Result, 1)
+	s.Require().NotEmpty(body.Cursor)
+}
+
+// ====================================
+// Token List Cursor Tests
+// ====================================
+
+// TestListCursorInResponse tests that cursor encodes the last token's id
+func (s *TokenHandlerTestSuite) TestListCursorInResponse() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/token")
+
+	s.token.EXPECT().
+		Filter(gomock.Any(), gomock.Any()).
+		Return([]storage.Token{testToken1, testToken2, testToken3}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var body struct {
+		Result []responses.Token `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	s.Require().Len(body.Result, 3)
+	s.Require().NotEmpty(body.Cursor)
+
+	decodedID, err := helpers.DecodeIDCursor(body.Cursor)
+	s.Require().NoError(err)
+	s.Require().EqualValues(testToken3.Id, decodedID)
+}
+
+// TestListWithCursor tests cursor-based pagination for token list
+func (s *TokenHandlerTestSuite) TestListWithCursor() {
+	q := make(url.Values)
+	q.Set("cursor", helpers.EncodeIDCursor(2))
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/token")
+
+	s.token.EXPECT().
+		Filter(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(ctx context.Context, filter storage.TokenListFilter) ([]storage.Token, error) {
+			s.Require().EqualValues(2, filter.CursorID)
+			return []storage.Token{testToken3}, nil
+		}).
+		Times(1)
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var body struct {
+		Result []responses.Token `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	s.Require().Len(body.Result, 1)
+	s.Require().NotEmpty(body.Cursor)
+}
+
+// TestListInvalidCursor tests handling of invalid cursor for token list
+func (s *TokenHandlerTestSuite) TestListInvalidCursor() {
+	q := make(url.Values)
+	q.Set("cursor", "not-valid-base64!!!")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/token")
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusBadRequest, rec.Code)
+}
+
+// ====================================
+// Transfer List Cursor Tests
+// ====================================
+
+// TestTransferListWithCursor tests cursor-based pagination for transfer list
+func (s *TokenHandlerTestSuite) TestTransferListWithCursor() {
+	q := make(url.Values)
+	q.Set("cursor", helpers.EncodeTimeIDCursor(testTime, 1))
+	q.Set("token_id", "0")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/transfer")
+
+	s.transfer.EXPECT().
+		Filter(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(ctx context.Context, filter storage.TransferListFilter) ([]storage.Transfer, error) {
+			s.Require().EqualValues(1, filter.CursorID)
+			s.Require().False(filter.CursorTime.IsZero())
+			return []storage.Transfer{testTransfer2, testTransfer3}, nil
+		}).
+		Times(1)
+
+	s.Require().NoError(s.handler.TransferList(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var body struct {
+		Result []responses.Transfer `json:"result"`
+		Cursor string               `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	s.Require().Len(body.Result, 2)
+	s.Require().NotEmpty(body.Cursor)
+
+	cursorTime, cursorID, err := helpers.DecodeTimeIDCursor(body.Cursor)
+	s.Require().NoError(err)
+	s.Require().EqualValues(testTransfer3.Id, cursorID)
+	s.Require().Equal(testTransfer3.Time.UTC(), cursorTime.UTC())
+}
+
+// TestTransferListInvalidCursor tests handling of invalid cursor for transfer list
+func (s *TokenHandlerTestSuite) TestTransferListInvalidCursor() {
+	q := make(url.Values)
+	q.Set("cursor", "not-valid-base64!!!")
+	q.Set("token_id", "0")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/transfer")
+
+	s.Require().NoError(s.handler.TransferList(c))
 	s.Require().Equal(http.StatusBadRequest, rec.Code)
 }

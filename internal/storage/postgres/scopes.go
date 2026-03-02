@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	"time"
+
 	"github.com/NobleScope/noble-indexer/internal/storage"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/uptrace/bun"
@@ -41,9 +43,40 @@ func sortTimeIDScope(q *bun.SelectQuery, sort sdk.SortOrder) *bun.SelectQuery {
 	return q.OrderExpr("time ?0, id ?0", bun.Safe(sort))
 }
 
+func cursorTimeIDScope(q *bun.SelectQuery, sort sdk.SortOrder, cursorTime time.Time, cursorID uint64) *bun.SelectQuery {
+	if cursorID == 0 {
+		return q
+	}
+	switch sort {
+	case sdk.SortOrderAsc:
+		return q.Where("(time, id) > (?, ?)", cursorTime, cursorID)
+	case sdk.SortOrderDesc:
+		return q.Where("(time, id) < (?, ?)", cursorTime, cursorID)
+	}
+	return q
+}
+
+func cursorIDScope(q *bun.SelectQuery, sort sdk.SortOrder, cursorID uint64) *bun.SelectQuery {
+	if cursorID == 0 {
+		return q
+	}
+	switch sort {
+	case sdk.SortOrderAsc:
+		return q.Where("id > ?", cursorID)
+	case sdk.SortOrderDesc:
+		return q.Where("id < ?", cursorID)
+	}
+	return q
+}
+
 func addressListFilter(query *bun.SelectQuery, fltrs storage.AddressListFilter) *bun.SelectQuery {
 	if fltrs.OnlyContracts {
 		query = query.Where("is_contract = ?", true)
+	}
+
+	if fltrs.CursorID > 0 {
+		fltrs.Offset = 0
+		query = cursorIDScope(query, fltrs.Sort, fltrs.CursorID)
 	}
 
 	query = limitScope(query, fltrs.Limit)
@@ -82,6 +115,11 @@ func contractListFilter(query *bun.SelectQuery, fltrs storage.ContractListFilter
 
 	if fltrs.DeployerId != nil {
 		query = query.Where("deployer_id = ?", *fltrs.DeployerId)
+	}
+
+	if fltrs.CursorID > 0 {
+		fltrs.Offset = 0
+		query = cursorIDScope(query, fltrs.Sort, fltrs.CursorID)
 	}
 
 	query = limitScope(query, fltrs.Limit)
@@ -125,6 +163,12 @@ func traceListFilter(query *bun.SelectQuery, fltrs storage.TraceListFilter) *bun
 	if len(fltrs.CallType) > 0 {
 		query = query.Where("call_type IN (?)", bun.In(fltrs.CallType))
 	}
+
+	if fltrs.CursorID > 0 {
+		fltrs.Offset = 0
+		query = cursorTimeIDScope(query, fltrs.Sort, fltrs.CursorTime, fltrs.CursorID)
+	}
+
 	query = limitScope(query, fltrs.Limit)
 	query = query.Offset(fltrs.Offset)
 	query = sortTimeIDScope(query, fltrs.Sort)
@@ -139,6 +183,11 @@ func tokenListFilter(query *bun.SelectQuery, fltrs storage.TokenListFilter) *bun
 
 	if len(fltrs.Type) > 0 {
 		query = query.Where("type IN (?)", bun.In(fltrs.Type))
+	}
+
+	if fltrs.CursorID > 0 {
+		fltrs.Offset = 0
+		query = cursorIDScope(query, fltrs.Sort, fltrs.CursorID)
 	}
 
 	query = limitScope(query, fltrs.Limit)
@@ -178,6 +227,11 @@ func transferListFilter(query *bun.SelectQuery, fltrs storage.TransferListFilter
 		query = query.Where("time < ?", fltrs.TimeTo)
 	}
 
+	if fltrs.CursorID > 0 {
+		fltrs.Offset = 0
+		query = cursorTimeIDScope(query, fltrs.Sort, fltrs.CursorTime, fltrs.CursorID)
+	}
+
 	query = limitScope(query, fltrs.Limit)
 	query = query.Offset(fltrs.Offset)
 	query = sortTimeIDScope(query, fltrs.Sort)
@@ -194,6 +248,11 @@ func tokenBalanceListFilter(query *bun.SelectQuery, fltrs storage.TokenBalanceLi
 	}
 	if fltrs.ContractId != nil {
 		query = query.Where("contract_id = ?", *fltrs.ContractId)
+	}
+
+	if fltrs.CursorID > 0 {
+		fltrs.Offset = 0
+		query = cursorIDScope(query, fltrs.Sort, fltrs.CursorID)
 	}
 
 	query = limitScope(query, fltrs.Limit)
@@ -222,6 +281,11 @@ func logListFilter(query *bun.SelectQuery, fltrs storage.LogListFilter) *bun.Sel
 	}
 	if !fltrs.TimeTo.IsZero() {
 		query = query.Where("time < ?", fltrs.TimeTo)
+	}
+
+	if fltrs.CursorID > 0 {
+		fltrs.Offset = 0
+		query = cursorTimeIDScope(query, fltrs.Sort, fltrs.CursorTime, fltrs.CursorID)
 	}
 
 	query = limitScope(query, fltrs.Limit)
@@ -253,6 +317,11 @@ func erc4337UserOpsListFilter(query *bun.SelectQuery, fltrs storage.ERC4337UserO
 	}
 	if !fltrs.TimeTo.IsZero() {
 		query = query.Where("time < ?", fltrs.TimeTo)
+	}
+
+	if fltrs.CursorID > 0 {
+		fltrs.Offset = 0
+		query = cursorTimeIDScope(query, fltrs.Sort, fltrs.CursorTime, fltrs.CursorID)
 	}
 
 	query = limitScope(query, fltrs.Limit)
@@ -293,6 +362,11 @@ func txListFilter(query *bun.SelectQuery, fltrs storage.TxListFilter) *bun.Selec
 	}
 	if len(fltrs.Status) > 0 {
 		query = query.Where("status IN (?)", bun.In(fltrs.Status))
+	}
+
+	if fltrs.CursorID > 0 {
+		fltrs.Offset = 0
+		query = cursorTimeIDScope(query, fltrs.Sort, fltrs.CursorTime, fltrs.CursorID)
 	}
 
 	query = limitScope(query, fltrs.Limit)

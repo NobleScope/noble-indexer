@@ -11,10 +11,12 @@ import (
 )
 
 type BlockListFilter struct {
-	Limit     int
-	Offset    int
-	Sort      storage.SortOrder
-	WithStats bool
+	Limit      int
+	Offset     int
+	Sort       storage.SortOrder
+	WithStats  bool
+	CursorTime time.Time
+	CursorID   uint64
 }
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed

@@ -26,6 +26,8 @@ type TxListFilter struct {
 	TimeFrom      time.Time
 	TimeTo        time.Time
 	WithABI       bool
+	CursorTime    time.Time
+	CursorID      uint64
 }
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed

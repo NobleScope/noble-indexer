@@ -30,6 +30,11 @@ func (b *BeaconWithdrawal) Filter(ctx context.Context, filter storage.BeaconWith
 		subQuery.Where("address_id = ?", *filter.AddressId)
 	}
 
+	if filter.CursorID > 0 {
+		filter.Offset = 0
+		subQuery = cursorTimeIDScope(subQuery, filter.Sort, filter.CursorTime, filter.CursorID)
+	}
+
 	subQuery = limitScope(subQuery, filter.Limit)
 	subQuery = sortTimeIDScope(subQuery, filter.Sort)
 	if filter.Offset > 0 {

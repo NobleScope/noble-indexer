@@ -11,11 +11,13 @@ import (
 )
 
 type BeaconWithdrawalListFilter struct {
-	Limit     int
-	Offset    int
-	Sort      storage.SortOrder
-	Height    *pkgTypes.Level
-	AddressId *uint64
+	Limit      int
+	Offset     int
+	Sort       storage.SortOrder
+	Height     *pkgTypes.Level
+	AddressId  *uint64
+	CursorTime time.Time
+	CursorID   uint64
 }
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed

@@ -54,6 +54,11 @@ func (p *ProxyContract) FilteredList(
 		query = query.Where("proxy_contract.status IN (?)", bun.In(filters.Status))
 	}
 
+	if filters.CursorID > 0 {
+		filters.Offset = 0
+		query = cursorIDScope(query, filters.Sort, filters.CursorID)
+	}
+
 	query = sortScope(query, "height", filters.Sort)
 	if filters.Offset > 0 {
 		query = query.Offset(filters.Offset)

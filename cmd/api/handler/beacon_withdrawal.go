@@ -1,9 +1,8 @@
 package handler
 
 import (
-	"net/http"
-
 	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/cmd/api/helpers"
 	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/labstack/echo/v4"
@@ -30,6 +29,7 @@ type beaconWithdrawalListRequest struct {
 	Sort    string       `query:"sort"    validate:"omitempty,oneof=asc desc"`
 	Height  *types.Level `query:"height"  validate:"omitempty,min=0"`
 	Address string       `query:"address" validate:"omitempty,address"`
+	Cursor  string       `query:"cursor"  validate:"omitempty"`
 }
 
 func (p *beaconWithdrawalListRequest) SetDefault() {
@@ -52,8 +52,9 @@ func (p *beaconWithdrawalListRequest) SetDefault() {
 //	@Param			sort	query	string	false	"Sort order by block height (default: asc)"				Enums(asc, desc)	default(asc)
 //	@Param			height	query	integer	false	"Filter by block height"								minimum(0)	example(12345)
 //	@Param			address	query	string	false	"Filter by recipient address (hexadecimal with 0x prefix)"	minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
+//	@Param			cursor	query	string	false	"Cursor for pagination (from previous response)"
 //	@Produce		json
-//	@Success		200	{array}		responses.BeaconWithdrawal	"List of beacon withdrawals"
+//	@Success		200	{object}	CursorResponse	"List of beacon withdrawals"
 //	@Failure		400	{object}	Error						"Invalid request parameters"
 //	@Failure		500	{object}	Error						"Internal server error"
 //	@Router			/beacon_withdrawals [get]
@@ -69,6 +70,15 @@ func (handler *BeaconWithdrawalHandler) List(c echo.Context) error {
 		Offset: req.Offset,
 		Height: req.Height,
 		Sort:   pgSort(req.Sort),
+	}
+
+	if req.Cursor != "" {
+		cursorTime, cursorID, err := helpers.DecodeTimeIDCursor(req.Cursor)
+		if err != nil {
+			return badRequestError(c, err)
+		}
+		filter.CursorTime = cursorTime
+		filter.CursorID = cursorID
 	}
 
 	if req.Address != "" {
@@ -92,5 +102,11 @@ func (handler *BeaconWithdrawalHandler) List(c echo.Context) error {
 		response[i] = responses.NewBeaconWithdrawal(withdrawals[i])
 	}
 
-	return c.JSON(http.StatusOK, response)
+	var cursor string
+	if len(withdrawals) > 0 {
+		last := withdrawals[len(withdrawals)-1]
+		cursor = helpers.EncodeTimeIDCursor(last.Time, last.Id)
+	}
+
+	return returnCursorList(c, response, cursor)
 }

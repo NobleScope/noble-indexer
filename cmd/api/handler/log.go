@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/cmd/api/helpers"
 	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/labstack/echo/v4"
@@ -35,6 +36,7 @@ type logListRequest struct {
 	TxHash  string  `query:"tx_hash" validate:"omitempty,tx_hash"`
 	Address string  `query:"address" validate:"omitempty,address"`
 	Decode  bool    `query:"decode"  validate:"omitempty"`
+	Cursor  string  `query:"cursor"  validate:"omitempty"`
 
 	From int64 `example:"1692892095" query:"time_from" swaggertype:"integer" validate:"omitempty,min=1"`
 	To   int64 `example:"1692892095" query:"time_to"   swaggertype:"integer" validate:"omitempty,min=1"`
@@ -64,8 +66,9 @@ func (req *logListRequest) SetDefault() {
 //	@Param			time_to			query	integer	false	"Filter by timestamp to (Unix timestamp)"					minimum(1)	example(1692892095)
 //	@Param			sort			query	string	false	"Sort order by timestamp (default: desc)"					Enums(asc, desc)	default(desc)
 //	@Param			decode			query	boolean	false	"Decode log data and topics using contract ABI"				default(false)
+//	@Param			cursor			query	string	false	"Cursor for pagination (from previous response)"
 //	@Produce		json
-//	@Success		200	{array}		responses.Log	"List of event logs"
+//	@Success		200	{object}	CursorResponse	"List of event logs"
 //	@Failure		400	{object}	Error			"Invalid request parameters"
 //	@Failure		500	{object}	Error			"Internal server error"
 //	@Router			/logs [get]
@@ -81,6 +84,15 @@ func (handler *LogHandler) List(c echo.Context) error {
 		Offset:  req.Offset,
 		Sort:    pgSort(req.Sort),
 		WithABI: req.Decode,
+	}
+
+	if req.Cursor != "" {
+		cursorTime, cursorID, err := helpers.DecodeTimeIDCursor(req.Cursor)
+		if err != nil {
+			return badRequestError(c, err)
+		}
+		filters.CursorTime = cursorTime
+		filters.CursorID = cursorID
 	}
 
 	if req.TxHash != "" {
@@ -132,5 +144,11 @@ func (handler *LogHandler) List(c echo.Context) error {
 		response[i] = responses.NewLog(logs[i])
 	}
 
-	return returnArray(c, response)
+	var cursor string
+	if len(logs) > 0 {
+		last := logs[len(logs)-1]
+		cursor = helpers.EncodeTimeIDCursor(last.Time, last.Id)
+	}
+
+	return returnCursorList(c, response, cursor)
 }
