@@ -79,16 +79,19 @@
                         "description": "If true, return only addresses that are smart contracts (default: false)",
                         "name": "only_contracts",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cursor for pagination (from previous response)",
+                        "name": "cursor",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "List of addresses with their balances",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/responses.Address"
-                            }
+                            "$ref": "#/definitions/handler.CursorResponse"
                         }
                     },
                     "400": {
@@ -209,16 +212,19 @@
                         "description": "Filter by recipient address (hexadecimal with 0x prefix)",
                         "name": "address",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cursor for pagination (from previous response)",
+                        "name": "cursor",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "List of beacon withdrawals",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/responses.BeaconWithdrawal"
-                            }
+                            "$ref": "#/definitions/handler.CursorResponse"
                         }
                     },
                     "400": {
@@ -282,16 +288,19 @@
                         "description": "Include statistics for each block (default: false)",
                         "name": "stats",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cursor for pagination (from previous response)",
+                        "name": "cursor",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "List of blocks",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/responses.Block"
-                            }
+                            "$ref": "#/definitions/handler.CursorResponse"
                         }
                     },
                     "400": {
@@ -488,10 +497,7 @@
                     "200": {
                         "description": "List of transactions in the block",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/responses.Transaction"
-                            }
+                            "$ref": "#/definitions/handler.CursorResponse"
                         }
                     },
                     "400": {
@@ -582,16 +588,19 @@
                         "description": "Filter by deployer address (hexadecimal with 0x prefix)",
                         "name": "deployer",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cursor for pagination (from previous response)",
+                        "name": "cursor",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "List of smart contracts",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/responses.Contract"
-                            }
+                            "$ref": "#/definitions/handler.CursorResponse"
                         }
                     },
                     "400": {
@@ -740,16 +749,30 @@
                         "description": "Number of source files to skip (default: 0)",
                         "name": "offset",
                         "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "default": "asc",
+                        "description": "Sort order (default: asc)",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cursor for pagination (from previous response)",
+                        "name": "cursor",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "List of source code files",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/responses.Source"
-                            }
+                            "$ref": "#/definitions/handler.CursorResponse"
                         }
                     },
                     "204": {
@@ -915,16 +938,19 @@
                         "description": "Decode log data and topics using contract ABI",
                         "name": "decode",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cursor for pagination (from previous response)",
+                        "name": "cursor",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "List of event logs",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/responses.Log"
-                            }
+                            "$ref": "#/definitions/handler.CursorResponse"
                         }
                     },
                     "400": {
@@ -983,6 +1009,16 @@
                         "in": "query"
                     },
                     {
+                        "enum": [
+                            "id",
+                            "height"
+                        ],
+                        "type": "string",
+                        "description": "Field to sort by (default: id)",
+                        "name": "sort_by",
+                        "in": "query"
+                    },
+                    {
                         "minimum": 1,
                         "type": "integer",
                         "example": 12345,
@@ -1023,16 +1059,19 @@
                         "description": "Filter by resolution status: new (just detected), resolved (implementation found), error (failed to resolve) (comma-separated)",
                         "name": "status",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cursor for pagination (from previous response)",
+                        "name": "cursor",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "List of proxy contracts",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/responses.ProxyContract"
-                            }
+                            "$ref": "#/definitions/handler.CursorResponse"
                         }
                     },
                     "400": {
@@ -1210,10 +1249,7 @@
                     "200": {
                         "description": "List of token balances",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/responses.TokenBalance"
-                            }
+                            "$ref": "#/definitions/handler.CursorResponse"
                         }
                     },
                     "400": {
@@ -1290,16 +1326,19 @@
                         "description": "Sort order by creation time (default: desc)",
                         "name": "sort",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cursor for pagination (from previous response)",
+                        "name": "cursor",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "List of tokens",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/responses.Token"
-                            }
+                            "$ref": "#/definitions/handler.CursorResponse"
                         }
                     },
                     "400": {
@@ -1489,16 +1528,19 @@
                         "description": "Decode trace input using contract ABI",
                         "name": "decode",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cursor for pagination (from previous response)",
+                        "name": "cursor",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "List of execution traces",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/responses.Trace"
-                            }
+                            "$ref": "#/definitions/handler.CursorResponse"
                         }
                     },
                     "400": {
@@ -1634,16 +1676,19 @@
                         "description": "Filter by token ID",
                         "name": "token_id",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cursor for pagination (from previous response)",
+                        "name": "cursor",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "List of token transfers",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/responses.Transfer"
-                            }
+                            "$ref": "#/definitions/handler.CursorResponse"
                         }
                     },
                     "400": {
@@ -1828,16 +1873,19 @@
                         "description": "Decode transaction input using contract ABI",
                         "name": "decode",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cursor for pagination (from previous response)",
+                        "name": "cursor",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "List of transactions",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/responses.Transaction"
-                            }
+                            "$ref": "#/definitions/handler.CursorResponse"
                         }
                     },
                     "400": {
@@ -2055,16 +2103,19 @@
                         "description": "Sort order by timestamp (default: desc)",
                         "name": "sort",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cursor for pagination (from previous response)",
+                        "name": "cursor",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "List of user operations",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/responses.UserOp"
-                            }
+                            "$ref": "#/definitions/handler.CursorResponse"
                         }
                     },
                     "400": {
@@ -2275,6 +2326,16 @@
         }
     },
     "definitions": {
+        "handler.CursorResponse": {
+            "description": "Paginated list response with cursor",
+            "type": "object",
+            "properties": {
+                "cursor": {
+                    "type": "string"
+                },
+                "result": {}
+            }
+        },
         "handler.Error": {
             "type": "object",
             "properties": {
@@ -2339,36 +2400,6 @@
                 "value": {
                     "type": "string",
                     "example": "10000000000"
-                }
-            }
-        },
-        "responses.BeaconWithdrawal": {
-            "description": "Beacon chain withdrawal transferring ETH from a validator to an execution layer address",
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string",
-                    "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
-                },
-                "amount": {
-                    "type": "string",
-                    "example": "1000000000000000000"
-                },
-                "height": {
-                    "type": "integer",
-                    "example": 100
-                },
-                "index": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "time": {
-                    "type": "string",
-                    "example": "2023-07-04T03:10:57+00:00"
-                },
-                "validator_index": {
-                    "type": "integer",
-                    "example": 100000
                 }
             }
         },
@@ -2676,93 +2707,6 @@
                 }
             }
         },
-        "responses.Log": {
-            "description": "Token transfer information",
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string",
-                    "example": "0x0000000000000000000000000000000000000001"
-                },
-                "data": {
-                    "type": "string",
-                    "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
-                },
-                "decoded": {
-                    "type": "object"
-                },
-                "height": {
-                    "type": "integer",
-                    "example": 100
-                },
-                "id": {
-                    "type": "integer",
-                    "example": 0
-                },
-                "index": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "name": {
-                    "type": "string",
-                    "example": "0xff64905f73a67fb594e0f940a8075a860db489ad991e032f48c81123eb52d60b"
-                },
-                "time": {
-                    "type": "string",
-                    "format": "date-time",
-                    "example": "2026-01-01T01:01:01+00:00"
-                },
-                "topics": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "tx_hash": {
-                    "type": "string",
-                    "example": "0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d"
-                }
-            }
-        },
-        "responses.ProxyContract": {
-            "description": "Proxy contract information",
-            "type": "object",
-            "properties": {
-                "contract": {
-                    "type": "string",
-                    "example": "0x0000000000000000000000000000000000000000"
-                },
-                "height": {
-                    "type": "integer",
-                    "example": 100
-                },
-                "implementation": {
-                    "type": "string",
-                    "example": "0x0000000000000000000000000000000000000001"
-                },
-                "status": {
-                    "type": "string",
-                    "enum": [
-                        "new",
-                        "resolved",
-                        "error"
-                    ],
-                    "example": "resolved"
-                },
-                "type": {
-                    "type": "string",
-                    "enum": [
-                        "EIP1167",
-                        "EIP7760",
-                        "EIP7702",
-                        "EIP1967",
-                        "custom",
-                        "clone_with_immutable_args"
-                    ],
-                    "example": "EIP1967"
-                }
-            }
-        },
         "responses.SearchItem": {
             "description": "Search result item",
             "type": "object",
@@ -2781,34 +2725,6 @@
                         "token"
                     ],
                     "example": "address"
-                }
-            }
-        },
-        "responses.Source": {
-            "description": "Contract source information",
-            "type": "object",
-            "properties": {
-                "content": {
-                    "type": "string",
-                    "example": "Source content"
-                },
-                "id": {
-                    "type": "integer",
-                    "example": 321
-                },
-                "license": {
-                    "type": "string",
-                    "example": "License"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Contract source name"
-                },
-                "urls": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 }
             }
         },
@@ -2917,125 +2833,6 @@
                 "type": {
                     "type": "string",
                     "example": "ERC20"
-                }
-            }
-        },
-        "responses.TokenBalance": {
-            "description": "Token balance information",
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string",
-                    "example": "0x0000000000000000000000000000000000000001"
-                },
-                "token": {
-                    "$ref": "#/definitions/responses.Token"
-                },
-                "value": {
-                    "type": "string",
-                    "example": "123456789"
-                }
-            }
-        },
-        "responses.Trace": {
-            "description": "Transaction execution trace information",
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "type": "string",
-                    "example": "123456789123456789"
-                },
-                "call_type": {
-                    "type": "string",
-                    "enum": [
-                        "call",
-                        "delegatecall",
-                        "staticcall",
-                        "callcode"
-                    ],
-                    "example": "delegatecall"
-                },
-                "contract": {
-                    "type": "string",
-                    "example": "0x0000000000000000000000000000000000000002"
-                },
-                "creation_method": {
-                    "type": "string",
-                    "example": "create"
-                },
-                "decoded": {
-                    "type": "object"
-                },
-                "from_address": {
-                    "type": "string",
-                    "example": "0x0000000000000000000000000000000000000001"
-                },
-                "gas_limit": {
-                    "type": "string",
-                    "example": "2100"
-                },
-                "gas_used": {
-                    "type": "string",
-                    "example": "21000"
-                },
-                "height": {
-                    "type": "integer",
-                    "example": 100
-                },
-                "init_hash": {
-                    "type": "string",
-                    "example": "0x6060604052341561000f57600080fd5b"
-                },
-                "input": {
-                    "type": "string",
-                    "example": "hex input data"
-                },
-                "output": {
-                    "type": "string",
-                    "example": "0x0"
-                },
-                "subtraces": {
-                    "type": "integer",
-                    "example": 0
-                },
-                "time": {
-                    "type": "string",
-                    "example": "2023-07-04T03:10:57+00:00"
-                },
-                "to_address": {
-                    "type": "string",
-                    "example": "0x123456789abcdef123456789abcdef123456789abc"
-                },
-                "trace_address": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    },
-                    "example": [
-                        1,
-                        2,
-                        3
-                    ]
-                },
-                "tx_hash": {
-                    "type": "string",
-                    "example": "0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22"
-                },
-                "tx_position": {
-                    "type": "integer",
-                    "example": 123456789
-                },
-                "type": {
-                    "type": "string",
-                    "enum": [
-                        "call",
-                        "create",
-                        "create2",
-                        "selfdestruct",
-                        "reward",
-                        "suicide"
-                    ],
-                    "example": "call"
                 }
             }
         },

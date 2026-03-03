@@ -361,7 +361,6 @@ type tokenBalanceListRequest struct {
 	Address  string  `query:"address"  validate:"omitempty,address"`
 	Contract string  `query:"contract" validate:"omitempty,address"`
 	TokenId  *string `query:"token_id" validate:"omitempty"`
-	Cursor   string  `query:"cursor"   validate:"omitempty"`
 }
 
 func (p *tokenBalanceListRequest) SetDefault() {
@@ -385,7 +384,6 @@ func (p *tokenBalanceListRequest) SetDefault() {
 //	@Param			address			query	string	false	"Filter by holder address"						minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
 //	@Param			contract		query	string	false	"Filter by token contract address"				minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
 //	@Param			token_id		query	string	false	"Filter by token ID"							example(0)
-//	@Param			cursor			query	string	false	"Cursor for pagination (from previous response)"
 //	@Produce		json
 //	@Success		200	{object}	CursorResponse	"List of token balances"
 //	@Failure		400	{object}	Error					"Invalid request parameters"
@@ -402,14 +400,6 @@ func (handler *TokenHandler) TokenBalanceList(c echo.Context) error {
 		Limit:  req.Limit,
 		Offset: req.Offset,
 		Sort:   pgSort(req.Sort),
-	}
-
-	if req.Cursor != "" {
-		cursorID, err := helpers.DecodeIDCursor(req.Cursor)
-		if err != nil {
-			return badRequestError(c, err)
-		}
-		filters.CursorID = cursorID
 	}
 
 	if req.TokenId != nil {
@@ -446,13 +436,7 @@ func (handler *TokenHandler) TokenBalanceList(c echo.Context) error {
 		response[i] = responses.NewTokenBalance(tbs[i])
 	}
 
-	var cursor string
-	if len(tbs) > 0 {
-		last := tbs[len(tbs)-1]
-		cursor = helpers.EncodeIDCursor(last.Id)
-	}
-
-	return returnCursorList(c, response, cursor)
+	return returnCursorList(c, response, "")
 }
 
 func (handler *TokenHandler) getAddressByHash(c echo.Context, h string) (storage.Address, error) {

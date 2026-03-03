@@ -16,7 +16,6 @@ type TokenBalanceListFilter struct {
 	AddressId  *uint64
 	ContractId *uint64
 	TokenId    *decimal.Decimal
-	CursorID   uint64
 }
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed

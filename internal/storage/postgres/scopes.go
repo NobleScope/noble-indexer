@@ -250,11 +250,6 @@ func tokenBalanceListFilter(query *bun.SelectQuery, fltrs storage.TokenBalanceLi
 		query = query.Where("contract_id = ?", *fltrs.ContractId)
 	}
 
-	if fltrs.CursorID > 0 {
-		fltrs.Offset = 0
-		query = cursorIDScope(query, fltrs.Sort, fltrs.CursorID)
-	}
-
 	query = limitScope(query, fltrs.Limit)
 	query = query.Offset(fltrs.Offset)
 	query = sortMultipleScope(query, []SortField{
