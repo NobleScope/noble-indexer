@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
-	"github.com/NobleScope/noble-indexer/cmd/api/helpers"
 	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/NobleScope/noble-indexer/internal/storage/mock"
 	"github.com/NobleScope/noble-indexer/internal/storage/types"
@@ -482,68 +481,4 @@ func (s *TxTestSuite) TestTxsOnlyFromAddress() {
 	s.Require().Equal(testAddressHex1.Hex(), txs[0].FromAddress)
 	s.Require().Nil(txs[0].ToAddress)
 	s.Require().Equal("TxStatusRevert", txs[0].Status)
-}
-
-// TestTransactionsListCursorInResponse tests that cursor is returned in block transactions response
-func (s *TxTestSuite) TestTransactionsListCursorInResponse() {
-	q := make(url.Values)
-	q.Set("height", "100")
-
-	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
-	rec := httptest.NewRecorder()
-	c := s.echo.NewContext(req, rec)
-	c.SetPath("/block/:height/txs")
-	c.SetParamNames("height")
-	c.SetParamValues("100")
-
-	s.txs.EXPECT().
-		ByHeight(gomock.Any(), pkgTypes.Level(100), 10, 0, sdk.SortOrderAsc).
-		Return([]*storage.Tx{&testTxWithToAddress, &testTxContractCreation}, nil).
-		Times(1)
-
-	s.Require().NoError(s.handler.TransactionsList(c))
-	s.Require().Equal(http.StatusOK, rec.Code)
-
-	var body struct {
-		Result []responses.Transaction `json:"result"`
-		Cursor string                  `json:"cursor"`
-	}
-	err := json.NewDecoder(rec.Body).Decode(&body)
-	s.Require().NoError(err)
-	s.Require().Len(body.Result, 2)
-	s.Require().NotEmpty(body.Cursor)
-
-	cursorTime, cursorID, err := helpers.DecodeTimeIDCursor(body.Cursor)
-	s.Require().NoError(err)
-	s.Require().EqualValues(testTxContractCreation.Id, cursorID)
-	s.Require().Equal(testTxContractCreation.Time.UTC(), cursorTime.UTC())
-}
-
-// TestTransactionsListEmptyCursor tests that empty result returns empty cursor
-func (s *TxTestSuite) TestTransactionsListEmptyCursor() {
-	q := make(url.Values)
-	q.Set("height", "999")
-
-	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
-	rec := httptest.NewRecorder()
-	c := s.echo.NewContext(req, rec)
-	c.SetPath("/block/:height/txs")
-	c.SetParamNames("height")
-	c.SetParamValues("999")
-
-	s.txs.EXPECT().
-		ByHeight(gomock.Any(), pkgTypes.Level(999), 10, 0, sdk.SortOrderAsc).
-		Return([]*storage.Tx{}, nil).
-		Times(1)
-
-	s.Require().NoError(s.handler.TransactionsList(c))
-	s.Require().Equal(http.StatusOK, rec.Code)
-
-	var body struct {
-		Result []responses.Transaction `json:"result"`
-		Cursor string                  `json:"cursor"`
-	}
-	err := json.NewDecoder(rec.Body).Decode(&body)
-	s.Require().NoError(err)
-	s.Require().Empty(body.Cursor)
 }

@@ -241,11 +241,5 @@ func (handler *BlockHandler) TransactionsList(c echo.Context) error {
 		response[i] = responses.NewTransaction(*txs[i])
 	}
 
-	var cursor string
-	if len(txs) > 0 {
-		last := txs[len(txs)-1]
-		cursor = helpers.EncodeTimeIDCursor(last.Time, last.Id)
-	}
-
-	return returnCursorList(c, response, cursor)
+	return returnCursorList(c, response, "")
 }
