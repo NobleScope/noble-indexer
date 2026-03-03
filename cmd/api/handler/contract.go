@@ -86,6 +86,9 @@ func (handler *ContractHandler) List(c echo.Context) error {
 	}
 
 	if req.Cursor != "" && (req.SortBy == "" || req.SortBy == "id") {
+		if req.Offset > 0 {
+			return badRequestError(c, errCursorWithOffset)
+		}
 		cursorID, err := helpers.DecodeIDCursor(req.Cursor)
 		if err != nil {
 			return badRequestError(c, err)
@@ -230,6 +233,9 @@ func (handler *ContractHandler) ContractSources(c echo.Context) error {
 	}
 
 	if req.Cursor != "" {
+		if req.Offset > 0 {
+			return badRequestError(c, errCursorWithOffset)
+		}
 		cursorID, err := helpers.DecodeIDCursor(req.Cursor)
 		if err != nil {
 			return badRequestError(c, err)

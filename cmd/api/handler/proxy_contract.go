@@ -89,6 +89,9 @@ func (req *listProxyContracts) ToFilters(
 	}
 
 	if req.Cursor != "" && (req.SortBy == "" || req.SortBy == "id") {
+		if req.Offset > 0 {
+			return filters, errCursorWithOffset
+		}
 		cursorID, err := helpers.DecodeIDCursor(req.Cursor)
 		if err != nil {
 			return filters, err

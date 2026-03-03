@@ -39,12 +39,12 @@ func (s *Source) Filter(ctx context.Context, filter storage.SourceListFilter) (s
 		Where("contract_id = ?", filter.ContractId)
 
 	if filter.CursorID > 0 {
-		filter.Offset = 0
 		query = cursorIDScope(query, filter.Sort, filter.CursorID)
+	} else {
+		query = query.Offset(filter.Offset)
 	}
 
 	query = limitScope(query, filter.Limit)
-	query = query.Offset(filter.Offset)
 	query = sortScope(query, "id", filter.Sort)
 
 	err = query.Scan(ctx, &sources)

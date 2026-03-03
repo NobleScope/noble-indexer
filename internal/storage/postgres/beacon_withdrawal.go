@@ -31,15 +31,13 @@ func (b *BeaconWithdrawal) Filter(ctx context.Context, filter storage.BeaconWith
 	}
 
 	if filter.CursorID > 0 {
-		filter.Offset = 0
 		subQuery = cursorTimeIDScope(subQuery, filter.Sort, filter.CursorTime, filter.CursorID)
+	} else {
+		subQuery = subQuery.Offset(filter.Offset)
 	}
 
 	subQuery = limitScope(subQuery, filter.Limit)
 	subQuery = sortTimeIDScope(subQuery, filter.Sort)
-	if filter.Offset > 0 {
-		subQuery.Offset(filter.Offset)
-	}
 
 	query := b.DB().NewSelect().
 		TableExpr("(?) AS beacon_withdrawals", subQuery).

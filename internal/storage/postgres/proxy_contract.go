@@ -60,14 +60,12 @@ func (p *ProxyContract) FilteredList(
 	}
 
 	if filters.CursorID > 0 {
-		filters.Offset = 0
 		query = cursorIDScope(query, filters.Sort, filters.CursorID)
+	} else {
+		query = query.Offset(filters.Offset)
 	}
 
 	query = sortScope(query, sortField, filters.Sort)
-	if filters.Offset > 0 {
-		query = query.Offset(filters.Offset)
-	}
 	query = limitScope(query, filters.Limit)
 
 	outerQuery := p.DB().NewSelect().TableExpr("(?) AS proxy", query).

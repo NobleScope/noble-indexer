@@ -147,6 +147,9 @@ func (handler *TxHandler) Traces(c echo.Context) error {
 	}
 
 	if req.Cursor != "" {
+		if req.Offset > 0 {
+			return badRequestError(c, errCursorWithOffset)
+		}
 		cursorTime, cursorID, err := helpers.DecodeTimeIDCursor(req.Cursor)
 		if err != nil {
 			return badRequestError(c, err)
@@ -299,6 +302,9 @@ func (handler *TxHandler) List(c echo.Context) error {
 	}
 
 	if req.Cursor != "" {
+		if req.Offset > 0 {
+			return badRequestError(c, errCursorWithOffset)
+		}
 		cursorTime, cursorID, err := helpers.DecodeTimeIDCursor(req.Cursor)
 		if err != nil {
 			return badRequestError(c, err)

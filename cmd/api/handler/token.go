@@ -92,6 +92,9 @@ func (handler *TokenHandler) List(c echo.Context) error {
 	}
 
 	if req.Cursor != "" {
+		if req.Offset > 0 {
+			return badRequestError(c, errCursorWithOffset)
+		}
 		cursorID, err := helpers.DecodeIDCursor(req.Cursor)
 		if err != nil {
 			return badRequestError(c, err)
@@ -244,6 +247,9 @@ func (handler *TokenHandler) TransferList(c echo.Context) error {
 	}
 
 	if req.Cursor != "" {
+		if req.Offset > 0 {
+			return badRequestError(c, errCursorWithOffset)
+		}
 		cursorTime, cursorID, err := helpers.DecodeTimeIDCursor(req.Cursor)
 		if err != nil {
 			return badRequestError(c, err)
