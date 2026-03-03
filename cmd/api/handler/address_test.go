@@ -132,7 +132,6 @@ func (s *AddressHandlerTestSuite) TestListSuccess() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	addresses := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(addresses, 3)
 
 	s.Require().EqualValues(1, addresses[0].Id)
@@ -172,7 +171,6 @@ func (s *AddressHandlerTestSuite) TestListWithLimit() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	addresses := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(addresses, 1)
 }
 
@@ -207,7 +205,6 @@ func (s *AddressHandlerTestSuite) TestListWithOnlyContracts() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	addresses := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(addresses, 2)
 	s.Require().True(addresses[0].IsContract)
 	s.Require().True(addresses[1].IsContract)
@@ -245,7 +242,6 @@ func (s *AddressHandlerTestSuite) TestListWithSortBy() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	addresses := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(addresses, 3)
 }
 
@@ -290,7 +286,6 @@ func (s *AddressHandlerTestSuite) TestListEmptyResult() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	addresses := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(addresses, 0)
 }
 

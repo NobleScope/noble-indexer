@@ -233,7 +233,6 @@ func (s *BlockTestSuite) TestList() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	blocks := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(blocks, 1)
 	s.Require().EqualValues(100, blocks[0].Height)
 	s.Require().Equal(testTime, blocks[0].Time)
@@ -283,7 +282,6 @@ func (s *BlockTestSuite) TestListWithStats() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	blocks := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(blocks, 1)
 	s.Require().EqualValues(100, blocks[0].Height)
 	s.Require().Equal(testTime, blocks[0].Time)

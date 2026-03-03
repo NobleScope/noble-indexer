@@ -161,7 +161,6 @@ func (s *UserOpHandlerTestSuite) TestListSuccess() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	ops := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(ops, 2)
 
 	s.Require().EqualValues(1, ops[0].Id)
@@ -204,7 +203,6 @@ func (s *UserOpHandlerTestSuite) TestListWithLimit() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	ops := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 }
 
@@ -238,7 +236,6 @@ func (s *UserOpHandlerTestSuite) TestListWithOffset() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	ops := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 	s.Require().EqualValues(2, ops[0].Id)
 }
@@ -273,7 +270,6 @@ func (s *UserOpHandlerTestSuite) TestListWithLimitAndOffset() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	ops := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 }
 
@@ -306,7 +302,6 @@ func (s *UserOpHandlerTestSuite) TestListAscOrder() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	ops := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(ops, 2)
 	s.Require().EqualValues(1, ops[0].Id)
 	s.Require().EqualValues(2, ops[1].Id)
@@ -341,7 +336,6 @@ func (s *UserOpHandlerTestSuite) TestListDescOrder() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	ops := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(ops, 2)
 	s.Require().EqualValues(2, ops[0].Id)
 	s.Require().EqualValues(1, ops[1].Id)
@@ -378,7 +372,6 @@ func (s *UserOpHandlerTestSuite) TestListWithHeight() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	ops := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 	s.Require().EqualValues(100, ops[0].Height)
 }
@@ -419,7 +412,6 @@ func (s *UserOpHandlerTestSuite) TestListWithTxHash() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	ops := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 	s.Require().EqualValues(1, ops[0].Id)
 }
@@ -460,7 +452,6 @@ func (s *UserOpHandlerTestSuite) TestListWithBundler() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	ops := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 	s.Require().EqualValues(1, ops[0].Id)
 }
@@ -501,7 +492,6 @@ func (s *UserOpHandlerTestSuite) TestListWithPaymaster() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	ops := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 	s.Require().NotNil(ops[0].Paymaster)
 }
@@ -537,7 +527,6 @@ func (s *UserOpHandlerTestSuite) TestListWithSuccessTrue() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	ops := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 	s.Require().True(ops[0].Success)
 }
@@ -573,7 +562,6 @@ func (s *UserOpHandlerTestSuite) TestListWithSuccessFalse() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	ops := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 	s.Require().False(ops[0].Success)
 }
@@ -611,7 +599,6 @@ func (s *UserOpHandlerTestSuite) TestListWithTimeRange() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	ops := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 }
 
@@ -641,7 +628,6 @@ func (s *UserOpHandlerTestSuite) TestListEmptyResult() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	ops := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(ops, 0)
 }
 
@@ -959,7 +945,6 @@ func (s *UserOpHandlerTestSuite) TestListWithMultipleFilters() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	ops := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 	s.Require().EqualValues(100, ops[0].Height)
 	s.Require().True(ops[0].Success)
@@ -1030,7 +1015,6 @@ func (s *UserOpHandlerTestSuite) TestListWithAllFilters() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	ops := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 }
 
@@ -1277,7 +1261,6 @@ func (s *UserOpHandlerTestSuite) TestListResponseFields() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	ops := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(ops, 1)
 
 	op := ops[0]

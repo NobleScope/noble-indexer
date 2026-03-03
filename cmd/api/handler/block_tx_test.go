@@ -178,7 +178,6 @@ func (s *TxTestSuite) TestTxsList() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	txs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(txs, 3)
 
 	s.Require().EqualValues(100, txs[0].Height)
@@ -231,7 +230,6 @@ func (s *TxTestSuite) TestTxsListWithLimit() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	txs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(txs, 1)
 }
 
@@ -265,7 +263,6 @@ func (s *TxTestSuite) TestTxsListWithOffset() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	txs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(txs, 1)
 	s.Require().EqualValues(2, txs[0].Index)
 }
@@ -301,7 +298,6 @@ func (s *TxTestSuite) TestTxsListWithLimitAndOffset() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	txs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(txs, 2)
 	s.Require().EqualValues(1, txs[0].Index)
 	s.Require().EqualValues(2, txs[1].Index)
@@ -338,7 +334,6 @@ func (s *TxTestSuite) TestTxsListDescOrder() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	txs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(txs, 3)
 	s.Require().EqualValues(2, txs[0].Index)
 	s.Require().EqualValues(1, txs[1].Index)
@@ -369,7 +364,6 @@ func (s *TxTestSuite) TestTxsListEmptyResult() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	txs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(txs, 0)
 }
 
@@ -476,7 +470,6 @@ func (s *TxTestSuite) TestTxsOnlyFromAddress() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	txs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(txs, 1)
 	s.Require().Equal(testAddressHex1.Hex(), txs[0].FromAddress)
 	s.Require().Nil(txs[0].ToAddress)

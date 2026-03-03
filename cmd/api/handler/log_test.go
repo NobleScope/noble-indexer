@@ -145,7 +145,6 @@ func (s *LogHandlerTestSuite) TestListSuccess() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	logs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(logs, 3)
 
 	s.Require().EqualValues(1, logs[0].Id)
@@ -184,7 +183,6 @@ func (s *LogHandlerTestSuite) TestListWithLimit() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	logs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(logs, 1)
 }
 
@@ -218,7 +216,6 @@ func (s *LogHandlerTestSuite) TestListWithOffset() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	logs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(logs, 1)
 	s.Require().EqualValues(2, logs[0].Id)
 }
@@ -253,7 +250,6 @@ func (s *LogHandlerTestSuite) TestListWithLimitAndOffset() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	logs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(logs, 2)
 	s.Require().EqualValues(2, logs[0].Id)
 	s.Require().EqualValues(3, logs[1].Id)
@@ -288,7 +284,6 @@ func (s *LogHandlerTestSuite) TestListAscOrder() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	logs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(logs, 3)
 	s.Require().EqualValues(1, logs[0].Id)
 	s.Require().EqualValues(2, logs[1].Id)
@@ -324,7 +319,6 @@ func (s *LogHandlerTestSuite) TestListDescOrder() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	logs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(logs, 3)
 	s.Require().EqualValues(3, logs[0].Id)
 	s.Require().EqualValues(2, logs[1].Id)
@@ -367,7 +361,6 @@ func (s *LogHandlerTestSuite) TestListWithTxHash() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	logs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(logs, 1)
 	s.Require().EqualValues(1, logs[0].Id)
 }
@@ -408,7 +401,6 @@ func (s *LogHandlerTestSuite) TestListWithAddress() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	logs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(logs, 2)
 	s.Require().EqualValues(1, logs[0].Id)
 	s.Require().EqualValues(3, logs[1].Id)
@@ -445,7 +437,6 @@ func (s *LogHandlerTestSuite) TestListWithHeight() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	logs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(logs, 1)
 	s.Require().EqualValues(100, logs[0].Height)
 }
@@ -483,7 +474,6 @@ func (s *LogHandlerTestSuite) TestListWithTimeRange() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	logs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(logs, 2)
 }
 
@@ -513,7 +503,6 @@ func (s *LogHandlerTestSuite) TestListEmptyResult() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	logs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(logs, 0)
 }
 
@@ -773,7 +762,6 @@ func (s *LogHandlerTestSuite) TestListWithMultipleFilters() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	logs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(logs, 1)
 	s.Require().EqualValues(100, logs[0].Height)
 }
@@ -809,7 +797,6 @@ func (s *LogHandlerTestSuite) TestListWithDecode() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	logs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(logs, 1)
 }
 

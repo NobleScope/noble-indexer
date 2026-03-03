@@ -154,7 +154,6 @@ func (s *ProxyContractHandlerTestSuite) TestListSuccess() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	contracts := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(contracts, 3)
 
 	// Check first contract
@@ -208,7 +207,6 @@ func (s *ProxyContractHandlerTestSuite) TestListWithLimit() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	contracts := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(contracts, 1)
 }
 
@@ -242,7 +240,6 @@ func (s *ProxyContractHandlerTestSuite) TestListWithOffset() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	contracts := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(contracts, 1)
 }
 
@@ -276,7 +273,6 @@ func (s *ProxyContractHandlerTestSuite) TestListWithTypeFilter() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	contracts := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(contracts, 2)
 }
 
@@ -310,7 +306,6 @@ func (s *ProxyContractHandlerTestSuite) TestListWithStatusFilter() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	contracts := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(contracts, 2)
 }
 
@@ -342,7 +337,6 @@ func (s *ProxyContractHandlerTestSuite) TestListWithHeightFilter() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	contracts := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(contracts, 1)
 	s.Require().EqualValues(100, contracts[0].Height)
 }
@@ -380,7 +374,6 @@ func (s *ProxyContractHandlerTestSuite) TestListWithImplementationFilter() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	contracts := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(contracts, 1)
 	s.Require().NotNil(contracts[0].Implementation)
 }
@@ -414,7 +407,6 @@ func (s *ProxyContractHandlerTestSuite) TestListAscOrder() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	contracts := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(contracts, 3)
 }
 
@@ -440,7 +432,6 @@ func (s *ProxyContractHandlerTestSuite) TestListEmptyResult() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	contracts := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(contracts, 0)
 }
 

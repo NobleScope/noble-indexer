@@ -212,7 +212,6 @@ func (s *TokenHandlerTestSuite) TestListSuccess() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	tokens := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(tokens, 3)
 
 	s.Require().EqualValues(1, tokens[0].Id)
@@ -251,7 +250,6 @@ func (s *TokenHandlerTestSuite) TestListWithLimit() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	tokens := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(tokens, 1)
 }
 
@@ -285,7 +283,6 @@ func (s *TokenHandlerTestSuite) TestListWithOffset() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	tokens := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(tokens, 2)
 }
 
@@ -350,7 +347,6 @@ func (s *TokenHandlerTestSuite) TestListWithContract() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	tokens := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(tokens, 2)
 }
 
@@ -385,7 +381,6 @@ func (s *TokenHandlerTestSuite) TestListWithType() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	tokens := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(tokens, 2)
 }
 
@@ -411,7 +406,6 @@ func (s *TokenHandlerTestSuite) TestListEmptyResult() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	tokens := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(tokens, 0)
 }
 
@@ -595,7 +589,6 @@ func (s *TokenHandlerTestSuite) TestTransferListSuccess() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	transfers := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(transfers, 3)
 }
 
@@ -634,7 +627,6 @@ func (s *TokenHandlerTestSuite) TestTransferListWithFilters() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	transfers := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(transfers, 2)
 }
 
@@ -854,7 +846,6 @@ func (s *TokenHandlerTestSuite) TestTokenBalanceListSuccess() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	balances := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(balances, 3)
 }
 
@@ -893,7 +884,6 @@ func (s *TokenHandlerTestSuite) TestTokenBalanceListWithAddress() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	balances := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(balances, 2)
 }
 
@@ -932,7 +922,6 @@ func (s *TokenHandlerTestSuite) TestTokenBalanceListWithContract() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	balances := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(balances, 2)
 }
 
@@ -965,7 +954,6 @@ func (s *TokenHandlerTestSuite) TestTokenBalanceListWithTokenId() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	balances := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(balances, 1)
 }
 
@@ -1024,7 +1012,6 @@ func (s *TokenHandlerTestSuite) TestTokenBalanceListEmptyResult() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	balances := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(balances, 0)
 }
 

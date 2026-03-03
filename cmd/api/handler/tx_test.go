@@ -302,7 +302,6 @@ func (s *TxHandlerTestSuite) TestListSuccess() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	txs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(txs, 3)
 
 	s.Require().EqualValues(100, txs[0].Height)
@@ -356,7 +355,6 @@ func (s *TxHandlerTestSuite) TestListWithLimit() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	txs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(txs, 1)
 }
 
@@ -394,7 +392,6 @@ func (s *TxHandlerTestSuite) TestListWithOffset() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	txs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(txs, 1)
 	s.Require().EqualValues(2, txs[0].Index)
 }
@@ -434,7 +431,6 @@ func (s *TxHandlerTestSuite) TestListWithLimitAndOffset() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	txs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(txs, 2)
 	s.Require().EqualValues(1, txs[0].Index)
 	s.Require().EqualValues(2, txs[1].Index)
@@ -475,7 +471,6 @@ func (s *TxHandlerTestSuite) TestListAscOrder() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	txs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(txs, 3)
 	s.Require().EqualValues(0, txs[0].Index)
 	s.Require().EqualValues(1, txs[1].Index)
@@ -517,7 +512,6 @@ func (s *TxHandlerTestSuite) TestListDescOrder() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	txs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(txs, 3)
 	s.Require().EqualValues(2, txs[0].Index)
 	s.Require().EqualValues(1, txs[1].Index)
@@ -552,7 +546,6 @@ func (s *TxHandlerTestSuite) TestListEmptyResult() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	txs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(txs, 0)
 }
 
@@ -678,7 +671,6 @@ func (s *TxHandlerTestSuite) TestListByAddressId() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	txs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(txs, 2)
 }
 
@@ -784,7 +776,6 @@ func (s *TxHandlerTestSuite) TestTracesSuccess() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	traces := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(traces, 3)
 
 	s.Require().EqualValues(100, traces[0].Height)
@@ -831,7 +822,6 @@ func (s *TxHandlerTestSuite) TestTracesWithTxHash() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	traces := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(traces, 1)
 	s.Require().NotNil(traces[0].TxHash)
 	s.Require().Equal("0x010203", *traces[0].TxHash)
@@ -875,7 +865,6 @@ func (s *TxHandlerTestSuite) TestTracesWithAddressFrom() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	traces := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(traces, 3)
 }
 
@@ -917,7 +906,6 @@ func (s *TxHandlerTestSuite) TestTracesWithAddressTo() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	traces := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(traces, 2)
 }
 
@@ -958,7 +946,6 @@ func (s *TxHandlerTestSuite) TestTracesWithAddress() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	traces := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(traces, 2)
 }
 
@@ -993,7 +980,6 @@ func (s *TxHandlerTestSuite) TestTracesWithType() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	traces := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(traces, 3)
 }
 
@@ -1030,7 +1016,6 @@ func (s *TxHandlerTestSuite) TestTracesWithHeight() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	traces := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(traces, 3)
 }
 
@@ -1066,7 +1051,6 @@ func (s *TxHandlerTestSuite) TestTracesWithLimitAndOffset() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	traces := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(traces, 1)
 }
 
@@ -1101,7 +1085,6 @@ func (s *TxHandlerTestSuite) TestTracesWithSortAsc() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	traces := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(traces, 3)
 }
 
@@ -1127,7 +1110,6 @@ func (s *TxHandlerTestSuite) TestTracesEmptyResult() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	traces := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(traces, 0)
 }
 
@@ -1521,7 +1503,6 @@ func (s *TxHandlerTestSuite) TestListWithDecode() {
 	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
 	txs := body.Result
-	s.Require().NoError(err)
 	s.Require().Len(txs, 1)
 }
 
