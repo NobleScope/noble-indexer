@@ -35,7 +35,6 @@ func sortMultipleScope(q *bun.SelectQuery, fields []SortField) *bun.SelectQuery 
 }
 
 func sortTimeIDScope(q *bun.SelectQuery, sort sdk.SortOrder) *bun.SelectQuery {
-
 	if sort != sdk.SortOrderAsc && sort != sdk.SortOrderDesc {
 		sort = sdk.SortOrderAsc
 	}
@@ -52,8 +51,9 @@ func cursorTimeIDScope(q *bun.SelectQuery, sort sdk.SortOrder, cursorTime time.T
 		return q.Where("(time, id) > (?, ?)", cursorTime, cursorID)
 	case sdk.SortOrderDesc:
 		return q.Where("(time, id) < (?, ?)", cursorTime, cursorID)
+	default:
+		return q.Where("(time, id) > (?, ?)", cursorTime, cursorID)
 	}
-	return q
 }
 
 func cursorIDScope(q *bun.SelectQuery, sort sdk.SortOrder, cursorID uint64) *bun.SelectQuery {
@@ -65,8 +65,9 @@ func cursorIDScope(q *bun.SelectQuery, sort sdk.SortOrder, cursorID uint64) *bun
 		return q.Where("id > ?", cursorID)
 	case sdk.SortOrderDesc:
 		return q.Where("id < ?", cursorID)
+	default:
+		return q.Where("id > ?", cursorID)
 	}
-	return q
 }
 
 func addressListFilter(query *bun.SelectQuery, fltrs storage.AddressListFilter) *bun.SelectQuery {
