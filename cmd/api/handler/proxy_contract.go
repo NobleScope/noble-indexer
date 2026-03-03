@@ -34,6 +34,7 @@ type listProxyContracts struct {
 	Limit          int         `query:"limit"          validate:"omitempty,min=1,max=100"`
 	Offset         int         `query:"offset"         validate:"omitempty,min=0"`
 	Sort           string      `query:"sort"           validate:"omitempty,oneof=asc desc"`
+	SortBy         string      `query:"sort_by"        validate:"omitempty,oneof=id height"`
 	Height         uint64      `query:"height"         validate:"omitempty,min=1"`
 	Implementation string      `query:"implementation" validate:"omitempty,address"`
 	Type           StringArray `query:"type"           validate:"omitempty,dive,proxy_contract_type"`
@@ -52,9 +53,10 @@ func (req *listProxyContracts) ToFilters(
 		req.Sort = desc
 	}
 	filters := storage.ListProxyFilters{
-		Limit:  req.Limit,
-		Offset: req.Offset,
-		Sort:   pgSort(req.Sort),
+		Limit:     req.Limit,
+		Offset:    req.Offset,
+		Sort:      pgSort(req.Sort),
+		SortField: req.SortBy,
 	}
 
 	if req.Height != 0 {
@@ -86,7 +88,7 @@ func (req *listProxyContracts) ToFilters(
 		}
 	}
 
-	if req.Cursor != "" {
+	if req.Cursor != "" && (req.SortBy == "" || req.SortBy == "id") {
 		cursorID, err := helpers.DecodeIDCursor(req.Cursor)
 		if err != nil {
 			return filters, err
@@ -106,6 +108,7 @@ func (req *listProxyContracts) ToFilters(
 //	@Param			limit			query	integer	false	"Number of proxy contracts to return (default: 10)"																					minimum(1)	maximum(100)	default(10)
 //	@Param			offset			query	integer	false	"Number of proxy contracts to skip (default: 0)"																					minimum(0)	default(0)
 //	@Param			sort			query	string	false	"Sort order by deployment height (default: desc)"																					Enums(asc, desc)	default(desc)
+//	@Param			sort_by			query	string	false	"Field to sort by (default: id)"																									Enums(id, height)
 //	@Param			height			query	integer	false	"Filter by deployment block height"																									minimum(1)	example(12345)
 //	@Param			implementation	query	string	false	"Filter by implementation contract address"																							minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
 //	@Param			type			query	string	false	"Filter by proxy pattern (comma-separated list)"																					Enums(EIP1167, EIP7760, EIP7702, EIP1967, custom, clone_with_immutable_args)
@@ -137,7 +140,7 @@ func (handler *ProxyContractHandler) List(c echo.Context) error {
 	}
 
 	var cursor string
-	if len(contracts) > 0 {
+	if len(contracts) > 0 && (req.SortBy == "" || req.SortBy == "id") {
 		last := contracts[len(contracts)-1]
 		cursor = helpers.EncodeIDCursor(last.Id)
 	}

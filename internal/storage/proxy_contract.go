@@ -13,6 +13,7 @@ type ListProxyFilters struct {
 	Limit            int
 	Offset           int
 	Sort             storage.SortOrder
+	SortField        string
 	Height           pkgTypes.Level
 	ImplementationId uint64
 	Type             []types.ProxyType

@@ -662,6 +662,7 @@ func (s *ProxyContractHandlerTestSuite) TestListInvalidCursor() {
 func (s *ProxyContractHandlerTestSuite) TestListCursorWithFilters() {
 	q := make(url.Values)
 	q.Set("cursor", "AAAAAAAAAAo")
+	q.Set("sort_by", "id")
 	q.Set("type", "EIP1967")
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
@@ -673,6 +674,7 @@ func (s *ProxyContractHandlerTestSuite) TestListCursorWithFilters() {
 		FilteredList(gomock.Any(), gomock.Any()).
 		DoAndReturn(func(ctx context.Context, filters storage.ListProxyFilters) ([]storage.ProxyContract, error) {
 			s.Require().EqualValues(10, filters.CursorID)
+			s.Require().Equal("id", filters.SortField)
 			s.Require().Len(filters.Type, 1)
 			s.Require().Equal(types.EIP1967, filters.Type[0])
 			return []storage.ProxyContract{testProxyContract2}, nil
