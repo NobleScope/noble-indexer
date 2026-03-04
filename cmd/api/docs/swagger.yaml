@@ -678,7 +678,10 @@ paths:
         in: query
         name: only_contracts
         type: boolean
-      - description: Cursor for pagination (from previous response)
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes the id of the last
+          returned record. Cannot be used together with offset (returns 400). Only
+          supported when sort_by=id (default); returns 400 for other sort_by values.
         in: query
         name: cursor
         type: string
@@ -774,7 +777,9 @@ paths:
         minLength: 42
         name: address
         type: string
-      - description: Cursor for pagination (from previous response)
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes (timestamp, id) of
+          the last returned record. Cannot be used together with offset (returns 400).
         in: query
         name: cursor
         type: string
@@ -829,7 +834,9 @@ paths:
         in: query
         name: stats
         type: boolean
-      - description: Cursor for pagination (from previous response)
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes (timestamp, id) of
+          the last returned record. Cannot be used together with offset (returns 400).
         in: query
         name: cursor
         type: string
@@ -1045,7 +1052,10 @@ paths:
         minLength: 42
         name: deployer
         type: string
-      - description: Cursor for pagination (from previous response)
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes the id of the last
+          returned record. Cannot be used together with offset (returns 400). Only
+          supported when sort_by=id (default); returns 400 for other sort_by values.
         in: query
         name: cursor
         type: string
@@ -1166,7 +1176,9 @@ paths:
         in: query
         name: sort
         type: string
-      - description: Cursor for pagination (from previous response)
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes the id of the last
+          returned record. Cannot be used together with offset (returns 400).
         in: query
         name: cursor
         type: string
@@ -1297,7 +1309,9 @@ paths:
         in: query
         name: decode
         type: boolean
-      - description: Cursor for pagination (from previous response)
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes (timestamp, id) of
+          the last returned record. Cannot be used together with offset (returns 400).
         in: query
         name: cursor
         type: string
@@ -1387,7 +1401,10 @@ paths:
         in: query
         name: status
         type: string
-      - description: Cursor for pagination (from previous response)
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes the id of the last
+          returned record. Cannot be used together with offset (returns 400). Only
+          supported when sort_by=id (default); returns 400 for other sort_by values.
         in: query
         name: cursor
         type: string
@@ -1584,7 +1601,9 @@ paths:
         in: query
         name: sort
         type: string
-      - description: Cursor for pagination (from previous response)
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes the id of the last
+          returned record. Cannot be used together with offset (returns 400).
         in: query
         name: cursor
         type: string
@@ -1735,7 +1754,9 @@ paths:
         in: query
         name: decode
         type: boolean
-      - description: Cursor for pagination (from previous response)
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes (timestamp, id) of
+          the last returned record. Cannot be used together with offset (returns 400).
         in: query
         name: cursor
         type: string
@@ -1845,7 +1866,9 @@ paths:
         in: query
         name: token_id
         type: string
-      - description: Cursor for pagination (from previous response)
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes (timestamp, id) of
+          the last returned record. Cannot be used together with offset (returns 400).
         in: query
         name: cursor
         type: string
@@ -1990,7 +2013,9 @@ paths:
         in: query
         name: decode
         type: boolean
-      - description: Cursor for pagination (from previous response)
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes (timestamp, id) of
+          the last returned record. Cannot be used together with offset (returns 400).
         in: query
         name: cursor
         type: string
@@ -2156,7 +2181,9 @@ paths:
         in: query
         name: sort
         type: string
-      - description: Cursor for pagination (from previous response)
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes (timestamp, id) of
+          the last returned record. Cannot be used together with offset (returns 400).
         in: query
         name: cursor
         type: string

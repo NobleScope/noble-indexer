@@ -52,7 +52,7 @@ func (p *beaconWithdrawalListRequest) SetDefault() {
 //	@Param			sort	query	string	false	"Sort order by block height (default: asc)"				Enums(asc, desc)	default(asc)
 //	@Param			height	query	integer	false	"Filter by block height"								minimum(0)	example(12345)
 //	@Param			address	query	string	false	"Filter by recipient address (hexadecimal with 0x prefix)"	minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
-//	@Param			cursor	query	string	false	"Cursor for pagination (from previous response)"
+//	@Param			cursor	query	string	false	"Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes (timestamp, id) of the last returned record. Cannot be used together with offset (returns 400)."
 //	@Produce		json
 //	@Success		200	{object}	CursorResponse	"List of beacon withdrawals"
 //	@Failure		400	{object}	Error						"Invalid request parameters"

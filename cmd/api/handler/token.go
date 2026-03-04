@@ -66,7 +66,7 @@ func (req *tokenListRequest) SetDefault() {
 //	@Param			offset			query	integer	false	"Number of tokens to skip (default: 0)"				minimum(0)	default(0)
 //	@Param			type			query	string	false	"Filter by token standard (comma-separated list)"	Enums(ERC20, ERC721, ERC1155)
 //	@Param			sort			query	string	false	"Sort order by creation time (default: desc)"		Enums(asc, desc)	default(desc)
-//	@Param			cursor			query	string	false	"Cursor for pagination (from previous response)"
+//	@Param			cursor			query	string	false	"Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes the id of the last returned record. Cannot be used together with offset (returns 400)."
 //	@Produce		json
 //	@Success		200	{object}	CursorResponse	"List of tokens"
 //	@Failure		400	{object}	Error			"Invalid request parameters"
@@ -220,7 +220,7 @@ func (p *transferListRequest) SetDefault() {
 //	@Param			address_to		query	string	false	"Filter by recipient address"								minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
 //	@Param			contract		query	string	false	"Filter by token contract address"							minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
 //	@Param			token_id		query	string	false	"Filter by token ID"										example(0)
-//	@Param			cursor			query	string	false	"Cursor for pagination (from previous response)"
+//	@Param			cursor			query	string	false	"Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes (timestamp, id) of the last returned record. Cannot be used together with offset (returns 400)."
 //	@Produce		json
 //	@Success		200	{object}	CursorResponse	"List of token transfers"
 //	@Failure		400	{object}	Error				"Invalid request parameters"

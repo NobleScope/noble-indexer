@@ -64,7 +64,7 @@ func (p *contractListRequest) SetDefault() {
 //	@Param			is_verified	query	boolean	false	"Filter to show only verified contracts (default: false)"					default(false)
 //	@Param			tx_hash		query	string	false	"Filter by deployment transaction hash (hexadecimal with 0x prefix)"		minlength(66)	maxlength(66)	example(0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef)
 //	@Param			deployer	query	string	false	"Filter by deployer address (hexadecimal with 0x prefix)"					minlength(42)	maxlength(42)
-//	@Param			cursor		query	string	false	"Cursor for pagination (from previous response)"
+//	@Param			cursor		query	string	false	"Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes the id of the last returned record. Cannot be used together with offset (returns 400). Only supported when sort_by=id (default); returns 400 for other sort_by values."
 //	@Produce		json
 //	@Success		200	{object}	CursorResponse	"List of smart contracts"
 //	@Failure		400	{object}	Error				"Invalid request parameters"
@@ -204,7 +204,7 @@ func (p *getSourcesRequest) SetDefault() {
 //	@Param			limit	query	integer	false	"Number of source files to return (default: 10)"											minimum(1)	maximum(100)	default(10)
 //	@Param			offset	query	integer	false	"Number of source files to skip (default: 0)"												minimum(0)	default(0)
 //	@Param			sort	query	string	false	"Sort order (default: asc)"																	Enums(asc, desc)	default(asc)
-//	@Param			cursor	query	string	false	"Cursor for pagination (from previous response)"
+//	@Param			cursor	query	string	false	"Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes the id of the last returned record. Cannot be used together with offset (returns 400)."
 //	@Produce		json
 //	@Success		200	{object}	CursorResponse	"List of source code files"
 //	@Success		204									"Contract not found or not verified"

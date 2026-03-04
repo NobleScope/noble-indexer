@@ -119,7 +119,7 @@ func (req *listProxyContracts) ToFilters(
 //	@Param			implementation	query	string	false	"Filter by implementation contract address"																							minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
 //	@Param			type			query	string	false	"Filter by proxy pattern (comma-separated list)"																					Enums(EIP1167, EIP7760, EIP7702, EIP1967, custom, clone_with_immutable_args)
 //	@Param			status			query	string	false	"Filter by resolution status: new (just detected), resolved (implementation found), error (failed to resolve) (comma-separated)"	Enums(new, resolved, error)
-//	@Param			cursor			query	string	false	"Cursor for pagination (from previous response)"
+//	@Param			cursor			query	string	false	"Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes the id of the last returned record. Cannot be used together with offset (returns 400). Only supported when sort_by=id (default); returns 400 for other sort_by values."
 //	@Produce		json
 //	@Success		200	{object}	CursorResponse	"List of proxy contracts"
 //	@Failure		400	{object}	Error					"Invalid request parameters"
@@ -130,6 +130,7 @@ func (handler *ProxyContractHandler) List(c echo.Context) error {
 	if err != nil {
 		return badRequestError(c, err)
 	}
+
 	filters, err := req.ToFilters(c.Request().Context(), handler.addresses)
 	if err != nil {
 		return badRequestError(c, err)

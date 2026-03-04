@@ -51,7 +51,7 @@ func (p *addressListRequest) SetDefault() {
 //	@Param			sort			query	string	false	"Sort order (default: asc)"													Enums(asc, desc)	default(asc)
 //	@Param			sort_by			query	string	false	"Field to sort by (default: id)"											Enums(id, value, last_height)
 //	@Param			only_contracts	query	boolean	false	"If true, return only addresses that are smart contracts (default: false)"	default(false)
-//	@Param			cursor			query	string	false	"Cursor for pagination (from previous response)"
+//	@Param			cursor			query	string	false	"Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes the id of the last returned record. Cannot be used together with offset (returns 400). Only supported when sort_by=id (default); returns 400 for other sort_by values."
 //	@Produce		json
 //	@Success		200	{object}	CursorResponse	"List of addresses with their balances"
 //	@Failure		400	{object}	Error				"Invalid request parameters"

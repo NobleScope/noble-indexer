@@ -113,7 +113,7 @@ func (req *getTxTraces) SetDefault() {
 //	@Param			call_type		query	string	false	"Filter by call type (comma-separated list)"				Enums(call, delegatecall, staticcall, callcode)
 //	@Param			sort			query	string	false	"Sort order (default: desc)"								Enums(asc, desc)	default(desc)
 //	@Param			decode			query	boolean	false	"Decode trace input using contract ABI"						default(false)
-//	@Param			cursor			query	string	false	"Cursor for pagination (from previous response)"
+//	@Param			cursor			query	string	false	"Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes (timestamp, id) of the last returned record. Cannot be used together with offset (returns 400)."
 //	@Produce		json
 //	@Success		200	{object}	CursorResponse	"List of execution traces"
 //	@Failure		400	{object}	Error			"Invalid request parameters"
@@ -268,7 +268,7 @@ func (req *listTxs) SetDefault() {
 //	@Param			time_to			query	integer	false	"Filter by timestamp to (Unix timestamp)"			minimum(1)	example(1692892095)
 //	@Param			sort			query	string	false	"Sort order by timestamp (default: desc)"			Enums(asc, desc)	default(desc)
 //	@Param			decode			query	boolean	false	"Decode transaction input using contract ABI"		default(false)
-//	@Param			cursor			query	string	false	"Cursor for pagination (from previous response)"
+//	@Param			cursor			query	string	false	"Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes (timestamp, id) of the last returned record. Cannot be used together with offset (returns 400)."
 //	@Produce		json
 //	@Success		200	{object}	CursorResponse	"List of transactions"
 //	@Failure		400	{object}	Error					"Invalid request parameters"

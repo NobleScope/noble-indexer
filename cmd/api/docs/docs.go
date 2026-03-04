@@ -84,7 +84,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Cursor for pagination (from previous response)",
+                        "description": "Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes the id of the last returned record. Cannot be used together with offset (returns 400). Only supported when sort_by=id (default); returns 400 for other sort_by values.",
                         "name": "cursor",
                         "in": "query"
                     }
@@ -217,7 +217,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Cursor for pagination (from previous response)",
+                        "description": "Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes (timestamp, id) of the last returned record. Cannot be used together with offset (returns 400).",
                         "name": "cursor",
                         "in": "query"
                     }
@@ -293,7 +293,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Cursor for pagination (from previous response)",
+                        "description": "Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes (timestamp, id) of the last returned record. Cannot be used together with offset (returns 400).",
                         "name": "cursor",
                         "in": "query"
                     }
@@ -593,7 +593,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Cursor for pagination (from previous response)",
+                        "description": "Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes the id of the last returned record. Cannot be used together with offset (returns 400). Only supported when sort_by=id (default); returns 400 for other sort_by values.",
                         "name": "cursor",
                         "in": "query"
                     }
@@ -765,7 +765,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Cursor for pagination (from previous response)",
+                        "description": "Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes the id of the last returned record. Cannot be used together with offset (returns 400).",
                         "name": "cursor",
                         "in": "query"
                     }
@@ -943,7 +943,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Cursor for pagination (from previous response)",
+                        "description": "Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes (timestamp, id) of the last returned record. Cannot be used together with offset (returns 400).",
                         "name": "cursor",
                         "in": "query"
                     }
@@ -1064,7 +1064,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Cursor for pagination (from previous response)",
+                        "description": "Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes the id of the last returned record. Cannot be used together with offset (returns 400). Only supported when sort_by=id (default); returns 400 for other sort_by values.",
                         "name": "cursor",
                         "in": "query"
                     }
@@ -1331,7 +1331,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Cursor for pagination (from previous response)",
+                        "description": "Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes the id of the last returned record. Cannot be used together with offset (returns 400).",
                         "name": "cursor",
                         "in": "query"
                     }
@@ -1533,7 +1533,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Cursor for pagination (from previous response)",
+                        "description": "Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes (timestamp, id) of the last returned record. Cannot be used together with offset (returns 400).",
                         "name": "cursor",
                         "in": "query"
                     }
@@ -1681,7 +1681,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Cursor for pagination (from previous response)",
+                        "description": "Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes (timestamp, id) of the last returned record. Cannot be used together with offset (returns 400).",
                         "name": "cursor",
                         "in": "query"
                     }
@@ -1878,7 +1878,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Cursor for pagination (from previous response)",
+                        "description": "Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes (timestamp, id) of the last returned record. Cannot be used together with offset (returns 400).",
                         "name": "cursor",
                         "in": "query"
                     }
@@ -2108,7 +2108,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Cursor for pagination (from previous response)",
+                        "description": "Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes (timestamp, id) of the last returned record. Cannot be used together with offset (returns 400).",
                         "name": "cursor",
                         "in": "query"
                     }
