@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/cmd/api/helpers"
 	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/labstack/echo/v4"
@@ -37,6 +38,7 @@ type userOpListRequest struct {
 	Bundler   string  `query:"bundler"   validate:"omitempty,address"`
 	Paymaster string  `query:"paymaster" validate:"omitempty,address"`
 	Success   *bool   `query:"success"   validate:"omitempty"`
+	Cursor    string  `query:"cursor"    validate:"omitempty"`
 
 	From int64 `example:"1692892095" query:"from" swaggertype:"integer" validate:"omitempty,min=1"`
 	To   int64 `example:"1692892095" query:"to"   swaggertype:"integer" validate:"omitempty,min=1"`
@@ -67,8 +69,9 @@ func (req *userOpListRequest) SetDefault() {
 //	@Param			from		query	integer	false	"Filter by timestamp from (Unix timestamp)"					minimum(1)
 //	@Param			to			query	integer	false	"Filter by timestamp to (Unix timestamp)"					minimum(1)
 //	@Param			sort		query	string	false	"Sort order by timestamp (default: desc)"					Enums(asc, desc)	default(desc)
+//	@Param			cursor		query	string	false	"Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes (timestamp, id) of the last returned record. Cannot be used together with offset (returns 400)."
 //	@Produce		json
-//	@Success		200	{array}		responses.UserOp	"List of user operations"
+//	@Success		200	{object}	CursorResponse	"List of user operations"
 //	@Failure		400	{object}	Error				"Invalid request parameters"
 //	@Failure		500	{object}	Error				"Internal server error"
 //	@Router			/user_ops [get]
@@ -83,6 +86,18 @@ func (handler *UserOpHandler) List(c echo.Context) error {
 		Limit:  req.Limit,
 		Offset: req.Offset,
 		Sort:   pgSort(req.Sort),
+	}
+
+	if req.Cursor != "" {
+		if req.Offset > 0 {
+			return badRequestError(c, errCursorWithOffset)
+		}
+		cursorTime, cursorID, err := helpers.DecodeTimeIDCursor(req.Cursor)
+		if err != nil {
+			return badRequestError(c, err)
+		}
+		filters.CursorTime = cursorTime
+		filters.CursorID = cursorID
 	}
 
 	if req.Height != nil {
@@ -152,7 +167,13 @@ func (handler *UserOpHandler) List(c echo.Context) error {
 		response[i] = responses.NewUserOp(userOps[i])
 	}
 
-	return returnArray(c, response)
+	var cursor string
+	if len(userOps) > 0 {
+		last := userOps[len(userOps)-1]
+		cursor = helpers.EncodeTimeIDCursor(last.Time, last.Id)
+	}
+
+	return returnCursorList(c, response, cursor)
 }
 
 type getUserOpRequest struct {

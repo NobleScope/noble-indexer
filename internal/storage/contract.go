@@ -19,6 +19,7 @@ type ContractListFilter struct {
 	IsVerified bool
 	TxId       *uint64
 	DeployerId *uint64
+	CursorID   uint64
 }
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed

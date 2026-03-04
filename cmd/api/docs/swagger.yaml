@@ -1,5 +1,12 @@
 basePath: /v1
 definitions:
+  handler.CursorResponse:
+    description: Paginated list response with cursor
+    properties:
+      cursor:
+        type: string
+      result: {}
+    type: object
   handler.Error:
     properties:
       message:
@@ -46,29 +53,6 @@ definitions:
       value:
         example: "10000000000"
         type: string
-    type: object
-  responses.BeaconWithdrawal:
-    description: Beacon chain withdrawal transferring ETH from a validator to an execution
-      layer address
-    properties:
-      address:
-        example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
-        type: string
-      amount:
-        example: "1000000000000000000"
-        type: string
-      height:
-        example: 100
-        type: integer
-      index:
-        example: 1
-        type: integer
-      time:
-        example: "2023-07-04T03:10:57+00:00"
-        type: string
-      validator_index:
-        example: 100000
-        type: integer
     type: object
   responses.Block:
     description: Noble block information
@@ -290,71 +274,6 @@ definitions:
           type: string
         type: array
     type: object
-  responses.Log:
-    description: Token transfer information
-    properties:
-      address:
-        example: "0x0000000000000000000000000000000000000001"
-        type: string
-      data:
-        example: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        type: string
-      decoded:
-        type: object
-      height:
-        example: 100
-        type: integer
-      id:
-        example: 0
-        type: integer
-      index:
-        example: 1
-        type: integer
-      name:
-        example: 0xff64905f73a67fb594e0f940a8075a860db489ad991e032f48c81123eb52d60b
-        type: string
-      time:
-        example: "2026-01-01T01:01:01+00:00"
-        format: date-time
-        type: string
-      topics:
-        items:
-          type: string
-        type: array
-      tx_hash:
-        example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22c0ee59781e54858a7d
-        type: string
-    type: object
-  responses.ProxyContract:
-    description: Proxy contract information
-    properties:
-      contract:
-        example: "0x0000000000000000000000000000000000000000"
-        type: string
-      height:
-        example: 100
-        type: integer
-      implementation:
-        example: "0x0000000000000000000000000000000000000001"
-        type: string
-      status:
-        enum:
-        - new
-        - resolved
-        - error
-        example: resolved
-        type: string
-      type:
-        enum:
-        - EIP1167
-        - EIP7760
-        - EIP7702
-        - EIP1967
-        - custom
-        - clone_with_immutable_args
-        example: EIP1967
-        type: string
-    type: object
   responses.SearchItem:
     description: Search result item
     properties:
@@ -372,26 +291,6 @@ definitions:
         - token
         example: address
         type: string
-    type: object
-  responses.Source:
-    description: Contract source information
-    properties:
-      content:
-        example: Source content
-        type: string
-      id:
-        example: 321
-        type: integer
-      license:
-        example: License
-        type: string
-      name:
-        example: Contract source name
-        type: string
-      urls:
-        items:
-          type: string
-        type: array
     type: object
   responses.State:
     description: Blockchain indexer state information
@@ -473,95 +372,6 @@ definitions:
         type: integer
       type:
         example: ERC20
-        type: string
-    type: object
-  responses.TokenBalance:
-    description: Token balance information
-    properties:
-      address:
-        example: "0x0000000000000000000000000000000000000001"
-        type: string
-      token:
-        $ref: '#/definitions/responses.Token'
-      value:
-        example: "123456789"
-        type: string
-    type: object
-  responses.Trace:
-    description: Transaction execution trace information
-    properties:
-      amount:
-        example: "123456789123456789"
-        type: string
-      call_type:
-        enum:
-        - call
-        - delegatecall
-        - staticcall
-        - callcode
-        example: delegatecall
-        type: string
-      contract:
-        example: "0x0000000000000000000000000000000000000002"
-        type: string
-      creation_method:
-        example: create
-        type: string
-      decoded:
-        type: object
-      from_address:
-        example: "0x0000000000000000000000000000000000000001"
-        type: string
-      gas_limit:
-        example: "2100"
-        type: string
-      gas_used:
-        example: "21000"
-        type: string
-      height:
-        example: 100
-        type: integer
-      init_hash:
-        example: 0x6060604052341561000f57600080fd5b
-        type: string
-      input:
-        example: hex input data
-        type: string
-      output:
-        example: "0x0"
-        type: string
-      subtraces:
-        example: 0
-        type: integer
-      time:
-        example: "2023-07-04T03:10:57+00:00"
-        type: string
-      to_address:
-        example: 0x123456789abcdef123456789abcdef123456789abc
-        type: string
-      trace_address:
-        example:
-        - 1
-        - 2
-        - 3
-        items:
-          type: integer
-        type: array
-      tx_hash:
-        example: 0x0764012270afacd3b101bcfadaaa9fc3190d04ed90ff22
-        type: string
-      tx_position:
-        example: 123456789
-        type: integer
-      type:
-        enum:
-        - call
-        - create
-        - create2
-        - selfdestruct
-        - reward
-        - suicide
-        example: call
         type: string
     type: object
   responses.TraceTreeItem:
@@ -868,15 +678,20 @@ paths:
         in: query
         name: only_contracts
         type: boolean
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes the id of the last
+          returned record. Cannot be used together with offset (returns 400). Only
+          supported when sort_by=id (default); returns 400 for other sort_by values.
+        in: query
+        name: cursor
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: List of addresses with their balances
           schema:
-            items:
-              $ref: '#/definitions/responses.Address'
-            type: array
+            $ref: '#/definitions/handler.CursorResponse'
         "400":
           description: Invalid request parameters
           schema:
@@ -962,15 +777,19 @@ paths:
         minLength: 42
         name: address
         type: string
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes (timestamp, id) of
+          the last returned record. Cannot be used together with offset (returns 400).
+        in: query
+        name: cursor
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: List of beacon withdrawals
           schema:
-            items:
-              $ref: '#/definitions/responses.BeaconWithdrawal'
-            type: array
+            $ref: '#/definitions/handler.CursorResponse'
         "400":
           description: Invalid request parameters
           schema:
@@ -1015,15 +834,19 @@ paths:
         in: query
         name: stats
         type: boolean
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes (timestamp, id) of
+          the last returned record. Cannot be used together with offset (returns 400).
+        in: query
+        name: cursor
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: List of blocks
           schema:
-            items:
-              $ref: '#/definitions/responses.Block'
-            type: array
+            $ref: '#/definitions/handler.CursorResponse'
         "400":
           description: Invalid request parameters
           schema:
@@ -1146,9 +969,7 @@ paths:
         "200":
           description: List of transactions in the block
           schema:
-            items:
-              $ref: '#/definitions/responses.Transaction'
-            type: array
+            $ref: '#/definitions/handler.CursorResponse'
         "400":
           description: Invalid block height
           schema:
@@ -1231,15 +1052,20 @@ paths:
         minLength: 42
         name: deployer
         type: string
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes the id of the last
+          returned record. Cannot be used together with offset (returns 400). Only
+          supported when sort_by=id (default); returns 400 for other sort_by values.
+        in: query
+        name: cursor
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: List of smart contracts
           schema:
-            items:
-              $ref: '#/definitions/responses.Contract'
-            type: array
+            $ref: '#/definitions/handler.CursorResponse'
         "400":
           description: Invalid request parameters
           schema:
@@ -1342,15 +1168,27 @@ paths:
         minimum: 0
         name: offset
         type: integer
+      - default: asc
+        description: 'Sort order (default: asc)'
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes the id of the last
+          returned record. Cannot be used together with offset (returns 400).
+        in: query
+        name: cursor
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: List of source code files
           schema:
-            items:
-              $ref: '#/definitions/responses.Source'
-            type: array
+            $ref: '#/definitions/handler.CursorResponse'
         "204":
           description: Contract not found or not verified
         "400":
@@ -1471,15 +1309,19 @@ paths:
         in: query
         name: decode
         type: boolean
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes (timestamp, id) of
+          the last returned record. Cannot be used together with offset (returns 400).
+        in: query
+        name: cursor
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: List of event logs
           schema:
-            items:
-              $ref: '#/definitions/responses.Log'
-            type: array
+            $ref: '#/definitions/handler.CursorResponse'
         "400":
           description: Invalid request parameters
           schema:
@@ -1519,6 +1361,13 @@ paths:
         in: query
         name: sort
         type: string
+      - description: 'Field to sort by (default: id)'
+        enum:
+        - id
+        - height
+        in: query
+        name: sort_by
+        type: string
       - description: Filter by deployment block height
         example: 12345
         in: query
@@ -1552,15 +1401,20 @@ paths:
         in: query
         name: status
         type: string
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes the id of the last
+          returned record. Cannot be used together with offset (returns 400). Only
+          supported when sort_by=id (default); returns 400 for other sort_by values.
+        in: query
+        name: cursor
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: List of proxy contracts
           schema:
-            items:
-              $ref: '#/definitions/responses.ProxyContract'
-            type: array
+            $ref: '#/definitions/handler.CursorResponse'
         "400":
           description: Invalid request parameters
           schema:
@@ -1693,9 +1547,7 @@ paths:
         "200":
           description: List of token balances
           schema:
-            items:
-              $ref: '#/definitions/responses.TokenBalance'
-            type: array
+            $ref: '#/definitions/handler.CursorResponse'
         "400":
           description: Invalid request parameters
           schema:
@@ -1749,15 +1601,19 @@ paths:
         in: query
         name: sort
         type: string
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes the id of the last
+          returned record. Cannot be used together with offset (returns 400).
+        in: query
+        name: cursor
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: List of tokens
           schema:
-            items:
-              $ref: '#/definitions/responses.Token'
-            type: array
+            $ref: '#/definitions/handler.CursorResponse'
         "400":
           description: Invalid request parameters
           schema:
@@ -1898,15 +1754,19 @@ paths:
         in: query
         name: decode
         type: boolean
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes (timestamp, id) of
+          the last returned record. Cannot be used together with offset (returns 400).
+        in: query
+        name: cursor
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: List of execution traces
           schema:
-            items:
-              $ref: '#/definitions/responses.Trace'
-            type: array
+            $ref: '#/definitions/handler.CursorResponse'
         "400":
           description: Invalid request parameters
           schema:
@@ -2006,15 +1866,19 @@ paths:
         in: query
         name: token_id
         type: string
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes (timestamp, id) of
+          the last returned record. Cannot be used together with offset (returns 400).
+        in: query
+        name: cursor
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: List of token transfers
           schema:
-            items:
-              $ref: '#/definitions/responses.Transfer'
-            type: array
+            $ref: '#/definitions/handler.CursorResponse'
         "400":
           description: Invalid request parameters
           schema:
@@ -2149,15 +2013,19 @@ paths:
         in: query
         name: decode
         type: boolean
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes (timestamp, id) of
+          the last returned record. Cannot be used together with offset (returns 400).
+        in: query
+        name: cursor
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: List of transactions
           schema:
-            items:
-              $ref: '#/definitions/responses.Transaction'
-            type: array
+            $ref: '#/definitions/handler.CursorResponse'
         "400":
           description: Invalid request parameters
           schema:
@@ -2313,15 +2181,19 @@ paths:
         in: query
         name: sort
         type: string
+      - description: Opaque cursor for keyset pagination. Base64url-encoded value
+          from the previous response's 'cursor' field. Encodes (timestamp, id) of
+          the last returned record. Cannot be used together with offset (returns 400).
+        in: query
+        name: cursor
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: List of user operations
           schema:
-            items:
-              $ref: '#/definitions/responses.UserOp'
-            type: array
+            $ref: '#/definitions/handler.CursorResponse'
         "400":
           description: Invalid request parameters
           schema:

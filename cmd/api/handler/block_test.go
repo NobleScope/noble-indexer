@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/cmd/api/helpers"
 	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/NobleScope/noble-indexer/internal/storage/mock"
 	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
@@ -225,9 +226,13 @@ func (s *BlockTestSuite) TestList() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var blocks []responses.Block
-	err := json.NewDecoder(rec.Body).Decode(&blocks)
+	var body struct {
+		Result []responses.Block `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	blocks := body.Result
 	s.Require().Len(blocks, 1)
 	s.Require().EqualValues(100, blocks[0].Height)
 	s.Require().Equal(testTime, blocks[0].Time)
@@ -270,9 +275,13 @@ func (s *BlockTestSuite) TestListWithStats() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var blocks []responses.Block
-	err := json.NewDecoder(rec.Body).Decode(&blocks)
+	var body struct {
+		Result []responses.Block `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	blocks := body.Result
 	s.Require().Len(blocks, 1)
 	s.Require().EqualValues(100, blocks[0].Height)
 	s.Require().Equal(testTime, blocks[0].Time)
@@ -295,4 +304,79 @@ func (s *BlockTestSuite) TestListWithStats() {
 	s.Require().EqualValues(testTime, blocks[0].Stats.Time)
 	s.Require().EqualValues(5, blocks[0].Stats.TxCount)
 	s.Require().EqualValues(100, blocks[0].Stats.BlockTime)
+}
+
+// TestListWithCursor tests cursor-based pagination for block list
+func (s *BlockTestSuite) TestListWithCursor() {
+	q := make(url.Values)
+	q.Set("cursor", helpers.EncodeTimeIDCursor(testTime, 1))
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/block")
+
+	s.block.EXPECT().
+		Filter(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(ctx context.Context, filter storage.BlockListFilter) ([]storage.Block, error) {
+			s.Require().EqualValues(1, filter.CursorID)
+			s.Require().False(filter.CursorTime.IsZero())
+			return []storage.Block{testBlock}, nil
+		}).
+		Times(1)
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var body struct {
+		Result []responses.Block `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	s.Require().Len(body.Result, 1)
+	s.Require().NotEmpty(body.Cursor)
+
+	cursorTime, cursorID, err := helpers.DecodeTimeIDCursor(body.Cursor)
+	s.Require().NoError(err)
+	s.Require().EqualValues(testBlock.Id, cursorID)
+	s.Require().Equal(testBlock.Time.UTC(), cursorTime.UTC())
+}
+
+// TestListInvalidCursor tests handling of invalid cursor for block list
+func (s *BlockTestSuite) TestListInvalidCursor() {
+	q := make(url.Values)
+	q.Set("cursor", "not-valid-base64!!!")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/block")
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusBadRequest, rec.Code)
+}
+
+// TestListEmptyCursor tests that empty result returns empty cursor
+func (s *BlockTestSuite) TestListEmptyCursor() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/block")
+
+	s.block.EXPECT().
+		Filter(gomock.Any(), gomock.Any()).
+		Return([]storage.Block{}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var body struct {
+		Result []responses.Block `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	s.Require().Empty(body.Cursor)
 }

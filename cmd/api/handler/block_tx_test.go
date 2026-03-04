@@ -171,9 +171,13 @@ func (s *TxTestSuite) TestTxsList() {
 	s.Require().NoError(s.handler.TransactionsList(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var txs []responses.Transaction
-	err := json.NewDecoder(rec.Body).Decode(&txs)
+	var body struct {
+		Result []responses.Transaction `json:"result"`
+		Cursor string                  `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	txs := body.Result
 	s.Require().Len(txs, 3)
 
 	s.Require().EqualValues(100, txs[0].Height)
@@ -219,9 +223,13 @@ func (s *TxTestSuite) TestTxsListWithLimit() {
 	s.Require().NoError(s.handler.TransactionsList(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var txs []responses.Transaction
-	err := json.NewDecoder(rec.Body).Decode(&txs)
+	var body struct {
+		Result []responses.Transaction `json:"result"`
+		Cursor string                  `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	txs := body.Result
 	s.Require().Len(txs, 1)
 }
 
@@ -248,9 +256,13 @@ func (s *TxTestSuite) TestTxsListWithOffset() {
 	s.Require().NoError(s.handler.TransactionsList(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var txs []responses.Transaction
-	err := json.NewDecoder(rec.Body).Decode(&txs)
+	var body struct {
+		Result []responses.Transaction `json:"result"`
+		Cursor string                  `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	txs := body.Result
 	s.Require().Len(txs, 1)
 	s.Require().EqualValues(2, txs[0].Index)
 }
@@ -279,9 +291,13 @@ func (s *TxTestSuite) TestTxsListWithLimitAndOffset() {
 	s.Require().NoError(s.handler.TransactionsList(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var txs []responses.Transaction
-	err := json.NewDecoder(rec.Body).Decode(&txs)
+	var body struct {
+		Result []responses.Transaction `json:"result"`
+		Cursor string                  `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	txs := body.Result
 	s.Require().Len(txs, 2)
 	s.Require().EqualValues(1, txs[0].Index)
 	s.Require().EqualValues(2, txs[1].Index)
@@ -311,9 +327,13 @@ func (s *TxTestSuite) TestTxsListDescOrder() {
 	s.Require().NoError(s.handler.TransactionsList(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var txs []responses.Transaction
-	err := json.NewDecoder(rec.Body).Decode(&txs)
+	var body struct {
+		Result []responses.Transaction `json:"result"`
+		Cursor string                  `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	txs := body.Result
 	s.Require().Len(txs, 3)
 	s.Require().EqualValues(2, txs[0].Index)
 	s.Require().EqualValues(1, txs[1].Index)
@@ -337,9 +357,13 @@ func (s *TxTestSuite) TestTxsListEmptyResult() {
 	s.Require().NoError(s.handler.TransactionsList(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var txs []responses.Transaction
-	err := json.NewDecoder(rec.Body).Decode(&txs)
+	var body struct {
+		Result []responses.Transaction `json:"result"`
+		Cursor string                  `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	txs := body.Result
 	s.Require().Len(txs, 0)
 }
 
@@ -439,9 +463,13 @@ func (s *TxTestSuite) TestTxsOnlyFromAddress() {
 	s.Require().NoError(s.handler.TransactionsList(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var txs []responses.Transaction
-	err := json.NewDecoder(rec.Body).Decode(&txs)
+	var body struct {
+		Result []responses.Transaction `json:"result"`
+		Cursor string                  `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	txs := body.Result
 	s.Require().Len(txs, 1)
 	s.Require().Equal(testAddressHex1.Hex(), txs[0].FromAddress)
 	s.Require().Nil(txs[0].ToAddress)

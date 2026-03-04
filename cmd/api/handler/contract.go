@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/cmd/api/helpers"
 	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/labstack/echo/v4"
@@ -38,6 +39,7 @@ type contractListRequest struct {
 	IsVerified bool   `query:"is_verified" validate:"omitempty"`
 	TxHash     string `query:"tx_hash"     validate:"omitempty,tx_hash"`
 	Deployer   string `query:"deployer"    validate:"omitempty,address"`
+	Cursor     string `query:"cursor"      validate:"omitempty"`
 }
 
 func (p *contractListRequest) SetDefault() {
@@ -62,8 +64,9 @@ func (p *contractListRequest) SetDefault() {
 //	@Param			is_verified	query	boolean	false	"Filter to show only verified contracts (default: false)"					default(false)
 //	@Param			tx_hash		query	string	false	"Filter by deployment transaction hash (hexadecimal with 0x prefix)"		minlength(66)	maxlength(66)	example(0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef)
 //	@Param			deployer	query	string	false	"Filter by deployer address (hexadecimal with 0x prefix)"					minlength(42)	maxlength(42)
+//	@Param			cursor		query	string	false	"Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes the id of the last returned record. Cannot be used together with offset (returns 400). Only supported when sort_by=id (default); returns 400 for other sort_by values."
 //	@Produce		json
-//	@Success		200	{array}		responses.Contract	"List of smart contracts"
+//	@Success		200	{object}	CursorResponse	"List of smart contracts"
 //	@Failure		400	{object}	Error				"Invalid request parameters"
 //	@Failure		500	{object}	Error				"Internal server error"
 //	@Router			/contracts [get]
@@ -80,6 +83,20 @@ func (handler *ContractHandler) List(c echo.Context) error {
 		Sort:       pgSort(req.Sort),
 		SortField:  req.SortBy,
 		IsVerified: req.IsVerified,
+	}
+
+	if req.Cursor != "" {
+		if req.SortBy != "" && req.SortBy != "id" {
+			return badRequestError(c, errCursorWithSortBy)
+		}
+		if req.Offset > 0 {
+			return badRequestError(c, errCursorWithOffset)
+		}
+		cursorID, err := helpers.DecodeIDCursor(req.Cursor)
+		if err != nil {
+			return badRequestError(c, err)
+		}
+		filters.CursorID = cursorID
 	}
 
 	if req.TxHash != "" {
@@ -118,7 +135,13 @@ func (handler *ContractHandler) List(c echo.Context) error {
 		response[i] = responses.NewContract(contracts[i])
 	}
 
-	return returnArray(c, response)
+	var cursor string
+	if len(contracts) > 0 && (req.SortBy == "" || req.SortBy == "id") {
+		last := contracts[len(contracts)-1]
+		cursor = helpers.EncodeIDCursor(last.Id)
+	}
+
+	return returnCursorList(c, response, cursor)
 }
 
 type getByHashRequest struct {
@@ -161,6 +184,14 @@ type getSourcesRequest struct {
 	Hash   string `param:"hash"   validate:"required,address"`
 	Limit  int    `query:"limit"  validate:"omitempty,min=1,max=100"`
 	Offset int    `query:"offset" validate:"omitempty,min=0"`
+	Sort   string `query:"sort"   validate:"omitempty,oneof=asc desc"`
+	Cursor string `query:"cursor" validate:"omitempty"`
+}
+
+func (p *getSourcesRequest) SetDefault() {
+	if p.Sort == "" {
+		p.Sort = asc
+	}
 }
 
 // ContractSources godoc
@@ -172,8 +203,10 @@ type getSourcesRequest struct {
 //	@Param			hash	path	string	true	"Contract address in hexadecimal format (e.g., 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)"	minlength(42)	maxlength(42)
 //	@Param			limit	query	integer	false	"Number of source files to return (default: 10)"											minimum(1)	maximum(100)	default(10)
 //	@Param			offset	query	integer	false	"Number of source files to skip (default: 0)"												minimum(0)	default(0)
+//	@Param			sort	query	string	false	"Sort order (default: asc)"																	Enums(asc, desc)	default(asc)
+//	@Param			cursor	query	string	false	"Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes the id of the last returned record. Cannot be used together with offset (returns 400)."
 //	@Produce		json
-//	@Success		200	{array}		responses.Source	"List of source code files"
+//	@Success		200	{object}	CursorResponse	"List of source code files"
 //	@Success		204									"Contract not found or not verified"
 //	@Failure		400	{object}	Error				"Invalid contract address format"
 //	@Failure		500	{object}	Error				"Internal server error"
@@ -183,6 +216,7 @@ func (handler *ContractHandler) ContractSources(c echo.Context) error {
 	if err != nil {
 		return badRequestError(c, err)
 	}
+	req.SetDefault()
 
 	hash, err := types.HexFromString(req.Hash)
 	if err != nil {
@@ -194,7 +228,25 @@ func (handler *ContractHandler) ContractSources(c echo.Context) error {
 		return handleError(c, err, handler.contract)
 	}
 
-	sources, err := handler.source.ByContractId(c.Request().Context(), contract.Id, req.Limit, req.Offset)
+	filter := storage.SourceListFilter{
+		ContractId: contract.Id,
+		Limit:      req.Limit,
+		Offset:     req.Offset,
+		Sort:       pgSort(req.Sort),
+	}
+
+	if req.Cursor != "" {
+		if req.Offset > 0 {
+			return badRequestError(c, errCursorWithOffset)
+		}
+		cursorID, err := helpers.DecodeIDCursor(req.Cursor)
+		if err != nil {
+			return badRequestError(c, err)
+		}
+		filter.CursorID = cursorID
+	}
+
+	sources, err := handler.source.Filter(c.Request().Context(), filter)
 	if err != nil {
 		return handleError(c, err, handler.source)
 	}
@@ -204,7 +256,13 @@ func (handler *ContractHandler) ContractSources(c echo.Context) error {
 		response[i] = responses.NewSource(sources[i])
 	}
 
-	return returnArray(c, response)
+	var cursor string
+	if len(sources) > 0 {
+		last := sources[len(sources)-1]
+		cursor = helpers.EncodeIDCursor(last.Id)
+	}
+
+	return returnCursorList(c, response, cursor)
 }
 
 // GetCode godoc

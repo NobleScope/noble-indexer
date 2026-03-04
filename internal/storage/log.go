@@ -11,15 +11,17 @@ import (
 )
 
 type LogListFilter struct {
-	Limit     int
-	Offset    int
-	Sort      storage.SortOrder
-	Height    *uint64
-	TxId      *uint64
-	AddressId *uint64
-	TimeFrom  time.Time
-	TimeTo    time.Time
-	WithABI   bool
+	Limit      int
+	Offset     int
+	Sort       storage.SortOrder
+	Height     *uint64
+	TxId       *uint64
+	AddressId  *uint64
+	TimeFrom   time.Time
+	TimeTo     time.Time
+	WithABI    bool
+	CursorTime time.Time
+	CursorID   uint64
 }
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed

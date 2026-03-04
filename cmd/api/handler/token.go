@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/cmd/api/helpers"
 	"github.com/NobleScope/noble-indexer/internal/storage"
 	internalTypes "github.com/NobleScope/noble-indexer/internal/storage/types"
 	"github.com/NobleScope/noble-indexer/pkg/types"
@@ -42,6 +43,7 @@ type tokenListRequest struct {
 	Offset   int         `query:"offset"   validate:"omitempty,min=0"`
 	Type     StringArray `query:"type"     validate:"omitempty,dive,token_type"`
 	Sort     string      `query:"sort"     validate:"omitempty,oneof=asc desc"`
+	Cursor   string      `query:"cursor"   validate:"omitempty"`
 }
 
 func (req *tokenListRequest) SetDefault() {
@@ -64,8 +66,9 @@ func (req *tokenListRequest) SetDefault() {
 //	@Param			offset			query	integer	false	"Number of tokens to skip (default: 0)"				minimum(0)	default(0)
 //	@Param			type			query	string	false	"Filter by token standard (comma-separated list)"	Enums(ERC20, ERC721, ERC1155)
 //	@Param			sort			query	string	false	"Sort order by creation time (default: desc)"		Enums(asc, desc)	default(desc)
+//	@Param			cursor			query	string	false	"Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes the id of the last returned record. Cannot be used together with offset (returns 400)."
 //	@Produce		json
-//	@Success		200	{array}		responses.Token	"List of tokens"
+//	@Success		200	{object}	CursorResponse	"List of tokens"
 //	@Failure		400	{object}	Error			"Invalid request parameters"
 //	@Failure		500	{object}	Error			"Internal server error"
 //	@Router			/tokens [get]
@@ -87,6 +90,18 @@ func (handler *TokenHandler) List(c echo.Context) error {
 		Sort:   pgSort(req.Sort),
 		Type:   tokenTypes,
 	}
+
+	if req.Cursor != "" {
+		if req.Offset > 0 {
+			return badRequestError(c, errCursorWithOffset)
+		}
+		cursorID, err := helpers.DecodeIDCursor(req.Cursor)
+		if err != nil {
+			return badRequestError(c, err)
+		}
+		filters.CursorID = cursorID
+	}
+
 	if req.Contract != "" {
 		address, err := handler.getAddressByHash(c, req.Contract)
 		if err != nil {
@@ -105,7 +120,13 @@ func (handler *TokenHandler) List(c echo.Context) error {
 		response[i] = responses.NewToken(tokens[i])
 	}
 
-	return returnArray(c, response)
+	var cursor string
+	if len(tokens) > 0 {
+		last := tokens[len(tokens)-1]
+		cursor = helpers.EncodeIDCursor(last.Id)
+	}
+
+	return returnCursorList(c, response, cursor)
 }
 
 type tokenRequest struct {
@@ -166,6 +187,7 @@ type transferListRequest struct {
 	AddressTo   string      `query:"address_to"   validate:"omitempty,address"`
 	Contract    string      `query:"contract"     validate:"omitempty,address"`
 	TokenId     *string     `query:"token_id"     validate:"omitempty"`
+	Cursor      string      `query:"cursor"       validate:"omitempty"`
 
 	From int64 `example:"1692892095" query:"time_from" swaggertype:"integer" validate:"omitempty,min=1"`
 	To   int64 `example:"1692892095" query:"time_to"   swaggertype:"integer" validate:"omitempty,min=1"`
@@ -198,8 +220,9 @@ func (p *transferListRequest) SetDefault() {
 //	@Param			address_to		query	string	false	"Filter by recipient address"								minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
 //	@Param			contract		query	string	false	"Filter by token contract address"							minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
 //	@Param			token_id		query	string	false	"Filter by token ID"										example(0)
+//	@Param			cursor			query	string	false	"Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes (timestamp, id) of the last returned record. Cannot be used together with offset (returns 400)."
 //	@Produce		json
-//	@Success		200	{array}		responses.Transfer	"List of token transfers"
+//	@Success		200	{object}	CursorResponse	"List of token transfers"
 //	@Failure		400	{object}	Error				"Invalid request parameters"
 //	@Failure		500	{object}	Error				"Internal server error"
 //	@Router			/transfers [get]
@@ -221,6 +244,18 @@ func (handler *TokenHandler) TransferList(c echo.Context) error {
 		Sort:   pgSort(req.Sort),
 		Height: req.Height,
 		Type:   transferTypes,
+	}
+
+	if req.Cursor != "" {
+		if req.Offset > 0 {
+			return badRequestError(c, errCursorWithOffset)
+		}
+		cursorTime, cursorID, err := helpers.DecodeTimeIDCursor(req.Cursor)
+		if err != nil {
+			return badRequestError(c, err)
+		}
+		filters.CursorTime = cursorTime
+		filters.CursorID = cursorID
 	}
 
 	if req.TokenId != nil {
@@ -285,7 +320,13 @@ func (handler *TokenHandler) TransferList(c echo.Context) error {
 		response[i] = responses.NewTransfer(transfers[i])
 	}
 
-	return returnArray(c, response)
+	var cursor string
+	if len(transfers) > 0 {
+		last := transfers[len(transfers)-1]
+		cursor = helpers.EncodeTimeIDCursor(last.Time, last.Id)
+	}
+
+	return returnCursorList(c, response, cursor)
 }
 
 type tokenTransferRequest struct {
@@ -350,7 +391,7 @@ func (p *tokenBalanceListRequest) SetDefault() {
 //	@Param			contract		query	string	false	"Filter by token contract address"				minlength(42)	maxlength(42)	example(0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb)
 //	@Param			token_id		query	string	false	"Filter by token ID"							example(0)
 //	@Produce		json
-//	@Success		200	{array}		responses.TokenBalance	"List of token balances"
+//	@Success		200	{object}	CursorResponse	"List of token balances"
 //	@Failure		400	{object}	Error					"Invalid request parameters"
 //	@Failure		500	{object}	Error					"Internal server error"
 //	@Router			/token_balances [get]
@@ -401,7 +442,7 @@ func (handler *TokenHandler) TokenBalanceList(c echo.Context) error {
 		response[i] = responses.NewTokenBalance(tbs[i])
 	}
 
-	return returnArray(c, response)
+	return returnCursorList(c, response, "")
 }
 
 func (handler *TokenHandler) getAddressByHash(c echo.Context, h string) (storage.Address, error) {

@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/cmd/api/helpers"
 	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/NobleScope/noble-indexer/internal/storage/mock"
 	"github.com/NobleScope/noble-indexer/internal/storage/types"
@@ -294,9 +295,13 @@ func (s *TxHandlerTestSuite) TestListSuccess() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var txs []responses.Transaction
-	err := json.NewDecoder(rec.Body).Decode(&txs)
+	var body struct {
+		Result []responses.Transaction `json:"result"`
+		Cursor string                  `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	txs := body.Result
 	s.Require().Len(txs, 3)
 
 	s.Require().EqualValues(100, txs[0].Height)
@@ -343,9 +348,13 @@ func (s *TxHandlerTestSuite) TestListWithLimit() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var txs []responses.Transaction
-	err := json.NewDecoder(rec.Body).Decode(&txs)
+	var body struct {
+		Result []responses.Transaction `json:"result"`
+		Cursor string                  `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	txs := body.Result
 	s.Require().Len(txs, 1)
 }
 
@@ -376,9 +385,13 @@ func (s *TxHandlerTestSuite) TestListWithOffset() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var txs []responses.Transaction
-	err := json.NewDecoder(rec.Body).Decode(&txs)
+	var body struct {
+		Result []responses.Transaction `json:"result"`
+		Cursor string                  `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	txs := body.Result
 	s.Require().Len(txs, 1)
 	s.Require().EqualValues(2, txs[0].Index)
 }
@@ -411,9 +424,13 @@ func (s *TxHandlerTestSuite) TestListWithLimitAndOffset() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var txs []responses.Transaction
-	err := json.NewDecoder(rec.Body).Decode(&txs)
+	var body struct {
+		Result []responses.Transaction `json:"result"`
+		Cursor string                  `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	txs := body.Result
 	s.Require().Len(txs, 2)
 	s.Require().EqualValues(1, txs[0].Index)
 	s.Require().EqualValues(2, txs[1].Index)
@@ -447,9 +464,13 @@ func (s *TxHandlerTestSuite) TestListAscOrder() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var txs []responses.Transaction
-	err := json.NewDecoder(rec.Body).Decode(&txs)
+	var body struct {
+		Result []responses.Transaction `json:"result"`
+		Cursor string                  `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	txs := body.Result
 	s.Require().Len(txs, 3)
 	s.Require().EqualValues(0, txs[0].Index)
 	s.Require().EqualValues(1, txs[1].Index)
@@ -484,9 +505,13 @@ func (s *TxHandlerTestSuite) TestListDescOrder() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var txs []responses.Transaction
-	err := json.NewDecoder(rec.Body).Decode(&txs)
+	var body struct {
+		Result []responses.Transaction `json:"result"`
+		Cursor string                  `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	txs := body.Result
 	s.Require().Len(txs, 3)
 	s.Require().EqualValues(2, txs[0].Index)
 	s.Require().EqualValues(1, txs[1].Index)
@@ -514,9 +539,13 @@ func (s *TxHandlerTestSuite) TestListEmptyResult() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var txs []responses.Transaction
-	err := json.NewDecoder(rec.Body).Decode(&txs)
+	var body struct {
+		Result []responses.Transaction `json:"result"`
+		Cursor string                  `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	txs := body.Result
 	s.Require().Len(txs, 0)
 }
 
@@ -635,9 +664,13 @@ func (s *TxHandlerTestSuite) TestListByAddressId() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var txs []responses.Transaction
-	err := json.NewDecoder(rec.Body).Decode(&txs)
+	var body struct {
+		Result []responses.Transaction `json:"result"`
+		Cursor string                  `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	txs := body.Result
 	s.Require().Len(txs, 2)
 }
 
@@ -736,9 +769,13 @@ func (s *TxHandlerTestSuite) TestTracesSuccess() {
 	s.Require().NoError(s.handler.Traces(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var traces []responses.Trace
-	err := json.NewDecoder(rec.Body).Decode(&traces)
+	var body struct {
+		Result []responses.Trace `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	traces := body.Result
 	s.Require().Len(traces, 3)
 
 	s.Require().EqualValues(100, traces[0].Height)
@@ -778,9 +815,13 @@ func (s *TxHandlerTestSuite) TestTracesWithTxHash() {
 	s.Require().NoError(s.handler.Traces(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var traces []responses.Trace
-	err := json.NewDecoder(rec.Body).Decode(&traces)
+	var body struct {
+		Result []responses.Trace `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	traces := body.Result
 	s.Require().Len(traces, 1)
 	s.Require().NotNil(traces[0].TxHash)
 	s.Require().Equal("0x010203", *traces[0].TxHash)
@@ -817,9 +858,13 @@ func (s *TxHandlerTestSuite) TestTracesWithAddressFrom() {
 	s.Require().NoError(s.handler.Traces(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var traces []responses.Trace
-	err := json.NewDecoder(rec.Body).Decode(&traces)
+	var body struct {
+		Result []responses.Trace `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	traces := body.Result
 	s.Require().Len(traces, 3)
 }
 
@@ -854,9 +899,13 @@ func (s *TxHandlerTestSuite) TestTracesWithAddressTo() {
 	s.Require().NoError(s.handler.Traces(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var traces []responses.Trace
-	err := json.NewDecoder(rec.Body).Decode(&traces)
+	var body struct {
+		Result []responses.Trace `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	traces := body.Result
 	s.Require().Len(traces, 2)
 }
 
@@ -890,9 +939,13 @@ func (s *TxHandlerTestSuite) TestTracesWithAddress() {
 	s.Require().NoError(s.handler.Traces(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var traces []responses.Trace
-	err := json.NewDecoder(rec.Body).Decode(&traces)
+	var body struct {
+		Result []responses.Trace `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	traces := body.Result
 	s.Require().Len(traces, 2)
 }
 
@@ -920,9 +973,13 @@ func (s *TxHandlerTestSuite) TestTracesWithType() {
 	s.Require().NoError(s.handler.Traces(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var traces []responses.Trace
-	err := json.NewDecoder(rec.Body).Decode(&traces)
+	var body struct {
+		Result []responses.Trace `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	traces := body.Result
 	s.Require().Len(traces, 3)
 }
 
@@ -952,9 +1009,13 @@ func (s *TxHandlerTestSuite) TestTracesWithHeight() {
 	s.Require().NoError(s.handler.Traces(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var traces []responses.Trace
-	err := json.NewDecoder(rec.Body).Decode(&traces)
+	var body struct {
+		Result []responses.Trace `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	traces := body.Result
 	s.Require().Len(traces, 3)
 }
 
@@ -983,9 +1044,13 @@ func (s *TxHandlerTestSuite) TestTracesWithLimitAndOffset() {
 	s.Require().NoError(s.handler.Traces(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var traces []responses.Trace
-	err := json.NewDecoder(rec.Body).Decode(&traces)
+	var body struct {
+		Result []responses.Trace `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	traces := body.Result
 	s.Require().Len(traces, 1)
 }
 
@@ -1013,9 +1078,13 @@ func (s *TxHandlerTestSuite) TestTracesWithSortAsc() {
 	s.Require().NoError(s.handler.Traces(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var traces []responses.Trace
-	err := json.NewDecoder(rec.Body).Decode(&traces)
+	var body struct {
+		Result []responses.Trace `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	traces := body.Result
 	s.Require().Len(traces, 3)
 }
 
@@ -1034,9 +1103,13 @@ func (s *TxHandlerTestSuite) TestTracesEmptyResult() {
 	s.Require().NoError(s.handler.Traces(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var traces []responses.Trace
-	err := json.NewDecoder(rec.Body).Decode(&traces)
+	var body struct {
+		Result []responses.Trace `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	traces := body.Result
 	s.Require().Len(traces, 0)
 }
 
@@ -1423,9 +1496,13 @@ func (s *TxHandlerTestSuite) TestListWithDecode() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var txs []responses.Transaction
-	err := json.NewDecoder(rec.Body).Decode(&txs)
+	var body struct {
+		Result []responses.Transaction `json:"result"`
+		Cursor string                  `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	txs := body.Result
 	s.Require().Len(txs, 1)
 }
 
@@ -1446,4 +1523,95 @@ func (s *TxHandlerTestSuite) TestTracesInvalidLimit() {
 	err := json.NewDecoder(rec.Body).Decode(&e)
 	s.Require().NoError(err)
 	s.Require().NotEmpty(e.Message)
+}
+
+// TestListWithCursor tests cursor-based pagination for tx list
+func (s *TxHandlerTestSuite) TestListWithCursor() {
+	q := make(url.Values)
+	q.Set("cursor", helpers.EncodeTimeIDCursor(testTime, 1))
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/tx")
+
+	s.tx.EXPECT().
+		Filter(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(ctx context.Context, filter storage.TxListFilter) ([]storage.Tx, error) {
+			s.Require().EqualValues(1, filter.CursorID)
+			s.Require().False(filter.CursorTime.IsZero())
+			return []storage.Tx{testTxWithToAddress}, nil
+		}).
+		Times(1)
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var body struct {
+		Result []responses.Transaction `json:"result"`
+		Cursor string                  `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	s.Require().Len(body.Result, 1)
+	s.Require().NotEmpty(body.Cursor)
+}
+
+// TestListInvalidCursor tests handling of invalid cursor for tx list
+func (s *TxHandlerTestSuite) TestListInvalidCursor() {
+	q := make(url.Values)
+	q.Set("cursor", "not-valid-base64!!!")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/tx")
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusBadRequest, rec.Code)
+}
+
+// TestTracesWithCursor tests cursor-based pagination for traces
+func (s *TxHandlerTestSuite) TestTracesWithCursor() {
+	q := make(url.Values)
+	q.Set("cursor", helpers.EncodeTimeIDCursor(testTime, 1))
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/traces")
+
+	s.trace.EXPECT().
+		Filter(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(ctx context.Context, filter storage.TraceListFilter) ([]*storage.Trace, error) {
+			s.Require().EqualValues(1, filter.CursorID)
+			s.Require().False(filter.CursorTime.IsZero())
+			return []*storage.Trace{}, nil
+		}).
+		Times(1)
+
+	s.Require().NoError(s.handler.Traces(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var body struct {
+		Result []responses.Trace `json:"result"`
+		Cursor string            `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	s.Require().Empty(body.Cursor)
+}
+
+// TestTracesInvalidCursor tests handling of invalid cursor for traces
+func (s *TxHandlerTestSuite) TestTracesInvalidCursor() {
+	q := make(url.Values)
+	q.Set("cursor", "not-valid-base64!!!")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/traces")
+
+	s.Require().NoError(s.handler.Traces(c))
+	s.Require().Equal(http.StatusBadRequest, rec.Code)
 }

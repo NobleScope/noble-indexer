@@ -25,6 +25,8 @@ type TraceListFilter struct {
 	Type          []types.TraceType
 	CallType      []types.CallType
 	WithABI       bool
+	CursorTime    time.Time
+	CursorID      uint64
 }
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed

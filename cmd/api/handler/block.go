@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/cmd/api/helpers"
 	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/NobleScope/noble-indexer/pkg/types"
 	"github.com/labstack/echo/v4"
@@ -71,6 +72,7 @@ type blockListRequest struct {
 	Offset int    `query:"offset" validate:"omitempty,min=0"`
 	Sort   string `query:"sort"   validate:"omitempty,oneof=asc desc"`
 	Stats  bool   `query:"stats"  validate:"omitempty"`
+	Cursor string `query:"cursor" validate:"omitempty"`
 }
 
 func (p *blockListRequest) SetDefault() {
@@ -92,8 +94,9 @@ func (p *blockListRequest) SetDefault() {
 //	@Param			offset	query	integer	false	"Number of blocks to skip (default: 0)"					minimum(0)	default(0)
 //	@Param			sort	query	string	false	"Sort order by height (default: asc)"					Enums(asc, desc)	default(asc)
 //	@Param			stats	query	boolean	false	"Include statistics for each block (default: false)"	default(false)
+//	@Param			cursor	query	string	false	"Opaque cursor for keyset pagination. Base64url-encoded value from the previous response's 'cursor' field. Encodes (timestamp, id) of the last returned record. Cannot be used together with offset (returns 400)."
 //	@Produce		json
-//	@Success		200	{array}		responses.Block	"List of blocks"
+//	@Success		200	{object}	CursorResponse	"List of blocks"
 //	@Failure		400	{object}	Error			"Invalid request parameters"
 //	@Failure		500	{object}	Error			"Internal server error"
 //	@Router			/blocks [get]
@@ -111,6 +114,18 @@ func (handler *BlockHandler) List(c echo.Context) error {
 		WithStats: req.Stats,
 	}
 
+	if req.Cursor != "" {
+		if req.Offset > 0 {
+			return badRequestError(c, errCursorWithOffset)
+		}
+		cursorTime, cursorID, err := helpers.DecodeTimeIDCursor(req.Cursor)
+		if err != nil {
+			return badRequestError(c, err)
+		}
+		filters.CursorTime = cursorTime
+		filters.CursorID = cursorID
+	}
+
 	var blocks []storage.Block
 	blocks, err = handler.block.Filter(c.Request().Context(), filters)
 
@@ -123,7 +138,13 @@ func (handler *BlockHandler) List(c echo.Context) error {
 		response[i] = responses.NewBlock(blocks[i])
 	}
 
-	return returnArray(c, response)
+	var cursor string
+	if len(blocks) > 0 {
+		last := blocks[len(blocks)-1]
+		cursor = helpers.EncodeTimeIDCursor(last.Time, last.Id)
+	}
+
+	return returnCursorList(c, response, cursor)
 }
 
 // Count godoc
@@ -200,7 +221,7 @@ func (p *transactionsListRequest) SetDefault() {
 //	@Param			offset	query	integer	false	"Number of transactions to skip (default: 0)"		minimum(0)	default(0)
 //	@Param			sort	query	string	false	"Sort order by index (default: asc)"				Enums(asc, desc)	default(asc)
 //	@Produce		json
-//	@Success		200	{array}		responses.Transaction	"List of transactions in the block"
+//	@Success		200	{object}	CursorResponse	"List of transactions in the block"
 //	@Failure		400	{object}	Error					"Invalid block height"
 //	@Failure		500	{object}	Error					"Internal server error"
 //	@Router			/blocks/{height}/transactions [get]
@@ -223,5 +244,5 @@ func (handler *BlockHandler) TransactionsList(c echo.Context) error {
 		response[i] = responses.NewTransaction(*txs[i])
 	}
 
-	return returnArray(c, response)
+	return returnCursorList(c, response, "")
 }

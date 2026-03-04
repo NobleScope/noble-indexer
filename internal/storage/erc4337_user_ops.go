@@ -21,6 +21,8 @@ type ERC4337UserOpsListFilter struct {
 	Success     *bool
 	TimeFrom    time.Time
 	TimeTo      time.Time
+	CursorTime  time.Time
+	CursorID    uint64
 }
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed

@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/NobleScope/noble-indexer/cmd/api/handler/responses"
+	"github.com/NobleScope/noble-indexer/cmd/api/helpers"
 	"github.com/NobleScope/noble-indexer/internal/storage"
 	"github.com/NobleScope/noble-indexer/internal/storage/mock"
 	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
@@ -124,9 +125,13 @@ func (s *AddressHandlerTestSuite) TestListSuccess() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var addresses []responses.Address
-	err := json.NewDecoder(rec.Body).Decode(&addresses)
+	var body struct {
+		Result []responses.Address `json:"result"`
+		Cursor string              `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	addresses := body.Result
 	s.Require().Len(addresses, 3)
 
 	s.Require().EqualValues(1, addresses[0].Id)
@@ -159,9 +164,13 @@ func (s *AddressHandlerTestSuite) TestListWithLimit() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var addresses []responses.Address
-	err := json.NewDecoder(rec.Body).Decode(&addresses)
+	var body struct {
+		Result []responses.Address `json:"result"`
+		Cursor string              `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	addresses := body.Result
 	s.Require().Len(addresses, 1)
 }
 
@@ -189,9 +198,13 @@ func (s *AddressHandlerTestSuite) TestListWithOnlyContracts() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var addresses []responses.Address
-	err := json.NewDecoder(rec.Body).Decode(&addresses)
+	var body struct {
+		Result []responses.Address `json:"result"`
+		Cursor string              `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	addresses := body.Result
 	s.Require().Len(addresses, 2)
 	s.Require().True(addresses[0].IsContract)
 	s.Require().True(addresses[1].IsContract)
@@ -222,9 +235,13 @@ func (s *AddressHandlerTestSuite) TestListWithSortBy() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var addresses []responses.Address
-	err := json.NewDecoder(rec.Body).Decode(&addresses)
+	var body struct {
+		Result []responses.Address `json:"result"`
+		Cursor string              `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	addresses := body.Result
 	s.Require().Len(addresses, 3)
 }
 
@@ -262,9 +279,13 @@ func (s *AddressHandlerTestSuite) TestListEmptyResult() {
 	s.Require().NoError(s.handler.List(c))
 	s.Require().Equal(http.StatusOK, rec.Code)
 
-	var addresses []responses.Address
-	err := json.NewDecoder(rec.Body).Decode(&addresses)
+	var body struct {
+		Result []responses.Address `json:"result"`
+		Cursor string              `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
 	s.Require().NoError(err)
+	addresses := body.Result
 	s.Require().Len(addresses, 0)
 }
 
@@ -359,4 +380,81 @@ func (s *AddressHandlerTestSuite) TestGetInvalidHashLength() {
 	err := json.NewDecoder(rec.Body).Decode(&e)
 	s.Require().NoError(err)
 	s.Require().NotEmpty(e.Message)
+}
+
+// TestListWithCursor tests cursor-based pagination for address list
+func (s *AddressHandlerTestSuite) TestListWithCursor() {
+	q := make(url.Values)
+	q.Set("cursor", helpers.EncodeIDCursor(1))
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/address")
+
+	s.address.EXPECT().
+		ListWithBalance(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(ctx context.Context, filter storage.AddressListFilter) ([]storage.Address, error) {
+			s.Require().EqualValues(1, filter.CursorID)
+			return []storage.Address{testAddress2, testAddress3}, nil
+		}).
+		Times(1)
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var body struct {
+		Result []responses.Address `json:"result"`
+		Cursor string              `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	s.Require().Len(body.Result, 2)
+	s.Require().NotEmpty(body.Cursor)
+
+	decodedID, err := helpers.DecodeIDCursor(body.Cursor)
+	s.Require().NoError(err)
+	s.Require().EqualValues(testAddress3.Id, decodedID)
+}
+
+// TestListInvalidCursor tests handling of invalid cursor for address list
+func (s *AddressHandlerTestSuite) TestListInvalidCursor() {
+	q := make(url.Values)
+	q.Set("cursor", "not-valid-base64!!!")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/address")
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusBadRequest, rec.Code)
+}
+
+// TestListNoCursorOnNonIdSort tests that cursor is empty when sorting by non-id field
+func (s *AddressHandlerTestSuite) TestListNoCursorOnNonIdSort() {
+	q := make(url.Values)
+	q.Set("sort_by", "last_height")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/address")
+
+	s.address.EXPECT().
+		ListWithBalance(gomock.Any(), gomock.Any()).
+		Return([]storage.Address{testAddress1, testAddress2}, nil).
+		Times(1)
+
+	s.Require().NoError(s.handler.List(c))
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var body struct {
+		Result []responses.Address `json:"result"`
+		Cursor string              `json:"cursor"`
+	}
+	err := json.NewDecoder(rec.Body).Decode(&body)
+	s.Require().NoError(err)
+	s.Require().Len(body.Result, 2)
+	s.Require().Empty(body.Cursor)
 }

@@ -54,10 +54,19 @@ func (p *ProxyContract) FilteredList(
 		query = query.Where("proxy_contract.status IN (?)", bun.In(filters.Status))
 	}
 
-	query = sortScope(query, "height", filters.Sort)
-	if filters.Offset > 0 {
+	sortField := "id"
+	switch filters.SortField {
+	case "id", "height":
+		sortField = filters.SortField
+	}
+
+	if filters.CursorID > 0 {
+		query = cursorIDScope(query, filters.Sort, filters.CursorID)
+	} else {
 		query = query.Offset(filters.Offset)
 	}
+
+	query = sortScope(query, sortField, filters.Sort)
 	query = limitScope(query, filters.Limit)
 
 	outerQuery := p.DB().NewSelect().TableExpr("(?) AS proxy", query).
@@ -68,7 +77,7 @@ func (p *ProxyContract) FilteredList(
 		Join("LEFT JOIN address AS contract_addr ON contract_addr.id = proxy.id")
 
 	if filters.Sort != "" {
-		outerQuery = sortScope(outerQuery, "proxy.height", filters.Sort)
+		outerQuery = sortScope(outerQuery, "proxy."+sortField, filters.Sort)
 	}
 
 	err = outerQuery.Scan(ctx, &contracts)

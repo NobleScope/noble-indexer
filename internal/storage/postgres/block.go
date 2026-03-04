@@ -54,9 +54,14 @@ func (b *Block) Filter(ctx context.Context, fltrs storage.BlockListFilter) (bloc
 	query := b.DB().NewSelect().
 		Model(&blocks)
 
+	if fltrs.CursorID > 0 {
+		query = cursorTimeIDScope(query, fltrs.Sort, fltrs.CursorTime, fltrs.CursorID)
+	} else {
+		query = query.Offset(fltrs.Offset)
+	}
+
 	query = sortTimeIDScope(query, fltrs.Sort)
 	query = limitScope(query, fltrs.Limit)
-	query = query.Offset(fltrs.Offset)
 
 	query = b.DB().NewSelect().
 		ColumnExpr("block.*").

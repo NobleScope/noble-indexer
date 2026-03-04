@@ -18,6 +18,7 @@ type TokenListFilter struct {
 	Sort       storage.SortOrder
 	ContractId *uint64
 	Type       []types.TokenType
+	CursorID   uint64
 }
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed

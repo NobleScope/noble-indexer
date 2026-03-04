@@ -7,11 +7,19 @@ import (
 	"github.com/uptrace/bun"
 )
 
+type SourceListFilter struct {
+	ContractId uint64
+	Limit      int
+	Offset     int
+	Sort       storage.SortOrder
+	CursorID   uint64
+}
+
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed
 type ISource interface {
 	storage.Table[*Source]
 
-	ByContractId(ctx context.Context, id uint64, limit, offset int) ([]Source, error)
+	Filter(ctx context.Context, filter SourceListFilter) ([]Source, error)
 }
 
 // Source -

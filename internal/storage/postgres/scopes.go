@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	"time"
+
 	"github.com/NobleScope/noble-indexer/internal/storage"
 	sdk "github.com/dipdup-net/indexer-sdk/pkg/storage"
 	"github.com/uptrace/bun"
@@ -33,7 +35,6 @@ func sortMultipleScope(q *bun.SelectQuery, fields []SortField) *bun.SelectQuery 
 }
 
 func sortTimeIDScope(q *bun.SelectQuery, sort sdk.SortOrder) *bun.SelectQuery {
-
 	if sort != sdk.SortOrderAsc && sort != sdk.SortOrderDesc {
 		sort = sdk.SortOrderAsc
 	}
@@ -41,13 +42,46 @@ func sortTimeIDScope(q *bun.SelectQuery, sort sdk.SortOrder) *bun.SelectQuery {
 	return q.OrderExpr("time ?0, id ?0", bun.Safe(sort))
 }
 
+func cursorTimeIDScope(q *bun.SelectQuery, sort sdk.SortOrder, cursorTime time.Time, cursorID uint64) *bun.SelectQuery {
+	if cursorID == 0 {
+		return q
+	}
+	switch sort {
+	case sdk.SortOrderAsc:
+		return q.Where("(time, id) > (?, ?)", cursorTime, cursorID)
+	case sdk.SortOrderDesc:
+		return q.Where("(time, id) < (?, ?)", cursorTime, cursorID)
+	default:
+		return q.Where("(time, id) > (?, ?)", cursorTime, cursorID)
+	}
+}
+
+func cursorIDScope(q *bun.SelectQuery, sort sdk.SortOrder, cursorID uint64) *bun.SelectQuery {
+	if cursorID == 0 {
+		return q
+	}
+	switch sort {
+	case sdk.SortOrderAsc:
+		return q.Where("id > ?", cursorID)
+	case sdk.SortOrderDesc:
+		return q.Where("id < ?", cursorID)
+	default:
+		return q.Where("id > ?", cursorID)
+	}
+}
+
 func addressListFilter(query *bun.SelectQuery, fltrs storage.AddressListFilter) *bun.SelectQuery {
 	if fltrs.OnlyContracts {
 		query = query.Where("is_contract = ?", true)
 	}
 
+	if fltrs.CursorID > 0 {
+		query = cursorIDScope(query, fltrs.Sort, fltrs.CursorID)
+	} else {
+		query = query.Offset(fltrs.Offset)
+	}
+
 	query = limitScope(query, fltrs.Limit)
-	query = query.Offset(fltrs.Offset)
 
 	switch fltrs.SortField {
 	case "last_height":
@@ -84,8 +118,13 @@ func contractListFilter(query *bun.SelectQuery, fltrs storage.ContractListFilter
 		query = query.Where("deployer_id = ?", *fltrs.DeployerId)
 	}
 
+	if fltrs.CursorID > 0 {
+		query = cursorIDScope(query, fltrs.Sort, fltrs.CursorID)
+	} else {
+		query = query.Offset(fltrs.Offset)
+	}
+
 	query = limitScope(query, fltrs.Limit)
-	query = query.Offset(fltrs.Offset)
 
 	switch fltrs.SortField {
 	case "id", "height":
@@ -125,8 +164,14 @@ func traceListFilter(query *bun.SelectQuery, fltrs storage.TraceListFilter) *bun
 	if len(fltrs.CallType) > 0 {
 		query = query.Where("call_type IN (?)", bun.In(fltrs.CallType))
 	}
+
+	if fltrs.CursorID > 0 {
+		query = cursorTimeIDScope(query, fltrs.Sort, fltrs.CursorTime, fltrs.CursorID)
+	} else {
+		query = query.Offset(fltrs.Offset)
+	}
+
 	query = limitScope(query, fltrs.Limit)
-	query = query.Offset(fltrs.Offset)
 	query = sortTimeIDScope(query, fltrs.Sort)
 
 	return query
@@ -141,8 +186,13 @@ func tokenListFilter(query *bun.SelectQuery, fltrs storage.TokenListFilter) *bun
 		query = query.Where("type IN (?)", bun.In(fltrs.Type))
 	}
 
+	if fltrs.CursorID > 0 {
+		query = cursorIDScope(query, fltrs.Sort, fltrs.CursorID)
+	} else {
+		query = query.Offset(fltrs.Offset)
+	}
+
 	query = limitScope(query, fltrs.Limit)
-	query = query.Offset(fltrs.Offset)
 	query = sortScope(query, "id", fltrs.Sort)
 
 	return query
@@ -178,8 +228,13 @@ func transferListFilter(query *bun.SelectQuery, fltrs storage.TransferListFilter
 		query = query.Where("time < ?", fltrs.TimeTo)
 	}
 
+	if fltrs.CursorID > 0 {
+		query = cursorTimeIDScope(query, fltrs.Sort, fltrs.CursorTime, fltrs.CursorID)
+	} else {
+		query = query.Offset(fltrs.Offset)
+	}
+
 	query = limitScope(query, fltrs.Limit)
-	query = query.Offset(fltrs.Offset)
 	query = sortTimeIDScope(query, fltrs.Sort)
 
 	return query
@@ -224,8 +279,13 @@ func logListFilter(query *bun.SelectQuery, fltrs storage.LogListFilter) *bun.Sel
 		query = query.Where("time < ?", fltrs.TimeTo)
 	}
 
+	if fltrs.CursorID > 0 {
+		query = cursorTimeIDScope(query, fltrs.Sort, fltrs.CursorTime, fltrs.CursorID)
+	} else {
+		query = query.Offset(fltrs.Offset)
+	}
+
 	query = limitScope(query, fltrs.Limit)
-	query = query.Offset(fltrs.Offset)
 	query = sortTimeIDScope(query, fltrs.Sort)
 
 	return query
@@ -255,8 +315,13 @@ func erc4337UserOpsListFilter(query *bun.SelectQuery, fltrs storage.ERC4337UserO
 		query = query.Where("time < ?", fltrs.TimeTo)
 	}
 
+	if fltrs.CursorID > 0 {
+		query = cursorTimeIDScope(query, fltrs.Sort, fltrs.CursorTime, fltrs.CursorID)
+	} else {
+		query = query.Offset(fltrs.Offset)
+	}
+
 	query = limitScope(query, fltrs.Limit)
-	query = query.Offset(fltrs.Offset)
 	query = sortTimeIDScope(query, fltrs.Sort)
 
 	return query
@@ -295,8 +360,13 @@ func txListFilter(query *bun.SelectQuery, fltrs storage.TxListFilter) *bun.Selec
 		query = query.Where("status IN (?)", bun.In(fltrs.Status))
 	}
 
+	if fltrs.CursorID > 0 {
+		query = cursorTimeIDScope(query, fltrs.Sort, fltrs.CursorTime, fltrs.CursorID)
+	} else {
+		query = query.Offset(fltrs.Offset)
+	}
+
 	query = limitScope(query, fltrs.Limit)
-	query = query.Offset(fltrs.Offset)
 	query = sortTimeIDScope(query, fltrs.Sort)
 
 	return query
