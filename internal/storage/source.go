@@ -19,7 +19,6 @@ type SourceListFilter struct {
 type ISource interface {
 	storage.Table[*Source]
 
-	ByContractId(ctx context.Context, id uint64, limit, offset int) ([]Source, error)
 	Filter(ctx context.Context, filter SourceListFilter) ([]Source, error)
 }
 

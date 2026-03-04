@@ -72,7 +72,10 @@ func (handler *AddressHandler) List(c echo.Context) error {
 		OnlyContracts: req.OnlyContracts,
 	}
 
-	if req.Cursor != "" && (req.SortBy == "" || req.SortBy == "id") {
+	if req.Cursor != "" {
+		if req.SortBy != "" && req.SortBy != "id" {
+			return badRequestError(c, errCursorWithSortBy)
+		}
 		if req.Offset > 0 {
 			return badRequestError(c, errCursorWithOffset)
 		}

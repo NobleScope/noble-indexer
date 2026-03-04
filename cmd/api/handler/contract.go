@@ -85,7 +85,10 @@ func (handler *ContractHandler) List(c echo.Context) error {
 		IsVerified: req.IsVerified,
 	}
 
-	if req.Cursor != "" && (req.SortBy == "" || req.SortBy == "id") {
+	if req.Cursor != "" {
+		if req.SortBy != "" && req.SortBy != "id" {
+			return badRequestError(c, errCursorWithSortBy)
+		}
 		if req.Offset > 0 {
 			return badRequestError(c, errCursorWithOffset)
 		}

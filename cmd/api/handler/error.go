@@ -12,6 +12,7 @@ import (
 var (
 	errInvalidAddress      = errors.New("invalid address")
 	errCursorWithOffset    = errors.New("cursor and offset cannot be used together")
+	errCursorWithSortBy    = errors.New("cursor is not supported for this sort_by value")
 	errCancelRequest       = "pq: canceling statement due to user request"
 	errInternalServerError = "Internal Server Error"
 )

@@ -20,18 +20,6 @@ func NewSource(db *database.Bun) *Source {
 	}
 }
 
-// ByContractId -
-func (s *Source) ByContractId(ctx context.Context, id uint64, limit, offset int) (sources []storage.Source, err error) {
-	err = s.DB().NewSelect().
-		Model((*storage.Source)(nil)).
-		Where("contract_id = ?", id).
-		Limit(limit).
-		Offset(offset).
-		Scan(ctx, &sources)
-
-	return
-}
-
 // Filter -
 func (s *Source) Filter(ctx context.Context, filter storage.SourceListFilter) (sources []storage.Source, err error) {
 	query := s.DB().NewSelect().

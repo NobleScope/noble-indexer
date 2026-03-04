@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -517,6 +518,128 @@ func (s *ContractTestSuite) TestContractSources_Empty() {
 	s.Require().NoError(err)
 	resp := body.Result
 	s.Require().Len(resp, 0)
+}
+
+func (s *ContractTestSuite) TestContractSources_CursorWithOffset() {
+	q := make(url.Values)
+	q.Set("cursor", helpers.EncodeIDCursor(5))
+	q.Set("offset", "10")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/contract/:hash/sources")
+	c.SetParamNames("hash")
+	c.SetParamValues(testAddressHex1.Hex())
+
+	s.contract.EXPECT().
+		ByHash(gomock.Any(), testAddressHex1).
+		Return(testContract, nil)
+
+	_ = s.handler.ContractSources(c)
+	s.Require().Equal(http.StatusBadRequest, rec.Code)
+
+	var resp Error
+	s.Require().NoError(json.NewDecoder(rec.Body).Decode(&resp))
+	s.Require().Contains(resp.Message, "cursor and offset cannot be used together")
+}
+
+func (s *ContractTestSuite) TestContractSources_SortDesc() {
+	q := make(url.Values)
+	q.Set("sort", "desc")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/contract/:hash/sources")
+	c.SetParamNames("hash")
+	c.SetParamValues(testAddressHex1.Hex())
+
+	s.contract.EXPECT().
+		ByHash(gomock.Any(), testAddressHex1).
+		Return(testContract, nil)
+
+	s.source.EXPECT().
+		Filter(gomock.Any(), storage.SourceListFilter{
+			ContractId: testContract.Id,
+			Sort:       sdk.SortOrderDesc,
+		}).
+		Return([]storage.Source{
+			{Id: 3, ContractId: testContract.Id, Name: "c.sol"},
+			{Id: 2, ContractId: testContract.Id, Name: "b.sol"},
+		}, nil)
+
+	err := s.handler.ContractSources(c)
+	s.Require().NoError(err)
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var body struct {
+		Result []responses.Source `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	s.Require().NoError(json.NewDecoder(rec.Body).Decode(&body))
+	s.Require().Len(body.Result, 2)
+	s.EqualValues(3, body.Result[0].Id)
+	s.EqualValues(2, body.Result[1].Id)
+}
+
+func (s *ContractTestSuite) TestContractSources_CursorRoundTrip() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/contract/:hash/sources")
+	c.SetParamNames("hash")
+	c.SetParamValues(testAddressHex1.Hex())
+
+	s.contract.EXPECT().
+		ByHash(gomock.Any(), testAddressHex1).
+		Return(testContract, nil)
+
+	s.source.EXPECT().
+		Filter(gomock.Any(), gomock.Any()).
+		Return([]storage.Source{
+			{Id: 42, ContractId: testContract.Id, Name: "x.sol"},
+		}, nil)
+
+	err := s.handler.ContractSources(c)
+	s.Require().NoError(err)
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var body struct {
+		Result []responses.Source `json:"result"`
+		Cursor string             `json:"cursor"`
+	}
+	s.Require().NoError(json.NewDecoder(rec.Body).Decode(&body))
+	s.Require().NotEmpty(body.Cursor)
+
+	decodedID, err := helpers.DecodeIDCursor(body.Cursor)
+	s.Require().NoError(err)
+	s.Require().EqualValues(42, decodedID)
+}
+
+func (s *ContractTestSuite) TestContractSources_FilterError() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := s.echo.NewContext(req, rec)
+	c.SetPath("/contract/:hash/sources")
+	c.SetParamNames("hash")
+	c.SetParamValues(testAddressHex1.Hex())
+
+	s.contract.EXPECT().
+		ByHash(gomock.Any(), testAddressHex1).
+		Return(testContract, nil)
+
+	s.source.EXPECT().
+		Filter(gomock.Any(), gomock.Any()).
+		Return(nil, errors.New("db connection error"))
+
+	s.source.EXPECT().
+		IsNoRows(gomock.Any()).
+		Return(false)
+
+	err := s.handler.ContractSources(c)
+	s.Require().NoError(err)
+	s.Require().Equal(http.StatusInternalServerError, rec.Code)
 }
 
 func (s *ContractTestSuite) TestContractListByDeployer() {

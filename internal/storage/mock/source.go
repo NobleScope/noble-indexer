@@ -42,45 +42,6 @@ func (m *MockISource) EXPECT() *MockISourceMockRecorder {
 	return m.recorder
 }
 
-// ByContractId mocks base method.
-func (m *MockISource) ByContractId(ctx context.Context, id uint64, limit, offset int) ([]storage.Source, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ByContractId", ctx, id, limit, offset)
-	ret0, _ := ret[0].([]storage.Source)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ByContractId indicates an expected call of ByContractId.
-func (mr *MockISourceMockRecorder) ByContractId(ctx, id, limit, offset any) *MockISourceByContractIdCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ByContractId", reflect.TypeOf((*MockISource)(nil).ByContractId), ctx, id, limit, offset)
-	return &MockISourceByContractIdCall{Call: call}
-}
-
-// MockISourceByContractIdCall wrap *gomock.Call
-type MockISourceByContractIdCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *MockISourceByContractIdCall) Return(arg0 []storage.Source, arg1 error) *MockISourceByContractIdCall {
-	c.Call = c.Call.Return(arg0, arg1)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *MockISourceByContractIdCall) Do(f func(context.Context, uint64, int, int) ([]storage.Source, error)) *MockISourceByContractIdCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockISourceByContractIdCall) DoAndReturn(f func(context.Context, uint64, int, int) ([]storage.Source, error)) *MockISourceByContractIdCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
 // CursorList mocks base method.
 func (m *MockISource) CursorList(ctx context.Context, id, limit uint64, order storage0.SortOrder, cmp storage0.Comparator) ([]*storage.Source, error) {
 	m.ctrl.T.Helper()
