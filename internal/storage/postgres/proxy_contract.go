@@ -55,7 +55,8 @@ func (p *ProxyContract) FilteredList(
 	}
 
 	sortField := "id"
-	if filters.SortField != "" {
+	switch filters.SortField {
+	case "id", "height":
 		sortField = filters.SortField
 	}
 
