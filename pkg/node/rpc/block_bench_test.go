@@ -3,52 +3,41 @@ package rpc
 import (
 	"context"
 	"fmt"
-	"os"
 	"testing"
 	"time"
 
 	indexerConfig "github.com/NobleScope/noble-indexer/pkg/indexer/config"
 	pkgTypes "github.com/NobleScope/noble-indexer/pkg/types"
-	"github.com/dipdup-net/go-lib/config"
-	"gopkg.in/yaml.v3"
+	goLibConfig "github.com/dipdup-net/go-lib/config"
 )
 
-const requestBulkSize = 50
-
-var partialCfg struct {
-	Networks indexerConfig.NetworksConfig `yaml:"networks"`
-}
+const (
+	requestBulkSize = 30
+	apiRateLimit    = 100
+	configPath      = "../../../configs/dipdup.yml"
+)
 
 func newBenchAPI(tb testing.TB) API {
 	tb.Helper()
 
-	nodeURL := os.Getenv("EVM_NODE_URL")
-	if nodeURL == "" {
-		tb.Skip("EVM_NODE_URL is not set")
-	}
-
-	network := os.Getenv("NETWORK")
-	if network == "" {
-		tb.Skip("NETWORK is not set")
-	}
-
-	raw, err := os.ReadFile("../../../configs/dipdup.yml")
-	if err != nil {
-		tb.Fatalf("reading config: %v", err)
-	}
-
-	if err := yaml.Unmarshal(raw, &partialCfg); err != nil {
+	var cfg indexerConfig.Config
+	if err := goLibConfig.ParseWithValidator(configPath, nil, &cfg); err != nil {
 		tb.Fatalf("parsing config: %v", err)
 	}
 
-	networkCfg, err := partialCfg.Networks.Get(network)
+	ds, ok := cfg.DataSources["node_rpc"]
+	if !ok || ds.URL == "" {
+		tb.Skip("node_rpc datasource is not configured")
+	}
+
+	networkCfg, err := cfg.Networks.Get(cfg.Network)
 	if err != nil {
 		tb.Fatalf("getting network config: %v", err)
 	}
 
 	return NewApi(
-		config.DataSource{URL: nodeURL},
-		WithRateLimit(100),
+		ds,
+		WithRateLimit(apiRateLimit),
 		WithTimeout(60*time.Second),
 		WithTraceMethod(networkCfg.GetTraceMethod()),
 	)
@@ -80,6 +69,7 @@ func BenchmarkBlockBulkSize(b *testing.B) {
 			}
 
 			avgPerBlock := float64(b.Elapsed()) / float64(b.N) / float64(bulkSize)
+			b.ReportMetric(avgPerBlock, "ns/block")
 			b.ReportMetric(avgPerBlock/float64(time.Millisecond), "ms/block")
 		})
 	}
