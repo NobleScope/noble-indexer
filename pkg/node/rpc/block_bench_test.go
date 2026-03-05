@@ -68,8 +68,9 @@ func BenchmarkBlockBulkSize(b *testing.B) {
 				}
 			}
 
-			avgPerBlock := float64(b.Elapsed()) / float64(b.N) / float64(bulkSize)
-			b.ReportMetric(avgPerBlock, "ns/block")
+			avgPerBulk := float64(b.Elapsed()) / float64(b.N)
+			avgPerBlock := avgPerBulk / float64(bulkSize)
+			b.ReportMetric(avgPerBulk/float64(time.Millisecond), "ms/bulk")
 			b.ReportMetric(avgPerBlock/float64(time.Millisecond), "ms/block")
 		})
 	}
