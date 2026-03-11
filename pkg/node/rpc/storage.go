@@ -54,6 +54,8 @@ func (api *API) Storage(ctx context.Context, requestData []pkgTypes.StorageReque
 		return nil, err
 	}
 
+	defer resp.Raw().Body.Close()
+
 	if resp.Status().IsError() {
 		return nil, errors.Errorf("invalid status: %d", resp.Status().Code())
 	}

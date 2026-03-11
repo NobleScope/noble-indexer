@@ -55,6 +55,7 @@ func (api *API) Block(ctx context.Context, level pkgTypes.Level) (pkgTypes.Block
 	if err != nil {
 		return pkgTypes.Block{}, err
 	}
+	defer resp.Raw().Body.Close()
 
 	if resp.Status().IsError() {
 		return pkgTypes.Block{}, errors.Errorf("invalid status: %d", resp.Status().Code())
@@ -126,6 +127,8 @@ func (api *API) BlockBulk(ctx context.Context, levels ...pkgTypes.Level) ([]pkgT
 	if err != nil {
 		return []pkgTypes.BlockData{}, err
 	}
+	defer resp.Raw().Body.Close()
+
 	if resp.Status().IsError() {
 		return []pkgTypes.BlockData{}, errors.Errorf("invalid status: %d", resp.Status().Code())
 	}
