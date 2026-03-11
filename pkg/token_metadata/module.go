@@ -23,11 +23,14 @@ import (
 	"github.com/pkg/errors"
 )
 
+const maxConcurrentResolvers = 16
+
 type Module struct {
 	modules.BaseModule
 
 	api         node.Api
 	pool        ipfs.Pool
+	cache       *cache.ValKey
 	pg          postgres.Storage
 	storage     sdk.Transactable
 	syncPeriod  time.Duration
@@ -38,12 +41,14 @@ type Module struct {
 
 func NewModule(pg postgres.Storage, cfg config.Config) *Module {
 	opts := make([]ipfs.Option, 0)
+	var valKeyCache *cache.ValKey
 	if cfg.Cache.URL != "" {
-		cache, err := cache.NewValKey(cfg.Cache.URL, time.Hour*24)
+		var err error
+		valKeyCache, err = cache.NewValKey(cfg.Cache.URL, time.Hour*24)
 		if err != nil {
 			panic(err)
 		}
-		opts = append(opts, ipfs.WithCache(cache))
+		opts = append(opts, ipfs.WithCache(valKeyCache))
 	}
 	pool, err := ipfs.New(cfg.TokenMetadataResolver.MetadataGateways, opts...)
 	if err != nil {
@@ -61,6 +66,7 @@ func NewModule(pg postgres.Storage, cfg config.Config) *Module {
 		pg:         pg,
 		storage:    pg.Transactable,
 		pool:       pool,
+		cache:      valKeyCache,
 		cfg:        cfg,
 		syncPeriod: time.Second * time.Duration(cfg.TokenMetadataResolver.SyncPeriod),
 		retryDelay: time.Minute * time.Duration(cfg.TokenMetadataResolver.RetryDelay),
@@ -80,6 +86,12 @@ func NewModule(pg postgres.Storage, cfg config.Config) *Module {
 func (m *Module) Close() error {
 	m.Log.Info().Msg("closing module...")
 	m.G.Wait()
+
+	if m.cache != nil {
+		if err := m.cache.Close(); err != nil {
+			m.Log.Err(err).Msg("closing cache")
+		}
+	}
 
 	return nil
 }
@@ -175,11 +187,14 @@ func (m *Module) sync(ctx context.Context) error {
 
 func (m *Module) resolveMetadata(ctx context.Context, tokens map[uint64]*storage.Token, metadata map[uint64]pkgTypes.TokenMetadata) error {
 	var wg sync.WaitGroup
+	sem := make(chan struct{}, maxConcurrentResolvers)
 
 	for i, t := range metadata {
 		wg.Add(1)
+		sem <- struct{}{}
 		go func(i uint64, t pkgTypes.TokenMetadata) {
 			defer wg.Done()
+			defer func() { <-sem }()
 			m.resolveTokenMetadata(ctx, tokens[i], t)
 		}(i, t)
 	}

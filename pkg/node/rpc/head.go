@@ -47,6 +47,8 @@ func (api *API) Head(ctx context.Context) (pkgTypes.Level, error) {
 		return 0, err
 	}
 
+	defer resp.Raw().Body.Close()
+
 	if resp.Status().IsError() {
 		return 0, errors.Errorf("invalid status: %d", resp.Status().Code())
 	}

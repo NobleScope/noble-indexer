@@ -108,6 +108,8 @@ func (api *API) TokenMetadataBulk(
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Raw().Body.Close()
+
 	if resp.Status().IsError() {
 		return nil, fmt.Errorf("invalid status: %d", resp.Status().Code())
 	}
