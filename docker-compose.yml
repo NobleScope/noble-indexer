@@ -120,6 +120,8 @@ services:
     volumes:
       - cache:/bitnami/valkey/data
     logging: *indexer-logging
+    networks:
+      - noble-network
 
 volumes:
   db:
